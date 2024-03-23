@@ -11,6 +11,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "GraphNode.h"
+#include "Shader.h"
 
 
 std::string loadShaderSource(const std::string& _filepath);
@@ -210,16 +212,6 @@ int main() {
 	glVertexArrayAttribBinding(vao2, ATTR_COLOR, ATTR_COLOR);
 
 	glVertexArrayElementBuffer(vao2, indexBuffer2);
-
-
-
-	/*glEnable(GL_DEPTH_TEST);
-
-	glEnable(GL_CULL_FACE);
-
-	glFrontFace(GL_CW);
-
-	glEnable(GL_BLEND);*/
 
 
 	glBindProgramPipeline(pipeline);

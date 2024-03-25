@@ -111,8 +111,8 @@ void Start() {
 int main() {
 	
 	Start();
-	GLuint vs = compileShader(loadShaderSource("C:\\Users\\woliw\\source\\zad4\\vs.vert").c_str(), GL_VERTEX_SHADER, "vs log");
-	GLuint fs = compileShader(loadShaderSource("C:\\Users\\woliw\\source\\zad4\\fs.frag").c_str(), GL_FRAGMENT_SHADER, "fs log");
+	GLuint vs = compileShader(loadShaderSource("../../../../src/vs.vert").c_str(), GL_VERTEX_SHADER, "vs log");
+	GLuint fs = compileShader(loadShaderSource("../../../../src/fs.frag").c_str(), GL_FRAGMENT_SHADER, "fs log");
 
 	GLuint pipeline;
 	glCreateProgramPipelines(1, &pipeline);

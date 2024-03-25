@@ -11,8 +11,19 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "GraphNode.h"
-#include "Shader.h"
+#include "lib/GraphNode.h"
+#include "lib/Shader.h"
+#include "lib/GameObject.h"
+#include "lib/SceneManager.h"
+#include "lib/AnimateBody.h"
+#include "lib/Axis.h"
+#include "lib/Camera.h"
+#include "lib/Component.h"
+#include "lib/Input.h"
+#include "lib/RigidBody.h"
+#include "lib/Scene.h"
+#include "lib/Transform.h"
+#include "lib/UI.h"
 
 
 std::string loadShaderSource(const std::string& _filepath);
@@ -84,6 +95,17 @@ void Start() {
 	glFrontFace(GL_CW);
 
 	glEnable(GL_BLEND);
+	SceneManager* sm = new SceneManager();
+	Scene* scene = new Scene("test");
+	GameObject* go = new GameObject("test object");
+	Camera* cam = new Camera();
+	Transform* trans = new Transform();
+	Component* comp = new Component();
+	UI* ui = new UI();
+	AnimateBody* ab = new AnimateBody();
+	RigidBody* rb = new RigidBody();
+	Axis* axis = new Axis("axis");
+	Input* input = new Input();
 }
 
 int main() {

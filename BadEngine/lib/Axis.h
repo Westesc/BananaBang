@@ -1,6 +1,7 @@
-#include <string>
 #ifndef Axis_H
 #define Axis_H
+
+#include <string>
 
 class Axis {
 public:
@@ -8,7 +9,7 @@ public:
 	~Axis();
 
 	char positive;
-	char negtaive;
+	char negative;
 	std::string name;
 };
 

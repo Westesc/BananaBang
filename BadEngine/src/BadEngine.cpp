@@ -106,6 +106,7 @@ void Start() {
 	RigidBody* rb = new RigidBody();
 	Axis* axis = new Axis("axis");
 	Input* input = new Input();
+	go->getTransform();
 }
 
 int main() {

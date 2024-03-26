@@ -2,6 +2,9 @@
 
 Transform::Transform()
 {
+	localPosition = glm::vec3(0.f, 0.f, 0.f);
+	localRotation = glm::vec3(0.f, 0.f, 0.f);
+	localScale = glm::vec3(1.f, 1.f, 1.f);
 }
 
 Transform::~Transform()

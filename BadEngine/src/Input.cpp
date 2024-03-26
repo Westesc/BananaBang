@@ -8,7 +8,7 @@ Input::~Input()
 {
 }
 
-Axis Input::getAxis(std::string name)
+Axis* Input::getAxis(std::string name)
 {
-	return Axis(name);
+	return new Axis(name);
 }

@@ -10,7 +10,7 @@ public:
 	Input();
 	~Input();
 
-	Axis getAxis(std::string name);
+	Axis* getAxis(std::string name);
 };
 
 #endif

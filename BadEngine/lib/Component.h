@@ -3,9 +3,6 @@
 
 class Component {
 public:
-	Component();
-	~Component();
-
 	bool enable;
 };
 

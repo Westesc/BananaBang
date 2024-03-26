@@ -1,7 +1,9 @@
 #include "../lib/GameObject.h"
 
-GameObject::GameObject(std::string Name, std::string Tag, std::string Layer)
-    : name(Name), tag(Tag), layer(Layer), active(true), parent(nullptr) {}
+GameObject::GameObject(std::string Name, std::string Tag, int Layer)
+    : name(Name), tag(Tag), layer(Layer), active(true), parent(nullptr) {
+    localTransform = new Transform();
+}
 
 GameObject::~GameObject() {
     for (auto child : children)
@@ -9,6 +11,7 @@ GameObject::~GameObject() {
         delete child;
     }
     children.clear();
+    delete localTransform;
 }
 
 void GameObject::setParent(GameObject* Parent)
@@ -30,22 +33,22 @@ void GameObject::removeChild(GameObject* Child)
     }
 }
 
-Transform GameObject::getTransform()
+Transform* GameObject::getTransform()
 {
-    return Transform();
+    return localTransform;
 }
 
-Component GameObject::getComponent()
+Component* GameObject::getComponent()
 {
-    return Component();
+    return new Component();
 }
 
-Component GameObject::getComponentInChildren()
+Component* GameObject::getComponentInChildren()
 {
     return children.at(0)->getComponent();
 }
 
-Component GameObject::getComponentInParent()
+Component* GameObject::getComponentInParent()
 {
     return parent->getComponent();
 }

@@ -1,4 +1,4 @@
-#include "SceneManager.h"
+#include "../lib/SceneManager.h"
 SceneManager::SceneManager() : activeScene(nullptr) {}
 
 SceneManager::~SceneManager() {}

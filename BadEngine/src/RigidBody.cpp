@@ -1,4 +1,4 @@
-#include "RigidBody.h"
+#include "../lib/RigidBody.h"
 
 RigidBody::RigidBody()
 {

@@ -1,4 +1,4 @@
-#include "AnimateBody.h"
+#include "../lib/AnimateBody.h"
 
 AnimateBody::AnimateBody() : time(0), Animation(0) {}
 

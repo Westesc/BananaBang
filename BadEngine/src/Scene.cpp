@@ -1,4 +1,4 @@
-#include "Scene.h"
+#include "../lib/Scene.h"
 Scene::Scene(std::string Name) : name(Name) {}
 Scene::~Scene() {}
 void Scene::Start() {

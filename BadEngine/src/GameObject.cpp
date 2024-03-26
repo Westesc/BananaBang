@@ -1,4 +1,4 @@
-#include "GameObject.h"
+#include "../lib/GameObject.h"
 
 GameObject::GameObject(std::string Name, std::string Tag, std::string Layer)
     : name(Name), tag(Tag), layer(Layer), active(true), parent(nullptr) {}

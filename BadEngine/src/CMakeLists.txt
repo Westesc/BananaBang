@@ -19,7 +19,7 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})
 source_group(TREE ${CMAKE_SOURCE_DIR}         FILES ${ASSETS_FILES})
 
 # Define the executable
-add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES} ${ASSETS_FILES} BadEngine.cpp "lib/GameObject.cpp" "lib/SceneManager.cpp" "lib/Scene.cpp" "lib/Camera.cpp" "lib/Transform.cpp" "lib/Component.cpp" "lib/UI.cpp" "lib/AnimateBody.cpp" "lib/RigidBody.cpp" "lib/Input.cpp" "lib/Axis.cpp")
+add_executable(${PROJECT_NAME} ${HEADER_FILES} ${SOURCE_FILES} ${ASSETS_FILES} BadEngine.cpp)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE GLFW_INCLUDE_NONE)
 target_compile_definitions(${PROJECT_NAME} PRIVATE LIBRARY_SUFFIX="")

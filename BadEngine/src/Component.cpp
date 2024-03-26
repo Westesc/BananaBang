@@ -1,4 +1,4 @@
-#include "Component.h"
+#include "../lib/Component.h"
 
 Component::Component() : enable(true) {}
 

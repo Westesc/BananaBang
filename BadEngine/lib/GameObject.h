@@ -5,6 +5,7 @@
 #include <vector>
 #include "Transform.h"
 #include "Component.h"
+#include "Model.h"
 
 class GameObject {
 public:
@@ -18,6 +19,7 @@ public:
 	GameObject* parent;
 	std::vector<GameObject*> children;
 	Transform* localTransform;
+	Model* modelComponent;
 
 	void setParent(GameObject* Parent);
 	void addChild(GameObject* Child);
@@ -26,6 +28,8 @@ public:
 	Component* getComponent();
 	Component* getComponentInChildren();
 	Component* getComponentInParent();
+	void addModelComponent(Model* model);
+	Model* getModelComponent() const;
 };
 
 #endif

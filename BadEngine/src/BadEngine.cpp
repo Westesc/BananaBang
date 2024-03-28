@@ -113,12 +113,17 @@ void Start() {
 int main() {
 	
 	Start();
+	Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
+	//shaders->use();
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
 	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
+	boxmodel->SetShader(shaders);
+	planemodel->SetShader(shaders);
 	box->addModelComponent(boxmodel);
 	plane->addModelComponent(planemodel);
+	/*
 	GLuint vs = compileShader(loadShaderSource("../../../../src/vs.vert").c_str(), GL_VERTEX_SHADER, "vs log");
 	GLuint fs = compileShader(loadShaderSource("../../../../src/fs.frag").c_str(), GL_FRAGMENT_SHADER, "fs log");
 
@@ -126,6 +131,7 @@ int main() {
 	glCreateProgramPipelines(1, &pipeline);
 	glUseProgramStages(pipeline, GL_VERTEX_SHADER_BIT, vs);
 	glUseProgramStages(pipeline, GL_FRAGMENT_SHADER_BIT, fs);
+	*/
 
 	/*
 	float verticles[]{
@@ -259,16 +265,18 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
 
-		glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(-1.f, -1.f, 0.f));
-
-		M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-
-		M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
-
 		glm::mat4 V = glm::lookAt(glm::vec3(-1.f, 2.f, 6.f), glm::vec3(-1.f, -1.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 50.f);
+
+
 		if (box->getModelComponent() != nullptr) {
+			//glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(-1.f, -1.f, 0.f));
+			//M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+			//M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
+			glm::mat4 M = glm::mat4(1);
+			box->getModelComponent()->setTransform(&M);
+			shaders->setMat4("M", M);
 			box->getModelComponent()->Draw();
 		}
 		/*
@@ -276,17 +284,21 @@ int main() {
 
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, nullptr);
-		*/
+		
 		glm::mat4 M2 = glm::rotate(glm::mat4(1.f), 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 		M2 = glm::translate(M2, glm::vec3(0.5f, -1.f, 2.f));
 
-		/* Ustawienie macierzy transformacji dla drugiego obiektu
+		// Ustawienie macierzy transformacji dla drugiego obiektu
 		glProgramUniformMatrix4fv(vs, 0, 1, GL_FALSE, glm::value_ptr(P * V * M2));
 
 		glBindVertexArray(vao2);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, nullptr);
 		*/
 		if (plane->getModelComponent() != nullptr) {
+			glm::mat4 M2 = glm::rotate(glm::mat4(1.f), 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+			M2 = glm::translate(M2, glm::vec3(0.5f, -1.f, 2.f));
+			plane->getModelComponent()->setTransform(&M2);
+			shaders->setMat4("M", M2);
 			plane->getModelComponent()->Draw();
 		}
 		glfwSwapBuffers(window);
@@ -294,9 +306,9 @@ int main() {
 	}
 	//glDeleteBuffers(1, &vertexBuffer);
 	//glDeleteVertexArrays(1, &vao);
-	glDeleteProgramPipelines(1, &pipeline);
-	glDeleteProgram(vs);
-	glDeleteProgram(fs);
+	//glDeleteProgramPipelines(1, &pipeline);
+	//glDeleteProgram(vs);
+	//glDeleteProgram(fs);
 
 	glfwTerminate();
 	return 0;

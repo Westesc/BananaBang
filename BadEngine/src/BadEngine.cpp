@@ -75,6 +75,7 @@ using Duration = std::chrono::duration<float, std::ratio<1, 1>>;
 
 constexpr int wys = 800, szer = 1000;
 GLFWwindow* window;
+Input* input;
 SceneManager* sm;
 void Start() {
 	glfwInit();
@@ -106,13 +107,14 @@ void Start() {
 	AnimateBody* ab = new AnimateBody();
 	RigidBody* rb = new RigidBody();
 	Axis* axis = new Axis("axis");
-	Input* input = new Input();
+	input = new Input(window);
 	go->getTransform();
 }
 
 int main() {
 	
 	Start();
+	int key, action;
 	Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
 	//shaders->use();
 	GameObject* box = new GameObject("box");
@@ -255,6 +257,10 @@ int main() {
 
 	const TimePoint tpStart = Clock::now();
 
+	static bool sequenceStarted = false;
+	static bool firstKeyPressed = false;
+	static bool secondKeyPressed = false;
+
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -278,6 +284,52 @@ int main() {
 			box->getModelComponent()->setTransform(&M);
 			shaders->setMat4("M", M);
 			box->getModelComponent()->Draw();
+		}
+		if (input->IsMove()) {
+			glm::vec2 dpos = input->getPosMouse();
+			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
+		}
+
+		if (input->IsKeobarodAction(window)) {
+			input->GetMessage(key, action);
+			// Obsługa sekwencji klawiszy
+			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+				if (!sequenceStarted) {
+					sequenceStarted = true;
+					secondKeyPressed = false;
+					firstKeyPressed = true;
+					std::cout << "W" << std::endl;
+				}
+				else if (firstKeyPressed && !secondKeyPressed) {
+					secondKeyPressed = true;
+					sequenceStarted = false;
+					firstKeyPressed = false;
+					std::cout << "Sekwencja klawiszy W + W została wykryta!" << std::endl;
+				}
+			}
+			else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			}
+			else if (key == GLFW_KEY_X && action == GLFW_PRESS) {
+				std::cout << "KLAWISZ X " << key << std::endl;
+			}
+			else if (key == GLFW_KEY_Z && action == GLFW_REPEAT) {
+				std::cout << "KLAWISZ Z " << key << std::endl;
+			}
+			//jednorazowe
+			else if (key == GLFW_MOUSE_BUTTON_LEFT) {
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				std::cout << "LEFT MOUSE " << key << std::endl;
+			}
+			else if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
+				std::cout << "Wyłączono klawisz S " << key << std::endl;
+			}
+			else if (action == GLFW_REPEAT) {
+				std::cout << "Nacisnieto klawisz " << key << std::endl;
+			}
+			else if (action == GLFW_RELEASE) {
+				std::cout << "Puszczono klawisz " << key << std::endl;
+			}
 		}
 		/*
 		glProgramUniformMatrix4fv(vs, 0, 1, GL_FALSE, glm::value_ptr(P * V * M));

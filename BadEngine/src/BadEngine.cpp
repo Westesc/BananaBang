@@ -71,10 +71,12 @@ Vertex f32tof16Vertex(float* _v32)
 using Clock = std::chrono::high_resolution_clock;
 using TimePoint = Clock::time_point;
 
+Camera* camera = new Camera();
 using Duration = std::chrono::duration<float, std::ratio<1, 1>>;
 
 constexpr int wys = 800, szer = 1000;
 GLFWwindow* window;
+Input* input;
 void Start() {
 	glfwInit();
 
@@ -98,28 +100,30 @@ void Start() {
 	SceneManager* sm = new SceneManager();
 	Scene* scene = new Scene("test");
 	GameObject* go = new GameObject("test object");
-	Camera* cam = new Camera();
 	Transform* trans = new Transform();
 	Component* comp = new Component();
 	UI* ui = new UI();
 	AnimateBody* ab = new AnimateBody();
 	RigidBody* rb = new RigidBody();
 	Axis* axis = new Axis("axis");
-	Input* input = new Input();
+	input = new Input(window);
 	go->getTransform();
 }
 
 int main() {
 	
 	Start();
+	int key, action;
 	GLuint vs = compileShader(loadShaderSource("../../../../src/vs.vert").c_str(), GL_VERTEX_SHADER, "vs log");
 	GLuint fs = compileShader(loadShaderSource("../../../../src/fs.frag").c_str(), GL_FRAGMENT_SHADER, "fs log");
+
+	camera->transform->localPosition = glm::vec3(0, 5, 20);
 
 	GLuint pipeline;
 	glCreateProgramPipelines(1, &pipeline);
 	glUseProgramStages(pipeline, GL_VERTEX_SHADER_BIT, vs);
 	glUseProgramStages(pipeline, GL_FRAGMENT_SHADER_BIT, fs);
-
+	
 
 	float verticles[]{
 		//pozycja     //kolor
@@ -241,6 +245,9 @@ int main() {
 
 
 	const TimePoint tpStart = Clock::now();
+	static bool sequenceStarted = false;
+	static bool firstKeyPressed = false;
+	static bool secondKeyPressed = false;
 
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -258,10 +265,68 @@ int main() {
 
 		M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
 
-		glm::mat4 V = glm::lookAt(glm::vec3(-1.f, 2.f, 6.f), glm::vec3(-1.f, -1.f, 0.f), glm::vec3(0.f, 1.f, 0.f));
+		glm::mat4 V = camera->getViewMatrix();
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 50.f);
 
+
+		if (input->IsMove()) {
+			glm::vec2 dpos = input->getPosMouse();
+			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
+			camera->updateCamera(dpos);
+		}
+
+		if (input->IsKeobarodAction(window)) {
+			input->GetMessage(key, action);
+			// Obsługa sekwencji klawiszy
+			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+				if (!sequenceStarted) {
+					sequenceStarted = true;
+					secondKeyPressed = false;
+					firstKeyPressed = true;
+					std::cout << "W" << std::endl;
+					camera->ProcessKeyboard(FORWARD, time);
+				}
+				else if (firstKeyPressed && !secondKeyPressed) {
+					secondKeyPressed = true;
+					sequenceStarted = false;
+					firstKeyPressed = false;
+					std::cout << "Sekwencja klawiszy W + W została wykryta!" << std::endl;
+				}
+			}
+			else if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+				camera->ProcessKeyboard(BACKWARD, time);
+			}
+			else if (key == GLFW_KEY_D&& action == GLFW_PRESS) {
+				camera->ProcessKeyboard(RIGHT, time);
+			}
+			else if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+				camera->ProcessKeyboard(LEFT, time);
+			}
+			else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			}
+			else if (key == GLFW_KEY_X && action == GLFW_PRESS) {
+				std::cout << "KLAWISZ X " << key << std::endl;
+			}
+			else if (key == GLFW_KEY_Z && action == GLFW_REPEAT) {
+				std::cout << "KLAWISZ Z " << key << std::endl;
+			}
+			//jednorazowe
+			else if (key == GLFW_MOUSE_BUTTON_LEFT) {
+				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+				std::cout << "LEFT MOUSE " << key << std::endl;
+			}
+			else if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
+				std::cout << "Wyłączono klawisz S " << key << std::endl;
+			}
+			else if (action == GLFW_REPEAT) {
+				std::cout << "Nacisnieto klawisz " << key << std::endl;
+			}
+			else if (action == GLFW_RELEASE) {
+				std::cout << "Puszczono klawisz " << key << std::endl;
+			}
+		}
 
 		glProgramUniformMatrix4fv(vs, 0, 1, GL_FALSE, glm::value_ptr(P * V * M));
 

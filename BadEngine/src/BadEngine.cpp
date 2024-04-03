@@ -277,12 +277,14 @@ int main() {
 
 
 		if (box->getModelComponent() != nullptr) {
-			//glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(-1.f, -1.f, 0.f));
-			//M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+			glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(-1.f, -1.f, 0.f));
+			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			//M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
-			glm::mat4 M = glm::mat4(1);
+			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
 			box->getModelComponent()->setTransform(&M);
 			shaders->setMat4("M", M);
+			shaders->setMat4("view", V);
+			shaders->setMat4("projection", P);
 			box->getModelComponent()->Draw();
 		}
 		if (input->IsMove()) {
@@ -348,9 +350,13 @@ int main() {
 		*/
 		if (plane->getModelComponent() != nullptr) {
 			glm::mat4 M2 = glm::rotate(glm::mat4(1.f), 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-			M2 = glm::translate(M2, glm::vec3(0.5f, -1.f, 2.f));
+			M2 = glm::rotate(M2, glm::radians(-90.0f), glm::vec3(1.0f,0.0f,0.0f));
+			M2 = glm::translate(M2, glm::vec3(0.5f, -1.f, -3.f));
+			M2 = glm::scale(M2, glm::vec3(0.1f, 0.1f, 0.1f));
 			plane->getModelComponent()->setTransform(&M2);
 			shaders->setMat4("M", M2);
+			shaders->setMat4("view", V);
+			shaders->setMat4("projection", P);
 			plane->getModelComponent()->Draw();
 		}
 		glfwSwapBuffers(window);

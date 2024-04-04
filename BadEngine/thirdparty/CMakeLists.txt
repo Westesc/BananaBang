@@ -16,6 +16,12 @@ set(stb_image_SOURCE_DIR ${STB_IMAGE_DIR} CACHE INTERNAL "")
 add_library(stb_image STATIC ${STB_IMAGE_DIR}/stb_image.cpp)
 target_include_directories(stb_image PRIVATE ${STB_IMAGE_DIR})
 
+# freetype
+set(FREETYPE_DIR ${CMAKE_CURRENT_LIST_DIR}/freetype)
+set(freetype_SOURCE_DIR ${FREETYPE_DIR} CACHE INTERNAL "")
+add_library(freetype STATIC ${FREETYPE_DIR}/freetype.cpp)
+target_include_directories(freetype PRIVATE ${FREETYPE_DIR})
+
 # other
 CPMAddPackage("gh:assimp/assimp@5.2.5")
 CPMAddPackage("gh:glfw/glfw#3.3.8")
@@ -32,6 +38,7 @@ add_library(imgui STATIC ${imgui_SOURCE_DIR}/imgui.cpp
 						 
 set_target_properties(glad
                       stb_image 
+                      freetype
                       assimp 
                       glfw 
                       glm 

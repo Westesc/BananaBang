@@ -1,7 +1,7 @@
 #include "../lib/GameObject.h"
 
 GameObject::GameObject(std::string Name, std::string Tag, int Layer)
-    : name(Name), tag(Tag), layer(Layer), active(true), parent(nullptr) {
+    : name(Name), tag(Tag), layer(Layer), active(true), parent(nullptr), modelComponent(nullptr) {
     localTransform = new Transform();
 }
 
@@ -51,4 +51,12 @@ Component* GameObject::getComponentInChildren()
 Component* GameObject::getComponentInParent()
 {
     return parent->getComponent();
+}
+
+void GameObject::addModelComponent(Model* model) {
+    modelComponent = model;
+}
+
+Model* GameObject::getModelComponent() const {
+    return modelComponent;
 }

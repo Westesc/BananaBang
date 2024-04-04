@@ -48,7 +48,7 @@ uint16_t f32tof16(float _32)
 	return f16;
 }
 
-struct Vertex
+/*struct Vertex
 {
 	uint16_t pos[3];
 	uint16_t padding1;
@@ -66,7 +66,7 @@ Vertex f32tof16Vertex(float* _v32)
 	v.color[1] = f32tof16(_v32[4]);
 	v.color[2] = f32tof16(_v32[5]);
 	return v;
-}
+}*/
 
 using Clock = std::chrono::high_resolution_clock;
 using TimePoint = Clock::time_point;
@@ -76,6 +76,7 @@ using Duration = std::chrono::duration<float, std::ratio<1, 1>>;
 
 constexpr int wys = 800, szer = 1000;
 GLFWwindow* window;
+SceneManager* sm;
 Input* input;
 void Start() {
 	glfwInit();
@@ -97,8 +98,8 @@ void Start() {
 	glFrontFace(GL_CW);
 
 	glEnable(GL_BLEND);
-	SceneManager* sm = new SceneManager();
-	Scene* scene = new Scene("test");
+	sm = new SceneManager();
+	Scene* scene = new Scene("main");
 	GameObject* go = new GameObject("test object");
 	Transform* trans = new Transform();
 	Component* comp = new Component();
@@ -113,18 +114,27 @@ void Start() {
 int main() {
 	
 	Start();
+	Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
+	GameObject* box = new GameObject("box");
+	GameObject* plane = new GameObject("plane");
+	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
+	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
+	boxmodel->SetShader(shaders);
+	planemodel->SetShader(shaders);
+	box->addModelComponent(boxmodel);
+	plane->addModelComponent(planemodel);
 	int key, action;
+	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 6.0f);
+	/*
 	GLuint vs = compileShader(loadShaderSource("../../../../src/vs.vert").c_str(), GL_VERTEX_SHADER, "vs log");
 	GLuint fs = compileShader(loadShaderSource("../../../../src/fs.frag").c_str(), GL_FRAGMENT_SHADER, "fs log");
-
-	camera->transform->localPosition = glm::vec3(0, 5, 20);
 
 	GLuint pipeline;
 	glCreateProgramPipelines(1, &pipeline);
 	glUseProgramStages(pipeline, GL_VERTEX_SHADER_BIT, vs);
 	glUseProgramStages(pipeline, GL_FRAGMENT_SHADER_BIT, fs);
-	
-
+	*/
+	/*
 	float verticles[]{
 		//pozycja     //kolor
 		// front
@@ -242,7 +252,7 @@ int main() {
 
 
 	glBindProgramPipeline(pipeline);
-
+	*/
 
 	const TimePoint tpStart = Clock::now();
 	static bool sequenceStarted = false;
@@ -259,16 +269,20 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
 
-		glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(-1.f, -1.f, 0.f));
-
-		M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-
-		M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
-
 		glm::mat4 V = camera->getViewMatrix();
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 50.f);
-
+		if (box->getModelComponent() != nullptr) {
+			glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(-1.f, -1.f, 0.f));
+			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+			//M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
+			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
+			box->getModelComponent()->setTransform(&M);
+			shaders->setMat4("M", M);
+			shaders->setMat4("view", V);
+			shaders->setMat4("projection", P);
+			box->getModelComponent()->Draw();
+		}
 
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
@@ -327,29 +341,38 @@ int main() {
 				std::cout << "Puszczono klawisz " << key << std::endl;
 			}
 		}
-
+		/*
 		glProgramUniformMatrix4fv(vs, 0, 1, GL_FALSE, glm::value_ptr(P * V * M));
 
 		glBindVertexArray(vao);
 		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, nullptr);
+		*/
+		if (plane->getModelComponent() != nullptr) {
+			glm::mat4 M2 = glm::rotate(glm::mat4(1.f), 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+			M2 = glm::rotate(M2, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			M2 = glm::translate(M2, glm::vec3(0.5f, -1.f, -3.f));
+			M2 = glm::scale(M2, glm::vec3(0.1f, 0.1f, 0.1f));
+			plane->getModelComponent()->setTransform(&M2);
+			shaders->setMat4("M", M2);
+			shaders->setMat4("view", V);
+			shaders->setMat4("projection", P);
+			plane->getModelComponent()->Draw();
+		}
 
-		glm::mat4 M2 = glm::rotate(glm::mat4(1.f), 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-		M2 = glm::translate(M2, glm::vec3(0.5f, -1.f, 2.f));
-
-		// Ustawienie macierzy transformacji dla drugiego obiektu
+		/* Ustawienie macierzy transformacji dla drugiego obiektu
 		glProgramUniformMatrix4fv(vs, 0, 1, GL_FALSE, glm::value_ptr(P * V * M2));
 
 		glBindVertexArray(vao2);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, nullptr);
-
+		*/
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	glDeleteBuffers(1, &vertexBuffer);
-	glDeleteVertexArrays(1, &vao);
-	glDeleteProgramPipelines(1, &pipeline);
-	glDeleteProgram(vs);
-	glDeleteProgram(fs);
+	//glDeleteBuffers(1, &vertexBuffer);
+	//glDeleteVertexArrays(1, &vao);
+	//glDeleteProgramPipelines(1, &pipeline);
+	//glDeleteProgram(vs);
+	//glDeleteProgram(fs);
 
 	glfwTerminate();
 	return 0;

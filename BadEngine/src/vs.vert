@@ -12,9 +12,11 @@ out gl_PerVertex
 out vec3 vertColor;
 
 layout(location = 0) uniform mat4 M;
+uniform mat4 view;
+uniform mat4 projection;
 
 void main()
 {
-	gl_Position = M * vec4(inPos, 1.f);
+	gl_Position = projection * view * M * vec4(inPos, 1.f);
 	vertColor = inColor;
 }

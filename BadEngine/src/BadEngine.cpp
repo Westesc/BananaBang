@@ -78,6 +78,8 @@ constexpr int wys = 800, szer = 1000;
 GLFWwindow* window;
 SceneManager* sm;
 Input* input;
+float boxSpeed = 0.5f;
+
 void Start() {
 	glfwInit();
 
@@ -272,10 +274,27 @@ int main() {
 		glm::mat4 V = camera->getViewMatrix();
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 50.f);
+		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+			box->getTransform()->localPosition += glm::vec3(0.0f, 0.0f, boxSpeed);
+		}
+		if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+			box->getTransform()->localPosition += glm::vec3(0.0f, 0.0f, -boxSpeed);
+		}
+		if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+			box->getTransform()->localPosition += glm::vec3(-boxSpeed, 0.0f, 0.0f);
+		}
+		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+			box->getTransform()->localPosition += glm::vec3(boxSpeed, 0.0f, 0.0f);
+		}
+		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+			box->getTransform()->localPosition += glm::vec3(0.0f, boxSpeed, 0.0f);
+		}
+		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+			box->getTransform()->localPosition += glm::vec3(0.0f, -boxSpeed, 0.0f);
+		}
 		if (box->getModelComponent() != nullptr) {
-			glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(-1.f, -1.f, 0.f));
+			glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(-1.f, -1.f, 0.f) + box->getTransform()->localPosition);
 			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-			//M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
 			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
 			box->getModelComponent()->setTransform(&M);
 			shaders->setMat4("M", M);

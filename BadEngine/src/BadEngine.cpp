@@ -268,7 +268,9 @@ int main() {
 	box->localTransform->localPosition = glm::vec3(-1.f, -1.f, 0.f);
 	box2->localTransform->localPosition = glm::vec3(-4.f, -4.f, 0.f);
 	glm::mat4 box1Prev = glm::translate(glm::mat4(1.f), box->getTransform()->localPosition);
+	box1Prev = glm::scale(box1Prev, glm::vec3(0.1f, 0.1f, 0.1f));
 	glm::mat4 box2Prev = glm::translate(glm::mat4(1.f), box2->getTransform()->localPosition);
+	box2Prev = glm::scale(box2Prev, glm::vec3(0.1f, 0.1f, 0.1f));
 
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -307,12 +309,11 @@ int main() {
 			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
 			box->getModelComponent()->setTransform(&M);
-			shaders->setMat4("M", M);
-			shaders->setMat4("view", V);
-			shaders->setMat4("projection", P);
-			box->getModelComponent()->Draw();
-			box->getModelComponent()->DrawBoundingBoxes(shaders, M);
-			box1Prev = M;
+			//shaders->setMat4("M", M);
+			//shaders->setMat4("view", V);
+			//shaders->setMat4("projection", P);
+			//box->getModelComponent()->Draw();
+			//box->getModelComponent()->DrawBoundingBoxes(shaders, M, box->getTransform()->localPosition);
 		}
 
 		if (box2->getModelComponent() != nullptr) {
@@ -320,15 +321,40 @@ int main() {
 			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
 			box2->getModelComponent()->setTransform(&M);
-			shaders->setMat4("M", M);
-			shaders->setMat4("view", V);
-			shaders->setMat4("projection", P);
-			box2->getModelComponent()->Draw();
-			box2->getModelComponent()->DrawBoundingBoxes(shaders, M);
-			box2Prev = M;
+			//shaders->setMat4("M", M);
+			//shaders->setMat4("view", V);
+			//shaders->setMat4("projection", P);
+			//box2->getModelComponent()->Draw();
+			//box2->getModelComponent()->DrawBoundingBoxes(shaders, M, box2->getTransform()->localPosition);
 		}
 		if (box->getModelComponent()->checkCollision(box2->getModelComponent())) {
 			std::cout << "KOLIZJA" << std::endl;
+			box->getModelComponent()->setTransform(&box1Prev);
+			shaders->setMat4("M", box1Prev);
+			shaders->setMat4("view", V);
+			shaders->setMat4("projection", P);
+			box->getModelComponent()->Draw();
+			box->getModelComponent()->DrawBoundingBoxes(shaders, box1Prev, box->getTransform()->localPosition);
+			box2->getModelComponent()->setTransform(&box2Prev);
+			shaders->setMat4("M", box2Prev);
+			shaders->setMat4("view", V);
+			shaders->setMat4("projection", P);
+			box2->getModelComponent()->Draw();
+			box2->getModelComponent()->DrawBoundingBoxes(shaders, box2Prev, box2->getTransform()->localPosition);
+		}
+		else {
+			shaders->setMat4("M", *box->getModelComponent()->getTransform());
+			shaders->setMat4("view", V);
+			shaders->setMat4("projection", P);
+			box->getModelComponent()->Draw();
+			box->getModelComponent()->DrawBoundingBoxes(shaders, *box->getModelComponent()->getTransform(),box->getTransform()->localPosition);
+			shaders->setMat4("M", *box2->getModelComponent()->getTransform());
+			shaders->setMat4("view", V);
+			shaders->setMat4("projection", P);
+			box2->getModelComponent()->Draw();
+			box2->getModelComponent()->DrawBoundingBoxes(shaders, *box2->getModelComponent()->getTransform(), box2->getTransform()->localPosition);
+			box1Prev = *(box->getModelComponent()->getTransform());
+			box2Prev = *(box2->getModelComponent()->getTransform());
 		}
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();

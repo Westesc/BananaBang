@@ -58,12 +58,13 @@ public:
         return boundingBox;
     }
 
-    void updateBoundingBox(const glm::mat4& modelMatrix) {
+    void updateBoundingBox(glm::mat4& modelMatrix, glm::vec3 position) {
         // Recalculate bounding box position based on transformed vertices
         glm::vec3 min(FLT_MAX);
         glm::vec3 max(-FLT_MAX);
 
-        // Transform mesh vertices using the provided model matrix
+        //modelMatrix = glm::translate(modelMatrix, -position);
+        //modelMatrix = glm::scale(modelMatrix, glm::vec3(10.f, 10.f, 10.f));
         for (const auto& vertex : vertices) {
             glm::vec4 transformedVertex = modelMatrix * glm::vec4(vertex.Position, 1.0f);
 

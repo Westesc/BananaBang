@@ -187,6 +187,7 @@ public:
     bool rotating;
     bool isBlue, iswhite;
     void setTransform(glm::mat4* matrix) { Transform = matrix; }
+    glm::mat4* getTransform() { return Transform; }
     void SetShader(Shader* s) { shader = s; }
 
     Model(char* path, bool rotate = true)
@@ -255,9 +256,9 @@ public:
         glDeleteBuffers(1, &EBO);
     }
 
-    void DrawBoundingBoxes(Shader* shader, glm::mat4 transformation) {
+    void DrawBoundingBoxes(Shader* shader, glm::mat4 transformation, glm::vec3 position) {
         for (const auto& mesh : meshes) {
-            mesh->updateBoundingBox(transformation);
+            mesh->updateBoundingBox(transformation, position);
             DrawBoundingBox(mesh->getBoundingBox(), shader, Transform);
         }
     }

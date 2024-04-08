@@ -23,6 +23,14 @@ public:
 	glm::vec3 getLocalPosition();
 	glm::vec3 getLocalRotation();
 	glm::vec3 getLocalScale();
+
+	friend Transform operator+(const Transform& lhs, const Transform& rhs) {
+		Transform result(lhs); 
+		result.localPosition += rhs.localPosition;
+		result.localRotation += rhs.localRotation;
+		result.localScale += rhs.localScale;
+		return result;
+	}
 };
 
 #endif

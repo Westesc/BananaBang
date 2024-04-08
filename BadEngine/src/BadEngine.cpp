@@ -78,7 +78,7 @@ constexpr int wys = 800, szer = 1000;
 GLFWwindow* window;
 SceneManager* sm;
 Input* input;
-float boxSpeed = 0.5f;
+float boxSpeed = 0.25f;
 
 void Start() {
 	glfwInit();
@@ -119,12 +119,16 @@ int main() {
 	Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
+	GameObject* box2 = new GameObject("box2");
 	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
+	Model* box2model = new Model(const_cast<char*>("../../../../res/box.obj"));
 	boxmodel->SetShader(shaders);
 	planemodel->SetShader(shaders);
+	box2model->SetShader(shaders);
 	box->addModelComponent(boxmodel);
 	plane->addModelComponent(planemodel);
+	box2->addModelComponent(box2model);
 	int key, action;
 	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 6.0f);
 	/*
@@ -261,6 +265,11 @@ int main() {
 	static bool firstKeyPressed = false;
 	static bool secondKeyPressed = false;
 
+	box->localTransform->localPosition = glm::vec3(-1.f, -1.f, 0.f);
+	box2->localTransform->localPosition = glm::vec3(-4.f, -4.f, 0.f);
+	glm::mat4 box1Prev = glm::translate(glm::mat4(1.f), box->getTransform()->localPosition);
+	glm::mat4 box2Prev = glm::translate(glm::mat4(1.f), box2->getTransform()->localPosition);
+
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -274,33 +283,80 @@ int main() {
 		glm::mat4 V = camera->getViewMatrix();
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 50.f);
-		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-			box->getTransform()->localPosition += glm::vec3(0.0f, 0.0f, boxSpeed);
+		glm::vec3 box1Center = box->getTransform()->localPosition;
+		glm::vec3 box2Center = box2->getTransform()->localPosition;
+
+		glm::vec3 box1HalfSize = glm::vec3(0.5f, 0.5f, 0.5f);
+		glm::vec3 box2HalfSize = glm::vec3(0.5f, 0.5f, 0.5f);
+		glm::vec3 totalHalfSize = box1HalfSize + box2HalfSize;
+
+		box1Center += box1HalfSize*2.f;
+		box2Center += box2HalfSize*2.f;
+
+		bool collisionX = abs(box1Center.x - box2Center.x) < totalHalfSize.x;
+		bool collisionY = abs(box1Center.y - box2Center.y) < totalHalfSize.y;
+		bool collisionZ = abs(box1Center.z - box2Center.z) < totalHalfSize.z;
+
+		if (collisionX && collisionY && collisionZ) {
+			std::cout<<"KOLIZJA"<<std::endl;
+			if (box->getModelComponent() != nullptr) {
+				box->getModelComponent()->setTransform(&box1Prev);
+				shaders->setMat4("M", box1Prev);
+				shaders->setMat4("view", V);
+				shaders->setMat4("projection", P);
+				box->getModelComponent()->Draw();
+			}
+
+			if (box2->getModelComponent() != nullptr) {
+				box2->getModelComponent()->setTransform(&box2Prev);
+				shaders->setMat4("M", box2Prev);
+				shaders->setMat4("view", V);
+				shaders->setMat4("projection", P);
+				box2->getModelComponent()->Draw();
+			}
 		}
-		if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-			box->getTransform()->localPosition += glm::vec3(0.0f, 0.0f, -boxSpeed);
-		}
-		if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-			box->getTransform()->localPosition += glm::vec3(-boxSpeed, 0.0f, 0.0f);
-		}
-		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-			box->getTransform()->localPosition += glm::vec3(boxSpeed, 0.0f, 0.0f);
-		}
-		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-			box->getTransform()->localPosition += glm::vec3(0.0f, boxSpeed, 0.0f);
-		}
-		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-			box->getTransform()->localPosition += glm::vec3(0.0f, -boxSpeed, 0.0f);
-		}
-		if (box->getModelComponent() != nullptr) {
-			glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(-1.f, -1.f, 0.f) + box->getTransform()->localPosition);
-			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
-			box->getModelComponent()->setTransform(&M);
-			shaders->setMat4("M", M);
-			shaders->setMat4("view", V);
-			shaders->setMat4("projection", P);
-			box->getModelComponent()->Draw();
+		else {
+			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+				box->getTransform()->localPosition += glm::vec3(0.0f, 0.0f, boxSpeed);
+			}
+			if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+				box->getTransform()->localPosition += glm::vec3(0.0f, 0.0f, -boxSpeed);
+			}
+			if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+				box->getTransform()->localPosition += glm::vec3(-boxSpeed, 0.0f, 0.0f);
+			}
+			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+				box->getTransform()->localPosition += glm::vec3(boxSpeed, 0.0f, 0.0f);
+			}
+			if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+				box->getTransform()->localPosition += glm::vec3(0.0f, boxSpeed, 0.0f);
+			}
+			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+				box->getTransform()->localPosition += glm::vec3(0.0f, -boxSpeed, 0.0f);
+			}
+			if (box->getModelComponent() != nullptr) {
+				glm::mat4 M = glm::translate(glm::mat4(1.f), box->getTransform()->localPosition);
+				M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+				M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
+				box->getModelComponent()->setTransform(&M);
+				shaders->setMat4("M", M);
+				shaders->setMat4("view", V);
+				shaders->setMat4("projection", P);
+				box->getModelComponent()->Draw();
+				box1Prev = M;
+			}
+
+			if (box2->getModelComponent() != nullptr) {
+				glm::mat4 M = glm::translate(glm::mat4(1.f), box2->getTransform()->localPosition);
+				M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+				M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
+				box2->getModelComponent()->setTransform(&M);
+				shaders->setMat4("M", M);
+				shaders->setMat4("view", V);
+				shaders->setMat4("projection", P);
+				box2->getModelComponent()->Draw();
+				box2Prev = M;
+			}
 		}
 
 		if (input->IsMove()) {

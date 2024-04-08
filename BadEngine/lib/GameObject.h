@@ -30,6 +30,7 @@ public:
 	Component* getComponentInParent();
 	void addModelComponent(Model* model);
 	Model* getModelComponent() const;
+	Transform* getGlobalTransform();
 };
 
 #endif

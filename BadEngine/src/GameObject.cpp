@@ -60,3 +60,16 @@ void GameObject::addModelComponent(Model* model) {
 Model* GameObject::getModelComponent() const {
     return modelComponent;
 }
+
+Transform* GameObject::getGlobalTransform() {
+    if (parent == nullptr) return localTransform;
+    Transform* globalTransform = new Transform(*localTransform);
+    Transform* parentGlobalTransform = parent->getGlobalTransform();
+    globalTransform->localPosition += parentGlobalTransform->localPosition;
+    globalTransform->localRotation += parentGlobalTransform->localRotation;
+    globalTransform->localScale += parentGlobalTransform->localScale;
+
+    delete parentGlobalTransform;
+
+    return globalTransform;
+}

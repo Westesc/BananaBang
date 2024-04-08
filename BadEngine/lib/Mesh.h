@@ -10,6 +10,7 @@
 #include <iostream>
 #include <vector>
 #include "Shader.h"
+#include "BoundingBox.h"
 
 struct Vertex
 {
@@ -29,7 +30,6 @@ struct Texture
     std::string path;
 };
 
-
 class Mesh {
 public:
     GLfloat deltaTime;
@@ -47,12 +47,34 @@ public:
         this->textures = textures;
 
         setupMesh();
+        calculateBoundingBox();
     }
 
     Mesh()
     {
     }
 
+    const BoundingBox& getBoundingBox() const {
+        return boundingBox;
+    }
+
+    void updateBoundingBox(const glm::mat4& modelMatrix) {
+        // Recalculate bounding box position based on transformed vertices
+        glm::vec3 min(FLT_MAX);
+        glm::vec3 max(-FLT_MAX);
+
+        // Transform mesh vertices using the provided model matrix
+        for (const auto& vertex : vertices) {
+            glm::vec4 transformedVertex = modelMatrix * glm::vec4(vertex.Position, 1.0f);
+
+            // Update bounding box extents
+            min = glm::min(min, glm::vec3(transformedVertex));
+            max = glm::max(max, glm::vec3(transformedVertex));
+        }
+
+        // Update bounding box
+        boundingBox = BoundingBox(min, max);
+    }
 
     // render the mesh
     void Draw(Shader* shader, glm::mat4* model, bool& isFromFile, bool& rotating, bool& isBlue)
@@ -146,8 +168,20 @@ public:
     }
 
 private:
-
+    BoundingBox boundingBox = BoundingBox(glm::vec3(FLT_MAX),glm::vec3(FLT_MIN));
     unsigned int VBO, EBO;
+
+    void calculateBoundingBox() {
+        glm::vec3 min(FLT_MAX);
+        glm::vec3 max(-FLT_MAX);
+
+        for (const auto& vertex : vertices) {
+            min = glm::min(min, vertex.Position);
+            max = glm::max(max, vertex.Position);
+        }
+
+        boundingBox = BoundingBox(min, max);
+    }
 
     void setupMesh()
     {

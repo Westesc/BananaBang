@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <ft2build.h>
 #include "../lib/GraphNode.h"
 #include "../lib/Shader.h"
 #include "../lib/GameObject.h"
@@ -25,7 +26,6 @@
 #include "../lib/Transform.h"
 #include "../lib/UI.h"
 
-#include "../thirdparty/freetype/freetype/ft2build.h"
 
 std::string loadShaderSource(const std::string& _filepath);
 GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _msg);

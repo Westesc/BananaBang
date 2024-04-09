@@ -1,6 +1,5 @@
 # CPM - package manager
 include(CPM)
-include(FindFreetype)
 
 # OpenGL
 find_package(OpenGL REQUIRED)
@@ -16,12 +15,6 @@ set(STB_IMAGE_DIR ${CMAKE_CURRENT_LIST_DIR}/stb_image)
 set(stb_image_SOURCE_DIR ${STB_IMAGE_DIR} CACHE INTERNAL "")
 add_library(stb_image STATIC ${STB_IMAGE_DIR}/stb_image.cpp)
 target_include_directories(stb_image PRIVATE ${STB_IMAGE_DIR})
-
-# freetype
-#set(FREETYPE_DIR ${CMAKE_CURRENT_LIST_DIR}/freetype)
-#set(freetype_SOURCE_DIR ${FREETYPE_DIR} CACHE INTERNAL "")
-#add_library(freetype STATIC ${FREETYPE_DIR}/ft2build.h)
-#target_include_directories(freetype PRIVATE ${FREETYPE_DIR})
 
 # other
 CPMAddPackage("gh:assimp/assimp@5.2.5")

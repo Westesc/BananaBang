@@ -2,10 +2,10 @@
 #include "imgui_impl/imgui_impl_glfw.h"
 #include "imgui_impl/imgui_impl_opengl3.h"
 #include <stdio.h>
-#include<GLFW/glfw3.h>
+#include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <string>
-#include<fstream>
+#include <fstream>
 #include <iostream>
 #include <chrono>
 #include <glm/glm.hpp>
@@ -25,6 +25,7 @@
 #include "../lib/Transform.h"
 #include "../lib/UI.h"
 
+#include "../thirdparty/freetype/freetype/ft2build.h"
 
 std::string loadShaderSource(const std::string& _filepath);
 GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _msg);
@@ -124,7 +125,8 @@ int main() {
 	box->addModelComponent(boxmodel);
 	plane->addModelComponent(planemodel);
 	int key, action;
-	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 6.0f);
+	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 20.0f);
+	//camera->transform->localRotation = glm::vec3(0.0f, 45.0f,0.0f);
 	/*
 	GLuint vs = compileShader(loadShaderSource("../../../../src/vs.vert").c_str(), GL_VERTEX_SHADER, "vs log");
 	GLuint fs = compileShader(loadShaderSource("../../../../src/fs.frag").c_str(), GL_FRAGMENT_SHADER, "fs log");
@@ -308,13 +310,16 @@ int main() {
 					std::cout << "Sekwencja klawiszy W + W została wykryta!" << std::endl;
 				}
 			}
-			else if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+			else if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
+				camera->ProcessKeyboard(FORWARD, time);
+			}
+			else if (key == GLFW_KEY_S && action == GLFW_REPEAT) {
 				camera->ProcessKeyboard(BACKWARD, time);
 			}
-			else if (key == GLFW_KEY_D&& action == GLFW_PRESS) {
+			else if (key == GLFW_KEY_D&& action == GLFW_REPEAT) {
 				camera->ProcessKeyboard(RIGHT, time);
 			}
-			else if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+			else if (key == GLFW_KEY_A && action == GLFW_REPEAT) {
 				camera->ProcessKeyboard(LEFT, time);
 			}
 			else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
@@ -336,6 +341,7 @@ int main() {
 			}
 			else if (action == GLFW_REPEAT) {
 				std::cout << "Nacisnieto klawisz " << key << std::endl;
+				std::cout << "Toto " << key << std::endl;
 			}
 			else if (action == GLFW_RELEASE) {
 				std::cout << "Puszczono klawisz " << key << std::endl;

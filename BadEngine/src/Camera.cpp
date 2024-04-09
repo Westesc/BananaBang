@@ -24,7 +24,7 @@ void Camera::updateCamera(glm::vec2 vector) {
 
 void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime)
 {
-	float velocity = .5f * deltaTime;
+	float velocity = .05f * deltaTime;
 	if (direction == FORWARD)
 		transform->localPosition += front * velocity;
 	if (direction == BACKWARD)

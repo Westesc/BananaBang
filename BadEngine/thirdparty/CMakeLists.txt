@@ -33,7 +33,6 @@ add_library(imgui STATIC ${imgui_SOURCE_DIR}/imgui.cpp
 						 
 set_target_properties(glad
                       stb_image 
-                      freetype
                       assimp 
                       glfw 
                       glm 

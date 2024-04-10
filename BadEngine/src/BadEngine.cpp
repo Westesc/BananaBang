@@ -39,8 +39,8 @@ std::map<GLchar, Character> Characters;
 unsigned int VAO, VBO;
 void RenderText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color);
 
-std::string loadShaderSource(const std::string& _filepath);
-GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _msg);
+//std::string loadShaderSource(const std::string& _filepath);
+//GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _msg);
 
 uint16_t f32tof16(float _32)
 {
@@ -105,12 +105,11 @@ void Start() {
 	gladLoadGL();
 
 	glEnable(GL_DEPTH_TEST);
-
 	glEnable(GL_CULL_FACE);
-
-	glFrontFace(GL_CW);
-
+	//glFrontFace(GL_CW);
 	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	sm = new SceneManager();
 	Scene* scene = new Scene("main");
 	GameObject* go = new GameObject("test object");
@@ -367,11 +366,14 @@ glBindVertexArray(0);
 	static bool firstKeyPressed = false;
 	static bool secondKeyPressed = false;
 
+	//glEnable(GL_CULL_FACE_MODE);
+	//glFrontFace(GL_CW);
+
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
 		}
-		glClearColor(.5f, .5f, .5f, 1.f);
+		glClearColor(0.f, .3f, .5f, 1.f);
 
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -387,6 +389,7 @@ glBindVertexArray(0);
 			//M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
 			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
 			box->getModelComponent()->setTransform(&M);
+			shaders->use();
 			shaders->setMat4("M", M);
 			shaders->setMat4("view", V);
 			shaders->setMat4("projection", P);
@@ -471,11 +474,11 @@ glBindVertexArray(0);
 			shaders->setMat4("projection", P);
 			plane->getModelComponent()->Draw();
 		}
-		glDisable(GL_DEPTH_TEST);
-		RenderText(shader, "This is sample text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+		///glDisable(GL_DEPTH_TEST);
+		RenderText(shader, "This is sample text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.5f, 0.5f));
 
 		RenderText(shader, "(C) LearnOpenGL.com", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
-		glEnable(GL_DEPTH_TEST);
+		//glEnable(GL_DEPTH_TEST);
 		/* Ustawienie macierzy transformacji dla drugiego obiektu
 		glProgramUniformMatrix4fv(vs, 0, 1, GL_FALSE, glm::value_ptr(P * V * M2));
 
@@ -494,7 +497,7 @@ glBindVertexArray(0);
 	glfwTerminate();
 	return 0;
 }
-
+/*
 std::string loadShaderSource(const std::string& _filepath)
 {
 	std::ifstream f(_filepath, std::ios::ate | std::ios::in);
@@ -519,7 +522,7 @@ GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _m
 
 	return shdr;
 }
-
+*/
 void RenderText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color)
 {
 	// activate corresponding render state	

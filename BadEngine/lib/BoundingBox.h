@@ -14,6 +14,11 @@ public:
     glm::vec3 center() const {
         return 0.5f * (min + max);
     }
+    float radius() const {
+        glm::vec3 halfDiagonal = (max - min) * 0.5f;
+        float halfDiagonalLength = glm::length(halfDiagonal);
+        return halfDiagonalLength;
+    }
 };
 
 #endif

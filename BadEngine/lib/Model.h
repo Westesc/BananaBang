@@ -256,9 +256,9 @@ public:
         glDeleteBuffers(1, &EBO);
     }
 
-    void DrawBoundingBoxes(Shader* shader, glm::mat4 transformation, glm::vec3 position) {
+    void DrawBoundingBoxes(Shader* shader, glm::mat4 transformation) {
         for (const auto& mesh : meshes) {
-            mesh->updateBoundingBox(transformation, position);
+            mesh->updateBoundingBox(transformation);
             DrawBoundingBox(mesh->getBoundingBox(), shader, Transform);
         }
     }
@@ -294,6 +294,23 @@ public:
             boxes.push_back(mesh->getBoundingBox());
         }
         return boxes;
+    }
+    glm::vec3 calculateCollisionResponse(const Model* other) {
+        glm::vec3 displacement(0.0f);
+
+        for (const auto& mesh : meshes) {
+            const BoundingBox& meshBox = mesh->getBoundingBox();
+            for (const auto& otherMesh : other->meshes) {
+                const BoundingBox& otherMeshBox = otherMesh->getBoundingBox();
+                if (checkBoundingBoxCollision(meshBox, otherMeshBox)) {
+                    glm::vec3 direction = glm::normalize(meshBox.center() - otherMeshBox.center());
+                    float magnitude = (meshBox.radius() + otherMeshBox.radius()) - glm::distance(meshBox.center(), otherMeshBox.center());
+                    displacement += direction * magnitude;
+                }
+            }
+        }
+
+        return displacement;
     }
 };
 

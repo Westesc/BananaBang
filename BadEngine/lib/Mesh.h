@@ -58,7 +58,7 @@ public:
         return boundingBox;
     }
 
-    void updateBoundingBox(glm::mat4& modelMatrix, glm::vec3 position) {
+    void updateBoundingBox(glm::mat4& modelMatrix) {
         // Recalculate bounding box position based on transformed vertices
         glm::vec3 min(FLT_MAX);
         glm::vec3 max(-FLT_MAX);

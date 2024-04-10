@@ -7,9 +7,10 @@ class BoundingBox : Component {
 public:
     glm::vec3 min;
     glm::vec3 max;
+    bool customSize;
 
-    BoundingBox(const glm::vec3& min, const glm::vec3& max)
-        : min(min), max(max) {}
+    BoundingBox(const glm::vec3& min, const glm::vec3& max, bool custom = false)
+        : min(min), max(max), customSize(custom) {}
 
     glm::vec3 center() const {
         return 0.5f * (min + max);

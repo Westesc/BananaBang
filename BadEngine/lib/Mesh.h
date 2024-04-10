@@ -59,22 +59,30 @@ public:
     }
 
     void updateBoundingBox(glm::mat4& modelMatrix) {
-        // Recalculate bounding box position based on transformed vertices
-        glm::vec3 min(FLT_MAX);
-        glm::vec3 max(-FLT_MAX);
-
-        //modelMatrix = glm::translate(modelMatrix, -position);
-        //modelMatrix = glm::scale(modelMatrix, glm::vec3(10.f, 10.f, 10.f));
-        for (const auto& vertex : vertices) {
-            glm::vec4 transformedVertex = modelMatrix * glm::vec4(vertex.Position, 1.0f);
-
-            // Update bounding box extents
-            min = glm::min(min, glm::vec3(transformedVertex));
-            max = glm::max(max, glm::vec3(transformedVertex));
+        if (boundingBox.customSize) {
+            glm::vec3 transformedMin = glm::vec3(modelMatrix * glm::vec4(boundingBox.min, 1.0f));
+            glm::vec3 transformedMax = glm::vec3(modelMatrix * glm::vec4(boundingBox.max, 1.0f));
+            boundingBox.min = transformedMin;
+            boundingBox.max = transformedMax;
         }
+        else {
+            glm::vec3 min(FLT_MAX);
+            glm::vec3 max(-FLT_MAX);
+            for (const auto& vertex : vertices) {
+                glm::vec4 transformedVertex = modelMatrix * glm::vec4(vertex.Position, 1.0f);
 
-        // Update bounding box
-        boundingBox = BoundingBox(min, max);
+                // Update bounding box extents
+                min = glm::min(min, glm::vec3(transformedVertex));
+                max = glm::max(max, glm::vec3(transformedVertex));
+            }
+
+            // Update bounding box
+            boundingBox = BoundingBox(min, max);
+        }
+    }
+
+    void setBoundingBox(const glm::vec3& customMin, const glm::vec3& customMax) {
+        boundingBox = BoundingBox(customMin, customMax, true);
     }
 
     // render the mesh

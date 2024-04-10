@@ -29,45 +29,6 @@
 std::string loadShaderSource(const std::string& _filepath);
 GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _msg);
 
-uint16_t f32tof16(float _32)
-{
-	if (_32 == 0)
-	{
-		return 0u;
-	}
-	uint32_t f32;
-	memcpy(&f32, &_32, 4);
-
-	uint16_t f16;
-	f16 = (f32 >> (23 - 10)) & 0x3ffu;
-	uint16_t exp = (f32 >> 23) & 0xff;
-	exp -= (127u - 15u);
-	exp &= 0x1fu;
-	f16 |= (exp << 10);
-	f16 |= (((f32 >> 31) & 1u) << 15);
-	return f16;
-}
-
-/*struct Vertex
-{
-	uint16_t pos[3];
-	uint16_t padding1;
-	uint16_t color[3];
-	uint16_t padding2;
-};
-
-Vertex f32tof16Vertex(float* _v32)
-{
-	Vertex v;
-	v.pos[0] = f32tof16(_v32[0]);
-	v.pos[1] = f32tof16(_v32[1]);
-	v.pos[2] = f32tof16(_v32[2]);
-	v.color[0] = f32tof16(_v32[3]);
-	v.color[1] = f32tof16(_v32[4]);
-	v.color[2] = f32tof16(_v32[5]);
-	return v;
-}*/
-
 using Clock = std::chrono::high_resolution_clock;
 using TimePoint = Clock::time_point;
 
@@ -117,7 +78,6 @@ int main() {
 	
 	Start();
 	Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
-	//Shader* shaders2 = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
 	GameObject* box2 = new GameObject("box2");
@@ -132,134 +92,6 @@ int main() {
 	box2->addModelComponent(box2model);
 	int key, action;
 	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 6.0f);
-	/*
-	GLuint vs = compileShader(loadShaderSource("../../../../src/vs.vert").c_str(), GL_VERTEX_SHADER, "vs log");
-	GLuint fs = compileShader(loadShaderSource("../../../../src/fs.frag").c_str(), GL_FRAGMENT_SHADER, "fs log");
-
-	GLuint pipeline;
-	glCreateProgramPipelines(1, &pipeline);
-	glUseProgramStages(pipeline, GL_VERTEX_SHADER_BIT, vs);
-	glUseProgramStages(pipeline, GL_FRAGMENT_SHADER_BIT, fs);
-	*/
-	/*
-	float verticles[]{
-		//pozycja     //kolor
-		// front
-		-0.5f, 0.5f, 0.5f, 1.f, 1.f, 1.f,
-		0.5f, 0.5f, 0.5f, 0.f, 0.5f, 1.f,
-		0.5f, -0.5f, 0.5f, 0.f, 0.f, 1.f,
-		-0.5f, -0.5f, 0.5f, 0.f, 1.f, 0.5f,
-		// right
-		0.5f, 0.5f, 0.5f, 1.f, 0.f, 0.f,
-		0.5f, 0.5f, -0.5f, 0.f, 1.f, 0.f,
-		0.5f, -0.5f, -0.5f, 0.f, 0.f, 1.f,
-		0.5f, -0.5f, 0.5f, 1.f, 1.f, 0.f,
-		//top
-		-0.5f, 0.5f, -0.5f, 1.f, 0.f, 0.f,
-		0.5f, 0.5f, -0.5f, 0.f, 1.f, 0.f,
-		0.5f, 0.5f, 0.5f, 0.f, 0.f, 1.f,
-		-0.5f, 0.5f, 0.5f, 1.f, 1.f, 0.f,
-		// back
-		-0.5f, 0.5f, -0.5f, 1.f, 0.f, 0.f,
-		0.5f, 0.5f, -0.5f, 0.f, 1.f, 0.f,
-		0.5f, -0.5f, -0.5f, 0.f, 0.f, 1.f,
-		-0.5f, -0.5f, -0.5f, 1.f, 1.f, 0.f,
-		// left
-		-0.5f, 0.5f, 0.5f, 1.f, 0.f, 0.f,
-		-0.5f, 0.5f, -0.5f, 0.f, 1.f, 0.f,
-		-0.5f, -0.5f, -0.5f, 0.f, 0.f, 1.f,
-		-0.5f, -0.5f, 0.5f, 1.f, 1.f, 0.f,
-		//bottom
-		-0.5f, -0.5f, -0.5f, 1.f, 0.f, 0.f,
-		0.5f, -0.5f, -0.5f, 0.f, 1.f, 0.f,
-		0.5f, -0.5f, 0.5f, 0.f, 0.f, 1.f,
-		-0.5f, -0.5f, 0.5f, 1.f, 1.f, 0.f
-	};
-	float verticles2[]{
-		//pozycja     //kolor
-		-0.6f, 0.1f, 1.0f, 1.f, 0.2f, 0.f,
-		0.4f, 0.1f, 1.0f, 1.f, 0.2f, 0.f,
-		0.4f, -0.1f, 1.0f, 1.f, 0.2f, 1.f,
-		-0.6f, -0.1f, 1.0f, 1.f, 0.2f, 0.f,
-	};
-	Vertex verticles16[24];
-	for (size_t i = 0u; i < 24u; i++) {
-		verticles16[i] = f32tof16Vertex(verticles + 6 * i);
-	}
-	//1 bajt
-	GLubyte indices[6 * 6]{
-		0, 1, 2,
-		0, 2, 3,
-		4, 5, 6,
-		4, 6, 7,
-		8, 9, 10,
-		8, 10, 11,
-		14, 13, 12,
-		15, 14, 12,
-		18, 17, 16,
-		19, 18, 16,
-		22, 21, 20,
-		23, 22, 20
-	};
-	GLubyte indices2[6 * 6]{
-	0, 1, 2,
-	0, 2, 3,
-	};
-	GLuint vao;
-	glCreateVertexArrays(1, &vao);
-
-	GLuint vertexBuffer;
-	glCreateBuffers(1, &vertexBuffer);
-	glNamedBufferStorage(vertexBuffer, sizeof(verticles16), verticles16, 0);
-
-	GLuint indexBuffer;
-	glCreateBuffers(1, &indexBuffer);
-	glNamedBufferStorage(indexBuffer, sizeof(indices), indices, 0);
-
-
-	constexpr GLuint ATTR_POS = 0u;
-	glEnableVertexArrayAttrib(vao, ATTR_POS);
-	glVertexArrayAttribFormat(vao, ATTR_POS, 3, GL_HALF_FLOAT, GL_FALSE, 0);
-	glVertexArrayVertexBuffer(vao, ATTR_POS, vertexBuffer, offsetof(Vertex, pos), sizeof(Vertex));
-	glVertexArrayAttribBinding(vao, ATTR_POS, ATTR_POS);
-
-	constexpr GLuint ATTR_COLOR = 1u;
-	glEnableVertexArrayAttrib(vao, ATTR_COLOR);
-	glVertexArrayAttribFormat(vao, ATTR_COLOR, 3, GL_HALF_FLOAT, GL_FALSE, 0);
-	glVertexArrayVertexBuffer(vao, ATTR_COLOR, vertexBuffer, offsetof(Vertex, color), sizeof(Vertex));
-	glVertexArrayAttribBinding(vao, ATTR_COLOR, ATTR_COLOR);
-
-	glVertexArrayElementBuffer(vao, indexBuffer);
-
-	GLuint vao2;
-	glCreateVertexArrays(1, &vao2);
-
-	GLuint vertexBuffer2;
-	glCreateBuffers(1, &vertexBuffer2);
-	glNamedBufferStorage(vertexBuffer2, sizeof(verticles16), verticles16, 0);
-
-	GLuint indexBuffer2;
-	glCreateBuffers(1, &indexBuffer2);
-	glNamedBufferStorage(indexBuffer2, sizeof(indices2), indices, 0);
-
-
-	//constexpr GLuint ATTR_POS = 3u;
-	glEnableVertexArrayAttrib(vao2, ATTR_POS);
-	glVertexArrayAttribFormat(vao2, ATTR_POS, 3, GL_HALF_FLOAT, GL_FALSE, 0);
-	glVertexArrayVertexBuffer(vao2, ATTR_POS, vertexBuffer2, offsetof(Vertex, pos), sizeof(Vertex));
-	glVertexArrayAttribBinding(vao2, ATTR_POS, ATTR_POS);
-
-	//constexpr GLuint ATTR_COLOR = 4u;
-	glEnableVertexArrayAttrib(vao2, ATTR_COLOR);
-	glVertexArrayAttribFormat(vao2, ATTR_COLOR, 3, GL_HALF_FLOAT, GL_FALSE, 0);
-	glVertexArrayVertexBuffer(vao2, ATTR_COLOR, vertexBuffer2, offsetof(Vertex, color), sizeof(Vertex));
-	glVertexArrayAttribBinding(vao2, ATTR_COLOR, ATTR_COLOR);
-
-	glVertexArrayElementBuffer(vao2, indexBuffer2);
-
-
-	glBindProgramPipeline(pipeline);
-	*/
 
 	const TimePoint tpStart = Clock::now();
 	static bool sequenceStarted = false;
@@ -268,12 +100,7 @@ int main() {
 
 	box->localTransform->localPosition = glm::vec3(-1.f, -1.f, 0.f);
 	box2->localTransform->localPosition = glm::vec3(-4.f, -4.f, 0.f);
-	glm::mat4 box1Prev = glm::translate(glm::mat4(1.f), box->getTransform()->localPosition);
-	box1Prev = glm::scale(box1Prev, glm::vec3(0.1f, 0.1f, 0.1f));
-	glm::mat4 box2Prev = glm::translate(glm::mat4(1.f), box2->getTransform()->localPosition);
-	box2Prev = glm::scale(box2Prev, glm::vec3(0.1f, 0.1f, 0.1f));
-	glm::vec3 box1PrevPos = box->localTransform->localPosition;
-	glm::vec3 box2PrevPos = box2->localTransform->localPosition;
+	box2->getModelComponent()->setCustomCollider(glm::vec3(-8.f,-8.f,0.f), glm::vec3(8.f,8.f,8.f));
 	float deltaTime = 0;
 	float lastTime = 0;
 	while (!glfwWindowShouldClose(window)) {
@@ -315,11 +142,6 @@ int main() {
 			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
 			box->getModelComponent()->setTransform(&M);
-			//shaders->setMat4("M", M);
-			//shaders->setMat4("view", V);
-			//shaders->setMat4("projection", P);
-			//box->getModelComponent()->Draw();
-			//box->getModelComponent()->DrawBoundingBoxes(shaders, M, box->getTransform()->localPosition);
 		}
 
 		if (box2->getModelComponent() != nullptr) {
@@ -327,37 +149,15 @@ int main() {
 			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
 			box2->getModelComponent()->setTransform(&M);
-			//shaders->setMat4("M", M);
-			//shaders->setMat4("view", V);
-			//shaders->setMat4("projection", P);
-			//box2->getModelComponent()->Draw();
-			//box2->getModelComponent()->DrawBoundingBoxes(shaders, M, box2->getTransform()->localPosition);
 		}
 		if (box->getModelComponent()->checkCollision(box2->getModelComponent())) {
 			std::cout << "KOLIZJA" << std::endl;
 			glm::vec3 displacement = box->getModelComponent()->calculateCollisionResponse(box2->getModelComponent())*0.01f;
+			std::cout << displacement.x << "," << displacement.y << "," << displacement.z << std::endl;
 			if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
 				box->getTransform()->localPosition += displacement;
 				box2->getTransform()->localPosition -= displacement;
 			}
-			/*
-			box->getModelComponent()->setTransform(&box1Prev);
-			box->localTransform->localPosition = box1PrevPos;
-			shaders->use();
-			shaders->setMat4("M", box1Prev);
-			shaders->setMat4("view", V);
-			shaders->setMat4("projection", P);
-			box->getModelComponent()->Draw();
-			box->getModelComponent()->DrawBoundingBoxes(shaders, box1Prev);
-			box2->getModelComponent()->setTransform(&box2Prev);
-			box2->localTransform->localPosition = box2PrevPos;
-			shaders->use();
-			shaders->setMat4("M", box2Prev);
-			shaders->setMat4("view", V);
-			shaders->setMat4("projection", P);
-			box2->getModelComponent()->Draw();
-			box2->getModelComponent()->DrawBoundingBoxes(shaders, box2Prev);
-			*/
 		}
 		shaders->use();
 		shaders->setMat4("M", *box->getModelComponent()->getTransform());
@@ -371,10 +171,6 @@ int main() {
 		shaders->setMat4("projection", P);
 		box2->getModelComponent()->Draw();
 		box2->getModelComponent()->DrawBoundingBoxes(shaders, *box2->getModelComponent()->getTransform());
-		box1Prev = *(box->getModelComponent()->getTransform());
-		box2Prev = *(box2->getModelComponent()->getTransform());
-		box1PrevPos = box->localTransform->localPosition;
-		box2PrevPos = box->localTransform->localPosition;
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
@@ -432,12 +228,6 @@ int main() {
 				std::cout << "Puszczono klawisz " << key << std::endl;
 			}
 		}
-		/*
-		glProgramUniformMatrix4fv(vs, 0, 1, GL_FALSE, glm::value_ptr(P * V * M));
-
-		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, nullptr);
-		*/
 		if (plane->getModelComponent() != nullptr) {
 			glm::mat4 M2 = glm::rotate(glm::mat4(1.f), 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			M2 = glm::rotate(M2, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -450,21 +240,9 @@ int main() {
 			shaders->setMat4("projection", P);
 			plane->getModelComponent()->Draw();
 		}
-
-		/* Ustawienie macierzy transformacji dla drugiego obiektu
-		glProgramUniformMatrix4fv(vs, 0, 1, GL_FALSE, glm::value_ptr(P * V * M2));
-
-		glBindVertexArray(vao2);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, nullptr);
-		*/
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	//glDeleteBuffers(1, &vertexBuffer);
-	//glDeleteVertexArrays(1, &vao);
-	//glDeleteProgramPipelines(1, &pipeline);
-	//glDeleteProgram(vs);
-	//glDeleteProgram(fs);
 
 	glfwTerminate();
 	return 0;

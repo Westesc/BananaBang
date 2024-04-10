@@ -35,7 +35,7 @@ public:
 				gShaderFile.close();
 				geometryCode = gShaderStream.str();
 			}
-			std::cout << fragmentCode << std::endl << std::endl << vertexCode << std::endl;
+			//std::cout << fragmentCode << std::endl << std::endl << vertexCode << std::endl;
 		}
 		catch (std::ifstream::failure e)
 		{

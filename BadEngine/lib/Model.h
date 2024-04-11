@@ -260,6 +260,12 @@ public:
         }
     }
 
+    void UpdateCollider(glm::mat4 transformation) {
+        for (const auto& mesh : meshes) {
+            mesh->updateCapsuleCollider(transformation);
+        }
+    }
+
     void setCustomBox(const glm::vec3& customMin, const glm::vec3& customMax) {
         for (const auto& mesh : meshes) {
             mesh->setBoundingBox(customMin, customMax);
@@ -302,18 +308,36 @@ public:
         return collisionX && collisionY && collisionZ;
     }
 
-    bool checkBoxCapsuleCollision(const BoundingBox& meshBox, const CapsuleCollider& otherCapsule) {
+    bool checkBoxCapsuleCollision(const BoundingBox& meshBox, const CapsuleCollider& otherCapsule, glm::mat4 transform) {
         glm::vec3 boxMin = meshBox.min;
         glm::vec3 boxMax = meshBox.max;
         glm::vec3 capsuleCenter = otherCapsule.center;
         float capsuleRadius = otherCapsule.radius;
         float capsuleHeight = otherCapsule.height;
 
-        glm::vec3 closestPoint = glm::clamp(capsuleCenter, boxMin, boxMax);
-        float distanceSquared = glm::length(capsuleCenter - closestPoint);
-        distanceSquared *= distanceSquared;
-        float minDistance = capsuleRadius + 0.5f * capsuleHeight;
-        return distanceSquared <= minDistance * minDistance;
+        glm::vec3 transformedCapsuleCenter = glm::vec3(transform * glm::vec4(capsuleCenter, 1.0f));
+        bool insideBox = transformedCapsuleCenter.x >= boxMin.x && transformedCapsuleCenter.x <= boxMax.x &&
+            transformedCapsuleCenter.y >= boxMin.y && transformedCapsuleCenter.y <= boxMax.y &&
+            transformedCapsuleCenter.z >= boxMin.z && transformedCapsuleCenter.z <= boxMax.z;
+        float distanceToBox = 0.0f;
+        if (!insideBox) {
+            if (transformedCapsuleCenter.x < boxMin.x)
+                distanceToBox += (transformedCapsuleCenter.x - boxMin.x) * (transformedCapsuleCenter.x - boxMin.x);
+            else if (transformedCapsuleCenter.x > boxMax.x)
+                distanceToBox += (transformedCapsuleCenter.x - boxMax.x) * (transformedCapsuleCenter.x - boxMax.x);
+
+            if (transformedCapsuleCenter.y < boxMin.y)
+                distanceToBox += (transformedCapsuleCenter.y - boxMin.y) * (transformedCapsuleCenter.y - boxMin.y);
+            else if (transformedCapsuleCenter.y > boxMax.y)
+                distanceToBox += (transformedCapsuleCenter.y - boxMax.y) * (transformedCapsuleCenter.y - boxMax.y);
+
+            if (transformedCapsuleCenter.z < boxMin.z)
+                distanceToBox += (transformedCapsuleCenter.z - boxMin.z) * (transformedCapsuleCenter.z - boxMin.z);
+            else if (transformedCapsuleCenter.z > boxMax.z)
+                distanceToBox += (transformedCapsuleCenter.z - boxMax.z) * (transformedCapsuleCenter.z - boxMax.z);
+        }
+        float minDistance = capsuleRadius;
+        return insideBox || distanceToBox <= minDistance * minDistance;
     }
 
     bool checkCapsuleCollision(const CapsuleCollider& capsule1, const CapsuleCollider& capsule2) {
@@ -328,7 +352,7 @@ public:
         return distanceSquared <= sumRadius * sumRadius;
     }
 
-    bool checkCollision(const Model* other) {
+    bool checkCollision(Model* other) {
         bool collisionFound = false;
         for (const auto& mesh : meshes) {
             if (mesh->boundingBox != nullptr) {
@@ -358,8 +382,9 @@ public:
                 for (const auto& otherMesh : other->meshes) {
                     if (otherMesh->capsuleCollider != nullptr) {
                         const CapsuleCollider& otherCapsule = otherMesh->getCapsuleCollider();
-                        if (checkBoxCapsuleCollision(meshBox, otherCapsule)) {
-                            std::cout << "AA" << std::endl;
+                        if (checkBoxCapsuleCollision(meshBox, otherCapsule, *other->getTransform())) {
+                            //std::cout << "box:" << meshBox.center().x << "," <<meshBox.center().y << "," <<meshBox.center().z << std::endl;
+                            //std::cout << "capsule:" << otherCapsule.center.x << "," << otherCapsule.center.y << "," << otherCapsule.center.z << std::endl;
                             collisionFound = true;
                             break;
                         }
@@ -398,7 +423,7 @@ public:
         }
         return boxes;
     }
-    glm::vec3 calculateCollisionResponse(const Model* other) {
+    glm::vec3 calculateCollisionResponse(Model* other) {
         glm::vec3 displacement(0.0f);
 
         for (const auto& mesh : meshes) {
@@ -415,7 +440,7 @@ public:
                     }
                     else if (otherMesh->capsuleCollider != nullptr) {
                         const CapsuleCollider& otherMeshCapsule = otherMesh->getCapsuleCollider();
-                        if (checkBoxCapsuleCollision(meshBox, otherMeshCapsule)) {
+                        if (checkBoxCapsuleCollision(meshBox, otherMeshCapsule, *other->getTransform())) {
                             glm::vec3 direction = glm::normalize(meshBox.center() - otherMeshCapsule.center);
                             float magnitude = (meshBox.radius() + otherMeshCapsule.radius) - glm::distance(meshBox.center(), otherMeshCapsule.center);
                             displacement += direction * magnitude;
@@ -428,7 +453,7 @@ public:
                 for (const auto& otherMesh : other->meshes) {
                     if (otherMesh->boundingBox != nullptr) {
                         const BoundingBox& otherMeshBox = otherMesh->getBoundingBox();
-                        if (checkBoxCapsuleCollision(otherMeshBox, meshCapsule)) {
+                        if (checkBoxCapsuleCollision(otherMeshBox, meshCapsule, *other->getTransform())) {
                             glm::vec3 direction = glm::normalize(meshCapsule.center - otherMeshBox.center());
                             float magnitude = (meshCapsule.radius + otherMeshBox.radius()) - glm::distance(meshCapsule.center, otherMeshBox.center());
                             displacement += direction * magnitude;

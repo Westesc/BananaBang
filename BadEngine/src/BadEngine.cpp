@@ -200,7 +200,7 @@ int main() {
 		shaders->setMat4("view", V);
 		shaders->setMat4("projection", P);
 		capsule->getModelComponent()->Draw();
-		//capsule->getModelComponent()->DrawBoundingBoxes(shaders, *capsule->getModelComponent()->getTransform());
+		capsule->getModelComponent()->UpdateCollider(*capsule->getModelComponent()->getTransform());
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;

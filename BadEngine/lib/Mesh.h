@@ -88,17 +88,22 @@ public:
         }
     }
 
+    void updateCapsuleCollider(glm::mat4& modelMatrix) {
+        glm::vec3 transformedCenter = glm::vec3(modelMatrix * glm::vec4(capsuleCollider->center, 1.0f));
+        capsuleCollider->center = transformedCenter;
+    }
+
     void setBoundingBox(const glm::vec3& customMin, const glm::vec3& customMax) {
         boundingBox = new BoundingBox(customMin, customMax, true);
     }
 
     void setCapsuleCollider(float radius, float height, glm::vec3 position) {
         if (capsuleCollider != nullptr) {
-            capsuleCollider = new CapsuleCollider(capsuleCollider->getCenter(), radius, height);
+            capsuleCollider = new CapsuleCollider(capsuleCollider->getCenter(), radius, height, true);
         }
         else {
             calculateBoundingCapsule(position);
-            capsuleCollider = new CapsuleCollider(capsuleCollider->getCenter(), radius, height);
+            capsuleCollider = new CapsuleCollider(capsuleCollider->getCenter(), radius, height, true);
         }
     }
 
@@ -126,7 +131,7 @@ public:
             maxRadius = std::max(maxRadius, glm::length(glm::vec2(vertex.Position.x, vertex.Position.z)));
         }
         float height = maxY - minY;
-        capsuleCollider = new CapsuleCollider(glm::vec3(position.x, (minY*0.1f + maxY*0.1f) * 0.5f, position.z), maxRadius* 0.1f, height* 0.1f);
+        capsuleCollider = new CapsuleCollider(glm::vec3(position.x, (minY + maxY) * 0.5f* 0.1f, position.z), maxRadius* 0.1f, height *0.1f);
     }
 
     // render the mesh

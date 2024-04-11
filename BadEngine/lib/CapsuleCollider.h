@@ -8,9 +8,10 @@ public:
     glm::vec3 center;
     float radius;
     float height;
+    bool customSize;
 
-    CapsuleCollider(const glm::vec3& center, float radius, float height)
-        : center(center), radius(radius), height(height) {}
+    CapsuleCollider(const glm::vec3& center, float radius, float height, bool custom = false)
+        : center(center), radius(radius), height(height), customSize(custom) {}
 
     glm::vec3 getCenter() const { return center; }
     void setCenter(const glm::vec3& newCenter) { center = newCenter; }

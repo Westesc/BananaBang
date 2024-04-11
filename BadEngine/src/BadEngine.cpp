@@ -81,15 +81,19 @@ int main() {
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
 	GameObject* box2 = new GameObject("box2");
+	GameObject* capsule = new GameObject("capsule");
 	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
 	Model* box2model = new Model(const_cast<char*>("../../../../res/box.obj"));
+	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
 	boxmodel->SetShader(shaders);
 	planemodel->SetShader(shaders);
 	box2model->SetShader(shaders);
+	capsulemodel->SetShader(shaders);
 	box->addModelComponent(boxmodel);
 	plane->addModelComponent(planemodel);
 	box2->addModelComponent(box2model);
+	capsule->addModelComponent(capsulemodel);
 	int key, action;
 	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 6.0f);
 
@@ -100,7 +104,11 @@ int main() {
 
 	box->localTransform->localPosition = glm::vec3(-1.f, -1.f, 0.f);
 	box2->localTransform->localPosition = glm::vec3(-4.f, -4.f, 0.f);
-	box2->getModelComponent()->setCustomCollider(glm::vec3(-8.f,-8.f,0.f), glm::vec3(8.f,8.f,8.f));
+	capsule->localTransform->localPosition = glm::vec3(4.f, 4.f, 0.f);
+	//box2->getModelComponent()->setCustomBox(glm::vec3(-8.f,-8.f,0.f), glm::vec3(8.f,8.f,8.f));
+	box->getModelComponent()->addCollider(1, box->localTransform->localPosition);
+	capsule->getModelComponent()->addCollider(2, capsule->localTransform->localPosition);
+	box2->getModelComponent()->addCollider(1, box->localTransform->localPosition);
 	float deltaTime = 0;
 	float lastTime = 0;
 	while (!glfwWindowShouldClose(window)) {
@@ -150,6 +158,13 @@ int main() {
 			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
 			box2->getModelComponent()->setTransform(&M);
 		}
+
+		if (capsule->getModelComponent() != nullptr) {
+			glm::mat4 M = glm::translate(glm::mat4(1.f), capsule->getTransform()->localPosition);
+			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
+			capsule->getModelComponent()->setTransform(&M);
+		}
 		if (box->getModelComponent()->checkCollision(box2->getModelComponent())) {
 			std::cout << "KOLIZJA" << std::endl;
 			glm::vec3 displacement = box->getModelComponent()->calculateCollisionResponse(box2->getModelComponent())*0.01f;
@@ -157,6 +172,15 @@ int main() {
 			if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
 				box->getTransform()->localPosition += displacement;
 				box2->getTransform()->localPosition -= displacement;
+			}
+		}
+		if (box->getModelComponent()->checkCollision(capsule->getModelComponent())) {
+			std::cout << "KOLIZJA2" << std::endl;
+			glm::vec3 displacement = box->getModelComponent()->calculateCollisionResponse(capsule->getModelComponent()) * 0.01f;
+			std::cout << displacement.x << "," << displacement.y << "," << displacement.z << std::endl;
+			if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
+				box->getTransform()->localPosition += displacement;
+				capsule->getTransform()->localPosition -= displacement;
 			}
 		}
 		shaders->use();
@@ -171,6 +195,12 @@ int main() {
 		shaders->setMat4("projection", P);
 		box2->getModelComponent()->Draw();
 		box2->getModelComponent()->DrawBoundingBoxes(shaders, *box2->getModelComponent()->getTransform());
+		shaders->use();
+		shaders->setMat4("M", *capsule->getModelComponent()->getTransform());
+		shaders->setMat4("view", V);
+		shaders->setMat4("projection", P);
+		capsule->getModelComponent()->Draw();
+		//capsule->getModelComponent()->DrawBoundingBoxes(shaders, *capsule->getModelComponent()->getTransform());
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;

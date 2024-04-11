@@ -11,6 +11,7 @@
 #include <vector>
 #include "Shader.h"
 #include "BoundingBox.h"
+#include "CapsuleCollider.h"
 
 struct Vertex
 {
@@ -39,6 +40,8 @@ public:
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
     unsigned int VAO;
+    BoundingBox* boundingBox = nullptr;
+    CapsuleCollider* capsuleCollider = nullptr;
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
     {
@@ -47,7 +50,7 @@ public:
         this->textures = textures;
 
         setupMesh();
-        calculateBoundingBox();
+        //calculateBoundingBox();
     }
 
     Mesh()
@@ -55,15 +58,19 @@ public:
     }
 
     const BoundingBox& getBoundingBox() const {
-        return boundingBox;
+        return *boundingBox;
+    }
+
+    const CapsuleCollider& getCapsuleCollider() const {
+        return *capsuleCollider;
     }
 
     void updateBoundingBox(glm::mat4& modelMatrix) {
-        if (boundingBox.customSize) {
-            glm::vec3 transformedMin = glm::vec3(modelMatrix * glm::vec4(boundingBox.min, 1.0f));
-            glm::vec3 transformedMax = glm::vec3(modelMatrix * glm::vec4(boundingBox.max, 1.0f));
-            boundingBox.min = transformedMin;
-            boundingBox.max = transformedMax;
+        if (boundingBox->customSize) {
+            glm::vec3 transformedMin = glm::vec3(modelMatrix * glm::vec4(boundingBox->min, 1.0f));
+            glm::vec3 transformedMax = glm::vec3(modelMatrix * glm::vec4(boundingBox->max, 1.0f));
+            boundingBox->min = transformedMin;
+            boundingBox->max = transformedMax;
         }
         else {
             glm::vec3 min(FLT_MAX);
@@ -77,12 +84,49 @@ public:
             }
 
             // Update bounding box
-            boundingBox = BoundingBox(min, max);
+            boundingBox = new BoundingBox(min, max);
         }
     }
 
     void setBoundingBox(const glm::vec3& customMin, const glm::vec3& customMax) {
-        boundingBox = BoundingBox(customMin, customMax, true);
+        boundingBox = new BoundingBox(customMin, customMax, true);
+    }
+
+    void setCapsuleCollider(float radius, float height, glm::vec3 position) {
+        if (capsuleCollider != nullptr) {
+            capsuleCollider = new CapsuleCollider(capsuleCollider->getCenter(), radius, height);
+        }
+        else {
+            calculateBoundingCapsule(position);
+            capsuleCollider = new CapsuleCollider(capsuleCollider->getCenter(), radius, height);
+        }
+    }
+
+    void calculateBoundingBox() {
+        glm::vec3 min(FLT_MAX);
+        glm::vec3 max(-FLT_MAX);
+
+        for (const auto& vertex : vertices) {
+            min = glm::min(min, vertex.Position);
+            max = glm::max(max, vertex.Position);
+        }
+
+        boundingBox = new BoundingBox(min, max);
+    }
+
+    void calculateBoundingCapsule(glm::vec3 position) {
+        float minY = FLT_MAX;
+        float maxY = -FLT_MAX;
+        float maxRadius = 0.0f;
+
+        for (const auto& vertex : vertices) {
+            float y = vertex.Position.y;
+            minY = std::min(minY, y);
+            maxY = std::max(maxY, y);
+            maxRadius = std::max(maxRadius, glm::length(glm::vec2(vertex.Position.x, vertex.Position.z)));
+        }
+        float height = maxY - minY;
+        capsuleCollider = new CapsuleCollider(glm::vec3(position.x, (minY*0.1f + maxY*0.1f) * 0.5f, position.z), maxRadius* 0.1f, height* 0.1f);
     }
 
     // render the mesh
@@ -140,57 +184,8 @@ public:
         glBindVertexArray(0);
     }
 
-    void generateTorus(int num_segments, int num_rings, float thickness, float radius) {
-        std::vector<unsigned int> indexBuffer;
-        std::vector<float> vertBuffer;
-        int num_vertices = (num_rings + 1) * (num_segments + 1);
-
-        const float pi = 3.1415926535f;
-        const float r1 = radius;
-        const float r2 = thickness;
-        for (int i = 0, index = 0; i <= num_rings; ++i) {
-            for (int j = 0; j <= num_segments; ++j, ++index) {
-                float u = float(i) / num_rings;
-                float v = (float(j) + u) / num_segments;
-
-                float u_angle = u * 2 * pi;
-                float v_angle = v * 2 * pi;
-
-                float x = cos(u_angle) * (r1 + cos(v_angle) * r2);
-                float y = sin(u_angle) * (r1 + cos(v_angle) * r2);
-                float z = sin(v_angle) * r2;
-                vertBuffer.push_back(x);
-                vertBuffer.push_back(y);
-                vertBuffer.push_back(z);
-
-            }
-        }
-
-        for (int i = 0, index = 0; i <= num_vertices; ++i) {
-            indexBuffer.push_back(int(i % num_vertices));
-            indexBuffer.push_back(int((i + num_segments + 1) % num_vertices));
-        }
-
-        vert = vertBuffer;
-        indices = indexBuffer;
-        setupMeshTorus();
-    }
-
 private:
-    BoundingBox boundingBox = BoundingBox(glm::vec3(FLT_MAX),glm::vec3(FLT_MIN));
     unsigned int VBO, EBO;
-
-    void calculateBoundingBox() {
-        glm::vec3 min(FLT_MAX);
-        glm::vec3 max(-FLT_MAX);
-
-        for (const auto& vertex : vertices) {
-            min = glm::min(min, vertex.Position);
-            max = glm::max(max, vertex.Position);
-        }
-
-        boundingBox = BoundingBox(min, max);
-    }
 
     void setupMesh()
     {

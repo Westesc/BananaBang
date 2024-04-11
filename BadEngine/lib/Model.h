@@ -260,9 +260,38 @@ public:
         }
     }
 
-    void setCustomCollider(const glm::vec3& customMin, const glm::vec3& customMax) {
+    void setCustomBox(const glm::vec3& customMin, const glm::vec3& customMax) {
         for (const auto& mesh : meshes) {
             mesh->setBoundingBox(customMin, customMax);
+        }
+    }
+
+    void setCustomCapsule(float radius, float height, glm::vec3 position) {
+        for (const auto& mesh : meshes) {
+            mesh->setCapsuleCollider(radius, height, position);
+        }
+    }
+
+    void addCollider(int collider, glm::vec3 position) {
+        if (collider == 0) {
+            for (const auto& mesh : meshes) {
+                mesh->boundingBox = nullptr;
+                mesh->capsuleCollider = nullptr;
+            }
+        }
+        else if (collider == 1) {
+            for (const auto& mesh : meshes) {
+                if (mesh->boundingBox == nullptr) {
+                    mesh->calculateBoundingBox();
+                }
+            }
+        }
+        else if (collider == 2) {
+            for (const auto& mesh : meshes) {
+                if (mesh->capsuleCollider == nullptr) {
+                    mesh->calculateBoundingCapsule(position);
+                }
+            }
         }
     }
 
@@ -273,22 +302,93 @@ public:
         return collisionX && collisionY && collisionZ;
     }
 
+    bool checkBoxCapsuleCollision(const BoundingBox& meshBox, const CapsuleCollider& otherCapsule) {
+        glm::vec3 boxMin = meshBox.min;
+        glm::vec3 boxMax = meshBox.max;
+        glm::vec3 capsuleCenter = otherCapsule.center;
+        float capsuleRadius = otherCapsule.radius;
+        float capsuleHeight = otherCapsule.height;
+
+        glm::vec3 closestPoint = glm::clamp(capsuleCenter, boxMin, boxMax);
+        float distanceSquared = glm::length(capsuleCenter - closestPoint);
+        distanceSquared *= distanceSquared;
+        float minDistance = capsuleRadius + 0.5f * capsuleHeight;
+        return distanceSquared <= minDistance * minDistance;
+    }
+
+    bool checkCapsuleCollision(const CapsuleCollider& capsule1, const CapsuleCollider& capsule2) {
+        glm::vec3 center1 = capsule1.center;
+        glm::vec3 center2 = capsule2.center;
+        float radius1 = capsule1.radius;
+        float radius2 = capsule2.radius;
+
+        float distanceSquared = glm::length(center1 - center2);
+        distanceSquared *= distanceSquared;
+        float sumRadius = radius1 + radius2;
+        return distanceSquared <= sumRadius * sumRadius;
+    }
+
     bool checkCollision(const Model* other) {
+        bool collisionFound = false;
         for (const auto& mesh : meshes) {
-            const BoundingBox& meshBox = mesh->getBoundingBox();
-            bool collisionFound = false;
-            for (const auto& otherMesh : other->meshes) {
-                const BoundingBox& otherMeshBox = otherMesh->getBoundingBox();
-                if (checkBoundingBoxCollision(meshBox, otherMeshBox)) {
-                    collisionFound = true;
-                    break;
+            if (mesh->boundingBox != nullptr) {
+                const BoundingBox& meshBox = mesh->getBoundingBox();
+                collisionFound = false;
+                for (const auto& otherMesh : other->meshes) {
+                    if (otherMesh->boundingBox != nullptr) {
+                        const BoundingBox& otherMeshBox = otherMesh->getBoundingBox();
+                        if (checkBoundingBoxCollision(meshBox, otherMeshBox)) {
+                            collisionFound = true;
+                            break;
+                        }
+                    }
                 }
             }
             if (!collisionFound) {
-                return false;
+                break;
             }
         }
-        return true;
+        if (collisionFound) {
+            return true;
+        }
+        for (const auto& mesh : meshes) {
+            if (mesh->boundingBox != nullptr) {
+                const BoundingBox& meshBox = mesh->getBoundingBox();
+                collisionFound = false;
+                for (const auto& otherMesh : other->meshes) {
+                    if (otherMesh->capsuleCollider != nullptr) {
+                        const CapsuleCollider& otherCapsule = otherMesh->getCapsuleCollider();
+                        if (checkBoxCapsuleCollision(meshBox, otherCapsule)) {
+                            std::cout << "AA" << std::endl;
+                            collisionFound = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!collisionFound) {
+                break;
+            }
+        }
+        for (const auto& mesh : meshes) {
+            if (mesh->capsuleCollider != nullptr) {
+                const CapsuleCollider& capsule = mesh->getCapsuleCollider();
+                collisionFound = false;
+                for (const auto& otherMesh : other->meshes) {
+                    if (otherMesh->capsuleCollider != nullptr) {
+                        const CapsuleCollider& otherCapsule = otherMesh->getCapsuleCollider();
+                        if (checkCapsuleCollision(capsule, otherCapsule)) {
+                            collisionFound = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (!collisionFound) {
+                break;
+            }
+        }
+        return collisionFound;
     }
 
     std::vector<BoundingBox> getBoundingBoxes() {
@@ -302,13 +402,46 @@ public:
         glm::vec3 displacement(0.0f);
 
         for (const auto& mesh : meshes) {
-            const BoundingBox& meshBox = mesh->getBoundingBox();
-            for (const auto& otherMesh : other->meshes) {
-                const BoundingBox& otherMeshBox = otherMesh->getBoundingBox();
-                if (checkBoundingBoxCollision(meshBox, otherMeshBox)) {
-                    glm::vec3 direction = glm::normalize(meshBox.center() - otherMeshBox.center());
-                    float magnitude = (meshBox.radius() + otherMeshBox.radius()) - glm::distance(meshBox.center(), otherMeshBox.center());
-                    displacement += direction * magnitude;
+            if (mesh->boundingBox != nullptr) {
+                const BoundingBox& meshBox = mesh->getBoundingBox();
+                for (const auto& otherMesh : other->meshes) {
+                    if (otherMesh->boundingBox != nullptr) {
+                        const BoundingBox& otherMeshBox = otherMesh->getBoundingBox();
+                        if (checkBoundingBoxCollision(meshBox, otherMeshBox)) {
+                            glm::vec3 direction = glm::normalize(meshBox.center() - otherMeshBox.center());
+                            float magnitude = (meshBox.radius() + otherMeshBox.radius()) - glm::distance(meshBox.center(), otherMeshBox.center());
+                            displacement += direction * magnitude;
+                        }
+                    }
+                    else if (otherMesh->capsuleCollider != nullptr) {
+                        const CapsuleCollider& otherMeshCapsule = otherMesh->getCapsuleCollider();
+                        if (checkBoxCapsuleCollision(meshBox, otherMeshCapsule)) {
+                            glm::vec3 direction = glm::normalize(meshBox.center() - otherMeshCapsule.center);
+                            float magnitude = (meshBox.radius() + otherMeshCapsule.radius) - glm::distance(meshBox.center(), otherMeshCapsule.center);
+                            displacement += direction * magnitude;
+                        }
+                    }
+                }
+            }
+            else if (mesh->capsuleCollider != nullptr) {
+                const CapsuleCollider& meshCapsule = mesh->getCapsuleCollider();
+                for (const auto& otherMesh : other->meshes) {
+                    if (otherMesh->boundingBox != nullptr) {
+                        const BoundingBox& otherMeshBox = otherMesh->getBoundingBox();
+                        if (checkBoxCapsuleCollision(otherMeshBox, meshCapsule)) {
+                            glm::vec3 direction = glm::normalize(meshCapsule.center - otherMeshBox.center());
+                            float magnitude = (meshCapsule.radius + otherMeshBox.radius()) - glm::distance(meshCapsule.center, otherMeshBox.center());
+                            displacement += direction * magnitude;
+                        }
+                    }
+                    else if (otherMesh->capsuleCollider != nullptr) {
+                        const CapsuleCollider& otherMeshCapsule = otherMesh->getCapsuleCollider();
+                        if (checkCapsuleCollision(meshCapsule, otherMeshCapsule)) {
+                            glm::vec3 direction = glm::normalize(meshCapsule.center - otherMeshCapsule.center);
+                            float magnitude = (meshCapsule.radius + otherMeshCapsule.radius) - glm::distance(meshCapsule.center, otherMeshCapsule.center);
+                            displacement += direction * magnitude;
+                        }
+                    }
                 }
             }
         }

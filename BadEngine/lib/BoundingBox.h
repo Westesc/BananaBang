@@ -1,9 +1,9 @@
 #ifndef BoundingBox_H
 #define BoundingBox_H
 
-#include "Component.h"
+#include "Collider.h"
 
-class BoundingBox : Component {
+class BoundingBox : Collider {
 public:
     glm::vec3 min;
     glm::vec3 max;

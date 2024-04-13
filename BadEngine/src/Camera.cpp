@@ -10,6 +10,7 @@ glm::mat4 Camera::getViewMatrix() {
 	return glm::lookAt(transform->getLocalPosition(), transform->getLocalPosition() + front, up);
 }
 
+
 void Camera::updateCamera(glm::vec2 vector) {
 	glm::vec3 Front;
 	transform->localRotation += glm::vec3(vector.x/300,-vector.y/300, 0);

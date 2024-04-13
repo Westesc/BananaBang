@@ -213,7 +213,6 @@ public:
             meshes[i]->Draw(shader, Transform, isFromFile, rotating, isBlue);
         }
     }
-
 };
 
 #endif

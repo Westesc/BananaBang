@@ -109,6 +109,7 @@ void Start() {
 	//glFrontFace(GL_CW);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	sm = new SceneManager();
 	Scene* scene = new Scene("main");
@@ -129,144 +130,26 @@ int main() {
 	
 	Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
 	GameObject* box = new GameObject("box");
+	GameObject* box2 = new GameObject("box2");
 	GameObject* plane = new GameObject("plane");
+	GameObject* sphere = new GameObject("sphere");
 	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
+	Model* boxmodel2 = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
+	Model* spheremodel = new Model(const_cast<char*>("../../../../res/Sphere1.obj"));
+
 	boxmodel->SetShader(shaders);
+	boxmodel2->SetShader(shaders);
 	planemodel->SetShader(shaders);
+	spheremodel->SetShader(shaders);
+
 	box->addModelComponent(boxmodel);
+	box2->addModelComponent(boxmodel2);
 	plane->addModelComponent(planemodel);
+	sphere->addModelComponent(spheremodel);
 	int key, action;
 	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 20.0f);
-	//camera->transform->localRotation = glm::vec3(0.0f, 45.0f,0.0f);
-	/*
-	GLuint vs = compileShader(loadShaderSource("../../../../src/vs.vert").c_str(), GL_VERTEX_SHADER, "vs log");
-	GLuint fs = compileShader(loadShaderSource("../../../../src/fs.frag").c_str(), GL_FRAGMENT_SHADER, "fs log");
-
-	GLuint pipeline;
-	glCreateProgramPipelines(1, &pipeline);
-	glUseProgramStages(pipeline, GL_VERTEX_SHADER_BIT, vs);
-	glUseProgramStages(pipeline, GL_FRAGMENT_SHADER_BIT, fs);
-	*/
-	/*
-	float verticles[]{
-		//pozycja     //kolor
-		// front
-		-0.5f, 0.5f, 0.5f, 1.f, 1.f, 1.f,
-		0.5f, 0.5f, 0.5f, 0.f, 0.5f, 1.f,
-		0.5f, -0.5f, 0.5f, 0.f, 0.f, 1.f,
-		-0.5f, -0.5f, 0.5f, 0.f, 1.f, 0.5f,
-		// right
-		0.5f, 0.5f, 0.5f, 1.f, 0.f, 0.f,
-		0.5f, 0.5f, -0.5f, 0.f, 1.f, 0.f,
-		0.5f, -0.5f, -0.5f, 0.f, 0.f, 1.f,
-		0.5f, -0.5f, 0.5f, 1.f, 1.f, 0.f,
-		//top
-		-0.5f, 0.5f, -0.5f, 1.f, 0.f, 0.f,
-		0.5f, 0.5f, -0.5f, 0.f, 1.f, 0.f,
-		0.5f, 0.5f, 0.5f, 0.f, 0.f, 1.f,
-		-0.5f, 0.5f, 0.5f, 1.f, 1.f, 0.f,
-		// back
-		-0.5f, 0.5f, -0.5f, 1.f, 0.f, 0.f,
-		0.5f, 0.5f, -0.5f, 0.f, 1.f, 0.f,
-		0.5f, -0.5f, -0.5f, 0.f, 0.f, 1.f,
-		-0.5f, -0.5f, -0.5f, 1.f, 1.f, 0.f,
-		// left
-		-0.5f, 0.5f, 0.5f, 1.f, 0.f, 0.f,
-		-0.5f, 0.5f, -0.5f, 0.f, 1.f, 0.f,
-		-0.5f, -0.5f, -0.5f, 0.f, 0.f, 1.f,
-		-0.5f, -0.5f, 0.5f, 1.f, 1.f, 0.f,
-		//bottom
-		-0.5f, -0.5f, -0.5f, 1.f, 0.f, 0.f,
-		0.5f, -0.5f, -0.5f, 0.f, 1.f, 0.f,
-		0.5f, -0.5f, 0.5f, 0.f, 0.f, 1.f,
-		-0.5f, -0.5f, 0.5f, 1.f, 1.f, 0.f
-	};
-	float verticles2[]{
-		//pozycja     //kolor
-		-0.6f, 0.1f, 1.0f, 1.f, 0.2f, 0.f,
-		0.4f, 0.1f, 1.0f, 1.f, 0.2f, 0.f,
-		0.4f, -0.1f, 1.0f, 1.f, 0.2f, 1.f,
-		-0.6f, -0.1f, 1.0f, 1.f, 0.2f, 0.f,
-	};
-	Vertex verticles16[24];
-	for (size_t i = 0u; i < 24u; i++) {
-		verticles16[i] = f32tof16Vertex(verticles + 6 * i);
-	}
-	//1 bajt
-	GLubyte indices[6 * 6]{
-		0, 1, 2,
-		0, 2, 3,
-		4, 5, 6,
-		4, 6, 7,
-		8, 9, 10,
-		8, 10, 11,
-		14, 13, 12,
-		15, 14, 12,
-		18, 17, 16,
-		19, 18, 16,
-		22, 21, 20,
-		23, 22, 20
-	};
-	GLubyte indices2[6 * 6]{
-	0, 1, 2,
-	0, 2, 3,
-	};
-	GLuint vao;
-	glCreateVertexArrays(1, &vao);
-
-	GLuint vertexBuffer;
-	glCreateBuffers(1, &vertexBuffer);
-	glNamedBufferStorage(vertexBuffer, sizeof(verticles16), verticles16, 0);
-
-	GLuint indexBuffer;
-	glCreateBuffers(1, &indexBuffer);
-	glNamedBufferStorage(indexBuffer, sizeof(indices), indices, 0);
-
-
-	constexpr GLuint ATTR_POS = 0u;
-	glEnableVertexArrayAttrib(vao, ATTR_POS);
-	glVertexArrayAttribFormat(vao, ATTR_POS, 3, GL_HALF_FLOAT, GL_FALSE, 0);
-	glVertexArrayVertexBuffer(vao, ATTR_POS, vertexBuffer, offsetof(Vertex, pos), sizeof(Vertex));
-	glVertexArrayAttribBinding(vao, ATTR_POS, ATTR_POS);
-
-	constexpr GLuint ATTR_COLOR = 1u;
-	glEnableVertexArrayAttrib(vao, ATTR_COLOR);
-	glVertexArrayAttribFormat(vao, ATTR_COLOR, 3, GL_HALF_FLOAT, GL_FALSE, 0);
-	glVertexArrayVertexBuffer(vao, ATTR_COLOR, vertexBuffer, offsetof(Vertex, color), sizeof(Vertex));
-	glVertexArrayAttribBinding(vao, ATTR_COLOR, ATTR_COLOR);
-
-	glVertexArrayElementBuffer(vao, indexBuffer);
-
-	GLuint vao2;
-	glCreateVertexArrays(1, &vao2);
-
-	GLuint vertexBuffer2;
-	glCreateBuffers(1, &vertexBuffer2);
-	glNamedBufferStorage(vertexBuffer2, sizeof(verticles16), verticles16, 0);
-
-	GLuint indexBuffer2;
-	glCreateBuffers(1, &indexBuffer2);
-	glNamedBufferStorage(indexBuffer2, sizeof(indices2), indices, 0);
-
-
-	//constexpr GLuint ATTR_POS = 3u;
-	glEnableVertexArrayAttrib(vao2, ATTR_POS);
-	glVertexArrayAttribFormat(vao2, ATTR_POS, 3, GL_HALF_FLOAT, GL_FALSE, 0);
-	glVertexArrayVertexBuffer(vao2, ATTR_POS, vertexBuffer2, offsetof(Vertex, pos), sizeof(Vertex));
-	glVertexArrayAttribBinding(vao2, ATTR_POS, ATTR_POS);
-
-	//constexpr GLuint ATTR_COLOR = 4u;
-	glEnableVertexArrayAttrib(vao2, ATTR_COLOR);
-	glVertexArrayAttribFormat(vao2, ATTR_COLOR, 3, GL_HALF_FLOAT, GL_FALSE, 0);
-	glVertexArrayVertexBuffer(vao2, ATTR_COLOR, vertexBuffer2, offsetof(Vertex, color), sizeof(Vertex));
-	glVertexArrayAttribBinding(vao2, ATTR_COLOR, ATTR_COLOR);
-
-	glVertexArrayElementBuffer(vao2, indexBuffer2);
-
-
-	glBindProgramPipeline(pipeline);
-	*/
+	
 Shader shader("../../../../res/Shaders/font.vert", "../../../../res/Shaders/font.frag");
 glm::mat4 projection1 = glm::ortho(0.0f, static_cast<float>(szer), 0.0f, static_cast<float>(wys));
 shader.use();
@@ -368,7 +251,8 @@ glBindVertexArray(0);
 
 	//glEnable(GL_CULL_FACE_MODE);
 	//glFrontFace(GL_CW);
-
+	glm::vec2 posM = glm::vec2(0.f, 0.f);
+	camera->updateCamera(posM);
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -383,8 +267,8 @@ glBindVertexArray(0);
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
 		if (box->getModelComponent() != nullptr) {
-			//glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(-1.f, -1.f, 0.f));
-			glm::mat4 M = glm::mat4(1.f);
+			glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(15.f, 0.f, 0.f) + camera->transform->getLocalPosition());
+			//glm::mat4 M = glm::mat4(1.f);
 			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			//M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
 			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
@@ -394,6 +278,20 @@ glBindVertexArray(0);
 			shaders->setMat4("view", V);
 			shaders->setMat4("projection", P);
 			box->getModelComponent()->Draw();
+		}
+		if (box2->getModelComponent() != nullptr) {
+			glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(20.f, 0.f, 18.f));
+			//glm::mat4 M = glm::mat4(1.f);
+			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+			M = glm::rotate(M, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			//M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
+			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
+			box2->getModelComponent()->setTransform(&M);
+			shaders->use();
+			shaders->setMat4("M", M);
+			shaders->setMat4("view", V);
+			shaders->setMat4("projection", P);
+			box2->getModelComponent()->Draw();
 		}
 
 		if (input->IsMove()) {
@@ -457,27 +355,42 @@ glBindVertexArray(0);
 				std::cout << "Puszczono klawisz " << key << std::endl;
 			}
 		}
-		/*
-		glProgramUniformMatrix4fv(vs, 0, 1, GL_FALSE, glm::value_ptr(P * V * M));
-
-		glBindVertexArray(vao);
-		glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_BYTE, nullptr);
-		*/
 		if (plane->getModelComponent() != nullptr) {
-			glm::mat4 M2 = glm::rotate(glm::mat4(1.f), 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-			M2 = glm::rotate(M2, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			M2 = glm::translate(M2, glm::vec3(0.5f, -1.f, -3.f));
+			glm::mat4 M2 = glm::translate(glm::mat4(1.f), glm::vec3(10.f, 0.f, 2.f) + camera->transform->getLocalPosition());
+			//glm::mat4 M = glm::mat4(1.f);
+			M2 = glm::rotate(M2, glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
+			M2 = glm::rotate(M2, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+			M2 = glm::rotate(M2, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+			M2 = glm::rotate(M2, 100.f, glm::vec3(0.f, 0.f, 1.f));
+			//M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
 			M2 = glm::scale(M2, glm::vec3(0.1f, 0.1f, 0.1f));
 			plane->getModelComponent()->setTransform(&M2);
+			shaders->use();
 			shaders->setMat4("M", M2);
 			shaders->setMat4("view", V);
 			shaders->setMat4("projection", P);
 			plane->getModelComponent()->Draw();
 		}
-		///glDisable(GL_DEPTH_TEST);
-		RenderText(shader, "This is sample text", 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.5f, 0.5f));
+		if (sphere->getModelComponent() != nullptr) {
 
-		RenderText(shader, "(C) LearnOpenGL.com", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
+			glm::mat4 M3 = glm::translate(glm::mat4(1.f), glm::vec3(70.f, 0.f, 15.f) + camera->transform->getLocalPosition());
+			M3 = glm::rotate(M3, 20.f * glm::radians(time), glm::vec3(0.f, 1.f, 0.f));
+			M3 = glm::scale(M3, glm::vec3(2.f, 2.0f, 2.0f));
+			sphere->getModelComponent()->setTransform(&M3);
+
+			// Użyj shadera i ustaw macierze widoku i projekcji
+			shaders->use();
+			shaders->setMat4("M", M3);
+			shaders->setMat4("view", V);
+			shaders->setMat4("projection", P);
+
+			// Narysuj komponent modelu sfery
+			sphere->getModelComponent()->Draw();
+		}
+		///glDisable(GL_DEPTH_TEST);
+		RenderText(shader, std::to_string(time), 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.5f, 0.5f));
+
+		RenderText(shader, "Hello World!", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
 		//glEnable(GL_DEPTH_TEST);
 		/* Ustawienie macierzy transformacji dla drugiego obiektu
 		glProgramUniformMatrix4fv(vs, 0, 1, GL_FALSE, glm::value_ptr(P * V * M2));
@@ -488,41 +401,10 @@ glBindVertexArray(0);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
-	//glDeleteBuffers(1, &vertexBuffer);
-	//glDeleteVertexArrays(1, &vao);
-	//glDeleteProgramPipelines(1, &pipeline);
-	//glDeleteProgram(vs);
-	//glDeleteProgram(fs);
-
 	glfwTerminate();
 	return 0;
 }
-/*
-std::string loadShaderSource(const std::string& _filepath)
-{
-	std::ifstream f(_filepath, std::ios::ate | std::ios::in);
-	const size_t len = f.tellg();
-	f.seekg(0);
 
-	std::string shdr;
-	shdr.resize(len);
-
-	f.read(&shdr.front(), len);
-
-	return shdr;
-}
-
-GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _msg)
-{
-	GLuint shdr = glCreateShaderProgramv(_stage, 1, &_source);
-	std::string log;
-	log.resize(1024);
-	glGetProgramInfoLog(shdr, log.size(), nullptr, &log.front());
-	printf("%s: %s\n", _msg.c_str(), log.c_str());
-
-	return shdr;
-}
-*/
 void RenderText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color)
 {
 	// activate corresponding render state	

@@ -176,7 +176,7 @@ int main() {
 		}
 		if (box->getModelComponent()->checkCollision(capsule->getModelComponent())) {
 			std::cout << "KOLIZJA2" << std::endl;
-			glm::vec3 displacement = box->getModelComponent()->calculateCollisionResponse(capsule->getModelComponent()) * 0.01f;
+			glm::vec3 displacement = box->getModelComponent()->calculateCollisionResponse(capsule->getModelComponent()) * 0.02f;
 			std::cout << displacement.x << "," << displacement.y << "," << displacement.z << std::endl;
 			if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
 				box->getTransform()->localPosition += displacement;

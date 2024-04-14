@@ -147,7 +147,7 @@ int main() {
 		}
 		if (box->getModelComponent() != nullptr) {
 			glm::mat4 M = glm::translate(glm::mat4(1.f), box->getTransform()->localPosition);
-			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+			//M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
 			box->getModelComponent()->setTransform(&M);
 		}

@@ -189,6 +189,8 @@ public:
     void setTransform(glm::mat4* matrix) { Transform = matrix; }
     glm::mat4* getTransform() { return Transform; }
     void SetShader(Shader* s) { shader = s; }
+    BoundingBox* boundingBox = nullptr;
+    CapsuleCollider* capsuleCollider = nullptr;
 
     Model(char* path, bool rotate = true)
     {
@@ -280,25 +282,62 @@ public:
 
     void addCollider(int collider, glm::vec3 position) {
         if (collider == 0) {
-            for (const auto& mesh : meshes) {
+            boundingBox = nullptr;
+            capsuleCollider = nullptr;
+            /*for (const auto& mesh : meshes) {
                 mesh->boundingBox = nullptr;
                 mesh->capsuleCollider = nullptr;
-            }
+            }*/
         }
         else if (collider == 1) {
-            for (const auto& mesh : meshes) {
+            if (boundingBox == nullptr) {
+                calculateBoundingBox();
+            }
+            /*for (const auto& mesh : meshes) {
                 if (mesh->boundingBox == nullptr) {
                     mesh->calculateBoundingBox();
                 }
-            }
+            }*/
         }
         else if (collider == 2) {
-            for (const auto& mesh : meshes) {
+            if (capsuleCollider == nullptr) {
+                calculateBoundingCapsule(position);
+            }
+            /*for (const auto& mesh : meshes) {
                 if (mesh->capsuleCollider == nullptr) {
                     mesh->calculateBoundingCapsule(position);
                 }
+            }*/
+        }
+    }
+
+    void calculateBoundingBox() {
+        glm::vec3 min(FLT_MAX);
+        glm::vec3 max(-FLT_MAX);
+        for (const auto& mesh : meshes) {
+            for (const auto& vertex : mesh->vertices) {
+                min = glm::min(min, vertex.Position);
+                max = glm::max(max, vertex.Position);
             }
         }
+
+        boundingBox = new BoundingBox(min, max);
+    }
+
+    void calculateBoundingCapsule(glm::vec3 position) {
+        float minY = FLT_MAX;
+        float maxY = -FLT_MAX;
+        float maxRadius = 0.0f;
+        for (const auto& mesh : meshes) {
+            for (const auto& vertex : mesh->vertices) {
+                float y = vertex.Position.y;
+                minY = std::min(minY, y);
+                maxY = std::max(maxY, y);
+                maxRadius = std::max(maxRadius, glm::length(glm::vec2(vertex.Position.x, vertex.Position.z)));
+            }
+        }
+        float height = maxY - minY;
+        capsuleCollider = new CapsuleCollider(glm::vec3(position.x, (minY + maxY) * 0.5f * 0.1f, position.z), maxRadius * 0.1f, height * 0.1f);
     }
 
     bool checkBoundingBoxCollision(const BoundingBox& box1, const BoundingBox& box2) {

@@ -4,8 +4,10 @@ Scene::~Scene() {}
 void Scene::Start() {
 
 }
-void Scene::Update() {
-
+void Scene::Update(glm::mat4 view, glm::mat4 perspective, float time) {
+	for (auto go : gameObjects) {
+		go->Update(view, perspective, time);
+	}
 }
 
 void Scene::addObject(GameObject* go) {
@@ -13,9 +15,9 @@ void Scene::addObject(GameObject* go) {
 }
 
 GameObject* Scene::findByName(std::string name) {
-	for (int i = 0; i < gameObjects.size(); i++) {
-		if (gameObjects.at(i)->name == name) {
-			return gameObjects.at(i);
+	for (auto go : gameObjects) {
+		if (go->name == name) {
+			return go;
 		}
 	}
 }

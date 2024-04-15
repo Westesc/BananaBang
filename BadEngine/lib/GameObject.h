@@ -20,6 +20,7 @@ public:
 	std::vector<GameObject*> children;
 	Transform* localTransform;
 	Model* modelComponent;
+	bool isRotating;
 
 	void setParent(GameObject* Parent);
 	void addChild(GameObject* Child);
@@ -32,6 +33,8 @@ public:
 	Model* getModelComponent() const;
 	Transform* getGlobalTransform();
 	void Move(glm::vec3 translation);
+	void Update(glm::mat4 view, glm::mat4 perspective, float time);
+	void setRotating(bool rotating);
 };
 
 #endif

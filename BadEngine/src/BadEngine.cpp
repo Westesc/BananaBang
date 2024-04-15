@@ -129,6 +129,9 @@ int main() {
 	sm->getActiveScene()->findByName("box2")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box2")->getTransform()->localPosition);
 	sm->getActiveScene()->findByName("capsule")->getModelComponent()->addCollider(2, sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition);
 	sm->getActiveScene()->findByName("capsule2")->getModelComponent()->addCollider(2, sm->getActiveScene()->findByName("capsule2")->getTransform()->localPosition);
+	sm->getActiveScene()->findByName("box2")->setRotating(true);
+	sm->getActiveScene()->findByName("plane")->setRotating(true);
+	sm->getActiveScene()->findByName("capsule")->setRotating(true);
 	float deltaTime = 0;
 	float lastTime = 0;
 	while (!glfwWindowShouldClose(window)) {
@@ -184,6 +187,7 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 		}
+		//sm->getActiveScene()->Update(V, P, time);
 		if (box->getModelComponent() != nullptr) {
 			glm::mat4 M = glm::translate(glm::mat4(1.f), box->getTransform()->localPosition);
 			//M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));

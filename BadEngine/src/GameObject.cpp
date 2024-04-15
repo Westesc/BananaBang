@@ -1,7 +1,7 @@
 #include "../lib/GameObject.h"
 
 GameObject::GameObject(std::string Name, std::string Tag, int Layer)
-    : name(Name), tag(Tag), layer(Layer), active(true), parent(nullptr), modelComponent(nullptr) {
+    : name(Name), tag(Tag), layer(Layer), active(true), parent(nullptr), modelComponent(nullptr), isRotating(false) {
     localTransform = new Transform();
 }
 
@@ -76,4 +76,19 @@ Transform* GameObject::getGlobalTransform() {
 
 void GameObject::Move(glm::vec3 translation) {
     localTransform->localPosition += translation;
+}
+
+void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
+    if (modelComponent != nullptr) {
+        glm::mat4 M = glm::translate(glm::mat4(1.f), localTransform->localPosition);
+        if (isRotating) {
+            M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+        }
+        M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
+        modelComponent->setTransform(&M);
+    }
+}
+
+void GameObject::setRotating(bool rotating) {
+    isRotating = rotating;
 }

@@ -31,6 +31,7 @@ public:
 	void addModelComponent(Model* model);
 	Model* getModelComponent() const;
 	Transform* getGlobalTransform();
+	void Move(glm::vec3 translation);
 };
 
 #endif

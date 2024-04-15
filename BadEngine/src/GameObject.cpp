@@ -73,3 +73,7 @@ Transform* GameObject::getGlobalTransform() {
 
     return globalTransform;
 }
+
+void GameObject::Move(glm::vec3 translation) {
+    localTransform->localPosition += translation;
+}

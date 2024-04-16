@@ -144,7 +144,40 @@ public:
         indices = indexBuffer;
         setupMeshTorus();
     }
+    void createSphere(int verticalSegments, int horizontalSegments) {
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
 
+        for (int j = 0; j <= verticalSegments; ++j) {
+            for (int i = 0; i <= horizontalSegments; ++i) {
+                float theta = j * glm::pi<float>() / verticalSegments;
+                float phi = i * 2 * glm::pi<float>() / horizontalSegments;
+                float x = sin(theta) * cos(phi);
+                float y = cos(theta);
+                float z = sin(theta) * sin(phi);
+                vertices.push_back({ glm::vec3(x, y, z), glm::vec3(x, y, z), glm::vec2(i / (float)horizontalSegments, j / (float)verticalSegments) });
+            }
+        }
+
+        for (int j = 0; j < verticalSegments; ++j) {
+            for (int i = 0; i < horizontalSegments; ++i) {
+                int first = (j * (horizontalSegments + 1)) + i;
+                int second = first + horizontalSegments + 1;
+                indices.push_back(first);
+                indices.push_back(second);
+                indices.push_back(first + 1);
+
+                indices.push_back(second);
+                indices.push_back(second + 1);
+                indices.push_back(first + 1);
+            }
+        }
+
+        this->vertices = vertices;
+        this->indices = indices;
+
+        setupMesh();
+    }
 private:
 
     unsigned int VBO, EBO;
@@ -198,5 +231,6 @@ private:
 
         glBindVertexArray(0);
     }
+
 };
 #endif

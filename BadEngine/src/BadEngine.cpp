@@ -61,26 +61,6 @@ uint16_t f32tof16(float _32)
 	return f16;
 }
 
-/*struct Vertex
-{
-	uint16_t pos[3];
-	uint16_t padding1;
-	uint16_t color[3];
-	uint16_t padding2;
-};
-
-Vertex f32tof16Vertex(float* _v32)
-{
-	Vertex v;
-	v.pos[0] = f32tof16(_v32[0]);
-	v.pos[1] = f32tof16(_v32[1]);
-	v.pos[2] = f32tof16(_v32[2]);
-	v.color[0] = f32tof16(_v32[3]);
-	v.color[1] = f32tof16(_v32[4]);
-	v.color[2] = f32tof16(_v32[5]);
-	return v;
-}*/
-
 using Clock = std::chrono::high_resolution_clock;
 using TimePoint = Clock::time_point;
 
@@ -109,7 +89,6 @@ void Start() {
 	//glFrontFace(GL_CW);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	sm = new SceneManager();
 	Scene* scene = new Scene("main");
@@ -129,20 +108,26 @@ int main() {
 	Start();
 	
 	Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
+	Shader* shadersS = new Shader("../../../../src/vsS.vert", "../../../../src/fsS.frag");
 	GameObject* box = new GameObject("box");
 	GameObject* box2 = new GameObject("box2");
 	GameObject* plane = new GameObject("plane");
 	GameObject* sphere = new GameObject("sphere");
+	GameObject* sphere2 = new GameObject("sphere2");
 	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* boxmodel2 = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
 	Model* spheremodel = new Model(const_cast<char*>("../../../../res/Sphere1.obj"));
+	Mesh* meshSphere = new Mesh();
+	
+	meshSphere->createSphere(100, 100);
 
 	boxmodel->SetShader(shaders);
 	boxmodel2->SetShader(shaders);
 	planemodel->SetShader(shaders);
 	spheremodel->SetShader(shaders);
 
+	sphere->addModelComponent(spheremodel);
 	box->addModelComponent(boxmodel);
 	box2->addModelComponent(boxmodel2);
 	plane->addModelComponent(planemodel);
@@ -151,7 +136,7 @@ int main() {
 	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 20.0f);
 	
 Shader shader("../../../../res/Shaders/font.vert", "../../../../res/Shaders/font.frag");
-glm::mat4 projection1 = glm::ortho(0.0f, static_cast<float>(szer), 0.0f, static_cast<float>(wys));
+glm::mat4 projection1 = glm::ortho(0.0f, static_cast<float>(szer), 0.0f, static_cast<float>(wys), -1.0f, 1.0f);
 shader.use();
 glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection1));
 
@@ -253,11 +238,17 @@ glBindVertexArray(0);
 	//glFrontFace(GL_CW);
 	glm::vec2 posM = glm::vec2(0.f, 0.f);
 	camera->updateCamera(posM);
+
+	bool isFromFile = false; 
+	bool rotating = true; 
+	bool isBlue = false;
+
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
 		}
 		glClearColor(0.f, .3f, .5f, 1.f);
+		
 
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -266,6 +257,18 @@ glBindVertexArray(0);
 		glm::mat4 V = camera->getViewMatrix();
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
+
+		glm::mat4 Mm = glm::translate(glm::mat4(1.f), glm::vec3(20.f, 0.f, 18.f) + camera->transform->getLocalPosition());
+		Mm = glm::scale(Mm, glm::vec3(50.f, 50.0f, 50.0f));
+		Mm = glm::rotate(Mm, 50.f * glm::radians(time), glm::vec3(0.f, 1.f, 0.f));
+		shadersS->use();
+		shadersS->setMat4("M", Mm);
+		shadersS->setMat4("view", V);
+		shadersS->setMat4("projection", P);
+		meshSphere->Draw(shadersS, &Mm, isFromFile, rotating, isBlue);
+
+		glDisable(GL_BLEND);
+
 		if (box->getModelComponent() != nullptr) {
 			glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(15.f, 0.f, 0.f) + camera->transform->getLocalPosition());
 			//glm::mat4 M = glm::mat4(1.f);
@@ -297,7 +300,7 @@ glBindVertexArray(0);
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
-			camera->updateCamera(dpos);
+			//camera->updateCamera(dpos);
 		}
 
 		if (input->IsKeobarodAction(window)) {
@@ -355,6 +358,7 @@ glBindVertexArray(0);
 				std::cout << "Puszczono klawisz " << key << std::endl;
 			}
 		}
+		glEnable(GL_BLEND);
 		if (plane->getModelComponent() != nullptr) {
 			glm::mat4 M2 = glm::translate(glm::mat4(1.f), glm::vec3(10.f, 0.f, 2.f) + camera->transform->getLocalPosition());
 			//glm::mat4 M = glm::mat4(1.f);
@@ -371,7 +375,7 @@ glBindVertexArray(0);
 			shaders->setMat4("projection", P);
 			plane->getModelComponent()->Draw();
 		}
-		if (sphere->getModelComponent() != nullptr) {
+		/*if (sphere->getModelComponent() != nullptr) {
 
 			glm::mat4 M3 = glm::translate(glm::mat4(1.f), glm::vec3(70.f, 0.f, 15.f) + camera->transform->getLocalPosition());
 			M3 = glm::rotate(M3, 20.f * glm::radians(time), glm::vec3(0.f, 1.f, 0.f));
@@ -386,7 +390,7 @@ glBindVertexArray(0);
 
 			// Narysuj komponent modelu sfery
 			sphere->getModelComponent()->Draw();
-		}
+		}*/
 		///glDisable(GL_DEPTH_TEST);
 		RenderText(shader, std::to_string(time), 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.5f, 0.5f));
 

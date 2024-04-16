@@ -58,7 +58,7 @@ void Start() {
 
 	glEnable(GL_CULL_FACE);
 
-	glFrontFace(GL_CW);
+	//glFrontFace(GL_CW);
 
 	glEnable(GL_BLEND);
 	sm = new SceneManager();

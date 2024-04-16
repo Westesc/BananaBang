@@ -16,17 +16,13 @@ set(stb_image_SOURCE_DIR ${STB_IMAGE_DIR} CACHE INTERNAL "")
 add_library(stb_image STATIC ${STB_IMAGE_DIR}/stb_image.cpp)
 target_include_directories(stb_image PRIVATE ${STB_IMAGE_DIR})
 
-# freetype
-set(FREETYPE_DIR ${CMAKE_CURRENT_LIST_DIR}/freetype)
-add_subdirectory(${FREETYPE_DIR})
-#target_include_directories(freetype PRIVATE ${FREETYPE_DIR})
-
 # other
 CPMAddPackage("gh:assimp/assimp@5.2.5")
 CPMAddPackage("gh:glfw/glfw#3.3.8")
 CPMAddPackage("gh:g-truc/glm#0.9.9.8")
 CPMAddPackage("gh:ocornut/imgui@1.88")
 CPMAddPackage("gh:gabime/spdlog@1.10.0")
+CPMAddPackage("gh:freetype/freetype#VER-2-13-2")
 
 set(imgui_SOURCE_DIR ${imgui_SOURCE_DIR} CACHE INTERNAL "")
 add_library(imgui STATIC ${imgui_SOURCE_DIR}/imgui.cpp
@@ -37,11 +33,12 @@ add_library(imgui STATIC ${imgui_SOURCE_DIR}/imgui.cpp
 						 
 set_target_properties(glad
                       stb_image 
-                      
+                      freetype
                       assimp 
                       glfw 
                       glm 
                       imgui 
+                      freetype
                       spdlog PROPERTIES FOLDER "thirdparty")
 
 if (TARGET zlibstatic)

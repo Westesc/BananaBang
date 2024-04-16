@@ -9,6 +9,7 @@
 #include <iostream>
 #include <chrono>
 #include <glm/glm.hpp>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "../lib/GraphNode.h"
@@ -80,13 +81,14 @@ void Start() {
 int main() {
 	
 	Start();
+	
 	Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
 	GameObject* box2 = new GameObject("box2");
 	GameObject* capsule = new GameObject("capsule");
 	GameObject* capsule2 = new GameObject("capsule2");
-	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
+	Model* boxmodel = new Model(const_cast<char*>("../../../../res/modelMonk.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
 	Model* box2model = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"));

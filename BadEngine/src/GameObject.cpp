@@ -96,8 +96,15 @@ void GameObject::setRotating(bool rotating) {
     isRotating = rotating;
 }
 
-void GameObject::checkResolveCollisions() {
-
+void GameObject::checkResolveCollisions(GameObject* other) {
+    if (modelComponent->checkCollision(other->modelComponent)) {
+        std::cout << "KOLIZJA" << std::endl;
+        glm::vec3 displacement = modelComponent->calculateCollisionResponse(other->modelComponent) * 0.01f;
+        if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
+            localTransform->localPosition += displacement;
+            localTransform->localPosition -= displacement;
+        }
+    }
 }
 
 void GameObject::Draw(Shader* shaders, glm::mat4 view, glm::mat4 perspective) {

@@ -12,7 +12,6 @@ public:
 
 	std::string name;
 	std::vector<GameObject*> gameObjects;
-
 	void addObject(GameObject* go);
 	GameObject* findByName(std::string name);
 	void Update(glm::mat4 view, glm::mat4 perspective, float time, Shader* shaders);

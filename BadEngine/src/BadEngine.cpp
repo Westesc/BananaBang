@@ -298,13 +298,16 @@ int main() {
 					std::cout << "Sekwencja klawiszy W + W została wykryta!" << std::endl;
 				}
 			}
-			else if (key == GLFW_KEY_S && action == GLFW_PRESS) {
+			else if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
+				camera->ProcessKeyboard(FORWARD, time);
+			}
+			else if (key == GLFW_KEY_S && action == GLFW_REPEAT) {
 				camera->ProcessKeyboard(BACKWARD, time);
 			}
-			else if (key == GLFW_KEY_D&& action == GLFW_PRESS) {
+			else if (key == GLFW_KEY_D && action == GLFW_REPEAT) {
 				camera->ProcessKeyboard(RIGHT, time);
 			}
-			else if (key == GLFW_KEY_A && action == GLFW_PRESS) {
+			else if (key == GLFW_KEY_A && action == GLFW_REPEAT) {
 				camera->ProcessKeyboard(LEFT, time);
 			}
 			else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {

@@ -15,7 +15,7 @@ public:
 
 	void addObject(GameObject* go);
 	GameObject* findByName(std::string name);
-	void Update(glm::mat4 view, glm::mat4 perspective, float time);
+	void Update(glm::mat4 view, glm::mat4 perspective, float time, Shader* shaders);
 
 protected:
 	void Start();

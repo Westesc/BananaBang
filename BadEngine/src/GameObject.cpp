@@ -1,4 +1,5 @@
 #include "../lib/GameObject.h"
+#include <glm/gtx/string_cast.hpp>
 
 GameObject::GameObject(std::string Name, std::string Tag, int Layer)
     : name(Name), tag(Tag), layer(Layer), active(true), parent(nullptr), modelComponent(nullptr), isRotating(false) {
@@ -86,9 +87,29 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
         }
         M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
         modelComponent->setTransform(&M);
+        //std::cout << name << "M1:" << glm::to_string(M) << std::endl;
+        //std::cout << "M2:" << glm::to_string(*modelComponent->getTransform()) << std::endl;
     }
 }
 
 void GameObject::setRotating(bool rotating) {
     isRotating = rotating;
+}
+
+void GameObject::checkResolveCollisions() {
+
+}
+
+void GameObject::Draw(Shader* shaders, glm::mat4 view, glm::mat4 perspective) {
+    shaders->use();
+    shaders->setMat4("M", *modelComponent->getTransform());
+    shaders->setMat4("view", view);
+    shaders->setMat4("projection", perspective);
+    modelComponent->Draw();
+    if (modelComponent->boundingBox != nullptr) {
+        modelComponent->DrawBoundingBoxes(shaders, *modelComponent->getTransform());
+    }
+    else if (modelComponent->capsuleCollider != nullptr) {
+        modelComponent->UpdateCollider(*modelComponent->getTransform());
+    }
 }

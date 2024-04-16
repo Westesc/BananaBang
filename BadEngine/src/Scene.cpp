@@ -4,9 +4,11 @@ Scene::~Scene() {}
 void Scene::Start() {
 
 }
-void Scene::Update(glm::mat4 view, glm::mat4 perspective, float time) {
+void Scene::Update(glm::mat4 view, glm::mat4 perspective, float time, Shader* shaders) {
 	for (auto go : gameObjects) {
 		go->Update(view, perspective, time);
+		go->checkResolveCollisions();
+		go->Draw(shaders, view, perspective);
 	}
 }
 

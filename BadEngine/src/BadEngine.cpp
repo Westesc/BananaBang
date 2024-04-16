@@ -107,7 +107,7 @@ int main() {
 	sm->getActiveScene()->addObject(plane);
 	sm->getActiveScene()->addObject(capsule2);
 	int key, action;
-	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 6.0f);
+	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 20.0f);
 
 	const TimePoint tpStart = Clock::now();
 	static bool sequenceStarted = false;
@@ -187,8 +187,8 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 		}
-		//sm->getActiveScene()->Update(V, P, time);
-		if (box->getModelComponent() != nullptr) {
+		sm->getActiveScene()->Update(V, P, time, shaders);
+		/*if (box->getModelComponent() != nullptr) {
 			glm::mat4 M = glm::translate(glm::mat4(1.f), box->getTransform()->localPosition);
 			//M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
@@ -274,6 +274,7 @@ int main() {
 		shaders->setMat4("projection", P);
 		capsule2->getModelComponent()->Draw();
 		capsule2->getModelComponent()->UpdateCollider(*capsule2->getModelComponent()->getTransform());
+		*/
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
@@ -334,7 +335,7 @@ int main() {
 				std::cout << "Puszczono klawisz " << key << std::endl;
 			}
 		}
-		if (plane->getModelComponent() != nullptr) {
+		/*if (plane->getModelComponent() != nullptr) {
 			glm::mat4 M2 = glm::rotate(glm::mat4(1.f), 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			M2 = glm::rotate(M2, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			M2 = glm::translate(M2, glm::vec3(0.5f, -1.f, -3.f));
@@ -345,7 +346,7 @@ int main() {
 			shaders->setMat4("view", V);
 			shaders->setMat4("projection", P);
 			plane->getModelComponent()->Draw();
-		}
+		}*/
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

@@ -37,8 +37,11 @@ struct Character {
 };
 std::map<GLchar, Character> Characters;
 unsigned int VAO, VBO;
+unsigned int VAO2, VBO2;
 void RenderText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color);
-
+void RenderPlane(Shader& shader, float x, float y, float width, float height, float transparent, glm::vec3 color);
+float pasx = 10;
+float pasy = 10;
 //std::string loadShaderSource(const std::string& _filepath);
 //GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _msg);
 
@@ -84,7 +87,7 @@ void Start() {
 	glfwMakeContextCurrent(window);
 	gladLoadGL();
 
-	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	//glFrontFace(GL_CW);
 	glEnable(GL_BLEND);
@@ -112,11 +115,13 @@ int main() {
 	GameObject* box = new GameObject("box");
 	GameObject* box2 = new GameObject("box2");
 	GameObject* plane = new GameObject("plane");
+	GameObject* plane2 = new GameObject("plane");
 	GameObject* sphere = new GameObject("sphere");
 	GameObject* sphere2 = new GameObject("sphere2");
 	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* boxmodel2 = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
+	Model* planemodel2= new Model(const_cast<char*>("../../../../res/plane.obj"));
 	Model* spheremodel = new Model(const_cast<char*>("../../../../res/Sphere1.obj"));
 	Mesh* meshSphere = new Mesh();
 	
@@ -125,21 +130,26 @@ int main() {
 	boxmodel->SetShader(shaders);
 	boxmodel2->SetShader(shaders);
 	planemodel->SetShader(shaders);
+	planemodel2->SetShader(shaders);
 	spheremodel->SetShader(shaders);
 
 	sphere->addModelComponent(spheremodel);
 	box->addModelComponent(boxmodel);
 	box2->addModelComponent(boxmodel2);
 	plane->addModelComponent(planemodel);
+	plane2->addModelComponent(planemodel2);
 	sphere->addModelComponent(spheremodel);
 	int key, action;
 	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 20.0f);
 	
 Shader shader("../../../../res/Shaders/font.vert", "../../../../res/Shaders/font.frag");
+Shader hudShader("../../../../res/Shaders/hud.vert", "../../../../res/Shaders/hud.frag");
 glm::mat4 projection1 = glm::ortho(0.0f, static_cast<float>(szer), 0.0f, static_cast<float>(wys), -1.0f, 1.0f);
+glm::mat4 projection2 = glm::ortho(0.0f, static_cast<float>(szer), 0.0f, static_cast<float>(wys), -1.0f, 1.0f);
 shader.use();
 glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection1));
-
+hudShader.use();
+glUniformMatrix4fv(glGetUniformLocation(hudShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection2));
 // FreeType
 // --------
 FT_Library ft;
@@ -228,8 +238,18 @@ glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
 glBindBuffer(GL_ARRAY_BUFFER, 0);
 glBindVertexArray(0);
 
+glGenVertexArrays(1, &VAO2);
+glGenBuffers(1, &VBO2);
+glBindVertexArray(VAO2);
+glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 2, NULL, GL_DYNAMIC_DRAW);
+glEnableVertexAttribArray(0);
+glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+glBindBuffer(GL_ARRAY_BUFFER, 0);
+glBindVertexArray(0);
 
 	const TimePoint tpStart = Clock::now();
+	TimePoint last = Clock::now();
 	static bool sequenceStarted = false;
 	static bool firstKeyPressed = false;
 	static bool secondKeyPressed = false;
@@ -253,7 +273,8 @@ glBindVertexArray(0);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
-
+		const float delta = std::chrono::duration_cast<Duration>(Clock::now() - last).count();
+		last = Clock::now();
 		glm::mat4 V = camera->getViewMatrix();
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
@@ -270,7 +291,7 @@ glBindVertexArray(0);
 		glDisable(GL_BLEND);
 
 		if (box->getModelComponent() != nullptr) {
-			glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(15.f, 0.f, 0.f) + camera->transform->getLocalPosition());
+			glm::mat4 M = glm::translate(glm::mat4(1.f), glm::vec3(15.f, 4.f, 5.f) + camera->transform->getLocalPosition());
 			//glm::mat4 M = glm::mat4(1.f);
 			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			//M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
@@ -300,7 +321,7 @@ glBindVertexArray(0);
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
-			//camera->updateCamera(dpos);
+			camera->updateCamera(dpos);
 		}
 
 		if (input->IsKeobarodAction(window)) {
@@ -361,18 +382,19 @@ glBindVertexArray(0);
 		glEnable(GL_BLEND);
 		if (plane->getModelComponent() != nullptr) {
 			glm::mat4 M2 = glm::translate(glm::mat4(1.f), glm::vec3(10.f, 0.f, 2.f) + camera->transform->getLocalPosition());
-			//glm::mat4 M = glm::mat4(1.f);
+			glm::mat4 M = glm::mat4(1.f);
 			M2 = glm::rotate(M2, glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 0.0f));
 			M2 = glm::rotate(M2, glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 			M2 = glm::rotate(M2, glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 			M2 = glm::rotate(M2, 100.f, glm::vec3(0.f, 0.f, 1.f));
 			//M = glm::translate(M, glm::vec3(1.f, 1.f, 0.f));
 			M2 = glm::scale(M2, glm::vec3(0.1f, 0.1f, 0.1f));
-			plane->getModelComponent()->setTransform(&M2);
+			plane->getModelComponent()->setTransform(&M);
 			shaders->use();
-			shaders->setMat4("M", M2);
-			shaders->setMat4("view", V);
-			shaders->setMat4("projection", P);
+			shaders->setMat4("M", M);
+			glm::mat4 V2 = glm::mat4(1);
+			shaders->setMat4("view", V2);
+			shaders->setMat4("projection", projection1);
 			plane->getModelComponent()->Draw();
 		}
 		/*if (sphere->getModelComponent() != nullptr) {
@@ -393,8 +415,15 @@ glBindVertexArray(0);
 		}*/
 		///glDisable(GL_DEPTH_TEST);
 		RenderText(shader, std::to_string(time), 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.5f, 0.5f));
-
+		
 		RenderText(shader, "Hello World!", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
+
+		RenderPlane(hudShader, 540.0f, 620.0f, 200.f, 200.f, 0.5f, glm::vec3(0.f, 1.f, 0.f));
+
+		RenderPlane(hudShader, 25.0f, 620.0f, pasx, pasy, 1.f, glm::vec3(pasx/100, 1.f, 0.f));
+		pasx += 0.1f  ;
+		if (pasx > 200)
+			pasx = 10;
 		//glEnable(GL_DEPTH_TEST);
 		/* Ustawienie macierzy transformacji dla drugiego obiektu
 		glProgramUniformMatrix4fv(vs, 0, 1, GL_FALSE, glm::value_ptr(P * V * M2));
@@ -408,7 +437,32 @@ glBindVertexArray(0);
 	glfwTerminate();
 	return 0;
 }
+void RenderPlane(Shader& shader, float x, float y, float width,float height, float transparent, glm::vec3 color)
+{
+	// activate corresponding render state	
+	shader.use();
+	glUniform3f(glGetUniformLocation(shader.ID, "col"), color.x, color.y, color.z);
+	glUniform1f(glGetUniformLocation(shader.ID, "transparent"), transparent);
+	glBindVertexArray(VAO2);
 
+		// update VBO for each character
+		float vertices[6][2] = {
+			{ x, y+height },
+			{ x,y,},
+			{ x + width, y},
+			{ x,y + height},
+			{ x + width, y },
+			{ x + width, y + height }
+		};
+		// update content of VBO memory
+		glBindBuffer(GL_ARRAY_BUFFER, VBO2);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		// render quad
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+			glBindVertexArray(0);
+}
 void RenderText(Shader& shader, std::string text, float x, float y, float scale, glm::vec3 color)
 {
 	// activate corresponding render state	

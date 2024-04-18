@@ -189,93 +189,37 @@ public:
         glBindVertexArray(0);
     }
 
-    void createSphere(int verticalSegments, int horizontalSegments) {
+    void createSphere(int verticalSegments, int horizontalSegments, int size) {
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
 
-
-        float angleYDiff = 180.f / (float)horizontalSegments;
-        float angleXZDiff = 360.f / (float)verticalSegments;
-
-        std::vector<glm::vec3> verts = std::vector<glm::vec3>();
-        std::vector<glm::vec2> texCoords = std::vector<glm::vec2>();
-        std::vector<Vertex> vertics = std::vector<Vertex>();
-        std::vector<unsigned int> ind = std::vector<unsigned int>();
-
-        //top
-        verts.push_back({ 0.f, 1.f, 0.f });
-        texCoords.push_back({ .5f, 1.f });
-
-        float horizontalDiff = 1.f / (float)horizontalSegments;
-        float verticalDiff = 1.f / (float)verticalSegments;
-
-
-        float angleY = angleYDiff;
-
-        //middle
-        for (unsigned int i = 0; i < horizontalSegments - 1; ++i) {
-            float radiansY = glm::radians(angleY);
-            float r = sinf(radiansY);
-            float y = cosf(radiansY);
-            unsigned int startV = i * verticalSegments + 1;
-
-            float angleXZ = 0.f;
-            for (unsigned int j = 0; j < verticalSegments; ++j) {
-                float radiansXZ = glm::radians(angleXZ);
-                float z = r * cosf(radiansXZ);
-                float x = r * sinf(radiansXZ);
-                verts.push_back({ x, y, z });
-                texCoords.push_back({ j * verticalDiff, 1.f - horizontalDiff * (i + 1) });
-
-                if (j == verticalSegments - 1)
-                {
-                    verts.push_back({ r * sinf(glm::radians(0.0f)), y, r * cosf(glm::radians(0.0f)) });
-                }
-                angleXZ += angleXZDiff;
-
-                if ((j + 1) % verticalSegments == 0)
-                {
-                    texCoords.push_back({ 1.f , 1.f - horizontalDiff * (i + 1) });
-                }
-            }
-            angleY += angleYDiff;
-        }
-        //down
-        verts.push_back({ 0.f, -1.f, 0.f });
-        texCoords.push_back({ .5f, 0.f });
-
-        unsigned int verticiesNum = verts.size();
-        for (unsigned int i = 0; i < verticalSegments; ++i) {
-            //top 
-            unsigned int leftVertex = i + 1;
-            unsigned int topVertex = 0;
-            unsigned int rightVertex = (i + 1) + 1;
-            ind.push_back(leftVertex); ind.push_back(topVertex); ind.push_back(rightVertex);
-            // down 
-            leftVertex = verticiesNum - 2 - verticalSegments + i;
-            topVertex = verticiesNum - 1;
-            rightVertex = verticiesNum - 2 - verticalSegments + i + 1;
-            ind.push_back(topVertex); ind.push_back(leftVertex); ind.push_back(rightVertex);
-        }
-        // rest 
-        for (unsigned int i = 0; i < horizontalSegments - 2; ++i) {
-            unsigned int startVertex = i * (verticalSegments + 1) + 1;
-            for (unsigned int j = 0; j < verticalSegments; ++j) {
-                unsigned int topLeft = j + startVertex;
-                unsigned int topRight = (j + 1) + startVertex;
-                unsigned int bottomLeft = j + verticalSegments + 1 + startVertex;
-                unsigned int bottomRight = (j + 1) + verticalSegments + 1 + startVertex;
-
-                ind.push_back(bottomLeft); ind.push_back(topLeft); ind.push_back(topRight);
-                ind.push_back(bottomLeft); ind.push_back(topRight); ind.push_back(bottomRight);
+        for (int j = 0; j <= verticalSegments; ++j) {
+            for (int i = 0; i <= horizontalSegments; ++i) {
+                float theta = j * glm::pi<float>() / verticalSegments;
+                float phi = i * 2 * glm::pi<float>() / horizontalSegments;
+                float x = size*sin(theta) * cos(phi);
+                float y = size*cos(theta);
+                float z = size*sin(theta) * sin(phi);
+                vertices.push_back({ glm::vec3(x, y, z), glm::vec3(x, y, z), glm::vec2(i / (float)horizontalSegments, j / (float)verticalSegments) });
             }
         }
 
-        for (unsigned int i = 0; i < verticiesNum; ++i)
-        {
-            vertics.push_back({ verts[i], verts[i], texCoords[i] });
+        for (int j = 0; j < verticalSegments/1.5; ++j) {
+            for (int i = 0; i < horizontalSegments; ++i) {
+                int first = (j * (horizontalSegments + 1)) + i;
+                int second = first + horizontalSegments + 1;
+                indices.push_back(first);
+                indices.push_back(second);
+                indices.push_back(first + 1);
+
+                indices.push_back(second);
+                indices.push_back(second + 1);
+                indices.push_back(first + 1);
+            }
         }
 
-        this->vertices = vertics;
-        this->indices = ind;
+        this->vertices = vertices;
+        this->indices = indices;
 
         setupMesh();
     }

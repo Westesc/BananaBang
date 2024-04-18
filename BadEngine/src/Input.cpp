@@ -1,6 +1,7 @@
 #include "../lib/Input.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <unordered_set>
 
 
 struct InputMessage {
@@ -15,6 +16,9 @@ struct InputMessageMouse {
 std::queue<InputMessage> inputQueue;
 
 std::queue<InputMessageMouse> mouseQueue;
+
+std::unordered_set<int> pressedKeys;
+int lastKey;
 
 
 Input::Input(GLFWwindow* _window)
@@ -32,11 +36,6 @@ Axis Input::getAxis(std::string name)
 {
 	return Axis(name);
 }
-
-bool isRepeat = false;
-bool isRepeat2 = false;
-bool canRepeat = false;
-int lastKey;
 
 bool Input::IsKeobarodAction(GLFWwindow* _window)
 {
@@ -100,14 +99,53 @@ void Input::mouse_callback(GLFWwindow* _window, double xpos, double ypos)
 }
 
 void Input::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		pressedKeys.insert(key);
+	}
+	else if (action == GLFW_RELEASE) {
+		pressedKeys.erase(key);
+		lastKey = key;
+	}
 	InputMessage message;
 	message.key = key;
-	canRepeat = true;
 	message.action = action;
 	inputQueue.push(message);
 }
+bool Input::checkAnyKey()
+{
+	if (pressedKeys.size() > 0)
+	{
+		return true;
+	}
+	return false;
+}
+bool Input::checkKey(int key)
+{
+	if (pressedKeys.find(key) != pressedKeys.end()) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+bool Input::checkSequence(int key1, int key2)
+{
+	if (lastKey == key1 && checkKey(key2))
+	{
+		lastKey = key2;
+		return true;
+	}
+	return false;
+}
 
 void Input::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		pressedKeys.insert(button);
+	}
+	else if (action == GLFW_RELEASE) {
+		pressedKeys.erase(button);
+	}
 	InputMessage message;
 	message.key = button;
 	message.action = action;

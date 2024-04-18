@@ -83,31 +83,43 @@ int main() {
 	Start();
 	
 	Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
+	Shader* skydomeShader = new Shader("../../../../src/vsS.vert", "../../../../src/fsS.frag");
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
 	GameObject* box2 = new GameObject("box2");
 	GameObject* capsule = new GameObject("capsule");
 	GameObject* capsule2 = new GameObject("capsule2");
-	Model* boxmodel = new Model(const_cast<char*>("../../../../res/modelMonk.obj"));
+	GameObject* skydome = new GameObject("skydome");
+	Model* boxmodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
 	Model* box2model = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
 	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"));
+	Mesh* meshSphere = new Mesh();
+	meshSphere->createSphere(100, 100, 50);
+	Model* skydomeModel = new Model(meshSphere);
+
+
+
 	boxmodel->SetShader(shaders);
 	planemodel->SetShader(shaders);
 	box2model->SetShader(shaders);
 	capsulemodel->SetShader(shaders);
 	capsule2model->SetShader(shaders);
+	skydomeModel->SetShader(skydomeShader);
 	box->addModelComponent(boxmodel);
 	plane->addModelComponent(planemodel);
 	box2->addModelComponent(box2model);
 	capsule->addModelComponent(capsulemodel);
 	capsule2->addModelComponent(capsule2model);
+	skydome->addModelComponent(skydomeModel);
+
 	sm->getActiveScene()->addObject(box);
 	sm->getActiveScene()->addObject(box2);
 	sm->getActiveScene()->addObject(capsule);
 	sm->getActiveScene()->addObject(plane);
 	sm->getActiveScene()->addObject(capsule2);
+	sm->getActiveScene()->addObject(skydome);
 	int key, action;
 	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 6.0f);
 
@@ -115,6 +127,10 @@ int main() {
 	static bool sequenceStarted = false;
 	static bool firstKeyPressed = false;
 	static bool secondKeyPressed = false;
+	std::string name = "src";
+
+	sm->getActiveScene()->findByName("skydome")->getModelComponent()->TextureFromFile("../../../../res/chmury1.png");
+	//sm->getActiveScene()->findByName("capsule")->getModelComponent()->TextureFromFile("../../../../res/zdj.png", name);
 
 	/*box->localTransform->localPosition = glm::vec3(-1.f, -1.f, 0.f);
 	box2->localTransform->localPosition = glm::vec3(-4.f, -4.f, 0.f);
@@ -134,14 +150,19 @@ int main() {
 	sm->getActiveScene()->findByName("box2")->setRotating(true);
 	sm->getActiveScene()->findByName("plane")->setRotating(true);
 	sm->getActiveScene()->findByName("capsule")->setRotating(true);
+
 	float deltaTime = 0;
 	float lastTime = 0;
+
+	bool isFromFile = false;
+	bool rotating = true;
+	bool isBlue = false;
+
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
 		}
 		glClearColor(0.2f, 0.3f, 0.7f, 1.f);
-
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
@@ -150,7 +171,18 @@ int main() {
 
 		glm::mat4 V = camera->getViewMatrix();
 
-		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 50.f);
+		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
+
+		if (skydome->getModelComponent() != nullptr) {
+			glm::mat4 Mm = glm::translate(glm::mat4(1.f), glm::vec3(20.f, 0.f, 18.f));
+			Mm = glm::scale(Mm, glm::vec3(50.f, 50.0f, 50.0f));
+			Mm = glm::rotate(Mm, glm::radians(time), glm::vec3(0.f, 1.f, 0.f));
+			skydomeShader->use();
+			skydomeShader->setMat4("M", Mm);
+			skydomeShader->setMat4("view", V);
+			skydomeShader->setMat4("projection", P);
+			skydomeModel->Draw();
+		}
 
 		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));

@@ -86,7 +86,7 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
             M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
         }
         M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
-        modelComponent->setTransform(&M);
+        modelComponent->setTransform(M);
         //std::cout << name << "M1:" << glm::to_string(M) << std::endl;
         //std::cout << "M2:" << glm::to_string(*modelComponent->getTransform()) << std::endl;
     }
@@ -102,7 +102,9 @@ void GameObject::checkResolveCollisions(GameObject* other) {
         glm::vec3 displacement = modelComponent->calculateCollisionResponse(other->modelComponent) * 0.01f;
         if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
             localTransform->localPosition += displacement;
-            localTransform->localPosition -= displacement;
+            other->localTransform->localPosition -= displacement;
+            modelComponent->setTransform(glm::translate(*modelComponent->getTransform(), displacement));
+            other->modelComponent->setTransform(glm::translate(*other->modelComponent->getTransform(), -displacement));
         }
     }
 }

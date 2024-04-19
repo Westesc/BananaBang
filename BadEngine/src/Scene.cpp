@@ -8,11 +8,11 @@ void Scene::Update(glm::mat4 view, glm::mat4 perspective, float time, Shader* sh
 	for (auto go : gameObjects) {
 		go->Update(view, perspective, time);
 	}
-	//for (int i = 0; i < gameObjects.size(); i++) {
-		//for (int j = i + 1; j < gameObjects.size(); j++) {
-			//gameObjects.at(i)->checkResolveCollisions(gameObjects.at(j));
-		//}
-	//}
+	for (int i = 0; i < gameObjects.size(); i++) {
+		for (int j = i + 1; j < gameObjects.size(); j++) {
+			gameObjects.at(i)->checkResolveCollisions(gameObjects.at(j));
+		}
+	}
 	for (auto go : gameObjects) {
 		go->Draw(shaders, view, perspective);
 	}

@@ -3,7 +3,9 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <yaml-cpp/yaml.h>
 #include "Component.h"
+#include "Serialize.h"
 
 class Transform : Component {
 public:
@@ -23,6 +25,7 @@ public:
 	glm::vec3 getLocalPosition();
 	glm::vec3 getLocalRotation();
 	glm::vec3 getLocalScale();
+	YAML::Node serialize();
 
 	friend Transform operator+(const Transform& lhs, const Transform& rhs) {
 		Transform result(lhs); 

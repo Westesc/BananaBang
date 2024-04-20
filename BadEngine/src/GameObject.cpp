@@ -92,3 +92,13 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
 void GameObject::setRotating(bool rotating) {
     isRotating = rotating;
 }
+
+YAML::Node GameObject::serialize() {
+    YAML::Node node;
+    node["name"] = this->name;
+    node["tag"] = this->tag;
+    node["layer"] = this->layer;
+    node["transform"] = this->localTransform->serialize();
+    node["model"] = this->modelComponent->serialize();
+    return node;
+}

@@ -21,3 +21,12 @@ GameObject* Scene::findByName(std::string name) {
 		}
 	}
 }
+
+YAML::Node Scene::serialize() {
+	YAML::Node node;
+	node["name"] = this->name;
+	for (auto go : gameObjects) {
+		node["gameObjects"].push_back(go->serialize());
+	}
+	return node;
+}

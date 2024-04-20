@@ -26,6 +26,7 @@
 #include "../lib/Transform.h"
 #include "../lib/UI.h"
 
+bool test = true;
 
 std::string loadShaderSource(const std::string& _filepath);
 GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _msg);
@@ -63,6 +64,7 @@ void Start() {
 
 	glEnable(GL_BLEND);
 	sm = new SceneManager();
+	sm->saveScene("first");
 	Scene* scene = new Scene("main");
 	sm->scenes.push_back(scene);
 	sm->activeScene = sm->scenes.at(0);
@@ -382,6 +384,11 @@ int main() {
 		}
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+		if (test) {
+
+			sm->saveScene("first");
+			test = false;
+		}
 	}
 
 	glfwTerminate();

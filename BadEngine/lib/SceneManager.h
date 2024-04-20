@@ -14,6 +14,7 @@ public:
 	Scene* activeScene;
 
 	void loadScene(std::string name);
+	void saveScene(std::string name);
 	Scene* getActiveScene();
 };
 

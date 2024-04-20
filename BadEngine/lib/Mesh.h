@@ -9,6 +9,8 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <yaml-cpp/yaml.h>
+
 #include "Shader.h"
 #include "BoundingBox.h"
 #include "CapsuleCollider.h"
@@ -18,10 +20,6 @@ struct Vertex
     glm::vec3 Position;
     glm::vec3 Normal;
     glm::vec2 TexCoords;
-    //tangent
-    glm::vec3 Tangent;
-    // bitangent
-    glm::vec3 Bitangent;
 };
 
 struct Texture
@@ -223,6 +221,34 @@ public:
 
         setupMesh();
     }
+
+    YAML::Node serialize()
+    {
+        YAML::Node node;
+        
+        for (auto v : vertices) {
+            YAML::Node vertexNode;
+            vertexNode["position"] = nodeVec3(v.Position);
+            std::cout << v.Position.x << " " << v.Position.y << " " << v.Position.z << std::endl;
+            vertexNode["normal"] = nodeVec3(v.Normal);
+            vertexNode["texCoords"] = nodeVec2(v.TexCoords);
+            node["vertex"].push_back(vertexNode);
+        }
+        for (auto i : indices) {
+            node["indices"].push_back(i);
+        }
+        for (auto t : textures) {
+            YAML::Node textureNode;
+            textureNode["id"] = t.id;
+            textureNode["path"] = t.path;
+            textureNode["type"] = t.type;
+            node["vertex"].push_back(textureNode);
+        }
+        
+
+        return node;
+    }
+
 private:
     unsigned int VBO, EBO;
 
@@ -274,6 +300,22 @@ private:
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
         glBindVertexArray(0);
+    }
+
+    YAML::Node nodeVec2(glm::vec2 vector)
+    {
+        YAML::Node node;
+        node["x"] = vector.x;
+        node["y"] = vector.y;
+        return node;
+    }
+    YAML::Node nodeVec3(glm::vec3 vector)
+    {
+        YAML::Node node;
+        node["x"] = vector.x;
+        node["y"] = vector.y;
+        node["z"] = vector.z;
+        return node;
     }
 };
 #endif

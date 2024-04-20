@@ -52,3 +52,21 @@ glm::vec3 Transform::getGlobalScale()
 {
 	return glm::vec3();
 }
+
+YAML::Node nodeVec3(glm::vec3 vector)
+{
+	YAML::Node node;
+	node["x"] = vector.x;
+	node["y"] = vector.y;
+	node["z"] = vector.z;
+	return node;
+}
+
+YAML::Node Transform::serialize() 
+{
+	YAML::Node node;
+	node["position"] = nodeVec3(localPosition);
+	node["rotation"] = nodeVec3(localRotation);
+	node["scale"] = nodeVec3(localScale);
+	return node;
+}

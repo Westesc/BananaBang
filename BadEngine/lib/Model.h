@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <stb_image.h>
-
+#include <yaml-cpp/yaml.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -14,7 +14,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
-
+#include <yaml-cpp/yaml.h>
 #include "Mesh.h"
 
 
@@ -591,6 +591,17 @@ public:
         */
         return displacement;
     }
+
+    YAML::Node serialize()
+    {
+        YAML::Node node;
+        for (auto m : meshes)
+        {
+            node["meshes"].push_back(m->serialize());
+        }
+        return node;
+    }
+    
 };
 
 #endif

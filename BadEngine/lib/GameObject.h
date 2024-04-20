@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <yaml-cpp/yaml.h>
 #include "Transform.h"
 #include "Component.h"
 #include "Model.h"
@@ -35,6 +36,7 @@ public:
 	void Move(glm::vec3 translation);
 	void Update(glm::mat4 view, glm::mat4 perspective, float time);
 	void setRotating(bool rotating);
+	YAML::Node serialize();
 };
 
 #endif

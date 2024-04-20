@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <yaml-cpp/yaml.h>
 #include "GameObject.h"
 
 class Scene {
@@ -16,7 +17,7 @@ public:
 	void addObject(GameObject* go);
 	GameObject* findByName(std::string name);
 	void Update(glm::mat4 view, glm::mat4 perspective, float time);
-
+	YAML::Node serialize();
 protected:
 	void Start();
 	

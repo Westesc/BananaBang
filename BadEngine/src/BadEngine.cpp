@@ -98,7 +98,7 @@ int main() {
 	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
 	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"));
 	Mesh* meshSphere = new Mesh();
-	meshSphere->createSphere(100, 100, 50);
+	meshSphere->createSphere(20, 20, 50);
 	Model* skydomeModel = new Model(meshSphere);
 
 

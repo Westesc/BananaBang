@@ -27,6 +27,7 @@ private:
     std::string directory;
     Shader* shader;
     bool isFromFile;
+    char* pathObj;
 
     float x;
     float y;
@@ -159,6 +160,7 @@ public:
         rotating = rotate;
         isFromFile = true;
         loadModel(path);
+        pathObj = path;
         Transform = new glm::mat4(1);
     }
 
@@ -595,9 +597,17 @@ public:
     YAML::Node serialize()
     {
         YAML::Node node;
-        for (auto m : meshes)
+        if (isFromFile) {
+            printf("Zaczyna");
+            node["path"] = pathObj;
+            printf("Nie ma problemu");
+        }
+        else
         {
-            node["meshes"].push_back(m->serialize());
+            for (auto m : meshes)
+            {
+                node["meshes"].push_back(m->serialize());
+            }
         }
         return node;
     }

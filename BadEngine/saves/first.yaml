@@ -6,9 +6,9 @@ Scenes:
         layer: 0
         transform:
           position:
-            x: -1.05773997
-            y: -0.508812547
-            z: -0.0425319299
+            x: -1.05822313
+            y: -0.580758214
+            z: -0.0126481224
           rotation:
             x: 0
             y: 0
@@ -24,9 +24,9 @@ Scenes:
         layer: 0
         transform:
           position:
-            x: -4.07346201
-            y: -4.25373459
-            z: 0.0219708718
+            x: -4
+            y: -4.27317286
+            z: 0
           rotation:
             x: 0
             y: 0
@@ -36,7 +36,7 @@ Scenes:
             y: 1
             z: 1
         model:
-          path: ../../../../res/box.obj
+          path: ../../../../res/tree.obj
       - name: capsule
         tag: none
         layer: 0
@@ -78,9 +78,9 @@ Scenes:
         layer: 0
         transform:
           position:
-            x: 8.07297897
-            y: 7.90861607
-            z: 0.0079129329
+            x: 8
+            y: 8
+            z: 0
           rotation:
             x: 0
             y: 0

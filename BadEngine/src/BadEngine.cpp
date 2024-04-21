@@ -28,6 +28,12 @@
 
 bool test = true;
 
+void DrawPlane(float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor);
+void DrawTree(float scaleT, float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor);
+int losujLiczbe();
+int losujLiczbe2();
+
+
 std::string loadShaderSource(const std::string& _filepath);
 GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _msg);
 
@@ -42,6 +48,10 @@ GLFWwindow* window;
 SceneManager* sm;
 Input* input;
 float boxSpeed = 4.f;
+
+float scale = 5.f;
+float scaleT = 1.f;
+const int sectors = 5;
 
 void Start() {
 	glfwInit();
@@ -83,20 +93,37 @@ void Start() {
 int main() {
 	
 	Start();
-	
+	int ilosc = 0;
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
+	int mojaTablica[sectors * sectors];
+	for (int i = 0; i < sectors * sectors; ++i) {
+		mojaTablica[i] = losujLiczbe();
+		ilosc += mojaTablica[i];
+		std::cout << mojaTablica[i] << std::endl;
+	}
+	std::vector<int> placeX;
+	std::vector<int> placeY;
+	for (int i = 0; i < ilosc; ++i) {
+		placeX.push_back(losujLiczbe2());
+		placeY.push_back(losujLiczbe2());
+	}
 	Shader* shaders = new Shader("../../../../src/shaders/vs.vert", "../../../../src/shaders/fs.frag");
 	Shader* skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
 	Shader* mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");
+	Shader* shaderTree = new Shader("../../../../src/shaders/vsTree.vert", "../../../../src/shaders/fsTree.frag");
+
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
 	GameObject* box2 = new GameObject("box2");
 	GameObject* capsule = new GameObject("capsule");
 	GameObject* capsule2 = new GameObject("capsule2");
 	GameObject* skydome = new GameObject("skydome");
+
 	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
-	Model* box2model = new Model(const_cast<char*>("../../../../res/box.obj"));
+	Model* box2model = new Model(const_cast<char*>("../../../../res/tree.obj"));
 	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
+
 	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"));
 	Mesh* meshSphere = new Mesh();
 	meshSphere->createSphere(20, 20, 50);
@@ -106,7 +133,7 @@ int main() {
 
 	boxmodel->SetShader(mapsShader);
 	planemodel->SetShader(shaders);
-	box2model->SetShader(shaders);
+	box2model->SetShader(shaderTree);
 	capsulemodel->SetShader(shaders);
 	capsule2model->SetShader(shaders);
 	skydomeModel->SetShader(skydomeShader);
@@ -134,9 +161,9 @@ int main() {
 
 	sm->getActiveScene()->findByName("skydome")->getModelComponent()->AddTexture("../../../../res/chmury1.png","diffuseMap");
 
-	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/drewno.png", "diffuseMap");
-	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/specular.png", "specularMap");
-	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/normal.png", "normalMap");
+	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/cegla.png", "diffuseMap");
+	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/specular2.png", "specularMap");
+	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/normal2.png", "normalMap");
 
 	glm::vec3 lightPos(0.5f, 10.0f, 0.3f);
 
@@ -236,17 +263,18 @@ int main() {
 		//sm->getActiveScene()->Update(V, P, time);
 		if (box->getModelComponent() != nullptr) {
 			glm::mat4 M = glm::translate(glm::mat4(1.f), box->getTransform()->localPosition);
+			M = glm::rotate(M, 10.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			//M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
 			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
 			box->getModelComponent()->setTransform(&M);
 		}
 
-		if (box2->getModelComponent() != nullptr) {
-			glm::mat4 M = glm::translate(glm::mat4(1.f), box2->getTransform()->localPosition);
-			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
-			box2->getModelComponent()->setTransform(&M);
-		}
+		//if (box2->getModelComponent() != nullptr) {
+			//glm::mat4 M = glm::translate(glm::mat4(1.f), box2->getTransform()->localPosition);
+			//M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+			//M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
+			//box2->getModelComponent()->setTransform(&M);
+		//}
 
 		if (capsule->getModelComponent() != nullptr) {
 			glm::mat4 M = glm::translate(glm::mat4(1.f), capsule->getTransform()->localPosition);
@@ -306,12 +334,13 @@ int main() {
 		box->getModelComponent()->Draw();
 		box->getModelComponent()->DrawBoundingBoxes(mapsShader, *box->getModelComponent()->getTransform());
 
-		shaders->use();
-		shaders->setMat4("M", *box2->getModelComponent()->getTransform());
-		shaders->setMat4("view", V);
-		shaders->setMat4("projection", P);
-		box2->getModelComponent()->Draw();
-		box2->getModelComponent()->DrawBoundingBoxes(shaders, *box2->getModelComponent()->getTransform());
+		shaderTree->use();
+		//shaders->setMat4("M", *box2->getModelComponent()->getTransform());
+		shaderTree->setMat4("view", V);
+		shaderTree->setMat4("projection", P);
+		//box2->getModelComponent()->Draw();
+		//box2->getModelComponent()->DrawBoundingBoxes(shaders, *box2->getModelComponent()->getTransform());
+
 		shaders->use();
 		shaders->setMat4("M", *capsule->getModelComponent()->getTransform());
 		shaders->setMat4("view", V);
@@ -333,6 +362,19 @@ int main() {
 		if (input->IsKeobarodAction(window)) {
 			input->GetMessage(key, action);
 			// Obsługa sekwencji klawiszy
+			if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+				for (int i = 0; i < sectors * sectors; ++i) {
+					mojaTablica[i] = losujLiczbe();
+					ilosc += mojaTablica[i];
+					std::cout << mojaTablica[i] << std::endl;
+				}
+				placeX.clear();
+				placeY.clear();
+				for (int i = 0; i < ilosc; ++i) {
+					placeX.push_back(losujLiczbe2());
+					placeY.push_back(losujLiczbe2());
+				}
+			}
 			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
 				if (!sequenceStarted) {
 					sequenceStarted = true;
@@ -384,17 +426,18 @@ int main() {
 				std::cout << "Puszczono klawisz " << key << std::endl;
 			}
 		}
+		int pom = 0;
 		if (plane->getModelComponent() != nullptr) {
-			glm::mat4 M2 = glm::rotate(glm::mat4(1.f), 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-			M2 = glm::rotate(M2, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			M2 = glm::translate(M2, glm::vec3(0.5f, -1.f, -3.f));
-			M2 = glm::scale(M2, glm::vec3(0.1f, 0.1f, 0.1f));
-			plane->getModelComponent()->setTransform(&M2);
-			shaders->use();
-			shaders->setMat4("M", M2);
-			shaders->setMat4("view", V);
-			shaders->setMat4("projection", P);
-			plane->getModelComponent()->Draw();
+			for(int i = 0; i <sectors; i++) 
+			{
+				for (int j = 0; j < sectors; j++) {
+					DrawPlane(scale, shaders, plane, glm::vec3(i*20, 0.f,j*20));
+					for (int z = 0; z < mojaTablica[i*sectors + j]; z++) {
+						DrawTree(scaleT, scale, shaderTree, box2, glm::vec3(i * 20 + placeX[pom] -2, 0.f, j * 20 + placeY[pom] - 2));
+						pom++;
+					}
+				}
+			}
 		}
 		glfwSwapBuffers(window);
 		glfwPollEvents();
@@ -408,6 +451,31 @@ int main() {
 	glfwTerminate();
 	return 0;
 }
+void DrawPlane(float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor) {
+	glm::mat4 M2 = glm::translate(glm::mat4(1.f), scale * vektor);
+	M2 = glm::scale(M2, glm::vec3(scale, scale, scale));
+	plane->getModelComponent()->setTransform(&M2);
+	shaders->use();
+	shaders->setMat4("M", M2);
+	plane->getModelComponent()->Draw();
+}
+void DrawTree(float scaleT, float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor) {
+	glm::mat4 M2 = glm::translate(glm::mat4(1.f), scale * vektor);
+	M2 = glm::scale(M2, glm::vec3(scaleT, scaleT, scaleT));
+	plane->getModelComponent()->setTransform(&M2);
+	shaders->use();
+	shaders->setMat4("M", M2);
+	plane->getModelComponent()->Draw();
+}
+
+int losujLiczbe() {
+	return std::rand() % 3 + 3;
+}
+
+int losujLiczbe2() {
+	return std::rand() % 17;
+}
+
 
 std::string loadShaderSource(const std::string& _filepath)
 {

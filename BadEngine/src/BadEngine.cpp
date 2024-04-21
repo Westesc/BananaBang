@@ -84,15 +84,16 @@ int main() {
 	
 	Start();
 	
-	Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
-	Shader* skydomeShader = new Shader("../../../../src/vsS.vert", "../../../../src/fsS.frag");
+	Shader* shaders = new Shader("../../../../src/shaders/vs.vert", "../../../../src/shaders/fs.frag");
+	Shader* skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
+	Shader* mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
 	GameObject* box2 = new GameObject("box2");
 	GameObject* capsule = new GameObject("capsule");
 	GameObject* capsule2 = new GameObject("capsule2");
 	GameObject* skydome = new GameObject("skydome");
-	Model* boxmodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
+	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
 	Model* box2model = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
@@ -103,7 +104,7 @@ int main() {
 
 
 
-	boxmodel->SetShader(shaders);
+	boxmodel->SetShader(mapsShader);
 	planemodel->SetShader(shaders);
 	box2model->SetShader(shaders);
 	capsulemodel->SetShader(shaders);
@@ -132,6 +133,18 @@ int main() {
 	std::string name = "src";
 
 	sm->getActiveScene()->findByName("skydome")->getModelComponent()->TextureFromFile("../../../../res/chmury1.png");
+	skydomeShader->use();
+	skydomeShader->setInt("texture_diffuse1", 0);
+
+	unsigned int diffuseMap = sm->getActiveScene()->findByName("box")->getModelComponent()->TextureFromFile("../../../../res/drewno.png");
+	unsigned int specularMap = sm->getActiveScene()->findByName("box")->getModelComponent()->TextureFromFile("../../../../res/specular.png");
+	unsigned int normalMap = sm->getActiveScene()->findByName("box")->getModelComponent()->TextureFromFile("../../../../res/normal.png");
+	mapsShader->use();
+	mapsShader->setInt("diffuseMap", 0);
+	mapsShader->setInt("normalMap", 1);
+	mapsShader->setInt("specularMap", 2);
+	glm::vec3 lightPos(0.5f, 10.0f, 0.3f);
+
 	//sm->getActiveScene()->findByName("capsule")->getModelComponent()->TextureFromFile("../../../../res/zdj.png", name);
 
 	/*box->localTransform->localPosition = glm::vec3(-1.f, -1.f, 0.f);
@@ -286,12 +299,22 @@ int main() {
 				box2->getTransform()->localPosition -= displacement;
 			}
 		}
-		shaders->use();
-		shaders->setMat4("M", *box->getModelComponent()->getTransform());
-		shaders->setMat4("view", V);
-		shaders->setMat4("projection", P);
+
+		mapsShader->use();
+		mapsShader->setVec3("viewPos", camera->transform->getLocalPosition());
+		mapsShader->setVec3("lightPos", lightPos);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, diffuseMap);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, normalMap);
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, specularMap);
+		mapsShader->setMat4("M", *box->getModelComponent()->getTransform());
+		mapsShader->setMat4("view", V);
+		mapsShader->setMat4("projection", P);
 		box->getModelComponent()->Draw();
-		box->getModelComponent()->DrawBoundingBoxes(shaders, *box->getModelComponent()->getTransform());
+		box->getModelComponent()->DrawBoundingBoxes(mapsShader, *box->getModelComponent()->getTransform());
+
 		shaders->use();
 		shaders->setMat4("M", *box2->getModelComponent()->getTransform());
 		shaders->setMat4("view", V);

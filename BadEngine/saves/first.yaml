@@ -6,9 +6,9 @@ Scenes:
         layer: 0
         transform:
           position:
-            x: -0.999747157
-            y: -0.819410086
-            z: -0.0156372786
+            x: -1.05773997
+            y: -0.508812547
+            z: -0.0425319299
           rotation:
             x: 0
             y: 0
@@ -18,15 +18,15 @@ Scenes:
             y: 1
             z: 1
         model:
-          path: ../../../../res/plane.obj
+          path: ../../../../res/box.obj
       - name: box2
         tag: none
         layer: 0
         transform:
           position:
-            x: -4.0732317
-            y: -4.08920574
-            z: 0.00772434566
+            x: -4.07346201
+            y: -4.25373459
+            z: 0.0219708718
           rotation:
             x: 0
             y: 0
@@ -42,9 +42,9 @@ Scenes:
         layer: 0
         transform:
           position:
-            x: 4
-            y: 4
-            z: 0
+            x: 4.05822325
+            y: 3.85393095
+            z: 0.0126481224
           rotation:
             x: 0
             y: 0

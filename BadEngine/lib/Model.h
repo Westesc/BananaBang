@@ -138,7 +138,7 @@ private:
 
     std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, std::string typeName)
     {
-        std::vector<Texture> textures;
+             std::vector<Texture> textures;
         for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)
         {
             aiString str;
@@ -174,7 +174,14 @@ public:
     void SetShader(Shader* s) { shader = s; }
     BoundingBox* boundingBox = nullptr;
     CapsuleCollider* capsuleCollider = nullptr;
-
+    void AddTexture(std::string const& filename, std::string typeName)
+    {
+        Texture texture;
+        texture.id = TextureFromFile(filename);
+        texture.type = typeName;
+        texture.path = filename;
+        textures_loaded.push_back(texture);
+    }
     Model(char* path, bool rotate = true, bool gamma = false) : gammaCorrection(gamma)
     {
         rotating = rotate;
@@ -197,6 +204,7 @@ public:
     {
         //std::string filename = std::string(path);
         //filename = directory + '/' + filename;
+
         unsigned int textureID;
         glGenTextures(1, &textureID);
 
@@ -236,7 +244,7 @@ public:
     {
         for (unsigned int i = 0; i < meshes.size(); i++)
         {
-            meshes[i]->Draw(shader, Transform, isFromFile, rotating, isBlue);
+            meshes[i]->Draw(shader, textures_loaded, Transform, isFromFile, rotating, isBlue);
         }
     }
 

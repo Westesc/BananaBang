@@ -132,20 +132,15 @@ int main() {
 	static bool secondKeyPressed = false;
 	std::string name = "src";
 
-	sm->getActiveScene()->findByName("skydome")->getModelComponent()->TextureFromFile("../../../../res/chmury1.png");
-	skydomeShader->use();
-	skydomeShader->setInt("texture_diffuse1", 0);
+	sm->getActiveScene()->findByName("skydome")->getModelComponent()->AddTexture("../../../../res/chmury1.png","diffuseMap");
 
-	unsigned int diffuseMap = sm->getActiveScene()->findByName("box")->getModelComponent()->TextureFromFile("../../../../res/drewno.png");
-	unsigned int specularMap = sm->getActiveScene()->findByName("box")->getModelComponent()->TextureFromFile("../../../../res/specular.png");
-	unsigned int normalMap = sm->getActiveScene()->findByName("box")->getModelComponent()->TextureFromFile("../../../../res/normal.png");
-	mapsShader->use();
-	mapsShader->setInt("diffuseMap", 0);
-	mapsShader->setInt("normalMap", 1);
-	mapsShader->setInt("specularMap", 2);
+	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/drewno.png", "diffuseMap");
+	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/specular.png", "specularMap");
+	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/normal.png", "normalMap");
+
 	glm::vec3 lightPos(0.5f, 10.0f, 0.3f);
 
-	//sm->getActiveScene()->findByName("capsule")->getModelComponent()->TextureFromFile("../../../../res/zdj.png", name);
+
 
 	/*box->localTransform->localPosition = glm::vec3(-1.f, -1.f, 0.f);
 	box2->localTransform->localPosition = glm::vec3(-4.f, -4.f, 0.f);
@@ -196,6 +191,8 @@ int main() {
 			skydomeShader->setMat4("M", Mm);
 			skydomeShader->setMat4("view", V);
 			skydomeShader->setMat4("projection", P);
+			//glActiveTexture(GL_TEXTURE0);
+			//glBindTexture(GL_TEXTURE_2D, texture);
 			skydomeModel->Draw();
 		}
 
@@ -303,12 +300,6 @@ int main() {
 		mapsShader->use();
 		mapsShader->setVec3("viewPos", camera->transform->getLocalPosition());
 		mapsShader->setVec3("lightPos", lightPos);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, diffuseMap);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, normalMap);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, specularMap);
 		mapsShader->setMat4("M", *box->getModelComponent()->getTransform());
 		mapsShader->setMat4("view", V);
 		mapsShader->setMat4("projection", P);

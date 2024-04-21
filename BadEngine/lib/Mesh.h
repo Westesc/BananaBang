@@ -140,7 +140,7 @@ public:
     }
 
     // render the mesh
-    void Draw(Shader* shader, glm::mat4* model, bool& isFromFile, bool& rotating, bool& isBlue)
+    void Draw(Shader* shader, std::vector<Texture> texture, glm::mat4* model, bool& isFromFile, bool& rotating, bool& isBlue)
     {
 
         unsigned int diffuseNr = 1;
@@ -154,12 +154,12 @@ public:
             shader->setBool("isBlue", isBlue);
         }
 
-        for (unsigned int i = 0; i < textures.size(); i++)
+        for (unsigned int i = 0; i < texture.size(); i++)
         {
             glActiveTexture(GL_TEXTURE0 + i);
 
             std::string number;
-            std::string name = textures[i].type;
+            std::string name = texture[i].type;
 
             if (name == "texture_diffuse") {
                 number = std::to_string(diffuseNr);
@@ -174,7 +174,7 @@ public:
 
             glUniform1i(glGetUniformLocation(shader->ID, (name + number).c_str()), i);
 
-            glBindTexture(GL_TEXTURE_2D, textures[i].id);
+            glBindTexture(GL_TEXTURE_2D, texture[i].id);
         }
 
 

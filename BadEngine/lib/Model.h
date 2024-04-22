@@ -259,7 +259,7 @@ public:
     }
 
     void DrawBoundingBoxes(Shader* shader, glm::mat4 transformation) {
-        updateBoundingBox(transformation);
+        //updateBoundingBox(transformation);
         DrawBoundingBox(*boundingBox);
         /*for (const auto& mesh : meshes) {
             mesh->updateBoundingBox(transformation);
@@ -268,7 +268,11 @@ public:
     }
 
     void updateBoundingBox(glm::mat4& modelMatrix) {
-        if (boundingBox->customSize) {
+        glm::vec3 transformedMin = glm::vec3(modelMatrix * glm::vec4(boundingBox->min, 1.0f));
+        glm::vec3 transformedMax = glm::vec3(modelMatrix * glm::vec4(boundingBox->max, 1.0f));
+        boundingBox->min = transformedMin;
+        boundingBox->max = transformedMax;
+        /*if (boundingBox->customSize) {
             glm::vec3 transformedMin = glm::vec3(modelMatrix * glm::vec4(boundingBox->min, 1.0f));
             glm::vec3 transformedMax = glm::vec3(modelMatrix * glm::vec4(boundingBox->max, 1.0f));
             boundingBox->min = transformedMin;
@@ -288,6 +292,7 @@ public:
 
             boundingBox = new BoundingBox(min, max);
         }
+        */
     }
 
     void UpdateCollider(glm::mat4 transformation) {
@@ -370,16 +375,48 @@ public:
         capsuleCollider = new CapsuleCollider(glm::vec3(position.x, (minY + maxY) * 0.5f * 0.1f, position.z), maxRadius * 0.1f, height * 0.1f);
     }
 
-    bool checkBoundingBoxCollision(const BoundingBox& box1, const BoundingBox& box2) {
-        bool collisionX = box1.max.x >= box2.min.x && box1.min.x <= box2.max.x;
-        bool collisionY = box1.max.y >= box2.min.y && box1.min.y <= box2.max.y;
-        bool collisionZ = box1.max.z >= box2.min.z && box1.min.z <= box2.max.z;
-        return collisionX && collisionY && collisionZ;
+    bool checkBoundingBoxCollision(const BoundingBox& box1, const BoundingBox& box2, const glm::mat4& transform1, const glm::mat4& transform2) {
+        glm::vec3 vertices1[] = {
+			glm::vec3(transform1 * glm::vec4(box1.vertices.at(0), 1.0f)),
+			glm::vec3(transform1 * glm::vec4(box1.vertices.at(1), 1.0f)),
+			glm::vec3(transform1 * glm::vec4(box1.vertices.at(2), 1.0f)),
+			glm::vec3(transform1 * glm::vec4(box1.vertices.at(3), 1.0f)),
+			glm::vec3(transform1 * glm::vec4(box1.vertices.at(4), 1.0f)),
+			glm::vec3(transform1 * glm::vec4(box1.vertices.at(5), 1.0f)),
+			glm::vec3(transform1 * glm::vec4(box1.vertices.at(6), 1.0f)),
+			glm::vec3(transform1 * glm::vec4(box1.vertices.at(7), 1.0f))
+		};
+
+        glm::vec3 vertices2[] = {
+            glm::vec3(transform2 * glm::vec4(box2.vertices.at(0), 1.0f)),
+            glm::vec3(transform2 * glm::vec4(box2.vertices.at(1), 1.0f)),
+            glm::vec3(transform2 * glm::vec4(box2.vertices.at(2), 1.0f)),
+            glm::vec3(transform2 * glm::vec4(box2.vertices.at(3), 1.0f)),
+            glm::vec3(transform2 * glm::vec4(box2.vertices.at(4), 1.0f)),
+            glm::vec3(transform2 * glm::vec4(box2.vertices.at(5), 1.0f)),
+            glm::vec3(transform2 * glm::vec4(box2.vertices.at(6), 1.0f)),
+            glm::vec3(transform2 * glm::vec4(box2.vertices.at(7), 1.0f))
+        };
+        for (int i = 0; i < 8; i++) {
+            if (vertices1[i].x >= vertices2[0].x && vertices1[i].x <= vertices2[1].x &&
+                vertices1[i].y >= vertices2[0].y && vertices1[i].y <= vertices2[1].y &&
+                vertices1[i].z >= vertices2[0].z && vertices1[i].z <= vertices2[1].z) {
+				return true;
+			}
+		}
+        for (int i = 0; i < 8; i++) {
+            if (vertices2[i].x >= vertices1[0].x && vertices2[i].x <= vertices1[1].x &&
+                vertices2[i].y >= vertices1[0].y && vertices2[i].y <= vertices1[1].y &&
+                vertices2[i].z >= vertices1[0].z && vertices2[i].z <= vertices1[1].z) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    bool checkBoxCapsuleCollision(const BoundingBox& meshBox, const CapsuleCollider& otherCapsule, glm::mat4 transform) {
-        glm::vec3 boxMin = meshBox.min;
-        glm::vec3 boxMax = meshBox.max;
+    bool checkBoxCapsuleCollision(const BoundingBox& meshBox, const CapsuleCollider& otherCapsule, glm::mat4 transform, glm::mat4 boxtransform) {
+        glm::vec3 boxMin = glm::vec3(boxtransform * glm::vec4(meshBox.min, 1.0f));
+        glm::vec3 boxMax = glm::vec3(boxtransform * glm::vec4(meshBox.max, 1.0f));
         glm::vec3 capsuleCenter = otherCapsule.center;
         float capsuleRadius = otherCapsule.radius;
         float capsuleHeight = otherCapsule.height;
@@ -432,15 +469,15 @@ public:
     bool checkCollision(Model* other) {
         if (boundingBox != nullptr) {
             if (other->boundingBox != nullptr) {
-                return checkBoundingBoxCollision(*boundingBox, *other->boundingBox);
+                return checkBoundingBoxCollision(*boundingBox, *other->boundingBox, *Transform, *other->getTransform());
             }
             else if (other->capsuleCollider != nullptr) {
-                return checkBoxCapsuleCollision(*boundingBox, *other->capsuleCollider, *other->getTransform());
+                return checkBoxCapsuleCollision(*boundingBox, *other->capsuleCollider, *other->getTransform(), *Transform);
             }
         }
         else if (capsuleCollider != nullptr) {
             if (other->boundingBox != nullptr) {
-                return checkBoxCapsuleCollision(*other->boundingBox, *capsuleCollider, *getTransform());
+                return checkBoxCapsuleCollision(*other->boundingBox, *capsuleCollider, *getTransform(), *other->getTransform());
             }
             else if (other->capsuleCollider != nullptr) {
                 return checkCapsuleCollision(*capsuleCollider, *other->capsuleCollider,*getTransform(), *other->getTransform());
@@ -462,27 +499,30 @@ public:
         glm::vec3 displacement(0.0f);
         if (boundingBox != nullptr) {
             if (other->boundingBox != nullptr) {
-                glm::vec3 direction = glm::normalize(boundingBox->center() = other->boundingBox->center());
-                float magnitude = (boundingBox->radius() + other->boundingBox->radius()) - glm::distance(boundingBox->center(), other->boundingBox->center());
+                glm::vec3 direction = glm::normalize(glm::vec3(*Transform * glm::vec4(boundingBox->center(), 1.0f)) - glm::vec3(*other->getTransform() * glm::vec4(other->boundingBox->center(), 1.0f)));
+                float magnitude = (boundingBox->radius() + other->boundingBox->radius()) - glm::distance(glm::vec3(*Transform * glm::vec4(boundingBox->center(), 1.0f)), glm::vec3(*other->getTransform() * glm::vec4(other->boundingBox->center(), 1.0f)));
                 displacement += direction * magnitude;
-                std::cout << glm::to_string(displacement) << std::endl;
+                std::cout << "2box"<<glm::to_string(displacement) << std::endl;
             }
             else if (other->capsuleCollider != nullptr) {
-                glm::vec3 direction = glm::normalize(boundingBox->center() - other->capsuleCollider->center);
-                float magnitude = (boundingBox->radius() + other->capsuleCollider->radius) - glm::distance(boundingBox->center(), other->capsuleCollider->center);
+                glm::vec3 direction = glm::normalize(glm::vec3(*Transform * glm::vec4(boundingBox->center(), 1.0f)) - other->capsuleCollider->center);
+                float magnitude = (boundingBox->radius() + other->capsuleCollider->radius) - glm::distance(glm::vec3(*Transform * glm::vec4(boundingBox->center(), 1.0f)), other->capsuleCollider->center);
                 displacement += direction * magnitude;
+                std::cout << "boxcapsule" << glm::to_string(displacement) << std::endl;
             }
         }
         else if (capsuleCollider != nullptr) {
             if (other->boundingBox != nullptr) {
-                glm::vec3 direction = glm::normalize(capsuleCollider->center - other->boundingBox->center());
-                float magnitude = (capsuleCollider->radius + other->boundingBox->radius()) - glm::distance(capsuleCollider->center, other->boundingBox->center());
+                glm::vec3 direction = glm::normalize(capsuleCollider->center - glm::vec3(*other->getTransform() * glm::vec4(other->boundingBox->center(), 1.0f)));
+                float magnitude = (capsuleCollider->radius + other->boundingBox->radius()) - glm::distance(capsuleCollider->center, glm::vec3(*other->getTransform() * glm::vec4(other->boundingBox->center(), 1.0f)));
                 displacement += direction * magnitude;
+                std::cout << "capsulebox" << glm::to_string(displacement) << std::endl;
             }
             else if (other->capsuleCollider != nullptr) {
                 glm::vec3 direction = glm::normalize(capsuleCollider->center - other->capsuleCollider->center);
                 float magnitude = (capsuleCollider->radius + other->capsuleCollider->radius) - glm::distance(capsuleCollider->center, other->capsuleCollider->center);
                 displacement += direction * magnitude;
+                std::cout << "2capsule" << glm::to_string(displacement) << std::endl;
             }
         }
         return displacement;

@@ -35,7 +35,7 @@ public:
 	void Move(glm::vec3 translation);
 	void Update(glm::mat4 view, glm::mat4 perspective, float time);
 	void setRotating(bool rotating);
-	void checkResolveCollisions(GameObject* other);
+	void checkResolveCollisions(GameObject* other, float deltaTime);
 	void Draw(Shader* shaders, glm::mat4 view, glm::mat4 perspective);
 };
 

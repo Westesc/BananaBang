@@ -24,6 +24,7 @@
 #include "../lib/Scene.h"
 #include "../lib/Transform.h"
 #include "../lib/UI.h"
+#include "../lib/CollisionManager.h"
 
 
 std::string loadShaderSource(const std::string& _filepath);
@@ -134,6 +135,7 @@ int main() {
 	sm->getActiveScene()->findByName("capsule")->setRotating(true);
 	float deltaTime = 0;
 	float lastTime = 0;
+	CollisionManager cm = CollisionManager(1000, 100);
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -145,10 +147,15 @@ int main() {
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
 		deltaTime = time - lastTime;
 		lastTime = time;
+		std::cout << "Delta time: " << deltaTime << std::endl;
 
 		glm::mat4 V = camera->getViewMatrix();
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 50.f);
+
+		for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
+			cm.addObject(sm->getActiveScene()->gameObjects.at(i));
+		}
 
 		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
@@ -187,8 +194,10 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 		}
-		sm->getActiveScene()->Update(V, P, time, shaders, deltaTime);
-		
+		sm->getActiveScene()->Update(V, P, time);
+		//sm->getActiveScene()->checkResolveCollisions(deltaTime);
+		cm.checkResolveCollisions(sm->getActiveScene()->gameObjects, deltaTime);
+		sm->getActiveScene()->Draw(shaders, V, P);
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
@@ -249,18 +258,6 @@ int main() {
 				std::cout << "Puszczono klawisz " << key << std::endl;
 			}
 		}
-		/*if (plane->getModelComponent() != nullptr) {
-			glm::mat4 M2 = glm::rotate(glm::mat4(1.f), 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-			M2 = glm::rotate(M2, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			M2 = glm::translate(M2, glm::vec3(0.5f, -1.f, -3.f));
-			M2 = glm::scale(M2, glm::vec3(0.1f, 0.1f, 0.1f));
-			plane->getModelComponent()->setTransform(&M2);
-			shaders->use();
-			shaders->setMat4("M", M2);
-			shaders->setMat4("view", V);
-			shaders->setMat4("projection", P);
-			plane->getModelComponent()->Draw();
-		}*/
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

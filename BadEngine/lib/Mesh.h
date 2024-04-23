@@ -29,6 +29,11 @@ struct Texture
     std::string path;
 };
 
+enum meshType {
+    fromFile,
+    sphere
+};
+
 class Mesh {
 public:
     GLfloat deltaTime;
@@ -37,9 +42,13 @@ public:
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
+    meshType type = fromFile;
     unsigned int VAO;
     BoundingBox* boundingBox = nullptr;
     CapsuleCollider* capsuleCollider = nullptr;
+    //zmienne do sfery
+    int verticalSegments, horizontalSegments, size;
+
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
     {
@@ -49,6 +58,12 @@ public:
 
         setupMesh();
         //calculateBoundingBox();
+    }
+
+    Mesh(YAML::Node node) {
+        if (node["type"].as<int>() == (int)sphere) {
+            createSphere(node["verticalSegments"].as<int>(), node["horizontalSegments"].as<int>(), node["size"].as<int>());
+        }
     }
 
     Mesh()
@@ -190,7 +205,10 @@ public:
     void createSphere(int verticalSegments, int horizontalSegments, int size) {
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
-
+        this->verticalSegments = verticalSegments;
+        this->horizontalSegments = horizontalSegments;
+        this->size = size;
+        type = sphere;
         for (int j = 0; j <= verticalSegments; ++j) {
             for (int i = 0; i <= horizontalSegments; ++i) {
                 float theta = j * glm::pi<float>() / verticalSegments;
@@ -226,10 +244,9 @@ public:
     {
         YAML::Node node;
         
-        for (auto v : vertices) {
+        /*for (auto v : vertices) {
             YAML::Node vertexNode;
             vertexNode["position"] = nodeVec3(v.Position);
-            std::cout << v.Position.x << " " << v.Position.y << " " << v.Position.z << std::endl;
             vertexNode["normal"] = nodeVec3(v.Normal);
             vertexNode["texCoords"] = nodeVec2(v.TexCoords);
             node["vertex"].push_back(vertexNode);
@@ -243,6 +260,12 @@ public:
             textureNode["path"] = t.path;
             textureNode["type"] = t.type;
             node["vertex"].push_back(textureNode);
+        }*/
+        if (type = sphere) {
+            node["type"] = (int)type;
+            node["verticalSegments"] = verticalSegments;
+            node["horizontalSegments"] = horizontalSegments;
+            node["size"] = size;
         }
         
 

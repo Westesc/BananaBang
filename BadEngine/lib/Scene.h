@@ -9,6 +9,7 @@
 class Scene {
 public:
 	Scene(std::string Name);
+	Scene(YAML::Node Node);
 	~Scene();
 
 	std::string name;
@@ -18,6 +19,7 @@ public:
 	GameObject* findByName(std::string name);
 	void Update(glm::mat4 view, glm::mat4 perspective, float time);
 	YAML::Node serialize();
+	
 protected:
 	void Start();
 	

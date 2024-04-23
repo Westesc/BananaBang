@@ -7,6 +7,18 @@ Transform::Transform()
 	localScale = glm::vec3(1.f, 1.f, 1.f);
 }
 
+glm::vec3 nodeToVec3(YAML::Node node) {
+	return glm::vec3(node["x"].as<float>(), node["y"].as<float>(), node["y"].as<float>());
+}
+
+Transform::Transform(YAML::Node node) {
+	this->localPosition = nodeToVec3(node["position"]);
+	this->localRotation = nodeToVec3(node["rotation"]);
+	this->localScale = nodeToVec3(node["scale"]);
+}
+
+
+
 Transform::~Transform()
 {
 }

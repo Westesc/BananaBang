@@ -25,9 +25,10 @@ private:
     std::vector<Texture> textures_loaded;
     std::vector<Mesh*> meshes;
     std::string directory;
+    const char* texturePath;
     Shader* shader;
     bool isFromFile;
-    char* pathObj;
+    const char* pathObj;
 
     float x;
     float y;
@@ -152,6 +153,8 @@ public:
     void setTransform(glm::mat4* matrix) { Transform = matrix; }
     glm::mat4* getTransform() { return Transform; }
     void SetShader(Shader* s) { shader = s; }
+    void setTexturePath(const char* path) { this->texturePath = path; }
+    Shader* GetShader() { return shader; }
     BoundingBox* boundingBox = nullptr;
     CapsuleCollider* capsuleCollider = nullptr;
 
@@ -171,6 +174,37 @@ public:
         isFromFile = false;
         meshes.push_back(mesh);
         Transform = new glm::mat4(1);
+    }
+
+    Model(YAML::Node node) {
+        shader = new Shader(node["shader"]);
+        if (node["path"]) {
+            isFromFile = true;
+            std::string stringPath = node["path"].as<std::string>();
+            this->pathObj = strdup(stringPath.c_str());
+            loadModel(pathObj);
+        }
+        else if (node["meshes"]) {
+            YAML::Node meshesNodes= node["meshes"];
+            for (auto mn : meshesNodes) {
+                meshes.push_back(new Mesh(mn));
+            }
+
+        }
+        
+        if (node["capsuleCollider"]) {
+            capsuleCollider = new CapsuleCollider(node["capsuleCollider"]);
+        }
+        if (node["boundingBox"]) {
+            boundingBox = new BoundingBox(node["boundingBox"]);
+        }
+        
+        
+        if (node["texturePath"])
+        {
+            this->texturePath = strdup(node["texturePath"].as<std::string>().c_str());
+            TextureFromFile(texturePath);
+        }
     }
 
     unsigned int TextureFromFile(std::string const& filename, bool gamma = false)
@@ -372,6 +406,7 @@ public:
     }
 
     bool checkBoundingBoxCollision(const BoundingBox& box1, const BoundingBox& box2) {
+        
         bool collisionX = box1.max.x >= box2.min.x && box1.min.x <= box2.max.x;
         bool collisionY = box1.max.y >= box2.min.y && box1.min.y <= box2.max.y;
         bool collisionZ = box1.max.z >= box2.min.z && box1.min.z <= box2.max.z;
@@ -434,6 +469,8 @@ public:
         //bool collisionFound = false;
         if (boundingBox != nullptr) {
             if (other->boundingBox != nullptr) {
+                std::cout<<"box2" << boundingBox->min.x << boundingBox->min.y << boundingBox->min.z << "    " << boundingBox->max.x << boundingBox->max.y << boundingBox->max.z << std::endl;
+                std::cout<<"box" << other->boundingBox->min.x << other->boundingBox->min.y << other->boundingBox->min.z << "    " << other->boundingBox->max.x << other->boundingBox->max.y << other->boundingBox->max.z << std::endl;
                 return checkBoundingBoxCollision(*boundingBox, *other->boundingBox);
             }
             else if (other->capsuleCollider != nullptr) {
@@ -596,19 +633,27 @@ public:
 
     YAML::Node serialize()
     {
+
         YAML::Node node;
         if (isFromFile) {
-            printf("Zaczyna");
             node["path"] = pathObj;
-            printf("Nie ma problemu");
         }
         else
         {
+            node["texturePath"] = this->texturePath;
+
             for (auto m : meshes)
             {
                 node["meshes"].push_back(m->serialize());
             }
         }
+        if (boundingBox != nullptr) {
+            node["boundingBox"] = boundingBox->serialize();
+        }
+        else if (capsuleCollider != nullptr) {
+            node["capsuleCollider"] = capsuleCollider->serialize();
+        }
+        node["shader"] = shader->serialize();
         return node;
     }
     

@@ -5,6 +5,21 @@ GameObject::GameObject(std::string Name, std::string Tag, int Layer)
     localTransform = new Transform();
 }
 
+GameObject::GameObject(YAML::Node node) {
+    this->name = node["name"].as<std::string>();
+    this->tag = node["tag"].as<std::string>();
+    this->layer = node["layer"].as<int>();
+    this->isRotating = node["isRotating"].as<bool>();
+    this->localTransform = new Transform(node["transform"]);
+    this->modelComponent = new Model(node["model"]);
+    if (node["children"]) {
+        YAML::Node childrenNode = node["children"];
+        for (auto childNode : childrenNode) {
+            this->children.push_back(new GameObject(childNode));
+        }
+    }
+}
+
 GameObject::~GameObject() {
     for (auto child : children)
     {
@@ -98,7 +113,11 @@ YAML::Node GameObject::serialize() {
     node["name"] = this->name;
     node["tag"] = this->tag;
     node["layer"] = this->layer;
+    node["isRotating"] = this->isRotating;
     node["transform"] = this->localTransform->serialize();
     node["model"] = this->modelComponent->serialize();
+    for (auto child : children) {
+        node["children"].push_back(child->serialize());
+    }
     return node;
 }

@@ -10,6 +10,7 @@
 class Transform : Component {
 public:
 	Transform();
+	Transform(YAML::Node node);
 	~Transform();
 
 	glm::vec3 localPosition;

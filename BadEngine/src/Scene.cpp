@@ -4,6 +4,17 @@ Scene::~Scene() {}
 void Scene::Start() {
 
 }
+
+Scene::Scene(YAML::Node node) {
+	this->name = node["name"].as<std::string>();
+	if (node["gameObjects"]) {
+		YAML::Node gameObjectsNode = node["gameObjects"];
+		for (auto goNode : gameObjectsNode) {
+			gameObjects.push_back(new GameObject(goNode));
+		}
+	}
+}
+
 void Scene::Update(glm::mat4 view, glm::mat4 perspective, float time) {
 	for (auto go : gameObjects) {
 		go->Update(view, perspective, time);

@@ -11,6 +11,7 @@
 class GameObject {
 public:
 	GameObject(std::string Name, std::string Tag = "none", int Layer = 0);
+	GameObject(YAML::Node node);
 	~GameObject();
 
 	std::string name;

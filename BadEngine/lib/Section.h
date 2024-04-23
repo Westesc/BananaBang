@@ -14,18 +14,24 @@ public:
 
 	bool checkCollision(Model* object) {
 		if (object->boundingBox != nullptr) {
-			glm::vec3 transformedMin = glm::vec3(*object->getTransform() * glm::vec4(object->boundingBox->min, 1.0f));
-			glm::vec3 transformedMax = glm::vec3(*object->getTransform() * glm::vec4(object->boundingBox->max, 1.0f));
-			if (transformedMax.x < bounds->min.x || transformedMin.x > bounds->max.x) {
-				return false;
+			glm::vec3 vertices1[] = {
+				glm::vec3(*object->getTransform() * glm::vec4(object->boundingBox->vertices.at(0), 1.0f)),
+				glm::vec3(*object->getTransform() * glm::vec4(object->boundingBox->vertices.at(1), 1.0f)),
+				glm::vec3(*object->getTransform() * glm::vec4(object->boundingBox->vertices.at(2), 1.0f)),
+				glm::vec3(*object->getTransform() * glm::vec4(object->boundingBox->vertices.at(3), 1.0f)),
+				glm::vec3(*object->getTransform() * glm::vec4(object->boundingBox->vertices.at(4), 1.0f)),
+				glm::vec3(*object->getTransform() * glm::vec4(object->boundingBox->vertices.at(5), 1.0f)),
+				glm::vec3(*object->getTransform() * glm::vec4(object->boundingBox->vertices.at(6), 1.0f)),
+				glm::vec3(*object->getTransform() * glm::vec4(object->boundingBox->vertices.at(7), 1.0f))
+			};
+			for (int i = 0; i < 8; i++) {
+				if (vertices1[i].x >= bounds->min.x && vertices1[i].x <= bounds->max.x &&
+					vertices1[i].y >= bounds->min.y && vertices1[i].y <= bounds->max.y &&
+					vertices1[i].z >= bounds->min.z && vertices1[i].z <= bounds->max.z) {
+					return true;
+				}
 			}
-			if (transformedMax.y < bounds->min.y || transformedMin.y > bounds->max.y) {
-				return false;
-			}
-			if (transformedMax.z < bounds->min.z || transformedMin.z > bounds->max.z) {
-				return false;
-			}
-			return true;
+			return false;
 		}
 		else if (object->capsuleCollider != nullptr) {
 			glm::vec3 capsuleCenter = object->capsuleCollider->center;

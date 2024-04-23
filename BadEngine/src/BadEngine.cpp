@@ -153,10 +153,6 @@ int main() {
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 50.f);
 
-		for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
-			cm.addObject(sm->getActiveScene()->gameObjects.at(i));
-		}
-
 		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
 		}
@@ -195,8 +191,11 @@ int main() {
 			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 		}
 		sm->getActiveScene()->Update(V, P, time);
-		//sm->getActiveScene()->checkResolveCollisions(deltaTime);
-		cm.checkResolveCollisions(sm->getActiveScene()->gameObjects, deltaTime);
+		plane->getModelComponent()->setTransform(glm::rotate(*plane->getModelComponent()->getTransform(), glm::radians(-90.f), glm::vec3(1.f, 0.f, 0.f)));
+		for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
+			cm.addObject(sm->getActiveScene()->gameObjects.at(i));
+		}
+		cm.checkResolveCollisions(deltaTime);
 		sm->getActiveScene()->Draw(shaders, V, P);
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();

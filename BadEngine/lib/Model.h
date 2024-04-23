@@ -23,6 +23,7 @@ class Model
 {
 private:
     glm::mat4* Transform;
+    glm::mat4* prevTransform = new glm::mat4(1.f);
     std::vector<Texture> textures_loaded;
     std::vector<Mesh*> meshes;
     std::string directory;
@@ -190,7 +191,11 @@ public:
     void setTransform(const glm::mat4& matrix) {
         *Transform = matrix;
     }
+    void setPrevTransform(const glm::mat4& matrix) {
+		*prevTransform = matrix;
+	}
     glm::mat4* getTransform() { return Transform; }
+    glm::mat4* getPrevTransform() { return prevTransform; }
     void SetShader(Shader* s) { shader = s; }
     BoundingBox* boundingBox = nullptr;
     CapsuleCollider* capsuleCollider = nullptr;

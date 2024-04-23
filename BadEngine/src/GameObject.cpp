@@ -101,12 +101,24 @@ void GameObject::checkResolveCollisions(GameObject* other, float deltaTime) {
     if (modelComponent->checkCollision(other->modelComponent)) {
         std::cout << "KOLIZJA" << std::endl;
         glm::vec3 displacement = modelComponent->calculateCollisionResponse(other->modelComponent);
-        displacement *= 0.1f * deltaTime;
+        glm::vec3 otherDisplacement = -displacement;
+        if (modelComponent->boundingBox != nullptr) {
+            displacement *= 0.1f * deltaTime;
+		}
+        else {
+			displacement *= deltaTime;
+        }
+        if (other->modelComponent->boundingBox != nullptr) {
+			otherDisplacement *= 0.1f * deltaTime;
+		}
+        else {
+			otherDisplacement *= deltaTime;
+		}
         if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
             localTransform->localPosition += displacement;
-            other->localTransform->localPosition -= displacement;
+            other->localTransform->localPosition += otherDisplacement;
             modelComponent->setTransform(glm::translate(*modelComponent->getTransform(), displacement));
-            other->modelComponent->setTransform(glm::translate(*other->modelComponent->getTransform(), -displacement));
+            other->modelComponent->setTransform(glm::translate(*other->modelComponent->getTransform(), otherDisplacement));
         }
     }
 }
@@ -123,4 +135,5 @@ void GameObject::Draw(Shader* shaders, glm::mat4 view, glm::mat4 perspective) {
     else if (modelComponent->capsuleCollider != nullptr) {
         modelComponent->UpdateCollider(*modelComponent->getTransform());
     }
+    modelComponent->setPrevTransform(*modelComponent->getTransform());
 }

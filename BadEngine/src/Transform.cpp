@@ -7,6 +7,18 @@ Transform::Transform()
 	localScale = glm::vec3(1.f, 1.f, 1.f);
 }
 
+glm::vec3 nodeToVec3(YAML::Node node) {
+	return glm::vec3(node["x"].as<float>(), node["y"].as<float>(), node["y"].as<float>());
+}
+
+Transform::Transform(YAML::Node node) {
+	this->localPosition = nodeToVec3(node["position"]);
+	this->localRotation = nodeToVec3(node["rotation"]);
+	this->localScale = nodeToVec3(node["scale"]);
+}
+
+
+
 Transform::~Transform()
 {
 }
@@ -51,4 +63,22 @@ glm::vec3 Transform::getLocalScale()
 glm::vec3 Transform::getGlobalScale()
 {
 	return glm::vec3();
+}
+
+YAML::Node nodeVec3(glm::vec3 vector)
+{
+	YAML::Node node;
+	node["x"] = vector.x;
+	node["y"] = vector.y;
+	node["z"] = vector.z;
+	return node;
+}
+
+YAML::Node Transform::serialize() 
+{
+	YAML::Node node;
+	node["position"] = nodeVec3(localPosition);
+	node["rotation"] = nodeVec3(localRotation);
+	node["scale"] = nodeVec3(localScale);
+	return node;
 }

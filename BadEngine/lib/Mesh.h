@@ -9,6 +9,8 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
+#include <yaml-cpp/yaml.h>
+
 #include "Shader.h"
 #include "BoundingBox.h"
 #include "CapsuleCollider.h"
@@ -18,10 +20,6 @@ struct Vertex
     glm::vec3 Position;
     glm::vec3 Normal;
     glm::vec2 TexCoords;
-    //tangent
-    glm::vec3 Tangent;
-    // bitangent
-    glm::vec3 Bitangent;
 };
 
 struct Texture
@@ -29,6 +27,11 @@ struct Texture
     unsigned int id;
     std::string type;
     std::string path;
+};
+
+enum meshType {
+    fromFile,
+    sphere
 };
 
 class Mesh {
@@ -39,9 +42,13 @@ public:
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
+    meshType type = fromFile;
     unsigned int VAO;
     BoundingBox* boundingBox = nullptr;
     CapsuleCollider* capsuleCollider = nullptr;
+    //zmienne do sfery
+    int verticalSegments, horizontalSegments, size;
+
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
     {
@@ -51,6 +58,12 @@ public:
 
         setupMesh();
         //calculateBoundingBox();
+    }
+
+    Mesh(YAML::Node node) {
+        if (node["type"].as<int>() == (int)sphere) {
+            createSphere(node["verticalSegments"].as<int>(), node["horizontalSegments"].as<int>(), node["size"].as<int>());
+        }
     }
 
     Mesh()
@@ -189,6 +202,76 @@ public:
         glBindVertexArray(0);
     }
 
+    void createSphere(int verticalSegments, int horizontalSegments, int size) {
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+        this->verticalSegments = verticalSegments;
+        this->horizontalSegments = horizontalSegments;
+        this->size = size;
+        type = sphere;
+        for (int j = 0; j <= verticalSegments; ++j) {
+            for (int i = 0; i <= horizontalSegments; ++i) {
+                float theta = j * glm::pi<float>() / verticalSegments;
+                float phi = i * 2 * glm::pi<float>() / horizontalSegments;
+                float x = size*sin(theta) * cos(phi);
+                float y = size*cos(theta);
+                float z = size*sin(theta) * sin(phi);
+                vertices.push_back({ glm::vec3(x, y, z), glm::vec3(x, y, z), glm::vec2(i / (float)horizontalSegments, j / (float)verticalSegments) });
+            }
+        }
+
+        for (int j = 0; j < verticalSegments/1.5; ++j) {
+            for (int i = 0; i < horizontalSegments; ++i) {
+                int first = (j * (horizontalSegments + 1)) + i;
+                int second = first + horizontalSegments + 1;
+                indices.push_back(first);
+                indices.push_back(second);
+                indices.push_back(first + 1);
+
+                indices.push_back(second);
+                indices.push_back(second + 1);
+                indices.push_back(first + 1);
+            }
+        }
+
+        this->vertices = vertices;
+        this->indices = indices;
+
+        setupMesh();
+    }
+
+    YAML::Node serialize()
+    {
+        YAML::Node node;
+        
+        /*for (auto v : vertices) {
+            YAML::Node vertexNode;
+            vertexNode["position"] = nodeVec3(v.Position);
+            vertexNode["normal"] = nodeVec3(v.Normal);
+            vertexNode["texCoords"] = nodeVec2(v.TexCoords);
+            node["vertex"].push_back(vertexNode);
+        }
+        for (auto i : indices) {
+            node["indices"].push_back(i);
+        }
+        for (auto t : textures) {
+            YAML::Node textureNode;
+            textureNode["id"] = t.id;
+            textureNode["path"] = t.path;
+            textureNode["type"] = t.type;
+            node["vertex"].push_back(textureNode);
+        }*/
+        if (type = sphere) {
+            node["type"] = (int)type;
+            node["verticalSegments"] = verticalSegments;
+            node["horizontalSegments"] = horizontalSegments;
+            node["size"] = size;
+        }
+        
+
+        return node;
+    }
+
 private:
     unsigned int VBO, EBO;
 
@@ -240,6 +323,22 @@ private:
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
 
         glBindVertexArray(0);
+    }
+
+    YAML::Node nodeVec2(glm::vec2 vector)
+    {
+        YAML::Node node;
+        node["x"] = vector.x;
+        node["y"] = vector.y;
+        return node;
+    }
+    YAML::Node nodeVec3(glm::vec3 vector)
+    {
+        YAML::Node node;
+        node["x"] = vector.x;
+        node["y"] = vector.y;
+        node["z"] = vector.z;
+        return node;
     }
 };
 #endif

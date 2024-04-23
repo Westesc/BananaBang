@@ -1,0 +1,172 @@
+Scenes:
+  - name: main
+    gameObjects:
+      - name: box
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: -1.05773997
+            y: -0.508812547
+            z: -0.0425319299
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/box.obj
+          boundingBox:
+            min:
+              x: -1.99860001
+              y: -1
+              z: -1.08659005
+            max:
+              x: 0.0013999939
+              y: 1
+              z: 0.913410008
+          shader:
+            vertexShader: ../../../../src/vs.vert
+            fragmentShader: ../../../../src/fs.frag
+      - name: box2
+        tag: none
+        layer: 0
+        isRotating: true
+        transform:
+          position:
+            x: -4.07346201
+            y: -4.25373459
+            z: 0.0219708718
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/box.obj
+          boundingBox:
+            min:
+              x: -5.57672501
+              y: -4.31393814
+              z: -1.08659005
+            max:
+              x: -3.04937315
+              y: -1.78658605
+              z: 0.913410008
+          shader:
+            vertexShader: ../../../../src/vs.vert
+            fragmentShader: ../../../../src/fs.frag
+      - name: capsule
+        tag: none
+        layer: 0
+        isRotating: true
+        transform:
+          position:
+            x: 4.05822325
+            y: 3.85393095
+            z: 0.0126481224
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/capsule.obj
+          capsuleCollider:
+            center:
+              x: 4.37971926
+              y: 4.12575102
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../src/vs.vert
+            fragmentShader: ../../../../src/fs.frag
+      - name: plane
+        tag: none
+        layer: 0
+        isRotating: true
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/plane.obj
+          shader:
+            vertexShader: ../../../../src/vs.vert
+            fragmentShader: ../../../../src/fs.frag
+      - name: capsule2
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: 8.07297897
+            y: 7.90861607
+            z: 0.0079129329
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/capsule.obj
+          capsuleCollider:
+            center:
+              x: 8.80000019
+              y: 8
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../src/vs.vert
+            fragmentShader: ../../../../src/fs.frag
+      - name: skydome
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          texturePath: ../../../../res/chmury1.png
+          meshes:
+            - type: 1
+              verticalSegments: 20
+              horizontalSegments: 20
+              size: 50
+          shader:
+            vertexShader: ../../../../src/vsS.vert
+            fragmentShader: ../../../../src/fsS.frag

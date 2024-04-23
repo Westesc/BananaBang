@@ -4,6 +4,16 @@ Scene::~Scene() {}
 void Scene::Start() {
 
 }
+
+Scene::Scene(YAML::Node node) {
+	this->name = node["name"].as<std::string>();
+	if (node["gameObjects"]) {
+		YAML::Node gameObjectsNode = node["gameObjects"];
+		for (auto goNode : gameObjectsNode) {
+			gameObjects.push_back(new GameObject(goNode));
+		}
+	}
+}
 void Scene::Update(glm::mat4 view, glm::mat4 perspective, float time) {
 	for (auto go : gameObjects) {
 		go->Update(view, perspective, time);
@@ -34,4 +44,13 @@ void Scene::checkResolveCollisions(float deltaTime) {
 			gameObjects.at(i)->checkResolveCollisions(gameObjects.at(j), deltaTime);
 		}
 	}
+}
+
+YAML::Node Scene::serialize() {
+	YAML::Node node;
+	node["name"] = this->name;
+	for (auto go : gameObjects) {
+		node["gameObjects"].push_back(go->serialize());
+	}
+	return node;
 }

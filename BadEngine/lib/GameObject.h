@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <yaml-cpp/yaml.h>
 #include "Transform.h"
 #include "Component.h"
 #include "Model.h"
@@ -10,6 +11,7 @@
 class GameObject {
 public:
 	GameObject(std::string Name, std::string Tag = "none", int Layer = 0);
+	GameObject(YAML::Node node);
 	~GameObject();
 
 	std::string name;
@@ -37,6 +39,8 @@ public:
 	void setRotating(bool rotating);
 	void checkResolveCollisions(GameObject* other, float deltaTime);
 	void Draw(Shader* shaders, glm::mat4 view, glm::mat4 perspective);
+	YAML::Node serialize();
+
 };
 
 #endif

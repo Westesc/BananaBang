@@ -5,6 +5,20 @@ GameObject::GameObject(std::string Name, std::string Tag, int Layer)
     : name(Name), tag(Tag), layer(Layer), active(true), parent(nullptr), modelComponent(nullptr), isRotating(false) {
     localTransform = new Transform();
 }
+GameObject::GameObject(YAML::Node node) {
+    this->name = node["name"].as<std::string>();
+    this->tag = node["tag"].as<std::string>();
+    this->layer = node["layer"].as<int>();
+    this->isRotating = node["isRotating"].as<bool>();
+    this->localTransform = new Transform(node["transform"]);
+    this->modelComponent = new Model(node["model"]);
+    if (node["children"]) {
+        YAML::Node childrenNode = node["children"];
+        for (auto childNode : childrenNode) {
+            this->children.push_back(new GameObject(childNode));
+        }
+    }
+}
 
 GameObject::~GameObject() {
     for (auto child : children)
@@ -136,4 +150,18 @@ void GameObject::Draw(Shader* shaders, glm::mat4 view, glm::mat4 perspective) {
         modelComponent->UpdateCollider(*modelComponent->getTransform());
     }
     modelComponent->setPrevTransform(*modelComponent->getTransform());
+}
+
+YAML::Node GameObject::serialize() {
+    YAML::Node node;
+    node["name"] = this->name;
+    node["tag"] = this->tag;
+    node["layer"] = this->layer;
+    node["isRotating"] = this->isRotating;
+    node["transform"] = this->localTransform->serialize();
+    node["model"] = this->modelComponent->serialize();
+    for (auto child : children) {
+        node["children"].push_back(child->serialize());
+    }
+    return node;
 }

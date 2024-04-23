@@ -82,16 +82,22 @@ int main() {
 	
 	Start();
 	Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
+	Shader* skydomeShader = new Shader("../../../../src/vsS.vert", "../../../../src/fsS.frag");
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
 	GameObject* box2 = new GameObject("box2");
 	GameObject* capsule = new GameObject("capsule");
 	GameObject* capsule2 = new GameObject("capsule2");
+	GameObject* skydome = new GameObject("skydome");
 	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
 	Model* box2model = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
 	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"));
+	Mesh* meshSphere = new Mesh();
+	meshSphere->createSphere(20, 20, 50);
+	Model* skydomeModel = new Model(meshSphere);
+
 	boxmodel->SetShader(shaders);
 	planemodel->SetShader(shaders);
 	box2model->SetShader(shaders);

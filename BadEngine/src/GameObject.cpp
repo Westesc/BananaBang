@@ -190,3 +190,7 @@ YAML::Node GameObject::serialize() {
     }
     return node;
 }
+
+void GameObject::setVisible(bool visible) {
+	isVisible = visible;
+}

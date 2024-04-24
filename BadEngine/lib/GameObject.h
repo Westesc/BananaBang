@@ -25,6 +25,7 @@ public:
 	bool isRotating;
 	float rotateSpeed;
 	glm::vec3 rotateAxis;
+	bool isVisible = true;
 
 	void setParent(GameObject* Parent);
 	void addChild(GameObject* Child);
@@ -42,7 +43,7 @@ public:
 	void checkResolveCollisions(GameObject* other, float deltaTime);
 	void Draw(glm::mat4 view, glm::mat4 perspective);
 	YAML::Node serialize();
-
+	void setVisible(bool visible);
 };
 
 #endif

@@ -34,7 +34,9 @@ GameObject* Scene::findByName(std::string name) {
 
 void Scene::Draw(glm::mat4 view, glm::mat4 perspective) {
 	for (auto go : gameObjects) {
-		go->Draw(view, perspective);
+		if (go->isVisible) {
+			go->Draw(view, perspective);
+		}
 	}
 }
 

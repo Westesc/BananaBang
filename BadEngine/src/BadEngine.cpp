@@ -10,6 +10,7 @@
 #include <chrono>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "../lib/GraphNode.h"
 #include "../lib/Shader.h"
@@ -88,6 +89,86 @@ void Start() {
 	go->getTransform();*/
 }
 
+std::array<glm::vec4, 6> calculateFrustumPlanes(const glm::mat4& viewProjectionMatrix) {
+	std::array<glm::vec4, 6> planes;
+	
+	// Left plane
+	planes[0] = glm::row(viewProjectionMatrix, 3) + glm::row(viewProjectionMatrix, 0);
+	// Right plane
+	planes[1] = glm::row(viewProjectionMatrix, 3) - glm::row(viewProjectionMatrix, 0);
+	// Top plane
+	planes[2] = glm::row(viewProjectionMatrix, 3) - glm::row(viewProjectionMatrix, 1);
+	// Bottom plane
+	planes[3] = glm::row(viewProjectionMatrix, 3) + glm::row(viewProjectionMatrix, 1);
+	// Near plane
+	planes[4] = glm::row(viewProjectionMatrix, 3) + glm::row(viewProjectionMatrix, 2);
+	// Far plane
+	planes[5] = glm::row(viewProjectionMatrix, 3) - glm::row(viewProjectionMatrix, 2);
+
+	return planes;
+}
+
+bool isBoxInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, BoundingBox& box, glm::mat4* transform) {
+	glm::vec3 vertices[] = {
+			glm::vec3(*transform * glm::vec4(box.vertices.at(0), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(1), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(2), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(3), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(4), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(5), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(6), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(7), 1.0f))
+	};
+	unsigned int inside = 0, outside = 0;
+	for (const auto& plane : frustumPlanes) {
+		unsigned PlaneOutside = 0;
+		glm::vec4 normalizedPlane = plane / glm::length(glm::vec3(plane));
+		for (const auto& vertex : vertices) {
+			float distance = glm::dot(glm::vec3(normalizedPlane), vertex) + plane.w;
+			if (distance < 0.0f) {
+				++PlaneOutside;
+			}
+			else {
+				++inside;
+			}
+		}
+		if (PlaneOutside == 8) {
+			return false;
+		}
+		outside+= PlaneOutside;
+	}
+	if (outside !=0) {
+		return true;
+	}
+	return true;
+}
+
+bool isCapsuleInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, CapsuleCollider* capsule, glm::mat4* transform) {
+	for (const auto& plane : frustumPlanes) {
+		float distance = glm::dot(glm::vec3(plane), glm::vec3(*transform * glm::vec4(capsule->center, 1.0f))) + plane.w;
+		if (distance <= -capsule->radius) {
+			return false;
+		}
+		if (distance >= capsule->height + capsule->radius) {
+			continue;
+		}
+	}
+	return true;
+}
+
+void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const std::vector<GameObject*>& objects) {
+	for (auto object : objects) {
+		if (object->getModelComponent()->boundingBox != nullptr) {
+			bool isVisible = isBoxInFrustum(frustumPlanes, *object->getModelComponent()->boundingBox, object->getModelComponent()->getTransform());
+			object->setVisible(isVisible);
+		}
+		else if (object->getModelComponent()->capsuleCollider != nullptr) {
+			bool isVisible = isCapsuleInFrustum(frustumPlanes, object->getModelComponent()->capsuleCollider, object->getModelComponent()->getTransform());
+			object->setVisible(isVisible);
+		}
+	}
+}
+
 int main() {
 	
 	Start();
@@ -162,6 +243,7 @@ int main() {
 	float deltaTime = 0;
 	float lastTime = 0;
 	CollisionManager cm = CollisionManager(1000, 100);
+	//std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -178,7 +260,7 @@ int main() {
 		glm::mat4 V = camera->getViewMatrix();
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 500.f);
-
+		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
 		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
 		}
@@ -225,6 +307,12 @@ int main() {
 			}
 		}
 		cm.checkResolveCollisions(deltaTime);
+		performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
+		for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
+			if (sm->getActiveScene()->gameObjects.at(i)->isVisible) {
+				std::cout << sm->getActiveScene()->gameObjects.at(i)->name << " " << std::endl;
+			}
+		}
 		sm->getActiveScene()->Draw(V, P);
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();

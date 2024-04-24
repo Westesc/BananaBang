@@ -2,7 +2,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 glm::vec3 nodeIntoVec3(YAML::Node node) {
-    return glm::vec3(node["x"].as<float>(), node["y"].as<float>(), node["y"].as<float>());
+    return glm::vec3(node["x"].as<float>(), node["y"].as<float>(), node["z"].as<float>());
 }
 YAML::Node vec3ToNode(glm::vec3 vector)
 {
@@ -22,13 +22,15 @@ GameObject::GameObject(YAML::Node node) {
     this->tag = node["tag"].as<std::string>();
     this->layer = node["layer"].as<int>();
     this->isRotating = node["isRotating"].as<bool>();
-    if (isRotating) {
-
-        this->rotateSpeed = node["rotateSpeed"].as<float>();
-        this->rotateAxis = nodeIntoVec3(node["rotateAxis"]);
-    }
     this->localTransform = new Transform(node["transform"]);
     this->modelComponent = new Model(node["model"]);
+    if (isRotating) {
+        this->setRotating(true, node["rotateSpeed"].as<float>(), nodeIntoVec3(node["rotateAxis"]));
+        //this->rotateSpeed = node["rotateSpeed"].as<float>();
+        //this->rotateAxis = nodeIntoVec3(node["rotateAxis"]);
+        
+    }
+    
     if (node["children"]) {
         YAML::Node childrenNode = node["children"];
         for (auto childNode : childrenNode) {

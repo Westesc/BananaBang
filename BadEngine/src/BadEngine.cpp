@@ -27,6 +27,12 @@
 #include "../lib/CollisionManager.h"
 
 
+
+void init_imgui();
+void imgui_begin();
+void imgui_render();
+void imgui_end();
+
 std::string loadShaderSource(const std::string& _filepath);
 GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _msg);
 
@@ -63,7 +69,8 @@ void Start() {
 	glFrontFace(GL_CCW);
 
 	glEnable(GL_BLEND);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	init_imgui();
 	sm = new SceneManager();
 	//Scene* scene = new Scene("main");
 	//sm->scenes.push_back(scene);
@@ -134,10 +141,12 @@ int main() {
 	box->getModelComponent()->addCollider(1, box->localTransform->localPosition);
 	capsule->getModelComponent()->addCollider(2, capsule->localTransform->localPosition);
 	box2->getModelComponent()->addCollider(1, box->localTransform->localPosition);*/
-	sm->getActiveScene()->findByName("box")->getTransform()->localPosition = glm::vec3(-1.f, -1.f, 0.f);
+
+	/*sm->getActiveScene()->findByName("box")->getTransform()->localPosition = glm::vec3(-1.f, -1.f, 0.f);
 	sm->getActiveScene()->findByName("box2")->getTransform()->localPosition = glm::vec3(-4.f, -4.f, 0.f);
 	sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition = glm::vec3(4.f, 4.f, 0.f);
 	sm->getActiveScene()->findByName("capsule2")->getTransform()->localPosition = glm::vec3(8.f, 8.f, 0.f);
+	
 	sm->getActiveScene()->findByName("box")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box")->getTransform()->localPosition);
 	sm->getActiveScene()->findByName("box2")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box2")->getTransform()->localPosition);
 	sm->getActiveScene()->findByName("capsule")->getModelComponent()->addCollider(2, sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition);
@@ -145,11 +154,11 @@ int main() {
 	sm->getActiveScene()->findByName("box2")->setRotating(true);
 	sm->getActiveScene()->findByName("plane")->setRotating(true);
 	sm->getActiveScene()->findByName("capsule")->setRotating(true);
-	sm->getActiveScene()->findByName("skydome")->setRotating(true,1.f,glm::vec3(0.f,1.f,0.f));
+	sm->getActiveScene()->findByName("skydome")->setRotating(true,100.f,glm::vec3(0.f,1.f,0.f));
 
 	sm->getActiveScene()->findByName("skydome")->getModelComponent()->TextureFromFile("../../../../res/chmury1.png");
 	sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTexturePath("../../../../res/chmury1.png");
-	
+	sm->activeScene = sm->scenes.at(1);*/
 	float deltaTime = 0;
 	float lastTime = 0;
 	CollisionManager cm = CollisionManager(1000, 100);
@@ -157,7 +166,7 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
 		}
-		glClearColor(0.2f, 0.3f, 0.7f, 1.f);
+		glClearColor(0.2f, 0.3f, 0.3f, 1.f);
 
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -208,7 +217,7 @@ int main() {
 			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 		}
 		sm->getActiveScene()->Update(V, P, time);
-		sm->getActiveScene()->findByName("plane")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("plane")->getModelComponent()->getTransform(), glm::radians(-90.f), glm::vec3(1.f, 0.f, 0.f)));
+		//sm->getActiveScene()->findByName("plane")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("plane")->getModelComponent()->getTransform(), glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
 		for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 			if (sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->boundingBox != nullptr || sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->capsuleCollider != nullptr)
 			{
@@ -219,7 +228,7 @@ int main() {
 		sm->getActiveScene()->Draw(V, P);
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
-			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
+			//std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
 			camera->updateCamera(dpos);
 		}
 
@@ -277,6 +286,9 @@ int main() {
 				std::cout << "Puszczono klawisz " << key << std::endl;
 			}
 		}
+		imgui_begin();
+		imgui_render(); 
+		imgui_end();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		if (test) {
@@ -284,6 +296,7 @@ int main() {
 			test = false;
 			//sm->loadScene("first");
 		}
+		
 	}
 
 	glfwTerminate();
@@ -313,4 +326,63 @@ GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _m
 	printf("%s: %s\n", _msg.c_str(), log.c_str());
 
 	return shdr;
+}
+
+void init_imgui()
+{
+	// Setup Dear ImGui binding
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init();
+
+	// Setup style
+	ImGui::StyleColorsDark();
+}
+void imgui_begin()
+{
+	// Start the Dear ImGui frame
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+}
+
+void imgui_render()
+{
+	/// Add new ImGui controls here
+
+
+	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+	{
+
+		ImGui::Begin("Opcje");                          // Create a window called "Hello, world!" and append into it.
+		for (auto go : sm->activeScene->gameObjects) {
+			ImGui::Text(go->name.c_str());
+			//ImGui::Text("x: %.2f,y: %.2f,z: %.2f",go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);
+			if (go->modelComponent->boundingBox != nullptr) {
+				ImGui::Text("localPosition x: %.2f,y: %.2f,z: %.2f", go->localTransform->getLocalPosition().x, go->localTransform->getLocalPosition().y, go->localTransform->getLocalPosition().z);
+				ImGui::Text("Min x: %.2f,y: %.2f,z: %.2f", go->modelComponent->boundingBox->min.x, go->modelComponent->boundingBox->min.y, go->modelComponent->boundingBox->min.z);
+				ImGui::Text("Max x: %.2f,y: %.2f,z: %.2f", go->modelComponent->boundingBox->max.x, go->modelComponent->boundingBox->max.y, go->modelComponent->boundingBox->max.z);
+			}
+		}
+			
+		ImGui::End();
+	}
+}
+
+void imgui_end()
+{
+	ImGui::Render();
+	int display_w, display_h;
+	glfwMakeContextCurrent(window);
+	glfwGetFramebufferSize(window, &display_w, &display_h);
+
+	glViewport(0, 0, display_w, display_h);
+
+
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

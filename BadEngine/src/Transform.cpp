@@ -8,7 +8,7 @@ Transform::Transform()
 }
 
 glm::vec3 nodeToVec3(YAML::Node node) {
-	return glm::vec3(node["x"].as<float>(), node["y"].as<float>(), node["y"].as<float>());
+	return glm::vec3(node["x"].as<float>(), node["y"].as<float>(), node["z"].as<float>());
 }
 
 Transform::Transform(YAML::Node node) {

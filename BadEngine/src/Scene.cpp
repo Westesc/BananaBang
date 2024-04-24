@@ -16,7 +16,6 @@ Scene::Scene(YAML::Node node) {
 }
 void Scene::Update(glm::mat4 view, glm::mat4 perspective, float time) {
 	for (auto go : gameObjects) {
-		std::cout << go->name << std::endl;
 		go->Update(view, perspective, time);
 	}
 }

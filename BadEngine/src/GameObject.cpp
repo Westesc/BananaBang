@@ -1,6 +1,18 @@
 #include "../lib/GameObject.h"
 #include <glm/gtx/string_cast.hpp>
 
+glm::vec3 nodeIntoVec3(YAML::Node node) {
+    return glm::vec3(node["x"].as<float>(), node["y"].as<float>(), node["y"].as<float>());
+}
+YAML::Node vec3ToNode(glm::vec3 vector)
+{
+    YAML::Node node;
+    node["x"] = vector.x;
+    node["y"] = vector.y;
+    node["z"] = vector.z;
+    return node;
+}
+
 GameObject::GameObject(std::string Name, std::string Tag, int Layer)
     : name(Name), tag(Tag), layer(Layer), active(true), parent(nullptr), modelComponent(nullptr), isRotating(false) {
     localTransform = new Transform();
@@ -10,6 +22,11 @@ GameObject::GameObject(YAML::Node node) {
     this->tag = node["tag"].as<std::string>();
     this->layer = node["layer"].as<int>();
     this->isRotating = node["isRotating"].as<bool>();
+    if (isRotating) {
+
+        this->rotateSpeed = node["rotateSpeed"].as<float>();
+        this->rotateAxis = nodeIntoVec3(node["rotateAxis"]);
+    }
     this->localTransform = new Transform(node["transform"]);
     this->modelComponent = new Model(node["model"]);
     if (node["children"]) {
@@ -97,7 +114,7 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
     if (modelComponent != nullptr) {
         glm::mat4 M = glm::translate(glm::mat4(1.f), localTransform->localPosition);
         if (isRotating) {
-            M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
+            M = glm::rotate(M, rotateSpeed * glm::radians(time), rotateAxis);
         }
         M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
         modelComponent->setTransform(M);
@@ -107,8 +124,10 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
     }
 }
 
-void GameObject::setRotating(bool rotating) {
+void GameObject::setRotating(bool rotating,float speed,glm::vec3 rotateAxis) {
     isRotating = rotating;
+    rotateSpeed = speed;
+    this->rotateAxis = rotateAxis;
 }
 
 void GameObject::checkResolveCollisions(GameObject* other, float deltaTime) {
@@ -137,14 +156,14 @@ void GameObject::checkResolveCollisions(GameObject* other, float deltaTime) {
     }
 }
 
-void GameObject::Draw(Shader* shaders, glm::mat4 view, glm::mat4 perspective) {
-    shaders->use();
-    shaders->setMat4("M", *modelComponent->getTransform());
-    shaders->setMat4("view", view);
-    shaders->setMat4("projection", perspective);
+void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
+    modelComponent->GetShader()->use();
+    modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
+    modelComponent->GetShader()->setMat4("view", view);
+    modelComponent->GetShader()->setMat4("projection", perspective);
     modelComponent->Draw();
     if (modelComponent->boundingBox != nullptr) {
-        modelComponent->DrawBoundingBoxes(shaders, *modelComponent->getTransform());
+        modelComponent->DrawBoundingBoxes(modelComponent->GetShader(), *modelComponent->getTransform());
     }
     else if (modelComponent->capsuleCollider != nullptr) {
         modelComponent->UpdateCollider(*modelComponent->getTransform());
@@ -158,6 +177,10 @@ YAML::Node GameObject::serialize() {
     node["tag"] = this->tag;
     node["layer"] = this->layer;
     node["isRotating"] = this->isRotating;
+    if (isRotating) {
+        node["rotateSpeed"] = this->rotateSpeed;
+        node["rotateAxis"] = vec3ToNode(this->rotateAxis);
+    }
     node["transform"] = this->localTransform->serialize();
     node["model"] = this->modelComponent->serialize();
     for (auto child : children) {

@@ -31,5 +31,5 @@ void SceneManager::saveScene(std::string name)
 
 Scene* SceneManager::getActiveScene()
 {
-	return scenes[0];
+	return activeScene;
 }

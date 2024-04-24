@@ -18,7 +18,7 @@ public:
 	GameObject* findByName(std::string name);
 	void Update(glm::mat4 view, glm::mat4 perspective, float time);
 	void checkResolveCollisions(float deltaTime);
-	void Draw(Shader* shaders, glm::mat4 view, glm::mat4 perspective);
+	void Draw(glm::mat4 view, glm::mat4 perspective);
 	YAML::Node serialize();
 
 protected:

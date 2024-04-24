@@ -41,6 +41,7 @@ GLFWwindow* window;
 SceneManager* sm;
 Input* input;
 float boxSpeed = 4.f;
+bool test = true;
 
 void Start() {
 	glfwInit();
@@ -59,12 +60,14 @@ void Start() {
 
 	glEnable(GL_CULL_FACE);
 
-	glFrontFace(GL_CW);
+	glFrontFace(GL_CCW);
 
 	glEnable(GL_BLEND);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	sm = new SceneManager();
-	Scene* scene = new Scene("main");
-	sm->scenes.push_back(scene);
+	//Scene* scene = new Scene("main");
+	//sm->scenes.push_back(scene);
+	sm->loadScene("first");
 	sm->activeScene = sm->scenes.at(0);
 	input = new Input(window);
 	/*GameObject* go = new GameObject("test object");
@@ -81,7 +84,7 @@ void Start() {
 int main() {
 	
 	Start();
-	Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
+	/*Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
 	Shader* skydomeShader = new Shader("../../../../src/vsS.vert", "../../../../src/fsS.frag");
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
@@ -95,7 +98,7 @@ int main() {
 	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
 	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"));
 	Mesh* meshSphere = new Mesh();
-	meshSphere->createSphere(20, 20, 50);
+	meshSphere->createDome(20, 20, 500);
 	Model* skydomeModel = new Model(meshSphere);
 
 	boxmodel->SetShader(shaders);
@@ -103,16 +106,19 @@ int main() {
 	box2model->SetShader(shaders);
 	capsulemodel->SetShader(shaders);
 	capsule2model->SetShader(shaders);
+	skydomeModel->SetShader(skydomeShader);
 	box->addModelComponent(boxmodel);
 	plane->addModelComponent(planemodel);
 	box2->addModelComponent(box2model);
 	capsule->addModelComponent(capsulemodel);
 	capsule2->addModelComponent(capsule2model);
+	skydome->addModelComponent(skydomeModel);
 	sm->getActiveScene()->addObject(box);
 	sm->getActiveScene()->addObject(box2);
 	sm->getActiveScene()->addObject(capsule);
 	sm->getActiveScene()->addObject(plane);
 	sm->getActiveScene()->addObject(capsule2);
+	sm->getActiveScene()->addObject(skydome);*/
 	int key, action;
 	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 20.0f);
 
@@ -139,6 +145,11 @@ int main() {
 	sm->getActiveScene()->findByName("box2")->setRotating(true);
 	sm->getActiveScene()->findByName("plane")->setRotating(true);
 	sm->getActiveScene()->findByName("capsule")->setRotating(true);
+	sm->getActiveScene()->findByName("skydome")->setRotating(true,1.f,glm::vec3(0.f,1.f,0.f));
+
+	sm->getActiveScene()->findByName("skydome")->getModelComponent()->TextureFromFile("../../../../res/chmury1.png");
+	sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTexturePath("../../../../res/chmury1.png");
+	
 	float deltaTime = 0;
 	float lastTime = 0;
 	CollisionManager cm = CollisionManager(1000, 100);
@@ -153,11 +164,11 @@ int main() {
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
 		deltaTime = time - lastTime;
 		lastTime = time;
-		std::cout << "Delta time: " << deltaTime << std::endl;
+		//std::cout << "Delta time: " << deltaTime << std::endl;
 
 		glm::mat4 V = camera->getViewMatrix();
 
-		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 50.f);
+		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 500.f);
 
 		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
@@ -197,12 +208,15 @@ int main() {
 			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 		}
 		sm->getActiveScene()->Update(V, P, time);
-		plane->getModelComponent()->setTransform(glm::rotate(*plane->getModelComponent()->getTransform(), glm::radians(-90.f), glm::vec3(1.f, 0.f, 0.f)));
+		sm->getActiveScene()->findByName("plane")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("plane")->getModelComponent()->getTransform(), glm::radians(-90.f), glm::vec3(1.f, 0.f, 0.f)));
 		for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
-			cm.addObject(sm->getActiveScene()->gameObjects.at(i));
+			if (sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->boundingBox != nullptr || sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->capsuleCollider != nullptr)
+			{
+				cm.addObject(sm->getActiveScene()->gameObjects.at(i));
+			}
 		}
 		cm.checkResolveCollisions(deltaTime);
-		sm->getActiveScene()->Draw(shaders, V, P);
+		sm->getActiveScene()->Draw(V, P);
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
@@ -265,6 +279,11 @@ int main() {
 		}
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+		if (test) {
+			sm->saveScene("first");
+			test = false;
+			//sm->loadScene("first");
+		}
 	}
 
 	glfwTerminate();

@@ -23,6 +23,8 @@ public:
 	Transform* localTransform;
 	Model* modelComponent;
 	bool isRotating;
+	float rotateSpeed;
+	glm::vec3 rotateAxis;
 
 	void setParent(GameObject* Parent);
 	void addChild(GameObject* Child);
@@ -36,9 +38,9 @@ public:
 	Transform* getGlobalTransform();
 	void Move(glm::vec3 translation);
 	void Update(glm::mat4 view, glm::mat4 perspective, float time);
-	void setRotating(bool rotating);
+	void setRotating(bool rotating, float speed = 100.f, glm::vec3 rotateAxis = glm::vec3(0.f, 0.f, 1.f));
 	void checkResolveCollisions(GameObject* other, float deltaTime);
-	void Draw(Shader* shaders, glm::mat4 view, glm::mat4 perspective);
+	void Draw(glm::mat4 view, glm::mat4 perspective);
 	YAML::Node serialize();
 
 };

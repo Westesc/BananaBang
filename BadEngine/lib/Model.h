@@ -170,6 +170,7 @@ public:
     {
         rotating = rotate;
         isFromFile = true;
+        pathObj = path;
         loadModel(path);
         Transform = new glm::mat4(1);
     }
@@ -187,18 +188,18 @@ public:
         shader = new Shader(node["shader"]);
         if (node["path"]) {
             isFromFile = true;
-            std::string stringPath = node["path"].as<std::string>();
-            this->pathObj = strdup(stringPath.c_str());
+            this->pathObj = strdup(node["path"].as<std::string>().c_str());
             loadModel(pathObj);
         }
         else if (node["meshes"]) {
             YAML::Node meshesNodes = node["meshes"];
+            isFromFile = false;
             for (auto mn : meshesNodes) {
                 meshes.push_back(new Mesh(mn));
             }
 
         }
-
+        Transform = new glm::mat4(1);
         if (node["capsuleCollider"]) {
             capsuleCollider = new CapsuleCollider(node["capsuleCollider"]);
         }

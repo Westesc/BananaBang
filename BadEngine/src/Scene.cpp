@@ -16,6 +16,7 @@ Scene::Scene(YAML::Node node) {
 }
 void Scene::Update(glm::mat4 view, glm::mat4 perspective, float time) {
 	for (auto go : gameObjects) {
+		std::cout << go->name << std::endl;
 		go->Update(view, perspective, time);
 	}
 }
@@ -32,9 +33,9 @@ GameObject* Scene::findByName(std::string name) {
 	}
 }
 
-void Scene::Draw(Shader* shaders, glm::mat4 view, glm::mat4 perspective) {
+void Scene::Draw(glm::mat4 view, glm::mat4 perspective) {
 	for (auto go : gameObjects) {
-		go->Draw(shaders, view, perspective);
+		go->Draw(view, perspective);
 	}
 }
 

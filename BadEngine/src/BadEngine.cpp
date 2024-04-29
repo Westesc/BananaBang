@@ -11,6 +11,7 @@
 #include <glm/glm.hpp>
 
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "../lib/GraphNode.h"
 #include "../lib/Shader.h"
@@ -25,8 +26,16 @@
 #include "../lib/Scene.h"
 #include "../lib/Transform.h"
 #include "../lib/UI.h"
+#include "../lib/CollisionManager.h"
 
-bool test = true;
+void init_imgui();
+void imgui_begin();
+void imgui_render();
+void imgui_end();
+
+//bool test = true;
+bool test = false;
+bool frustumTest = false;
 
 void DrawPlane(float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor);
 void DrawTree(float scaleT, float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor);
@@ -70,11 +79,15 @@ void Start() {
 
 	glEnable(GL_CULL_FACE);
 
-	//glFrontFace(GL_CW);
+	glFrontFace(GL_CCW);
 
 	glEnable(GL_BLEND);
+	init_imgui();
 	sm = new SceneManager();
-	sm->saveScene("first");
+	//Scene * scene = new Scene("main");
+	//sm->scenes.push_back(scene);
+	//sm->loadScene("first");
+	//sm->activeScene = sm->scenes.at(0);
 	Scene* scene = new Scene("main");
 	sm->scenes.push_back(scene);
 	sm->activeScene = sm->scenes.at(0);
@@ -89,6 +102,75 @@ void Start() {
 	
 	go->getTransform();*/
 }
+
+std::array<glm::vec4, 6> calculateFrustumPlanes(const glm::mat4& viewProjectionMatrix) {
+	std::array<glm::vec4, 6> planes;
+
+	// Left plane
+	planes[0] = glm::row(viewProjectionMatrix, 3) + glm::row(viewProjectionMatrix, 0);
+	// Right plane
+	planes[1] = glm::row(viewProjectionMatrix, 3) - glm::row(viewProjectionMatrix, 0);
+	// Top plane
+	planes[2] = glm::row(viewProjectionMatrix, 3) - glm::row(viewProjectionMatrix, 1);
+	// Bottom plane
+	planes[3] = glm::row(viewProjectionMatrix, 3) + glm::row(viewProjectionMatrix, 1);
+	// Near plane
+	planes[4] = glm::row(viewProjectionMatrix, 3) + glm::row(viewProjectionMatrix, 2);
+	// Far plane
+	planes[5] = glm::row(viewProjectionMatrix, 3) - glm::row(viewProjectionMatrix, 2);
+
+	return planes;
+}
+
+bool isBoxInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, BoundingBox& box, glm::mat4* transform) {
+	glm::vec3 vertices[] = {
+			glm::vec3(*transform * glm::vec4(box.vertices.at(0), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(1), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(2), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(3), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(4), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(5), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(6), 1.0f)),
+			glm::vec3(*transform * glm::vec4(box.vertices.at(7), 1.0f))
+	};
+	for (const auto& plane : frustumPlanes) {
+		glm::vec4 normalizedPlane = plane / glm::length(glm::vec3(plane));
+		for (const auto& vertex : vertices) {
+			float distance = glm::dot(glm::vec3(normalizedPlane), vertex) + normalizedPlane.w;
+			if (distance < 0.0f) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+bool isCapsuleInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, CapsuleCollider* capsule, glm::mat4* transform) {
+	for (const auto& plane : frustumPlanes) {
+		float distance = glm::dot(glm::vec3(plane), glm::vec3(*transform * glm::vec4(capsule->center, 1.0f))) + plane.w;
+		if (distance <= -capsule->radius) {
+			return false;
+		}
+		if (distance >= capsule->height + capsule->radius) {
+			continue;
+		}
+	}
+	return true;
+}
+
+void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const std::vector<GameObject*>& objects) {
+	for (auto object : objects) {
+		if (object->getModelComponent()->boundingBox != nullptr) {
+			bool isVisible = isBoxInFrustum(frustumPlanes, *object->getModelComponent()->boundingBox, object->getModelComponent()->getTransform());
+			object->setVisible(isVisible);
+		}
+		else if (object->getModelComponent()->capsuleCollider != nullptr) {
+			bool isVisible = isCapsuleInFrustum(frustumPlanes, object->getModelComponent()->capsuleCollider, object->getModelComponent()->getTransform());
+			object->setVisible(isVisible);
+		}
+	}
+}
+
 
 int main() {
 	
@@ -151,7 +233,7 @@ int main() {
 	sm->getActiveScene()->addObject(capsule2);
 	sm->getActiveScene()->addObject(skydome);
 	int key, action;
-	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 6.0f);
+	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 20.0f);
 
 	const TimePoint tpStart = Clock::now();
 	static bool sequenceStarted = false;
@@ -187,6 +269,7 @@ int main() {
 	sm->getActiveScene()->findByName("box2")->setRotating(true);
 	sm->getActiveScene()->findByName("plane")->setRotating(true);
 	sm->getActiveScene()->findByName("capsule")->setRotating(true);
+	//sm->getActiveScene()->findByName("skydome")->setRotating(true, 100.f, glm::vec3(0.f, 1.f, 0.f));
 
 	float deltaTime = 0;
 	float lastTime = 0;
@@ -194,7 +277,7 @@ int main() {
 	bool isFromFile = false;
 	bool rotating = true;
 	bool isBlue = false;
-
+	CollisionManager cm = CollisionManager(1000, 100);
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -205,12 +288,14 @@ int main() {
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
 		deltaTime = time - lastTime;
 		lastTime = time;
+		//std::cout << "Delta time: " << deltaTime << std::endl;
 
 		glm::mat4 V = camera->getViewMatrix();
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
+		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
 
-		if (skydome->getModelComponent() != nullptr) {
+		/*if (skydome->getModelComponent() != nullptr) {
 			glm::mat4 Mm = glm::translate(glm::mat4(1.f), glm::vec3(20.f, 0.f, 18.f));
 			Mm = glm::scale(Mm, glm::vec3(50.f, 50.0f, 50.0f));
 			Mm = glm::rotate(Mm, glm::radians(time), glm::vec3(0.f, 1.f, 0.f));
@@ -221,7 +306,7 @@ int main() {
 			//glActiveTexture(GL_TEXTURE0);
 			//glBindTexture(GL_TEXTURE_2D, texture);
 			skydomeModel->Draw();
-		}
+		}*/
 
 		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
@@ -260,70 +345,30 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 		}
-		//sm->getActiveScene()->Update(V, P, time);
-		if (box->getModelComponent() != nullptr) {
-			glm::mat4 M = glm::translate(glm::mat4(1.f), box->getTransform()->localPosition);
-			M = glm::rotate(M, 10.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-			//M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
-			box->getModelComponent()->setTransform(&M);
+		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+			frustumTest = !frustumTest;
 		}
-
-		//if (box2->getModelComponent() != nullptr) {
-			//glm::mat4 M = glm::translate(glm::mat4(1.f), box2->getTransform()->localPosition);
-			//M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-			//M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
-			//box2->getModelComponent()->setTransform(&M);
-		//}
-
-		if (capsule->getModelComponent() != nullptr) {
-			glm::mat4 M = glm::translate(glm::mat4(1.f), capsule->getTransform()->localPosition);
-			M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
-			capsule->getModelComponent()->setTransform(&M);
-		}
-		if (capsule2->getModelComponent() != nullptr) {
-			glm::mat4 M = glm::translate(glm::mat4(1.f), capsule2->getTransform()->localPosition);
-			//M = glm::rotate(M, 100.f * glm::radians(time), glm::vec3(0.f, 0.f, 1.f));
-			M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
-			capsule2->getModelComponent()->setTransform(&M);
-		}
-		if (box->getModelComponent()->checkCollision(box2->getModelComponent())) {
-			std::cout << "KOLIZJA" << std::endl;
-			glm::vec3 displacement = box->getModelComponent()->calculateCollisionResponse(box2->getModelComponent())*0.01f;
-			std::cout << displacement.x << "," << displacement.y << "," << displacement.z << std::endl;
-			if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
-				box->getTransform()->localPosition += displacement;
-				box2->getTransform()->localPosition -= displacement;
+		sm->getActiveScene()->Update(V, P, time);
+		sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::translate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(20.f, 0.f, 18.f)));
+		sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::scale(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(50.f, 50.0f, 50.0f)));
+		sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::radians(time), glm::vec3(0.f, 1.f, 0.f)));
+		//sm->getActiveScene()->findByName("plane")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("plane")->getModelComponent()->getTransform(), glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
+		for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
+			if (sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->boundingBox != nullptr || sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->capsuleCollider != nullptr)
+			{
+				cm.addObject(sm->getActiveScene()->gameObjects.at(i));
 			}
 		}
-		if (box->getModelComponent()->checkCollision(capsule->getModelComponent())) {
-			std::cout << "KOLIZJA2" << std::endl;
-			glm::vec3 displacement = box->getModelComponent()->calculateCollisionResponse(capsule->getModelComponent()) * 0.02f;
-			std::cout << displacement.x << "," << displacement.y << "," << displacement.z << std::endl;
-			if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
-				box->getTransform()->localPosition += displacement;
-				capsule->getTransform()->localPosition -= displacement;
+		cm.checkResolveCollisions(deltaTime);
+		performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
+		if (frustumTest) {
+			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
+				if (sm->getActiveScene()->gameObjects.at(i)->isVisible) {
+					std::cout << sm->getActiveScene()->gameObjects.at(i)->name << " " << std::endl;
+				}
 			}
 		}
-		if (capsule2->getModelComponent()->checkCollision(capsule->getModelComponent())) {
-			std::cout << "KOLIZJA3" << std::endl;
-			glm::vec3 displacement = capsule2->getModelComponent()->calculateCollisionResponse(capsule->getModelComponent()) * 0.02f;
-			std::cout << displacement.x << "," << displacement.y << "," << displacement.z << std::endl;
-			if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
-				capsule2->getTransform()->localPosition += displacement;
-				capsule->getTransform()->localPosition -= displacement;
-			}
-		}
-		if (capsule2->getModelComponent()->checkCollision(box2->getModelComponent())) {
-			std::cout << "KOLIZJA4" << std::endl;
-			glm::vec3 displacement = capsule2->getModelComponent()->calculateCollisionResponse(box2->getModelComponent()) * 0.02f;
-			std::cout << displacement.x << "," << displacement.y << "," << displacement.z << std::endl;
-			if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
-				capsule2->getTransform()->localPosition += displacement;
-				box2->getTransform()->localPosition -= displacement;
-			}
-		}
+		sm->getActiveScene()->Draw(V, P);
 
 		mapsShader->use();
 		mapsShader->setVec3("viewPos", camera->transform->getLocalPosition());
@@ -331,8 +376,8 @@ int main() {
 		mapsShader->setMat4("M", *box->getModelComponent()->getTransform());
 		mapsShader->setMat4("view", V);
 		mapsShader->setMat4("projection", P);
-		box->getModelComponent()->Draw();
-		box->getModelComponent()->DrawBoundingBoxes(mapsShader, *box->getModelComponent()->getTransform());
+		//box->getModelComponent()->Draw();
+		//box->getModelComponent()->DrawBoundingBoxes(mapsShader, *box->getModelComponent()->getTransform());
 
 		shaderTree->use();
 		//shaders->setMat4("M", *box2->getModelComponent()->getTransform());
@@ -341,7 +386,7 @@ int main() {
 		//box2->getModelComponent()->Draw();
 		//box2->getModelComponent()->DrawBoundingBoxes(shaders, *box2->getModelComponent()->getTransform());
 
-		shaders->use();
+		/*shaders->use();
 		shaders->setMat4("M", *capsule->getModelComponent()->getTransform());
 		shaders->setMat4("view", V);
 		shaders->setMat4("projection", P);
@@ -352,7 +397,7 @@ int main() {
 		shaders->setMat4("view", V);
 		shaders->setMat4("projection", P);
 		capsule2->getModelComponent()->Draw();
-		capsule2->getModelComponent()->UpdateCollider(*capsule2->getModelComponent()->getTransform());
+		capsule2->getModelComponent()->UpdateCollider(*capsule2->getModelComponent()->getTransform());*/
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
@@ -439,6 +484,9 @@ int main() {
 				}
 			}
 		}
+		imgui_begin();
+		imgui_render();
+		imgui_end();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		if (test) {
@@ -454,7 +502,7 @@ int main() {
 void DrawPlane(float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor) {
 	glm::mat4 M2 = glm::translate(glm::mat4(1.f), scale * vektor);
 	M2 = glm::scale(M2, glm::vec3(scale, scale, scale));
-	plane->getModelComponent()->setTransform(&M2);
+	plane->getModelComponent()->setTransform(M2);
 	shaders->use();
 	shaders->setMat4("M", M2);
 	plane->getModelComponent()->Draw();
@@ -462,7 +510,7 @@ void DrawPlane(float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor
 void DrawTree(float scaleT, float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor) {
 	glm::mat4 M2 = glm::translate(glm::mat4(1.f), scale * vektor);
 	M2 = glm::scale(M2, glm::vec3(scaleT, scaleT, scaleT));
-	plane->getModelComponent()->setTransform(&M2);
+	plane->getModelComponent()->setTransform(M2);
 	shaders->use();
 	shaders->setMat4("M", M2);
 	plane->getModelComponent()->Draw();
@@ -500,4 +548,63 @@ GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _m
 	printf("%s: %s\n", _msg.c_str(), log.c_str());
 
 	return shdr;
+}
+
+void init_imgui()
+{
+	// Setup Dear ImGui binding
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
+
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init();
+
+	// Setup style
+	ImGui::StyleColorsDark();
+}
+void imgui_begin()
+{
+	// Start the Dear ImGui frame
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+}
+
+void imgui_render()
+{
+	/// Add new ImGui controls here
+
+
+	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
+	{
+
+		ImGui::Begin("Opcje");                          // Create a window called "Hello, world!" and append into it.
+		for (auto go : sm->activeScene->gameObjects) {
+			ImGui::Text(go->name.c_str());
+			//ImGui::Text("x: %.2f,y: %.2f,z: %.2f",go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);
+			if (go->modelComponent->boundingBox != nullptr) {
+				ImGui::Text("localPosition x: %.2f,y: %.2f,z: %.2f", go->localTransform->getLocalPosition().x, go->localTransform->getLocalPosition().y, go->localTransform->getLocalPosition().z);
+				ImGui::Text("Min x: %.2f,y: %.2f,z: %.2f", go->modelComponent->boundingBox->min.x, go->modelComponent->boundingBox->min.y, go->modelComponent->boundingBox->min.z);
+				ImGui::Text("Max x: %.2f,y: %.2f,z: %.2f", go->modelComponent->boundingBox->max.x, go->modelComponent->boundingBox->max.y, go->modelComponent->boundingBox->max.z);
+			}
+		}
+
+		ImGui::End();
+	}
+}
+
+void imgui_end()
+{
+	ImGui::Render();
+	int display_w, display_h;
+	glfwMakeContextCurrent(window);
+	glfwGetFramebufferSize(window, &display_w, &display_h);
+
+	glViewport(0, 0, display_w, display_h);
+
+
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }

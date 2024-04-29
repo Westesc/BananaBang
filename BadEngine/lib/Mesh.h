@@ -36,6 +36,12 @@ struct Texture
     std::string path;
 };
 
+enum meshType {
+    fromFile,
+    sphere,
+    dome
+};
+
 class Mesh {
 public:
     GLfloat deltaTime;
@@ -44,9 +50,13 @@ public:
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
+    meshType type = fromFile;
     unsigned int VAO;
     BoundingBox* boundingBox = nullptr;
     CapsuleCollider* capsuleCollider = nullptr;
+    //zmienne do sfery
+    int verticalSegments, horizontalSegments, size;
+
 
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
     {
@@ -56,6 +66,15 @@ public:
 
         setupMesh();
         //calculateBoundingBox();
+    }
+
+    Mesh(YAML::Node node) {
+        if (node["type"].as<int>() == (int)sphere) {
+            createSphere(node["verticalSegments"].as<int>(), node["horizontalSegments"].as<int>(), node["size"].as<int>());
+        }
+        else if(node["type"].as<int>() == (int)dome) {
+            createDome(node["verticalSegments"].as<int>(), node["horizontalSegments"].as<int>(), node["size"].as<int>());
+        }
     }
 
     Mesh()
@@ -197,7 +216,10 @@ public:
     void createSphere(int verticalSegments, int horizontalSegments, int size) {
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
-
+        this->verticalSegments = verticalSegments;
+        this->horizontalSegments = horizontalSegments;
+        this->size = size;
+        type = sphere;
         for (int j = 0; j <= verticalSegments; ++j) {
             for (int i = 0; i <= horizontalSegments; ++i) {
                 float theta = j * glm::pi<float>() / verticalSegments;
@@ -229,14 +251,49 @@ public:
         setupMesh();
     }
 
+    void createDome(int verticalSegments, int horizontalSegments, int size) {
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> indices;
+        this->verticalSegments = verticalSegments;
+        this->horizontalSegments = horizontalSegments;
+        this->size = size;
+        type = dome;
+        for (int j = 0; j <= verticalSegments; ++j) {
+            for (int i = 0; i <= horizontalSegments; ++i) {
+                float theta = j * glm::pi<float>() / verticalSegments;
+                float phi = i * 2 * glm::pi<float>() / horizontalSegments;
+                float x = size * sin(theta) * cos(phi);
+                float y = size * cos(theta);
+                float z = size * sin(theta) * sin(phi);
+                vertices.push_back({ glm::vec3(x, y, z), glm::vec3(x, y, z), glm::vec2(i / (float)horizontalSegments, j / (float)verticalSegments) });
+            }
+        }
+        for (int j = 0; j < verticalSegments / 1.5; ++j) {
+            for (int i = 0; i < horizontalSegments; ++i) {
+                int first = (j * (horizontalSegments + 1)) + i;
+                int second = first + horizontalSegments + 1;
+                indices.push_back(first);
+                indices.push_back(second);
+                indices.push_back(first + 1);
+
+                indices.push_back(second);
+                indices.push_back(second + 1);
+                indices.push_back(first + 1);
+            }
+        }
+        this->vertices = vertices;
+        this->indices = indices;
+
+        setupMesh();
+    }
+
     YAML::Node serialize()
     {
         YAML::Node node;
         
-        for (auto v : vertices) {
+        /*for (auto v : vertices) {
             YAML::Node vertexNode;
             vertexNode["position"] = nodeVec3(v.Position);
-            std::cout << v.Position.x << " " << v.Position.y << " " << v.Position.z << std::endl;
             vertexNode["normal"] = nodeVec3(v.Normal);
             vertexNode["texCoords"] = nodeVec2(v.TexCoords);
             node["vertex"].push_back(vertexNode);
@@ -250,6 +307,12 @@ public:
             textureNode["path"] = t.path;
             textureNode["type"] = t.type;
             node["vertex"].push_back(textureNode);
+        }*/
+        if (type == sphere || type == dome) {
+            node["type"] = (int)type;
+            node["verticalSegments"] = verticalSegments;
+            node["horizontalSegments"] = horizontalSegments;
+            node["size"] = size;
         }
         
 

@@ -34,7 +34,7 @@ void imgui_render();
 void imgui_end();
 
 //bool test = true;
-bool test = false;
+bool test = true;
 bool frustumTest = false;
 
 void DrawPlane(float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor);

@@ -26,7 +26,6 @@ private:
     glm::mat4* Transform;
     glm::mat4* prevTransform = new glm::mat4(1.f);
     std::vector<Texture> textures_loaded;
-    const char* texturePath;
     std::vector<Mesh*> meshes;
     std::string directory;
     Shader* shader;
@@ -182,7 +181,6 @@ public:
     glm::mat4* getTransform() { return Transform; }
     glm::mat4* getPrevTransform() { return prevTransform; }
     void SetShader(Shader* s) { shader = s; }
-    void setTexturePath(const char* path) { this->texturePath = path; }
     Shader* GetShader() { return shader; }
     BoundingBox* boundingBox = nullptr;
     CapsuleCollider* capsuleCollider = nullptr;
@@ -276,10 +274,12 @@ public:
         }
 
 
-        if (node["texturePath"])
+        if (node["textures"])
         {
-            this->texturePath = strdup(node["texturePath"].as<std::string>().c_str());
-            TextureFromFile(texturePath);
+            YAML::Node  texturesNode = node["textures"];
+            for (auto tex : texturesNode) {
+                AddTexture(tex["path"].as<std::string>(),tex["type"].as<std::string>());
+            }
         }
     }
 
@@ -609,12 +609,16 @@ public:
         }
         else
         {
-            node["texturePath"] = this->texturePath;
-
             for (auto m : meshes)
             {
                 node["meshes"].push_back(m->serialize());
             }
+        }
+        for (auto tex : textures_loaded) {
+            YAML::Node textureNode;
+            textureNode["path"] = tex.path;
+            textureNode["type"] = tex.type;
+            node["textures"].push_back(textureNode);
         }
         if (boundingBox != nullptr) {
             node["boundingBox"] = boundingBox->serialize();

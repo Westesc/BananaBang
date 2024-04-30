@@ -269,7 +269,7 @@ int main() {
 	sm->getActiveScene()->findByName("box2")->setRotating(true);
 	sm->getActiveScene()->findByName("plane")->setRotating(true);
 	sm->getActiveScene()->findByName("capsule")->setRotating(true);
-	//sm->getActiveScene()->findByName("skydome")->setRotating(true, 100.f, glm::vec3(0.f, 1.f, 0.f));
+	sm->getActiveScene()->findByName("skydome")->setRotating(true, 1.f, glm::vec3(0.f, 1.f, 0.f));
 
 	float deltaTime = 0;
 	float lastTime = 0;
@@ -277,6 +277,8 @@ int main() {
 	bool isFromFile = false;
 	bool rotating = true;
 	bool isBlue = false;
+	//sm->loadScene("first");
+	//sm->activeScene = sm->scenes.at(1);
 	CollisionManager cm = CollisionManager(1000, 100);
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -582,6 +584,7 @@ void imgui_render()
 	{
 
 		ImGui::Begin("Opcje");                          // Create a window called "Hello, world!" and append into it.
+		ImGui::Text("localPosition x: %.2f,y: %.2f,z: %.2f", camera->transform->localRotation.x, camera->transform->localRotation.y, camera->transform->localRotation.z);
 		for (auto go : sm->activeScene->gameObjects) {
 			ImGui::Text(go->name.c_str());
 			//ImGui::Text("x: %.2f,y: %.2f,z: %.2f",go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);

@@ -66,12 +66,12 @@ Scenes:
           path: ../../../../res/tree.obj
           boundingBox:
             min:
-              x: -4.27804518
-              y: -4.11265373
+              x: -4.26911116
+              y: -4.13258696
               z: -0.300000012
             max:
-              x: -4.47297907
-              y: -2.03371143
+              x: -4.61480093
+              y: -2.0733397
               z: 0.300000012
             customSize: false
           shader:
@@ -103,8 +103,8 @@ Scenes:
           path: ../../../../res/capsule.obj
           capsuleCollider:
             center:
-              x: 4.37072706
-              y: 4.15020466
+              x: 4.35881472
+              y: 4.17678261
               z: 0
             radius: 1.36705923
             height: 3.43535995
@@ -170,7 +170,12 @@ Scenes:
       - name: skydome
         tag: none
         layer: 0
-        isRotating: false
+        isRotating: true
+        rotateSpeed: 1
+        rotateAxis:
+          x: 0
+          y: 1
+          z: 0
         transform:
           position:
             x: 0

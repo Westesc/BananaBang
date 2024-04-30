@@ -13,6 +13,10 @@ glm::mat4 Camera::getViewMatrix() {
 void Camera::updateCamera(glm::vec2 vector) {
 	glm::vec3 Front;
 	transform->localRotation += glm::vec3(vector.x/300,-vector.y/300, 0);
+	if(transform->localRotation.y>1.56)
+		transform->localRotation.y = 1.56;
+	else if (transform->localRotation.y < -1.56)
+		transform->localRotation.y = -1.56;
 	Front.x = cos(transform->localRotation.x ) * cos(transform->localRotation.y);
 	Front.y = sin(transform->localRotation.y);
 	Front.z = sin(transform->localRotation.x) * cos(transform->localRotation.y);

@@ -26,6 +26,8 @@
 #include "../lib/Transform.h"
 #include "../lib/UI.h"
 #include "../lib/CollisionManager.h"
+#include "../lib/PlayerMovement.h"
+#include "../lib/GameMode.h"
 
 
 
@@ -47,6 +49,7 @@ constexpr int wys = 800, szer = 1000;
 GLFWwindow* window;
 SceneManager* sm;
 Input* input;
+PlayerMovement* pm;
 float boxSpeed = 4.f;
 bool test = true;
 bool frustumTest = false;
@@ -79,6 +82,7 @@ void Start() {
 	sm->loadScene("first");
 	sm->activeScene = sm->scenes.at(0);
 	input = new Input(window);
+	pm = new PlayerMovement(sm, input);
 	/*GameObject* go = new GameObject("test object");
 	Transform* trans = new Transform();
 	Component* comp = new Component();
@@ -230,8 +234,11 @@ int main() {
 	sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTexturePath("../../../../res/chmury1.png");
 	sm->activeScene = sm->scenes.at(1);*/
 	float deltaTime = 0;
+	float deltaTime2 = 0;
 	float lastTime = 0;
+	GameMode gameMode;
 	CollisionManager cm = CollisionManager(1000, 100);
+
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -242,31 +249,36 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
 		deltaTime = time - lastTime;
+		deltaTime2 += time - lastTime;
 		lastTime = time;
-		//std::cout << "Delta time: " << deltaTime << std::endl;
+		if (input->checkAnyKey())
+		{
+			if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_1))
+			{
+				gameMode.setMode(GameMode::Debug);
+			}
+			else if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_2))
+			{
+				gameMode.setMode(GameMode::Start);
+			}
+			else if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_3))
+			{
+				gameMode.setMode(GameMode::Game);
+			}
+			else if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_4))
+			{
+				gameMode.setMode(GameMode::Menu);
+			}
+		}
+
+		if (gameMode.getMode() == GameMode::Game) {
+			pm->ManagePlayer(deltaTime, deltaTime2);
+		}
 
 		glm::mat4 V = camera->getViewMatrix();
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 500.f);
 		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
-		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
-		}
 
 		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
@@ -315,56 +327,43 @@ int main() {
 
 		if (input->IsKeobarodAction(window)) {
 			input->GetMessage(key, action);
-			// Obsługa sekwencji klawiszy
-			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-				if (!sequenceStarted) {
-					sequenceStarted = true;
-					secondKeyPressed = false;
-					firstKeyPressed = true;
-					std::cout << "W" << std::endl;
+			if (gameMode.getMode() == GameMode::Debug) {
+
+				if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
 					camera->ProcessKeyboard(FORWARD, time);
 				}
-				else if (firstKeyPressed && !secondKeyPressed) {
-					secondKeyPressed = true;
-					sequenceStarted = false;
-					firstKeyPressed = false;
-					std::cout << "Sekwencja klawiszy W + W została wykryta!" << std::endl;
+				else if (key == GLFW_KEY_S && action == GLFW_REPEAT) {
+					camera->ProcessKeyboard(BACKWARD, time);
 				}
-			}
-			else if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
-				camera->ProcessKeyboard(FORWARD, time);
-			}
-			else if (key == GLFW_KEY_S && action == GLFW_REPEAT) {
-				camera->ProcessKeyboard(BACKWARD, time);
-			}
-			else if (key == GLFW_KEY_D && action == GLFW_REPEAT) {
-				camera->ProcessKeyboard(RIGHT, time);
-			}
-			else if (key == GLFW_KEY_A && action == GLFW_REPEAT) {
-				camera->ProcessKeyboard(LEFT, time);
-			}
-			else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			}
-			else if (key == GLFW_KEY_X && action == GLFW_PRESS) {
-				std::cout << "KLAWISZ X " << key << std::endl;
-			}
-			else if (key == GLFW_KEY_Z && action == GLFW_REPEAT) {
-				std::cout << "KLAWISZ Z " << key << std::endl;
-			}
-			//jednorazowe
-			else if (key == GLFW_MOUSE_BUTTON_LEFT) {
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-				std::cout << "LEFT MOUSE " << key << std::endl;
-			}
-			else if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
-				std::cout << "Wyłączono klawisz S " << key << std::endl;
-			}
-			else if (action == GLFW_REPEAT) {
-				std::cout << "Nacisnieto klawisz " << key << std::endl;
-			}
-			else if (action == GLFW_RELEASE) {
-				std::cout << "Puszczono klawisz " << key << std::endl;
+				else if (key == GLFW_KEY_D && action == GLFW_REPEAT) {
+					camera->ProcessKeyboard(RIGHT, time);
+				}
+				else if (key == GLFW_KEY_A && action == GLFW_REPEAT) {
+					camera->ProcessKeyboard(LEFT, time);
+				}
+				else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				}
+				else if (key == GLFW_KEY_X && action == GLFW_PRESS) {
+					std::cout << "KLAWISZ X " << key << std::endl;
+				}
+				else if (key == GLFW_KEY_Z && action == GLFW_REPEAT) {
+					std::cout << "KLAWISZ Z " << key << std::endl;
+				}
+				//jednorazowe
+				else if (key == GLFW_MOUSE_BUTTON_LEFT) {
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+					std::cout << "LEFT MOUSE " << key << std::endl;
+				}
+				else if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
+					std::cout << "Wyłączono klawisz S " << key << std::endl;
+				}
+				else if (action == GLFW_REPEAT) {
+					std::cout << "Nacisnieto klawisz " << key << std::endl;
+				}
+				else if (action == GLFW_RELEASE) {
+					std::cout << "Puszczono klawisz " << key << std::endl;
+				}
 			}
 		}
 		imgui_begin();

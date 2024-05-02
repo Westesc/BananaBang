@@ -165,6 +165,12 @@ void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const 
 int main() {
 	
 	Start();
+	/*Shader* shader = new Shader("../../../../res/shaders/vs_player.vert", "../../../../res/shaders/fs_player.frag");
+	GameObject* player = new GameObject("player");
+	Model* playermodel = new Model(const_cast<char*>("../../../../res/objects/player.obj"));
+	playermodel->SetShader(shader);
+	player->addModelComponent(playermodel);
+	sm->getActiveScene()->addObject(player);
 	/*Shader* shaders = new Shader("../../../../src/vs.vert", "../../../../src/fs.frag");
 	Shader* skydomeShader = new Shader("../../../../src/vsS.vert", "../../../../src/fsS.frag");
 	GameObject* box = new GameObject("box");
@@ -216,6 +222,7 @@ int main() {
 	capsule->getModelComponent()->addCollider(2, capsule->localTransform->localPosition);
 	box2->getModelComponent()->addCollider(1, box->localTransform->localPosition);*/
 
+	//sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(-1.f, -1.f, 1.f);
 	/*sm->getActiveScene()->findByName("box")->getTransform()->localPosition = glm::vec3(-1.f, -1.f, 0.f);
 	sm->getActiveScene()->findByName("box2")->getTransform()->localPosition = glm::vec3(-4.f, -4.f, 0.f);
 	sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition = glm::vec3(4.f, 4.f, 0.f);

@@ -96,8 +96,8 @@ Scenes:
           path: ../../../../res/objects/capsule.obj
           capsuleCollider:
             center:
-              x: 4.44222641
-              y: 4.4466486
+              x: 4.44179392
+              y: 4.44707823
               z: 0
             radius: 1.36705923
             height: 3.43535995
@@ -192,6 +192,28 @@ Scenes:
           shader:
             vertexShader: ../../../../res/shaders/vsS.vert
             fragmentShader: ../../../../res/shaders/fsS.frag
+      - name: player
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: -1
+            y: -1
+            z: 1
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/player.obj
+          shader:
+            vertexShader: ../../../../res/shaders/vs_player.vert
+            fragmentShader: ../../../../res/shaders/fs_player.frag
   - name: main
     gameObjects:
       - name: box

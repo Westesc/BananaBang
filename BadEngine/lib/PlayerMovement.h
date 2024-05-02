@@ -9,6 +9,8 @@ private:
 	//movement
 	float moveSpeed = 4.f;
 	float deltaTime2 = 0.f;
+	float runSpeed = 10.f;
+	float turnSpeed = 10.f;
 
 	//jumping
 	float limitJump = 5.f;
@@ -32,29 +34,33 @@ private:
 		if (input->checkAnyKey() && deltaTime2 > 0.02f)
 		{
 			deltaTime2 = 0.f;
+			if (input->checkKey(GLFW_KEY_LEFT_SHIFT) && state == walking)
+			{
+				speed = runSpeed;
+			}
 			if (input->checkKey(GLFW_KEY_R))
 			{
-				sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, -speed * getFramePerSeconds(), 0.0f));
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, -speed * getFramePerSeconds(), 0.0f));
 			}
 			if (input->checkKey(GLFW_KEY_E))
 			{
-				sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, speed * getFramePerSeconds(), 0.0f));
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, speed * getFramePerSeconds(), 0.0f));
 			}
 			if (input->checkKey(GLFW_KEY_W))
 			{
-				sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, -speed * getFramePerSeconds()));
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, -speed * getFramePerSeconds()));
 			}
 			if (input->checkKey(GLFW_KEY_S))
 			{
-				sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, speed * getFramePerSeconds()));
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, speed * getFramePerSeconds()));
 			}
 			if (input->checkKey(GLFW_KEY_A))
 			{
-				sm->getActiveScene()->findByName("box")->Move(glm::vec3(-speed * getFramePerSeconds(), 0.0f, 0.0f));
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(-speed * getFramePerSeconds(), 0.0f, 0.0f));
 			}
 			if (input->checkKey(GLFW_KEY_D))
 			{
-				sm->getActiveScene()->findByName("box")->Move(glm::vec3(speed * getFramePerSeconds(), 0.0f, 0.0f));
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(speed * getFramePerSeconds(), 0.0f, 0.0f));
 			}
 			if (input->checkSequence(GLFW_KEY_1, GLFW_KEY_2)) {
 				std::cout << "Wykryto sekwencje!" << std::endl;
@@ -64,7 +70,7 @@ private:
 	void jump() {
 		useGravity();
 		MovePlayer(airSpeed);
-		glm::vec3 finalPosition = sm->getActiveScene()->findByName("box")->getTransform()->getLocalPosition();
+		glm::vec3 finalPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
 		float jumpDistance = glm::length(finalPosition - initialPosition);
 		if (jumpDistance > limitJump) {
 			state = air;
@@ -81,7 +87,7 @@ private:
 	void useGravity() {
 		MovePlayer(airSpeed);
 		upwardsSpeed += gravity * getFramePerSeconds();
-		sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, upwardsSpeed * getFramePerSeconds(), 0.0f));
+		sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, upwardsSpeed * getFramePerSeconds(), 0.0f));
 	}
 
 	void checkState() {
@@ -90,15 +96,15 @@ private:
 			{
 				upwardsSpeed = jumpPower;
 				state = jump_up;
-				initialPosition = sm->getActiveScene()->findByName("box")->getTransform()->getLocalPosition();
+				initialPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
 			}
 		}
 		//tyczasowo jeœli kolizuje z czymœ o tagu ground do wy³¹cz grawitacje
-		std::cout << glm::length(sm->getActiveScene()->findByName("box")->getTransform()->getLocalPosition().y - initialPosition.y) << std::endl;
-		if (glm::length(sm->getActiveScene()->findByName("box")->getTransform()->getLocalPosition().y - initialPosition.y) < 0.5f && state == air) {
+		std::cout << glm::length(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y - initialPosition.y) << std::endl;
+		if (glm::length(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y - initialPosition.y) < 0.5f && state == air) {
 			state = walking;
 			upwardsSpeed = 0.f;
-			sm->getActiveScene()->findByName("box")->getTransform()->localPosition.y = initialPosition.y;
+			sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y = initialPosition.y;
 		}
 	}
 

@@ -19,27 +19,20 @@ Scenes:
             y: 1
             z: 1
         model:
-          path: ../../../../res/box.obj
-          textures:
-            - path: ../../../../res/cegla.png
-              type: diffuseMap
-            - path: ../../../../res/specular2.png
-              type: specularMap
-            - path: ../../../../res/normal2.png
-              type: normalMap
+          path: ../../../../res/objects/box.obj
           boundingBox:
             min:
-              x: -1.99860001
-              y: -1
-              z: -1.08659005
+              x: -9.98600006
+              y: 0
+              z: -10.8659
             max:
-              x: 0.0013999939
-              y: 1
-              z: 0.913410008
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
             customSize: false
           shader:
-            vertexShader: ../../../../src/shaders/v_maps.vert
-            fragmentShader: ../../../../src/shaders/f_maps.frag
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
       - name: box2
         tag: none
         layer: 0
@@ -63,20 +56,20 @@ Scenes:
             y: 1
             z: 1
         model:
-          path: ../../../../res/tree.obj
+          path: ../../../../res/objects/box.obj
           boundingBox:
             min:
-              x: -4.26911116
-              y: -4.13258696
-              z: -0.300000012
+              x: -9.98600006
+              y: 0
+              z: -10.8659
             max:
-              x: -4.61480093
-              y: -2.0733397
-              z: 0.300000012
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
             customSize: false
           shader:
-            vertexShader: ../../../../src/shaders/vsTree.vert
-            fragmentShader: ../../../../src/shaders/fsTree.frag
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
       - name: capsule
         tag: none
         layer: 0
@@ -136,8 +129,223 @@ Scenes:
         model:
           path: ../../../../res/objects/plane.obj
           shader:
-            vertexShader: ../../../../src/shaders/vs.vert
-            fragmentShader: ../../../../src/shaders/fs.frag
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule2
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: 8
+            y: 8
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 8.88888931
+              y: 8.88888931
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: skydome
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 1
+          z: 0
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          texturePath: ../../../../res/textures/chmury1.png
+          meshes:
+            - type: 2
+              verticalSegments: 20
+              horizontalSegments: 20
+              size: 500
+          shader:
+            vertexShader: ../../../../res/shaders/vsS.vert
+            fragmentShader: ../../../../res/shaders/fsS.frag
+      - name: player
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: -1
+            y: -1
+            z: 1
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/player.obj
+          shader:
+            vertexShader: ../../../../res/shaders/vs_player.vert
+            fragmentShader: ../../../../res/shaders/fs_player.frag
+  - name: main
+    gameObjects:
+      - name: box
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: -1
+            y: -1
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8659
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
+            customSize: false
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: box2
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: -4
+            y: -4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8659
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
+            customSize: false
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 4
+            y: 4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 4.38589811
+              y: 4.1052742
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: plane
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/plane.obj
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
       - name: capsule2
         tag: none
         layer: 0
@@ -392,4 +600,1161 @@ Scenes:
           shader:
             vertexShader: ../../../../res/shaders/vsS.vert
             fragmentShader: ../../../../res/shaders/fsS.frag
- 
+  - name: main
+    gameObjects:
+      - name: box
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: -1
+            y: -1
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8659
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
+            customSize: true
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: box2
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: -4
+            y: -4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8659
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
+            customSize: true
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 4
+            y: 4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 4.30516195
+              y: 4.51719379
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: plane
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/plane.obj
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule2
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: 8
+            y: 8
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 8.88000011
+              y: 8.80000019
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: skydome
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 1
+          z: 0
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          texturePath: ../../../../res/textures/chmury1.png
+          meshes:
+            - type: 2
+              verticalSegments: 20
+              horizontalSegments: 20
+              size: 500
+          shader:
+            vertexShader: ../../../../res/shaders/vsS.vert
+            fragmentShader: ../../../../res/shaders/fsS.frag
+  - name: main
+    gameObjects:
+      - name: box
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: -1
+            y: -1
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8659
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
+            customSize: true
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: box2
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: -4
+            y: -4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8659
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
+            customSize: true
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 4
+            y: 4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 4.38769484
+              y: 4.09845209
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: plane
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/plane.obj
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule2
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: 8
+            y: 8
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 8.80000019
+              y: 8
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: skydome
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 1
+          z: 0
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          texturePath: ../../../../res/textures/chmury1.png
+          meshes:
+            - type: 2
+              verticalSegments: 20
+              horizontalSegments: 20
+              size: 500
+          shader:
+            vertexShader: ../../../../res/shaders/vsS.vert
+            fragmentShader: ../../../../res/shaders/fsS.frag
+  - name: main
+    gameObjects:
+      - name: box
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: -1
+            y: -1
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8659
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
+            customSize: true
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: box2
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: -4
+            y: -4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8659
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
+            customSize: true
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 4
+            y: 4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 4.38732815
+              y: 4.09988546
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: plane
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/plane.obj
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule2
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: 8
+            y: 8
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 8.80000019
+              y: 8
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: skydome
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 1
+          z: 0
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          texturePath: ../../../../res/textures/chmury1.png
+          meshes:
+            - type: 2
+              verticalSegments: 20
+              horizontalSegments: 20
+              size: 500
+          shader:
+            vertexShader: ../../../../res/shaders/vsS.vert
+            fragmentShader: ../../../../res/shaders/fsS.frag
+  - name: main
+    gameObjects:
+      - name: box
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: -1
+            y: -1
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8659
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
+            customSize: true
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: box2
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: -4
+            y: -4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8659
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
+            customSize: true
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 4
+            y: 4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 4.3807745
+              y: 4.12251854
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: plane
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/plane.obj
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule2
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: 8
+            y: 8
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 8.80000019
+              y: 8
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: skydome
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 1
+          z: 0
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          texturePath: ../../../../res/textures/chmury1.png
+          meshes:
+            - type: 2
+              verticalSegments: 20
+              horizontalSegments: 20
+              size: 500
+          shader:
+            vertexShader: ../../../../res/shaders/vsS.vert
+            fragmentShader: ../../../../res/shaders/fsS.frag
+  - name: main
+    gameObjects:
+      - name: box
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: -1
+            y: -1
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8659
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
+            customSize: true
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: box2
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: -4
+            y: -4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8659
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13409996
+            customSize: true
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 4
+            y: 4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 4
+              y: 0
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: plane
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/plane.obj
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule2
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: 8
+            y: 8
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 8
+              y: 0
+              z: 0
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: skydome
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 1
+          z: 0
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          texturePath: ../../../../res/textures/chmury1.png
+          meshes:
+            - type: 2
+              verticalSegments: 20
+              horizontalSegments: 20
+              size: 500
+          shader:
+            vertexShader: ../../../../res/shaders/vsS.vert
+            fragmentShader: ../../../../res/shaders/fsS.frag
+  - name: main
+    gameObjects:
+      - name: box
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: -1
+            y: -1
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8699999
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13000011
+            customSize: true
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: box2
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: -4
+            y: -4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/box.obj
+          boundingBox:
+            min:
+              x: -9.98600006
+              y: 0
+              z: -10.8699999
+            max:
+              x: 10.0139999
+              y: 20
+              z: 9.13000011
+            customSize: true
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 4
+            y: 4
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 4.25061083
+              y: 4.57159138
+              z: 0.0410241
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: plane
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 100
+        rotateAxis:
+          x: 0
+          y: 0
+          z: 1
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/plane.obj
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: capsule2
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: 8
+            y: 8
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/capsule.obj
+          capsuleCollider:
+            center:
+              x: 8.88800049
+              y: 8.88000011
+              z: 0.0800000057
+            radius: 1.36705923
+            height: 3.43535995
+          shader:
+            vertexShader: ../../../../res/shaders/vs.vert
+            fragmentShader: ../../../../res/shaders/fs.frag
+      - name: skydome
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 1
+        rotateAxis:
+          x: 0
+          y: 1
+          z: 0
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          texturePath: ../../../../res/textures/chmury1.png
+          meshes:
+            - type: 2
+              verticalSegments: 20
+              horizontalSegments: 20
+              size: 2500
+          shader:
+            vertexShader: ../../../../res/shaders/vsS.vert
+            fragmentShader: ../../../../res/shaders/fsS.frag

@@ -66,12 +66,12 @@ Scenes:
           path: ../../../../res/tree.obj
           boundingBox:
             min:
-              x: -4.26911116
-              y: -4.13258696
+              x: -4.27374506
+              y: -4.12273359
               z: -0.300000012
             max:
-              x: -4.61480093
-              y: -2.0733397
+              x: -4.54447985
+              y: -2.05229831
               z: 0.300000012
             customSize: false
           shader:
@@ -103,8 +103,8 @@ Scenes:
           path: ../../../../res/capsule.obj
           capsuleCollider:
             center:
-              x: 4.35881472
-              y: 4.17678261
+              x: 4.36499357
+              y: 4.16364479
               z: 0
             radius: 1.36705923
             height: 3.43535995

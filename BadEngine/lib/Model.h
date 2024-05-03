@@ -5,8 +5,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <stb_image.h>
 #include <glm/gtx/string_cast.hpp>
-
-#include <yaml-cpp/yaml.h>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>

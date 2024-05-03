@@ -9,7 +9,6 @@
 #include <iostream>
 #include <chrono>
 #include <glm/glm.hpp>
-
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -27,6 +26,8 @@
 #include "../lib/Transform.h"
 #include "../lib/UI.h"
 #include "../lib/CollisionManager.h"
+#include "../lib/PlayerMovement.h"
+#include "../lib/GameMode.h"
 
 void init_imgui();
 void imgui_begin();
@@ -48,6 +49,7 @@ GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _m
 
 using Clock = std::chrono::high_resolution_clock;
 using TimePoint = Clock::time_point;
+PlayerMovement* pm;
 
 Camera* camera = new Camera();
 using Duration = std::chrono::duration<float, std::ratio<1, 1>>;
@@ -99,8 +101,8 @@ void Start() {
 	AnimateBody* ab = new AnimateBody();
 	RigidBody* rb = new RigidBody();
 	Axis* axis = new Axis("axis");
-	
 	go->getTransform();*/
+	pm = new PlayerMovement(sm, input);
 }
 
 std::array<glm::vec4, 6> calculateFrustumPlanes(const glm::mat4& viewProjectionMatrix) {
@@ -272,13 +274,16 @@ int main() {
 	sm->getActiveScene()->findByName("skydome")->setRotating(true, 1.f, glm::vec3(0.f, 1.f, 0.f));
 
 	float deltaTime = 0;
+	float deltaTime2 = 0;
 	float lastTime = 0;
-
+	GameMode gameMode;
 	bool isFromFile = false;
 	bool rotating = true;
 	bool isBlue = false;
 	//sm->loadScene("first");
 	//sm->activeScene = sm->scenes.at(1);
+
+
 	CollisionManager cm = CollisionManager(1000, 100);
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -289,6 +294,7 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
 		deltaTime = time - lastTime;
+		deltaTime2 += time - lastTime;
 		lastTime = time;
 		//std::cout << "Delta time: " << deltaTime << std::endl;
 
@@ -309,6 +315,29 @@ int main() {
 			//glBindTexture(GL_TEXTURE_2D, texture);
 			skydomeModel->Draw();
 		}*/
+		if (input->checkAnyKey())
+		{
+			if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_1))
+			{
+				gameMode.setMode(GameMode::Debug);
+			}
+			else if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_2))
+			{
+				gameMode.setMode(GameMode::Start);
+			}
+			else if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_3))
+			{
+				gameMode.setMode(GameMode::Game);
+			}
+			else if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_4))
+			{
+				gameMode.setMode(GameMode::Menu);
+			}
+		}
+
+		if (gameMode.getMode() == GameMode::Game) {
+			pm->ManagePlayer(deltaTime, deltaTime2);
+		}
 
 		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
@@ -402,75 +431,78 @@ int main() {
 		capsule2->getModelComponent()->UpdateCollider(*capsule2->getModelComponent()->getTransform());*/
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
-			std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
+			//std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
 			camera->updateCamera(dpos);
 		}
 
 		if (input->IsKeobarodAction(window)) {
 			input->GetMessage(key, action);
-			// Obsługa sekwencji klawiszy
-			if (key == GLFW_KEY_F && action == GLFW_PRESS) {
-				for (int i = 0; i < sectors * sectors; ++i) {
-					mojaTablica[i] = losujLiczbe();
-					ilosc += mojaTablica[i];
-					std::cout << mojaTablica[i] << std::endl;
+
+			if (gameMode.getMode() == GameMode::Debug) {
+				// Obsługa sekwencji klawiszy
+				if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+					for (int i = 0; i < sectors * sectors; ++i) {
+						mojaTablica[i] = losujLiczbe();
+						ilosc += mojaTablica[i];
+						std::cout << mojaTablica[i] << std::endl;
+					}
+					placeX.clear();
+					placeY.clear();
+					for (int i = 0; i < ilosc; ++i) {
+						placeX.push_back(losujLiczbe2());
+						placeY.push_back(losujLiczbe2());
+					}
 				}
-				placeX.clear();
-				placeY.clear();
-				for (int i = 0; i < ilosc; ++i) {
-					placeX.push_back(losujLiczbe2());
-					placeY.push_back(losujLiczbe2());
+				if (key == GLFW_KEY_W && action == GLFW_PRESS) {
+					if (!sequenceStarted) {
+						sequenceStarted = true;
+						secondKeyPressed = false;
+						firstKeyPressed = true;
+						std::cout << "W" << std::endl;
+						camera->ProcessKeyboard(FORWARD, time);
+					}
+					else if (firstKeyPressed && !secondKeyPressed) {
+						secondKeyPressed = true;
+						sequenceStarted = false;
+						firstKeyPressed = false;
+						std::cout << "Sekwencja klawiszy W + W została wykryta!" << std::endl;
+					}
 				}
-			}
-			if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-				if (!sequenceStarted) {
-					sequenceStarted = true;
-					secondKeyPressed = false;
-					firstKeyPressed = true;
-					std::cout << "W" << std::endl;
+				else if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
 					camera->ProcessKeyboard(FORWARD, time);
 				}
-				else if (firstKeyPressed && !secondKeyPressed) {
-					secondKeyPressed = true;
-					sequenceStarted = false;
-					firstKeyPressed = false;
-					std::cout << "Sekwencja klawiszy W + W została wykryta!" << std::endl;
+				else if (key == GLFW_KEY_S && action == GLFW_REPEAT) {
+					camera->ProcessKeyboard(BACKWARD, time);
 				}
-			}
-			else if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
-				camera->ProcessKeyboard(FORWARD, time);
-			}
-			else if (key == GLFW_KEY_S && action == GLFW_REPEAT) {
-				camera->ProcessKeyboard(BACKWARD, time);
-			}
-			else if (key == GLFW_KEY_D && action == GLFW_REPEAT) {
-				camera->ProcessKeyboard(RIGHT, time);
-			}
-			else if (key == GLFW_KEY_A && action == GLFW_REPEAT) {
-				camera->ProcessKeyboard(LEFT, time);
-			}
-			else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			}
-			else if (key == GLFW_KEY_X && action == GLFW_PRESS) {
-				std::cout << "KLAWISZ X " << key << std::endl;
-			}
-			else if (key == GLFW_KEY_Z && action == GLFW_REPEAT) {
-				std::cout << "KLAWISZ Z " << key << std::endl;
-			}
-			//jednorazowe
-			else if (key == GLFW_MOUSE_BUTTON_LEFT) {
-				glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-				std::cout << "LEFT MOUSE " << key << std::endl;
-			}
-			else if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
-				std::cout << "Wyłączono klawisz S " << key << std::endl;
-			}
-			else if (action == GLFW_REPEAT) {
-				std::cout << "Nacisnieto klawisz " << key << std::endl;
-			}
-			else if (action == GLFW_RELEASE) {
-				std::cout << "Puszczono klawisz " << key << std::endl;
+				else if (key == GLFW_KEY_D && action == GLFW_REPEAT) {
+					camera->ProcessKeyboard(RIGHT, time);
+				}
+				else if (key == GLFW_KEY_A && action == GLFW_REPEAT) {
+					camera->ProcessKeyboard(LEFT, time);
+				}
+				else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				}
+				else if (key == GLFW_KEY_X && action == GLFW_PRESS) {
+					std::cout << "KLAWISZ X " << key << std::endl;
+				}
+				else if (key == GLFW_KEY_Z && action == GLFW_REPEAT) {
+					std::cout << "KLAWISZ Z " << key << std::endl;
+				}
+				//jednorazowe
+				else if (key == GLFW_MOUSE_BUTTON_LEFT) {
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+					std::cout << "LEFT MOUSE " << key << std::endl;
+				}
+				else if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
+					std::cout << "Wyłączono klawisz S " << key << std::endl;
+				}
+				else if (action == GLFW_REPEAT) {
+					std::cout << "Nacisnieto klawisz " << key << std::endl;
+				}
+				else if (action == GLFW_RELEASE) {
+					std::cout << "Puszczono klawisz " << key << std::endl;
+				}
 			}
 		}
 		int pom = 0;

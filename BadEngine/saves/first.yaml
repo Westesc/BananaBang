@@ -1,7 +1,7 @@
 Scenes:
   - name: main
     gameObjects:
-      - name: box
+      - name: player
         tag: none
         layer: 0
         isRotating: false
@@ -15,9 +15,9 @@ Scenes:
             y: 0
             z: 0
           scale:
-            x: 1
-            y: 1
-            z: 1
+            x: 0.1
+            y: 0.1
+            z: 0.1
         model:
           path: ../../../../res/box.obj
           textures:
@@ -66,12 +66,12 @@ Scenes:
           path: ../../../../res/tree.obj
           boundingBox:
             min:
-              x: -4.27374506
-              y: -4.12273359
+              x: -4.27859354
+              y: -4.11129093
               z: -0.300000012
             max:
-              x: -4.54447985
-              y: -2.05229831
+              x: -4.46334505
+              y: -2.0314188
               z: 0.300000012
             customSize: false
           shader:
@@ -103,8 +103,8 @@ Scenes:
           path: ../../../../res/capsule.obj
           capsuleCollider:
             center:
-              x: 4.36499357
-              y: 4.16364479
+              x: 4.37145805
+              y: 4.14838791
               z: 0
             radius: 1.36705923
             height: 3.43535995
@@ -186,9 +186,9 @@ Scenes:
             y: 0
             z: 0
           scale:
-            x: 1
-            y: 1
-            z: 1
+            x: 50
+            y: 50
+            z: 50
         model:
           meshes:
             - type: 1

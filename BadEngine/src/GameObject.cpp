@@ -118,8 +118,9 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
         if (isRotating) {
             M = glm::rotate(M, rotateSpeed * glm::radians(time), rotateAxis);
         }
-        M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
+        M = glm::scale(M, localTransform->localScale);
         modelComponent->setTransform(M);
+
         //modelComponent->updateBoundingBox(M);
         //std::cout << name << "M1:" << glm::to_string(M) << std::endl;
         //std::cout << "M2:" << glm::to_string(*modelComponent->getTransform()) << std::endl;

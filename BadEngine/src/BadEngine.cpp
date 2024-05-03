@@ -35,7 +35,7 @@ void imgui_render();
 void imgui_end();
 
 //bool test = true;
-bool test = true;
+bool test = false;
 bool frustumTest = false;
 
 void DrawPlane(float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor);
@@ -280,8 +280,8 @@ int main() {
 	bool isFromFile = false;
 	bool rotating = true;
 	bool isBlue = false;
-	//sm->loadScene("first");
-	//sm->activeScene = sm->scenes.at(1);
+	sm->loadScene("first");
+	sm->activeScene = sm->scenes.at(1);
 
 
 	CollisionManager cm = CollisionManager(1000, 100);
@@ -380,14 +380,19 @@ int main() {
 			frustumTest = !frustumTest;
 		}
 		sm->getActiveScene()->Update(V, P, time);
-		sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::translate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(20.f, 0.f, 18.f)));
-		sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::scale(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(50.f, 50.0f, 50.0f)));
-		sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::radians(time), glm::vec3(0.f, 1.f, 0.f)));
+		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::translate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(20.f, 0.f, 18.f)));
+		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::scale(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(50.f, 50.0f, 50.0f)));
+		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::radians(time), glm::vec3(0.f, 1.f, 0.f)));
 		//sm->getActiveScene()->findByName("plane")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("plane")->getModelComponent()->getTransform(), glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
 		for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 			if (sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->boundingBox != nullptr || sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->capsuleCollider != nullptr)
 			{
 				cm.addObject(sm->getActiveScene()->gameObjects.at(i));
+			}
+			if (sm->getActiveScene()->gameObjects.at(i)->modelComponent != nullptr) {
+				sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->GetShader()->use();
+				sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->GetShader()->setVec3("viewPos", camera->transform->getLocalPosition());
+				sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->GetShader()->setVec3("lightPos", lightPos);
 			}
 		}
 		cm.checkResolveCollisions(deltaTime);

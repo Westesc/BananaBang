@@ -1,6 +1,9 @@
 #include "../lib/Camera.h"
-Camera::Camera() {
+#include "../lib/SceneManager.h"
+
+Camera::Camera(SceneManager* sm) {
 	transform = new Transform();
+	this->sm = sm;
 }
 Camera::~Camera() {
 	delete transform;
@@ -11,6 +14,7 @@ glm::mat4 Camera::getViewMatrix() {
 }
 
 void Camera::updateCamera(glm::vec2 vector) {
+	//sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
 	glm::vec3 Front;
 	transform->localRotation += glm::vec3(vector.x/300,-vector.y/300, 0);
 	Front.x = cos(transform->localRotation.x ) * cos(transform->localRotation.y);

@@ -42,12 +42,12 @@ GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _m
 using Clock = std::chrono::high_resolution_clock;
 using TimePoint = Clock::time_point;
 
-Camera* camera = new Camera();
 using Duration = std::chrono::duration<float, std::ratio<1, 1>>;
 
 constexpr int wys = 800, szer = 1000;
 GLFWwindow* window;
 SceneManager* sm;
+Camera* camera;
 Input* input;
 PlayerMovement* pm;
 float boxSpeed = 4.f;
@@ -74,6 +74,7 @@ void Start() {
 	glFrontFace(GL_CCW);
 
 	glEnable(GL_BLEND);
+
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	init_imgui();
 	sm = new SceneManager();
@@ -82,6 +83,7 @@ void Start() {
 	sm->loadScene("first");
 	sm->activeScene = sm->scenes.at(0);
 	input = new Input(window);
+	camera = new Camera(sm);
 	pm = new PlayerMovement(sm, input);
 	/*GameObject* go = new GameObject("test object");
 	Transform* trans = new Transform();
@@ -240,6 +242,7 @@ int main() {
 	sm->getActiveScene()->findByName("skydome")->getModelComponent()->TextureFromFile("../../../../res/chmury1.png");
 	sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTexturePath("../../../../res/chmury1.png");
 	sm->activeScene = sm->scenes.at(1);*/
+	//sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(0.1f, 0.1f, 0.1f);
 	float deltaTime = 0;
 	float deltaTime2 = 0;
 	float lastTime = 0;
@@ -328,8 +331,9 @@ int main() {
 		sm->getActiveScene()->Draw(V, P);
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
-			//std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
-			camera->updateCamera(dpos);
+			if (glfwGetInputMode(window, GLFW_CURSOR) != 212993) {
+				camera->updateCamera(dpos);
+			}
 		}
 
 		if (input->IsKeobarodAction(window)) {
@@ -358,7 +362,7 @@ int main() {
 					std::cout << "KLAWISZ Z " << key << std::endl;
 				}
 				//jednorazowe
-				else if (key == GLFW_MOUSE_BUTTON_LEFT) {
+				else if (key == GLFW_MOUSE_BUTTON_RIGHT) {
 					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 					std::cout << "LEFT MOUSE " << key << std::endl;
 				}
@@ -449,9 +453,10 @@ void imgui_render()
 		ImGui::Begin("Opcje");                          // Create a window called "Hello, world!" and append into it.
 		for (auto go : sm->activeScene->gameObjects) {
 			ImGui::Text(go->name.c_str());
+			ImGui::Text("localPosition x: %.2f,y: %.2f,z: %.2f", go->localTransform->getLocalPosition().x, go->localTransform->getLocalPosition().y, go->localTransform->getLocalPosition().z);
 			//ImGui::Text("x: %.2f,y: %.2f,z: %.2f",go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);
 			if (go->modelComponent->boundingBox != nullptr) {
-				ImGui::Text("localPosition x: %.2f,y: %.2f,z: %.2f", go->localTransform->getLocalPosition().x, go->localTransform->getLocalPosition().y, go->localTransform->getLocalPosition().z);
+				//ImGui::Text("localPosition x: %.2f,y: %.2f,z: %.2f", go->localTransform->getLocalPosition().x, go->localTransform->getLocalPosition().y, go->localTransform->getLocalPosition().z);
 				ImGui::Text("Min x: %.2f,y: %.2f,z: %.2f", go->modelComponent->boundingBox->min.x, go->modelComponent->boundingBox->min.y, go->modelComponent->boundingBox->min.z);
 				ImGui::Text("Max x: %.2f,y: %.2f,z: %.2f", go->modelComponent->boundingBox->max.x, go->modelComponent->boundingBox->max.y, go->modelComponent->boundingBox->max.z);
 			}

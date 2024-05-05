@@ -1,5 +1,12 @@
 #ifndef PlayerMovement_H
 #define PlayerMovement_H
+#include <cmath>
+#include "Transform.h"
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+//djsfoijdkaopkd
+
 class PlayerMovement {
 private:
 	SceneManager* sm;
@@ -10,7 +17,12 @@ private:
 	float moveSpeed = 4.f;
 	float deltaTime2 = 0.f;
 	float runSpeed = 10.f;
-	float turnSpeed = 10.f;
+	float turnSpeed = 500.f;
+
+	//nie dodtykaæ
+	float currentSpeed = 0.f;
+	float currentTurnSpeed = 0.f;
+	float rotateAngle = 0.f;
 
 	//jumping
 	float limitJump = 5.f;
@@ -29,6 +41,24 @@ private:
 		climbing
 	};
 	State state = walking;
+	void getRotate() 
+	{
+		if (rotateAngle < 90.f && currentTurnSpeed > 0 || rotateAngle > -90.f && currentTurnSpeed < 0)
+		{
+			rotateAngle += currentTurnSpeed * getFramePerSeconds();
+			currentSpeed = 0.f;
+		}
+	}
+
+	void move(float speed) {
+		getRotate();
+		sm->getActiveScene()->findByName("player")->setRotating(false, glm::radians(rotateAngle), glm::vec3(0.f, 1.f, 0.f));
+		float distance = currentSpeed * getFramePerSeconds();
+		float dx = distance * sin(sm->getActiveScene()->findByName("player")->getRotate());
+		float dz = distance * cos(sm->getActiveScene()->findByName("player")->getRotate());
+		sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.0f, dz));
+	}
+
 	void MovePlayer(float speed)
 	{
 		if (input->checkAnyKey() && deltaTime2 > 0.02f)
@@ -48,25 +78,37 @@ private:
 			}
 			if (input->checkKey(GLFW_KEY_W))
 			{
-				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, -speed * getFramePerSeconds()));
+				currentSpeed = -speed;
+				currentTurnSpeed = 0.f;
 			}
-			if (input->checkKey(GLFW_KEY_S))
+			else if (input->checkKey(GLFW_KEY_S))
 			{
-				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, speed * getFramePerSeconds()));
-			}
-			if (input->checkKey(GLFW_KEY_A))
-			{
-				sm->getActiveScene()->findByName("player")->Move(glm::vec3(-speed * getFramePerSeconds(), 0.0f, 0.0f));
+				currentSpeed = speed;
+				currentTurnSpeed = 0.f;
 			}
 			if (input->checkKey(GLFW_KEY_D))
 			{
-				sm->getActiveScene()->findByName("player")->Move(glm::vec3(speed * getFramePerSeconds(), 0.0f, 0.0f));
+				currentSpeed = -speed;
+				currentTurnSpeed = -turnSpeed;
+			}
+			else if (input->checkKey(GLFW_KEY_A))
+			{
+				currentSpeed = -speed;
+				currentTurnSpeed = turnSpeed;
 			}
 			if (input->checkSequence(GLFW_KEY_1, GLFW_KEY_2)) {
 				std::cout << "Wykryto sekwencje!" << std::endl;
 			}
 		}
+		else if(!input->checkAnyKey()) 
+		{
+			currentSpeed = 0.f;
+			currentTurnSpeed = 0.f;
+			//rotateAngle = 0.f;
+		}
+		move(speed);
 	}
+
 	void jump() {
 		useGravity();
 		MovePlayer(airSpeed);
@@ -100,7 +142,6 @@ private:
 			}
 		}
 		//tyczasowo jeœli kolizuje z czymœ o tagu ground do wy³¹cz grawitacje
-		std::cout << glm::length(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y - initialPosition.y) << std::endl;
 		if (glm::length(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y - initialPosition.y) < 0.5f && state == air) {
 			state = walking;
 			upwardsSpeed = 0.f;

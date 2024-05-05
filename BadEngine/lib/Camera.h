@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Transform.h"
+#include "SceneManager.h"
 
 const float YAW = 90.0f;
 const float PITCH = -10.0f;
@@ -20,6 +21,7 @@ enum Camera_Movement {
 
 class Camera {
 public:
+	SceneManager* sm;
 	glm::vec3 background;
 	glm::vec3 right;
 	glm::vec3 up;
@@ -27,7 +29,7 @@ public:
 	Transform* transform;
 	float Zoom = ZOOM;
 
-	Camera();
+	Camera(SceneManager* sm);
 	~Camera();
 	glm::mat4 getViewMatrix();
 	void updateCamera(glm::vec2 vector);

@@ -118,6 +118,9 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
         if (isRotating) {
             M = glm::rotate(M, rotateSpeed * glm::radians(time), rotateAxis);
         }
+        else {
+            M = glm::rotate(M, rotateSpeed, rotateAxis);
+        }
         M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
         modelComponent->setTransform(M);
         //modelComponent->updateBoundingBox(M);
@@ -130,6 +133,9 @@ void GameObject::setRotating(bool rotating,float speed,glm::vec3 rotateAxis) {
     isRotating = rotating;
     rotateSpeed = speed;
     this->rotateAxis = rotateAxis;
+}
+float GameObject::getRotate() {
+    return rotateSpeed;
 }
 
 void GameObject::checkResolveCollisions(GameObject* other, float deltaTime) {

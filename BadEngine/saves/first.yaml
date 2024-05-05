@@ -96,8 +96,8 @@ Scenes:
           path: ../../../../res/objects/capsule.obj
           capsuleCollider:
             center:
-              x: 4.44179392
-              y: 4.44707823
+              x: 4.44107914
+              y: 4.44778252
               z: 0
             radius: 1.36705923
             height: 3.43535995
@@ -206,9 +206,9 @@ Scenes:
             y: 0
             z: 0
           scale:
-            x: 1
-            y: 1
-            z: 1
+            x: 0.100000001
+            y: 0.100000001
+            z: 0.100000001
         model:
           path: ../../../../res/objects/player.obj
           shader:

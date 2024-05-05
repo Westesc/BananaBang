@@ -280,12 +280,15 @@ int main() {
 				gameMode.setMode(GameMode::Menu);
 			}
 		}
-
+		glm::mat4 V(1.f);
 		if (gameMode.getMode() == GameMode::Game) {
 			pm->ManagePlayer(deltaTime, deltaTime2);
+			V = camera->GetViewMatrix();
 		}
+		else if (gameMode.getMode() != GameMode::Game) {
 
-		glm::mat4 V = camera->getViewMatrix();
+			V = camera->getViewMatrix();
+		}
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 500.f);
 		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());

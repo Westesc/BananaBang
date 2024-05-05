@@ -28,10 +28,15 @@ public:
 	glm::vec3 front;
 	Transform* transform;
 	float Zoom = ZOOM;
+	float Yaw = 0.f;
+	float Pitch = 0.f;
+	float sensitivity = 0.3f;
+	float x, y, z;
 
 	Camera(SceneManager* sm);
 	~Camera();
 	glm::mat4 getViewMatrix();
+	glm::mat4 GetViewMatrix();
 	void updateCamera(glm::vec2 vector);
 	void ProcessKeyboard(Camera_Movement direction, float deltaTime);
 };

@@ -195,6 +195,7 @@ int main() {
 	Shader* skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
 	Shader* mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");
 	Shader* shaderTree = new Shader("../../../../src/shaders/vsTree.vert", "../../../../src/shaders/fsTree.frag");
+	Shader* rampShader = new Shader("../../../../src/shaders/ramp.vert", "../../../../src/shaders/ramp.frag");
 
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
@@ -202,11 +203,13 @@ int main() {
 	GameObject* capsule = new GameObject("capsule");
 	GameObject* capsule2 = new GameObject("capsule2");
 	GameObject* skydome = new GameObject("skydome");
+	GameObject* rampBox = new GameObject("rampBox");
 
 	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
 	Model* box2model = new Model(const_cast<char*>("../../../../res/tree.obj"));
 	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
+	Model* rampModel = new Model(const_cast<char*>("../../../../res/box.obj"));
 
 	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"));
 	Mesh* meshSphere = new Mesh();
@@ -221,12 +224,14 @@ int main() {
 	capsulemodel->SetShader(shaders);
 	capsule2model->SetShader(shaders);
 	skydomeModel->SetShader(skydomeShader);
+	rampModel->SetShader(rampShader);
 	box->addModelComponent(boxmodel);
 	plane->addModelComponent(planemodel);
 	box2->addModelComponent(box2model);
 	capsule->addModelComponent(capsulemodel);
 	capsule2->addModelComponent(capsule2model);
 	skydome->addModelComponent(skydomeModel);
+	rampBox->addModelComponent(rampModel);
 
 	sm->getActiveScene()->addObject(box);
 	sm->getActiveScene()->addObject(box2);
@@ -234,6 +239,7 @@ int main() {
 	sm->getActiveScene()->addObject(plane);
 	sm->getActiveScene()->addObject(capsule2);
 	sm->getActiveScene()->addObject(skydome);
+	sm->getActiveScene()->addObject(rampBox);
 	int key, action;
 	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 20.0f);
 
@@ -264,6 +270,7 @@ int main() {
 	sm->getActiveScene()->findByName("box2")->getTransform()->localPosition = glm::vec3(-4.f, -4.f, 0.f);
 	sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition = glm::vec3(4.f, 4.f, 0.f);
 	sm->getActiveScene()->findByName("capsule2")->getTransform()->localPosition = glm::vec3(8.f, 8.f, 0.f);
+	sm->getActiveScene()->findByName("rampBox")->getTransform()->localPosition = glm::vec3(0.f, 5.f, 0.f);
 	sm->getActiveScene()->findByName("box")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box")->getTransform()->localPosition);
 	sm->getActiveScene()->findByName("box2")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box2")->getTransform()->localPosition);
 	sm->getActiveScene()->findByName("capsule")->getModelComponent()->addCollider(2, sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition);

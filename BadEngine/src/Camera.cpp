@@ -26,6 +26,15 @@ glm::mat4 Camera::GetViewMatrix() {
 	return viewMatrix;
 }
 
+glm::vec3 Camera::getFront() {
+	glm::vec3 front;
+	front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	front.y = sin(glm::radians(Pitch));
+	front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+	front = glm::normalize(front);
+	return front;
+}
+
 void Camera::updateCamera(glm::vec2 vector) {
 	Yaw += vector.x * sensitivity;
 	Pitch += vector.y * sensitivity;

@@ -20,12 +20,14 @@ std::queue<InputMessageMouse> mouseQueue;
 std::unordered_set<int> pressedKeys;
 int lastKey;
 
+float Zoom = 50.0f;
 
 Input::Input(GLFWwindow* _window)
 {
 	glfwSetKeyCallback(_window, key_callback);
 	glfwSetMouseButtonCallback(_window, mouse_button_callback);
 	glfwSetCursorPosCallback(_window, mouse_callback);
+	glfwSetScrollCallback(_window, scroll_callback);
 }
 
 Input::~Input()
@@ -75,6 +77,11 @@ glm::vec2 Input::getPosMouse()
 	return glm::vec2(0.f, 0.f);
 }
 
+float Input::GetZoom()
+{
+	return Zoom;
+}
+
 void Input::putAway(int key, int action) {
 	InputMessage message;
 	message.key = key;
@@ -97,6 +104,7 @@ void Input::mouse_callback(GLFWwindow* _window, double xpos, double ypos)
 	last = pos;
 	mouseQueue.push(imm);
 }
+
 
 void Input::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
 	if (action == GLFW_PRESS) {
@@ -150,4 +158,13 @@ void Input::mouse_button_callback(GLFWwindow* window, int button, int action, in
 	message.key = button;
 	message.action = action;
 	inputQueue.push(message);
+}
+
+void Input::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	Zoom -= (float)yoffset;
+	if (Zoom < 30.0f)
+		Zoom = 30.0f;
+	if (Zoom > 90.0f)
+		Zoom = 90.0f;
 }

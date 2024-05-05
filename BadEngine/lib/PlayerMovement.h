@@ -18,11 +18,11 @@ private:
 	float moveSpeed = 4.f;
 	float deltaTime2 = 0.f;
 	float runSpeed = 10.f;
-	float turnSpeed = 500.f;
+	float turnSpeed = 90.f;
 
-	//nie dodtykaæ
+	//nie dotykaæ
 	float currentSpeed = 0.f;
-	float currentTurnSpeed = 0.f;
+	float currentTurn = 0.f;
 	float rotateAngle = 0.f;
 
 	//jumping
@@ -44,16 +44,27 @@ private:
 	State state = walking;
 	void getRotate() 
 	{
-		if (rotateAngle < 90.f && currentTurnSpeed > 0 || rotateAngle > -90.f && currentTurnSpeed < 0)
-		{
-			rotateAngle += currentTurnSpeed * getFramePerSeconds();
-			currentSpeed = 0.f;
+		float rotationSpeed = 500.f; 
+		float angleDifference = currentTurn - rotateAngle;
+		float rotationAmount = rotationSpeed * getFramePerSeconds();
+
+		while (angleDifference < -180.0f) angleDifference += 360.0f;
+		while (angleDifference > 180.0f) angleDifference -= 360.0f;
+
+		if (fabs(angleDifference) <= rotationAmount) {
+			rotateAngle = currentTurn;
+		}
+		else {
+			int direction = (angleDifference > 0) ? 1 : -1;
+			rotateAngle += direction * rotationAmount;
 		}
 	}
 
 	void move(float speed) {
 		getRotate();
-		sm->getActiveScene()->findByName("player")->setRotating(false, glm::radians(rotateAngle), glm::vec3(0.f, 1.f, 0.f));
+		float angle = atan2(camera->getFront().x, camera->getFront().z);
+		sm->getActiveScene()->findByName("player")->setRotating(false, angle + glm::radians(rotateAngle), glm::vec3(0.f, 1.f, 0.f));
+
 		float distance = currentSpeed * getFramePerSeconds();
 		float dx = distance * sin(sm->getActiveScene()->findByName("player")->getRotate());
 		float dz = distance * cos(sm->getActiveScene()->findByName("player")->getRotate());
@@ -80,22 +91,22 @@ private:
 			if (input->checkKey(GLFW_KEY_W))
 			{
 				currentSpeed = -speed;
-				currentTurnSpeed = 0.f;
+				currentTurn = 0.f;
 			}
 			else if (input->checkKey(GLFW_KEY_S))
 			{
-				currentSpeed = speed;
-				currentTurnSpeed = 0.f;
+				currentSpeed = -speed;
+				currentTurn = 180.f;
 			}
 			if (input->checkKey(GLFW_KEY_D))
 			{
 				currentSpeed = -speed;
-				currentTurnSpeed = -turnSpeed;
+				currentTurn = -90;
 			}
 			else if (input->checkKey(GLFW_KEY_A))
 			{
 				currentSpeed = -speed;
-				currentTurnSpeed = turnSpeed;
+				currentTurn = 90;
 			}
 			if (input->checkSequence(GLFW_KEY_1, GLFW_KEY_2)) {
 				std::cout << "Wykryto sekwencje!" << std::endl;
@@ -104,10 +115,12 @@ private:
 		else if(!input->checkAnyKey()) 
 		{
 			currentSpeed = 0.f;
-			currentTurnSpeed = 0.f;
+			//currentTurnSpeed = 0.f;
 			//rotateAngle = 0.f;
 		}
-		move(speed);
+		if (input->checkAnyKey()) {
+			move(speed);
+		}
 	}
 
 	void jump() {

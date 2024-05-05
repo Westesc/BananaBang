@@ -290,8 +290,8 @@ int main() {
 			V = camera->getViewMatrix();
 		}
 
-		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 500.f);
-		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
+		glm::mat4 P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(szer) / wys, 1.f, 500.f);
+		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(70.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
 
 		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
@@ -332,7 +332,7 @@ int main() {
 			}
 		}
 		sm->getActiveScene()->Draw(V, P);
-		if (input->IsMove()) {
+		while (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			if (glfwGetInputMode(window, GLFW_CURSOR) != 212993) {
 				camera->updateCamera(dpos);

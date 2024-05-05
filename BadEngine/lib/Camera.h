@@ -30,13 +30,14 @@ public:
 	float Zoom = ZOOM;
 	float Yaw = 0.f;
 	float Pitch = 0.f;
-	float sensitivity = 0.3f;
+	float sensitivity = 0.05f;
 	float x, y, z;
 
 	Camera(SceneManager* sm);
 	~Camera();
 	glm::mat4 getViewMatrix();
 	glm::mat4 GetViewMatrix();
+	glm::vec3 getFront();
 	void updateCamera(glm::vec2 vector);
 	void ProcessKeyboard(Camera_Movement direction, float deltaTime);
 };

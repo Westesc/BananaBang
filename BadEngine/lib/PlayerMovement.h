@@ -11,6 +11,7 @@ class PlayerMovement {
 private:
 	SceneManager* sm;
 	Input* input;
+	Camera* camera;
 	float time = 0.0f;
 
 	//movement
@@ -150,14 +151,16 @@ private:
 	}
 
 public:
-	PlayerMovement(SceneManager* sm, Input* input) {
+	PlayerMovement(SceneManager* sm, Input* input, Camera* camera) {
 		this->sm = sm;
 		this->input = input;
+		this->camera = camera;
 	}
 
 	void ManagePlayer(float deltaTime, float& deltaTime2)
 	{
 		this->deltaTime2 = deltaTime2;
+		//std::cout<<camera->transform->getLocalRotation().x<<", " << camera->transform->getLocalRotation().y <<", " << camera->transform->getLocalRotation().z <<std::endl;
 		checkState();
 		setTime(deltaTime);
 		if (state == walking) {

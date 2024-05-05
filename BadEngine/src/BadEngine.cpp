@@ -84,7 +84,7 @@ void Start() {
 	sm->activeScene = sm->scenes.at(0);
 	input = new Input(window);
 	camera = new Camera(sm);
-	pm = new PlayerMovement(sm, input);
+	pm = new PlayerMovement(sm, input, camera);
 	/*GameObject* go = new GameObject("test object");
 	Transform* trans = new Transform();
 	Component* comp = new Component();

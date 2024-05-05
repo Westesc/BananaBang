@@ -17,12 +17,11 @@ glm::mat4 Camera::getViewMatrix() {
 glm::mat4 Camera::GetViewMatrix() {
 	glm::vec3 playerPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
 
-	glm::vec3 cameraPosition;
-	cameraPosition.x = playerPosition.x + 10.f * cos(glm::radians(Yaw));
-	cameraPosition.y = playerPosition.y + 10.f * sin(glm::radians(Pitch));
-	cameraPosition.z = playerPosition.z + 10.f * sin(glm::radians(Yaw));
+	transform->localRotation.x = playerPosition.x + 10.f * cos(glm::radians(Yaw));
+	transform->localRotation.y = playerPosition.y + 10.f * sin(glm::radians(Pitch));
+	transform->localRotation.z = playerPosition.z + 10.f * sin(glm::radians(Yaw));
 
-	glm::mat4 viewMatrix = glm::lookAt(cameraPosition, playerPosition, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 viewMatrix = glm::lookAt(transform->localRotation, playerPosition, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	return viewMatrix;
 }
@@ -30,7 +29,6 @@ glm::mat4 Camera::GetViewMatrix() {
 void Camera::updateCamera(glm::vec2 vector) {
 	Yaw += vector.x * sensitivity;
 	Pitch += vector.y * sensitivity;
-	std::cout << "YAW: " << Yaw << ", Pitch" << Pitch << std::endl;
 	if (Pitch > 89.0f)
 		Pitch = 89.0f;
 	if (Pitch < -10.0f)

@@ -236,6 +236,9 @@ public:
 	void setfloat4(const std::string& name, const float x, const float y, const float z, const float w) {
 		glUniform4f(glGetUniformLocation(ID, name.c_str()), x, y, z, x);
 	}
+	/*void setSampler1D(const std::string& name, const int value) {
+		glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+	}*/
 
 	YAML::Node serialize() {
 		YAML::Node node;

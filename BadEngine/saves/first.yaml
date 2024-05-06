@@ -207,17 +207,17 @@ Scenes:
         isRotating: false
         transform:
           position:
-            x: 8
-            y: 8
+            x: 0
+            y: 5
             z: 0
           rotation:
             x: 0
             y: 0
             z: 0
           scale:
-            x: 0.5
-            y: 0.5
-            z: 0.5
+            x: 0.1
+            y: 0.1
+            z: 0.1
         model:
           path: ../../../../res/box.obj
           shader:

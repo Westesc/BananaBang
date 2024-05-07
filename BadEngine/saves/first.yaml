@@ -7,9 +7,9 @@ Scenes:
         isRotating: false
         transform:
           position:
-            x: -1
-            y: -1
-            z: 0
+            x: -1.25800776
+            y: -0.534281909
+            z: -0.0448072553
           rotation:
             x: 0
             y: 0
@@ -29,13 +29,13 @@ Scenes:
               type: normalMap
           boundingBox:
             min:
-              x: -9.98600006
-              y: 0
-              z: -10.8659
+              x: -11.2440081
+              y: -0.534281909
+              z: -10.9107075
             max:
-              x: 10.0139999
-              y: 20
-              z: 9.13409996
+              x: 8.75599194
+              y: 19.4657173
+              z: 9.08929253
             customSize: false
           shader:
             vertexShader: ../../../../src/shaders/v_maps.vert
@@ -66,12 +66,12 @@ Scenes:
           path: ../../../../res/tree.obj
           boundingBox:
             min:
-              x: -3
-              y: 0
+              x: -6.53091717
+              y: -5.61073208
               z: -3
             max:
-              x: 3
-              y: 20
+              x: -12.2072954
+              y: 14.4835129
               z: 3
             customSize: false
           shader:
@@ -88,9 +88,9 @@ Scenes:
           z: 1
         transform:
           position:
-            x: 4
-            y: 4
-            z: 0
+            x: 6.58007812
+            y: -0.657180548
+            z: 0.448072523
           rotation:
             x: 0
             y: 0
@@ -103,9 +103,9 @@ Scenes:
           path: ../../../../res/capsule.obj
           capsuleCollider:
             center:
-              x: 4
-              y: 0
-              z: 0
+              x: 12.0517015
+              y: 3.60393429
+              z: 0.448072523
             radius: 1.36705923
             height: 3.43535995
           shader:
@@ -159,8 +159,8 @@ Scenes:
           path: ../../../../res/capsule.obj
           capsuleCollider:
             center:
-              x: 8
-              y: 0
+              x: 16
+              y: 8
               z: 0
             radius: 1.36705923
             height: 3.43535995
@@ -191,7 +191,7 @@ Scenes:
             z: 1
         model:
           meshes:
-            - type: 1
+            - type: 2
               verticalSegments: 20
               horizontalSegments: 20
               size: 50
@@ -207,17 +207,17 @@ Scenes:
         isRotating: false
         transform:
           position:
-            x: 5
-            y: 7
+            x: 0
+            y: 5
             z: 0
           rotation:
             x: 0
             y: 0
             z: 0
           scale:
-            x: 0.1
-            y: 0.1
-            z: 0.1
+            x: 1
+            y: 1
+            z: 1
         model:
           path: ../../../../res/box.obj
           shader:
@@ -225,181 +225,15 @@ Scenes:
             fragmentShader: ../../../../src/shaders/ramp.frag
   - name: main
     gameObjects:
-      - name: player
-        tag: none
-        layer: 0
-        isRotating: false
-        transform:
-          position:
-            x: -1
-            y: -1
-            z: 0
-          rotation:
-            x: 0
-            y: 0
-            z: 0
-          scale:
-            x: 0.100000001
-            y: 0.100000001
-            z: 0.100000001
-        model:
-          path: ../../../../res/box.obj
-          textures:
-            - path: ../../../../res/cegla.png
-              type: diffuseMap
-            - path: ../../../../res/specular2.png
-              type: specularMap
-            - path: ../../../../res/normal2.png
-              type: normalMap
-          boundingBox:
-            min:
-              x: -1.19985998
-              y: -1.10000002
-              z: -0.108659007
-            max:
-              x: -0.999859989
-              y: -0.899999976
-              z: 0.0913410038
-            customSize: false
-          shader:
-            vertexShader: ../../../../src/shaders/v_maps.vert
-            fragmentShader: ../../../../src/shaders/f_maps.frag
-      - name: box2
+      - name: sphere
         tag: none
         layer: 0
         isRotating: true
-        rotateSpeed: 100
-        rotateAxis:
-          x: 0
-          y: 0
-          z: 1
-        transform:
-          position:
-            x: -4
-            y: -4
-            z: 0
-          rotation:
-            x: 0
-            y: 0
-            z: 0
-          scale:
-            x: 1
-            y: 1
-            z: 1
-        model:
-          path: ../../../../res/tree.obj
-          boundingBox:
-            min:
-              x: 1.89832163
-              y: -4.64720821
-              z: -0.299999982
-            max:
-              x: 0.420722961
-              y: -6.12257338
-              z: 0.299999982
-            customSize: false
-          shader:
-            vertexShader: ../../../../src/shaders/vsTree.vert
-            fragmentShader: ../../../../src/shaders/fsTree.frag
-      - name: capsule
-        tag: none
-        layer: 0
-        isRotating: true
-        rotateSpeed: 100
-        rotateAxis:
-          x: 0
-          y: 0
-          z: 1
-        transform:
-          position:
-            x: 4
-            y: 4
-            z: 0
-          rotation:
-            x: 0
-            y: 0
-            z: 0
-          scale:
-            x: 1
-            y: 1
-            z: 1
-        model:
-          path: ../../../../res/capsule.obj
-          capsuleCollider:
-            center:
-              x: -1.98633289
-              y: 4.69468403
-              z: 0
-            radius: 1.36705923
-            height: 3.43535995
-          shader:
-            vertexShader: ../../../../src/shaders/vs.vert
-            fragmentShader: ../../../../src/shaders/fs.frag
-      - name: plane
-        tag: none
-        layer: 0
-        isRotating: true
-        rotateSpeed: 100
-        rotateAxis:
-          x: 0
-          y: 0
-          z: 1
-        transform:
-          position:
-            x: 0
-            y: 0
-            z: 0
-          rotation:
-            x: 0
-            y: 0
-            z: 0
-          scale:
-            x: 1
-            y: 1
-            z: 1
-        model:
-          path: ../../../../res/plane.obj
-          shader:
-            vertexShader: ../../../../src/shaders/vs.vert
-            fragmentShader: ../../../../src/shaders/fs.frag
-      - name: capsule2
-        tag: none
-        layer: 0
-        isRotating: false
-        transform:
-          position:
-            x: 8
-            y: 8
-            z: 0
-          rotation:
-            x: 0
-            y: 0
-            z: 0
-          scale:
-            x: 1
-            y: 1
-            z: 1
-        model:
-          path: ../../../../res/capsule.obj
-          capsuleCollider:
-            center:
-              x: 16.7999992
-              y: 16
-              z: 0
-            radius: 1.36705923
-            height: 3.43535995
-          shader:
-            vertexShader: ../../../../src/shaders/vs.vert
-            fragmentShader: ../../../../src/shaders/fs.frag
-      - name: skydome
-        tag: none
-        layer: 0
-        isRotating: true
-        rotateSpeed: 1
+        rotateSpeed: 10
         rotateAxis:
           x: 0
           y: 1
-          z: 0
+          z: 1
         transform:
           position:
             x: 0
@@ -410,9 +244,9 @@ Scenes:
             y: 0
             z: 0
           scale:
-            x: 50
-            y: 50
-            z: 50
+            x: 1
+            y: 1
+            z: 1
         model:
           meshes:
             - type: 1
@@ -420,8 +254,8 @@ Scenes:
               horizontalSegments: 20
               size: 50
           textures:
-            - path: ../../../../res/chmury1.png
+            - path: ../../../../res/drewno.png
               type: diffuseMap
           shader:
-            vertexShader: ../../../../src/shaders/vsS.vert
-            fragmentShader: ../../../../src/shaders/fsS.frag
+            vertexShader: ../../../../src/shaders/phong.vert
+            fragmentShader: ../../../../src/shaders/phong.frag

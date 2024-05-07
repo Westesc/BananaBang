@@ -217,7 +217,7 @@ int main() {
 
 	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"));
 	Mesh* meshSphere = new Mesh();
-	meshSphere->createSphere(20, 20, 50);
+	meshSphere->createDome(20, 20, 50);
 	Model* skydomeModel = new Model(meshSphere);
 
 
@@ -293,8 +293,6 @@ int main() {
 	bool isFromFile = false;
 	bool rotating = true;
 	bool isBlue = false;
-	//sm->loadScene("first");
-	//sm->activeScene = sm->scenes.at(1);
 
 
 	CollisionManager cm = CollisionManager(1000, 100);
@@ -302,6 +300,9 @@ int main() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, sm->getActiveScene()->findByName("rampBox")->getModelComponent()->TextureFromFile("../../../../res/gradient.png"));
 	glUniform1i(glGetUniformLocation(sm->getActiveScene()->findByName("rampBox")->getModelComponent()->GetShader()->ID,"gradientTexture"), 0);
+
+	sm->loadScene("first");
+	sm->activeScene = sm->scenes.at(2);
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -429,6 +430,7 @@ int main() {
 				sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->GetShader()->use();
 				sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->GetShader()->setVec3("viewPos", camera->transform->getLocalPosition());
 				sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->GetShader()->setVec3("lightPos", lightPos);
+				sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->GetShader()->setVec3("lightColor", glm::vec3(1.0f));
 			}
 		}
 		cm.checkResolveCollisions(deltaTime);

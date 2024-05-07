@@ -302,7 +302,7 @@ int main() {
 	glUniform1i(glGetUniformLocation(sm->getActiveScene()->findByName("rampBox")->getModelComponent()->GetShader()->ID,"gradientTexture"), 0);
 
 	sm->loadScene("first");
-	sm->activeScene = sm->scenes.at(2);
+	sm->activeScene = sm->scenes.at(1);
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -583,7 +583,7 @@ void renderImGui() {
 	ImGui_ImplGlfw_NewFrame();
 	ImGui::NewFrame();
 
-	ImGui::Begin("System Generyczny");
+	ImGui::Begin("System Generatywny");
 	ImGui::SliderInt("Sectors", &sectorsPom, 1, 10);
 	ImGui::SliderInt("Min drzew", &a, 0, 10);
 	ImGui::SliderInt("Max drzew", &b, a, 20);

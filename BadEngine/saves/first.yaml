@@ -215,9 +215,9 @@ Scenes:
             y: 0
             z: 0
           scale:
-            x: 1
-            y: 1
-            z: 1
+            x: 0.1
+            y: 0.1
+            z: 0.1
         model:
           path: ../../../../res/box.obj
           shader:

@@ -207,8 +207,8 @@ Scenes:
         isRotating: false
         transform:
           position:
-            x: 0
-            y: 5
+            x: 5
+            y: 7
             z: 0
           rotation:
             x: 0

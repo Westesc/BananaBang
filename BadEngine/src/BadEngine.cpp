@@ -294,7 +294,7 @@ int main() {
 	CollisionManager cm = CollisionManager(1000, 100);
 	sm->getActiveScene()->findByName("rampBox")->getModelComponent()->GetShader()->use();
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_1D, sm->getActiveScene()->findByName("rampBox")->getModelComponent()->TextureFromFile("../../../../res/gradient.png"));
+	glBindTexture(GL_TEXTURE_2D, sm->getActiveScene()->findByName("rampBox")->getModelComponent()->TextureFromFile("../../../../res/gradient.png"));
 	glUniform1i(glGetUniformLocation(sm->getActiveScene()->findByName("rampBox")->getModelComponent()->GetShader()->ID,"gradientTexture"), 0);
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -367,6 +367,25 @@ int main() {
 		}
 		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+		}
+		if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+		}
+		if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+		}
+		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+		}
+		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+		}
+		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {

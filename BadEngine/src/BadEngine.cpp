@@ -29,19 +29,18 @@
 #include "../lib/PlayerMovement.h"
 #include "../lib/GameMode.h"
 
-void init_imgui();
-void imgui_begin();
-void imgui_render();
-void imgui_end();
-
 //bool test = true;
 bool test = false;
 bool frustumTest = false;
 
 void DrawPlane(float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor);
 void DrawTree(float scaleT, float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor);
-int losujLiczbe();
+int losujLiczbe(int a, int b);
 int losujLiczbe2();
+
+void setupImGui(GLFWwindow* window);
+void renderImGui();
+void cleanupImGui();
 
 
 std::string loadShaderSource(const std::string& _filepath);
@@ -62,7 +61,11 @@ float boxSpeed = 4.f;
 
 float scale = 5.f;
 float scaleT = 1.f;
-const int sectors = 5;
+int sectors = 5;
+int sectorsPom = 5;
+int a = 3;
+int b = 5;
+bool buttonPressed;
 
 void Start() {
 	glfwInit();
@@ -84,7 +87,7 @@ void Start() {
 	glFrontFace(GL_CCW);
 
 	glEnable(GL_BLEND);
-	init_imgui();
+
 	sm = new SceneManager();
 	//Scene * scene = new Scene("main");
 	//sm->scenes.push_back(scene);
@@ -179,9 +182,9 @@ int main() {
 	Start();
 	int ilosc = 0;
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
-	int mojaTablica[sectors * sectors];
+	std::vector<int> mojaTablica;
 	for (int i = 0; i < sectors * sectors; ++i) {
-		mojaTablica[i] = losujLiczbe();
+		mojaTablica.push_back(losujLiczbe(a, b));
 		ilosc += mojaTablica[i];
 		std::cout << mojaTablica[i] << std::endl;
 	}
@@ -191,6 +194,7 @@ int main() {
 		placeX.push_back(losujLiczbe2());
 		placeY.push_back(losujLiczbe2());
 	}
+
 	Shader* shaders = new Shader("../../../../src/shaders/vs.vert", "../../../../src/shaders/fs.frag");
 	Shader* skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
 	Shader* mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");
@@ -249,6 +253,8 @@ int main() {
 	static bool secondKeyPressed = false;
 	std::string name = "src";
 
+	setupImGui(window);
+
 	sm->getActiveScene()->findByName("skydome")->getModelComponent()->AddTexture("../../../../res/chmury1.png","diffuseMap");
 
 	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/cegla.png", "diffuseMap");
@@ -287,8 +293,8 @@ int main() {
 	bool isFromFile = false;
 	bool rotating = true;
 	bool isBlue = false;
-	sm->loadScene("first");
-	sm->activeScene = sm->scenes.at(1);
+	//sm->loadScene("first");
+	//sm->activeScene = sm->scenes.at(1);
 
 
 	CollisionManager cm = CollisionManager(1000, 100);
@@ -466,28 +472,31 @@ int main() {
 		capsule2->getModelComponent()->UpdateCollider(*capsule2->getModelComponent()->getTransform());*/
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
-			//std::cout << "x: " << dpos.x << " y: " << dpos.y << std::endl;
-			camera->updateCamera(dpos);
+			if (glfwGetInputMode(window, GLFW_CURSOR) != 212993) {
+				camera->updateCamera(dpos);
+			}
 		}
-
+		if (buttonPressed) {
+			sectors = sectorsPom;
+			mojaTablica.clear();
+			for (int i = 0; i < sectors * sectors; ++i) {
+				mojaTablica.push_back(losujLiczbe(a, b));
+				ilosc += mojaTablica[i];
+				std::cout << mojaTablica[i] << std::endl;
+			}
+			placeX.clear();
+			placeY.clear();
+			for (int i = 0; i < ilosc; ++i) {
+				placeX.push_back(losujLiczbe2());
+				placeY.push_back(losujLiczbe2());
+			}
+			buttonPressed = false;
+		}
 		if (input->IsKeobarodAction(window)) {
 			input->GetMessage(key, action);
 
 			if (gameMode.getMode() == GameMode::Debug) {
 				// Obsługa sekwencji klawiszy
-				if (key == GLFW_KEY_F && action == GLFW_PRESS) {
-					for (int i = 0; i < sectors * sectors; ++i) {
-						mojaTablica[i] = losujLiczbe();
-						ilosc += mojaTablica[i];
-						std::cout << mojaTablica[i] << std::endl;
-					}
-					placeX.clear();
-					placeY.clear();
-					for (int i = 0; i < ilosc; ++i) {
-						placeX.push_back(losujLiczbe2());
-						placeY.push_back(losujLiczbe2());
-					}
-				}
 				if (key == GLFW_KEY_W && action == GLFW_PRESS) {
 					if (!sequenceStarted) {
 						sequenceStarted = true;
@@ -525,7 +534,7 @@ int main() {
 					std::cout << "KLAWISZ Z " << key << std::endl;
 				}
 				//jednorazowe
-				else if (key == GLFW_MOUSE_BUTTON_LEFT) {
+				else if (key == GLFW_MOUSE_BUTTON_RIGHT) {
 					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 					std::cout << "LEFT MOUSE " << key << std::endl;
 				}
@@ -542,20 +551,18 @@ int main() {
 		}
 		int pom = 0;
 		if (plane->getModelComponent() != nullptr) {
-			for(int i = 0; i <sectors; i++) 
+			for (int i = 0; i < sectors; i++)
 			{
 				for (int j = 0; j < sectors; j++) {
-					DrawPlane(scale, shaders, plane, glm::vec3(i*20, 0.f,j*20));
-					for (int z = 0; z < mojaTablica[i*sectors + j]; z++) {
-						DrawTree(scaleT, scale, shaderTree, box2, glm::vec3(i * 20 + placeX[pom] -2, 0.f, j * 20 + placeY[pom] - 2));
+					DrawPlane(scale, shaders, plane, glm::vec3(i * 20, 0.f, j * 20));
+					for (int z = 0; z < mojaTablica[i * sectors + j]; z++) {
+						DrawTree(scaleT, scale, shaderTree, box2, glm::vec3(i * 20 + placeX[pom] - 1.5, 0.f, j * 20 + placeY[pom]));
 						pom++;
 					}
 				}
 			}
 		}
-		imgui_begin();
-		imgui_render();
-		imgui_end();
+		renderImGui();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		if (test) {
@@ -564,10 +571,47 @@ int main() {
 			test = false;
 		}
 	}
-
+	cleanupImGui();
 	glfwTerminate();
 	return 0;
 }
+
+void renderImGui() {
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui::NewFrame();
+
+	ImGui::Begin("System Generyczny");
+	ImGui::SliderInt("Sectors", &sectorsPom, 1, 10);
+	ImGui::SliderInt("Min drzew", &a, 0, 10);
+	ImGui::SliderInt("Max drzew", &b, a, 20);
+	if (ImGui::Button("Generate")) {
+		buttonPressed = true;
+	}
+	ImGui::End();
+
+	ImGui::Render();
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void setupImGui(GLFWwindow* window) {
+	// Konfiguracja ImGui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 130");
+
+	ImGui::StyleColorsDark();
+}
+
+void cleanupImGui() {
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+}
+
 void DrawPlane(float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor) {
 	glm::mat4 M2 = glm::translate(glm::mat4(1.f), scale * vektor);
 	M2 = glm::scale(M2, glm::vec3(scale, scale, scale));
@@ -585,12 +629,13 @@ void DrawTree(float scaleT, float scale, Shader* shaders, GameObject* plane, glm
 	plane->getModelComponent()->Draw();
 }
 
-int losujLiczbe() {
-	return std::rand() % 3 + 3;
+int losujLiczbe(int a, int b) {
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
+	return std::rand() % (b - a + 1) + a;
 }
-
+//-2, 15
 int losujLiczbe2() {
-	return std::rand() % 17;
+	return std::rand() % 18 - 2;
 }
 
 
@@ -619,62 +664,3 @@ GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _m
 	return shdr;
 }
 
-void init_imgui()
-{
-	// Setup Dear ImGui binding
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
-	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;   // Enable Gamepad Controls
-
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init();
-
-	// Setup style
-	ImGui::StyleColorsDark();
-}
-void imgui_begin()
-{
-	// Start the Dear ImGui frame
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
-}
-
-void imgui_render()
-{
-	/// Add new ImGui controls here
-
-
-	// 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
-	{
-
-		ImGui::Begin("Opcje");                          // Create a window called "Hello, world!" and append into it.
-		ImGui::Text("localPosition x: %.2f,y: %.2f,z: %.2f", camera->transform->localRotation.x, camera->transform->localRotation.y, camera->transform->localRotation.z);
-		for (auto go : sm->activeScene->gameObjects) {
-			ImGui::Text(go->name.c_str());
-			//ImGui::Text("x: %.2f,y: %.2f,z: %.2f",go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);
-			if (go->modelComponent->boundingBox != nullptr) {
-				ImGui::Text("localPosition x: %.2f,y: %.2f,z: %.2f", go->localTransform->getLocalPosition().x, go->localTransform->getLocalPosition().y, go->localTransform->getLocalPosition().z);
-				ImGui::Text("Min x: %.2f,y: %.2f,z: %.2f", go->modelComponent->boundingBox->min.x, go->modelComponent->boundingBox->min.y, go->modelComponent->boundingBox->min.z);
-				ImGui::Text("Max x: %.2f,y: %.2f,z: %.2f", go->modelComponent->boundingBox->max.x, go->modelComponent->boundingBox->max.y, go->modelComponent->boundingBox->max.z);
-			}
-		}
-
-		ImGui::End();
-	}
-}
-
-void imgui_end()
-{
-	ImGui::Render();
-	int display_w, display_h;
-	glfwMakeContextCurrent(window);
-	glfwGetFramebufferSize(window, &display_w, &display_h);
-
-	glViewport(0, 0, display_w, display_h);
-
-
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}

@@ -9,9 +9,8 @@ uniform sampler2D gradientTexture;
 
 void main()
 {
-    float distance = length(lightPos - FragPos);
-    float uv = distance / 64;
-    uv = clamp(uv, 0.1, 0.8);
-    vec3 color = texture(gradientTexture, vec2(uv, 1.0)).rgb;
-    FragColor = vec4(color, 1.0);
+	vec3 lightDir = normalize(lightPos - FragPos);
+	vec3 normal = normalize(cross(dFdx(FragPos), dFdy(FragPos)));
+	vec3 color = texture(gradientTexture, vec2(clamp(dot(lightDir, normal) * 0.5 + 0.5, 0.1, 1.0), 0.0)).rgb;
+	FragColor = vec4(color, 1.0);
 }

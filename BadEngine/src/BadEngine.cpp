@@ -61,10 +61,10 @@ float boxSpeed = 4.f;
 
 float scale = 5.f;
 float scaleT = 1.f;
-int sectors = 5;
-int sectorsPom = 5;
-int a = 3;
-int b = 5;
+int sectors = 1;
+int sectorsPom = 1;
+int a = 0;
+int b = 0;
 bool buttonPressed;
 
 void Start() {
@@ -260,7 +260,7 @@ int main() {
 	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/cegla.png", "diffuseMap");
 	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/specular2.png", "specularMap");
 	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/normal2.png", "normalMap");
-
+	
 	glm::vec3 lightPos(0.5f, 10.0f, 0.3f);
 
 
@@ -302,7 +302,8 @@ int main() {
 	glUniform1i(glGetUniformLocation(sm->getActiveScene()->findByName("rampBox")->getModelComponent()->GetShader()->ID,"gradientTexture"), 0);
 
 	sm->loadScene("first");
-	sm->activeScene = sm->scenes.at(1);
+	sm->activeScene = sm->scenes.at(3);
+	//sm->getActiveScene()->findByName("tree_1")->addChild(new GameObject("log"));
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -426,12 +427,8 @@ int main() {
 			{
 				cm.addObject(sm->getActiveScene()->gameObjects.at(i));
 			}
-			if (sm->getActiveScene()->gameObjects.at(i)->modelComponent != nullptr) {
-				sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->GetShader()->use();
-				sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->GetShader()->setVec3("viewPos", camera->transform->getLocalPosition());
-				sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->GetShader()->setVec3("lightPos", lightPos);
-				sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->GetShader()->setVec3("lightColor", glm::vec3(1.0f));
-			}
+			sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
+			
 		}
 		cm.checkResolveCollisions(deltaTime);
 		performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);

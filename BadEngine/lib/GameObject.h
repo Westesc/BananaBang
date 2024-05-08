@@ -44,6 +44,7 @@ public:
 	void Draw(glm::mat4 view, glm::mat4 perspective);
 	YAML::Node serialize();
 	void setVisible(bool visible);
+	void lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 lightColor);
 };
 
 #endif

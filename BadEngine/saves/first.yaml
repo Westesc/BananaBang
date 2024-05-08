@@ -215,15 +215,15 @@ Scenes:
             y: 0
             z: 0
           scale:
-            x: 0.1
-            y: 0.1
-            z: 0.1
+            x: 0.100000001
+            y: 0.100000001
+            z: 0.100000001
         model:
           path: ../../../../res/box.obj
           shader:
             vertexShader: ../../../../src/shaders/ramp.vert
             fragmentShader: ../../../../src/shaders/ramp.frag
-  - name: main
+  - name: shaderTest
     gameObjects:
       - name: sphere
         tag: none
@@ -259,3 +259,84 @@ Scenes:
           shader:
             vertexShader: ../../../../src/shaders/phong.vert
             fragmentShader: ../../../../src/shaders/phong.frag
+  - name: trees
+    gameObjects:
+      - name: tree_1
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          path: ../../../../res/objects/trees/tree_trunk.obj
+          shader:
+            vertexShader: ../../../../src/shaders/phong.vert
+            fragmentShader: ../../../../src/shaders/phong.frag
+        children:
+          - name: box
+            tag: none
+            layer: 0
+            isRotating: false
+            transform:
+              position:
+                x: 0
+                y: 0.05
+                z: 0
+              rotation:
+                x: 0
+                y: 0
+                z: 0
+              scale:
+                x: 1
+                y: 1
+                z: 1
+            model:
+              path: ../../../../res/objects/trees/tree_log.obj
+              shader:
+                vertexShader: ../../../../src/shaders/phong.vert
+                fragmentShader: ../../../../src/shaders/phong.frag
+      - name: skydome
+        tag: none
+        layer: 0
+        isRotating: true
+        rotateSpeed: 1
+        rotateAxis:
+          x: 0
+          y: 1
+          z: 0
+        transform:
+          position:
+            x: 0
+            y: 0
+            z: 0
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 1
+            y: 1
+            z: 1
+        model:
+          meshes:
+            - type: 2
+              verticalSegments: 20
+              horizontalSegments: 20
+              size: 50
+          textures:
+            - path: ../../../../res/chmury1.png
+              type: diffuseMap
+          shader:
+            vertexShader: ../../../../src/shaders/vsS.vert
+            fragmentShader: ../../../../src/shaders/fsS.frag

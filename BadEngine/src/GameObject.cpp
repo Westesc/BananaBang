@@ -125,6 +125,9 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
         //std::cout << name << "M1:" << glm::to_string(M) << std::endl;
         //std::cout << "M2:" << glm::to_string(*modelComponent->getTransform()) << std::endl;
     }
+    for (auto ch : children) {
+        ch->Update(view, perspective,time);
+    }
 }
 
 void GameObject::setRotating(bool rotating,float speed,glm::vec3 rotateAxis) {
@@ -172,6 +175,11 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
         modelComponent->UpdateCollider(*modelComponent->getTransform());
     }
     modelComponent->setPrevTransform(*modelComponent->getTransform());
+    for (auto ch : children) {
+        if (ch->isVisible) {
+            ch->Draw(view, perspective);
+        }
+    }
 }
 
 YAML::Node GameObject::serialize() {
@@ -194,4 +202,16 @@ YAML::Node GameObject::serialize() {
 
 void GameObject::setVisible(bool visible) {
 	isVisible = visible;
+}
+
+void GameObject::lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 lightColor) {
+    if (modelComponent != nullptr) {
+        getModelComponent()->GetShader()->use();
+        getModelComponent()->GetShader()->setVec3("viewPos", viewPos);
+        getModelComponent()->GetShader()->setVec3("lightPos", lightPos);
+        getModelComponent()->GetShader()->setVec3("lightColor", lightColor);
+    }
+    for (auto ch : children) {
+        ch->lightSetting(viewPos, lightPos, lightColor);
+    }
 }

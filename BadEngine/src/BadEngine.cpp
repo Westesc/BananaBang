@@ -28,7 +28,7 @@
 #include "../lib/CollisionManager.h"
 #include "../lib/PlayerMovement.h"
 #include "../lib/GameMode.h"
-
+#include "../lib/TimeManager.h"
 
 
 void init_imgui();
@@ -50,6 +50,8 @@ SceneManager* sm;
 Camera* camera;
 Input* input;
 PlayerMovement* pm;
+TimeManager* tm = new TimeManager();
+
 float boxSpeed = 4.f;
 bool test = true;
 bool frustumTest = false;
@@ -84,7 +86,7 @@ void Start() {
 	sm->activeScene = sm->scenes.at(0);
 	input = new Input(window);
 	camera = new Camera(sm);
-	pm = new PlayerMovement(sm, input, camera);
+	pm = new PlayerMovement(sm, input, camera, tm);
 	/*GameObject* go = new GameObject("test object");
 	Transform* trans = new Transform();
 	Component* comp = new Component();
@@ -261,6 +263,9 @@ int main() {
 		deltaTime = time - lastTime;
 		deltaTime2 += time - lastTime;
 		lastTime = time;
+
+		tm->setTime(deltaTime);
+
 		if (input->checkAnyKey())
 		{
 			if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_1))
@@ -282,8 +287,8 @@ int main() {
 		}
 		glm::mat4 V(1.f);
 		if (gameMode.getMode() == GameMode::Game) {
-			pm->ManagePlayer(deltaTime, deltaTime2);
-			V = camera->GetViewMatrix();
+			pm->ManagePlayer(deltaTime2);
+			V = camera->getViewMatrixPlayer();
 		}
 		else if (gameMode.getMode() != GameMode::Game) {
 

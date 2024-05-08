@@ -96,8 +96,8 @@ Scenes:
           path: ../../../../res/objects/capsule.obj
           capsuleCollider:
             center:
-              x: 4.44166422
-              y: 4.44720554
+              x: 4.44168758
+              y: 4.44718266
               z: 0
             radius: 1.36705923
             height: 3.43535995

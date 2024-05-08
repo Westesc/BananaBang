@@ -36,7 +36,7 @@ public:
 	Camera(SceneManager* sm);
 	~Camera();
 	glm::mat4 getViewMatrix();
-	glm::mat4 GetViewMatrix();
+	glm::mat4 getViewMatrixPlayer();
 	glm::vec3 getFront();
 	void updateCamera(glm::vec2 vector);
 	void ProcessKeyboard(Camera_Movement direction, float deltaTime);

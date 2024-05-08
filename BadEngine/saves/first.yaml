@@ -204,7 +204,12 @@ Scenes:
       - name: rampBox
         tag: none
         layer: 0
-        isRotating: false
+        isRotating: true
+        rotateSpeed: 10
+        rotateAxis:
+          x: 0
+          y: 1
+          z: 1
         transform:
           position:
             x: 0
@@ -253,9 +258,6 @@ Scenes:
               verticalSegments: 20
               horizontalSegments: 20
               size: 50
-          textures:
-            - path: ../../../../res/drewno.png
-              type: diffuseMap
           shader:
-            vertexShader: ../../../../src/shaders/phong.vert
-            fragmentShader: ../../../../src/shaders/phong.frag
+            vertexShader: ../../../../src/shaders/ramp.vert
+            fragmentShader: ../../../../src/shaders/ramp.frag

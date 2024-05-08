@@ -205,7 +205,7 @@ public:
                 glActiveTexture(GL_TEXTURE0);
             }
             else
-                glDrawElements(GL_TRIANGLE_STRIP, indices.size(), GL_UNSIGNED_INT, 0);
+                glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
         }
         else {
             glDrawArrays(GL_POINTS, 0, vert.size());

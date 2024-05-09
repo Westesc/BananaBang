@@ -233,7 +233,7 @@ Scenes:
       - name: sphere
         tag: none
         layer: 0
-        isRotating: true
+        isRotating: false
         rotateSpeed: 10
         rotateAxis:
           x: 0
@@ -241,9 +241,9 @@ Scenes:
           z: 1
         transform:
           position:
-            x: 0
-            y: 0
-            z: 0
+            x: 0.5
+            y: 5
+            z: 0.3
           rotation:
             x: 0
             y: 0
@@ -261,3 +261,29 @@ Scenes:
           shader:
             vertexShader: ../../../../src/shaders/ramp.vert
             fragmentShader: ../../../../src/shaders/ramp.frag
+      - name: Light
+        tag: none
+        layer: 0
+        isRotating: false
+        transform:
+          position:
+            x: 0.3
+            y: 10
+            z: 0.5
+          rotation:
+            x: 0
+            y: 0
+            z: 0
+          scale:
+            x: 0.5
+            y: 0.5
+            z: 0.5
+        model:
+          meshes:
+            - type: 1
+              verticalSegments: 20
+              horizontalSegments: 20
+              size: 50
+          shader:
+            vertexShader: ../../../../src/shaders/vs.vert
+            fragmentShader: ../../../../src/shaders/fs.frag

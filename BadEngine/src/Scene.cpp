@@ -30,6 +30,7 @@ GameObject* Scene::findByName(std::string name) {
 			return go;
 		}
 	}
+	return nullptr;
 }
 
 void Scene::Draw(glm::mat4 view, glm::mat4 perspective) {

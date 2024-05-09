@@ -303,6 +303,10 @@ int main() {
 
 	sm->loadScene("first");
 	sm->activeScene = sm->scenes.at(2);
+	sm->getActiveScene()->findByName("sphere")->getModelComponent()->GetShader()->use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, sm->getActiveScene()->findByName("sphere")->getModelComponent()->TextureFromFileClamp("../../../../res/gradient.png"));
+	glUniform1i(glGetUniformLocation(sm->getActiveScene()->findByName("sphere")->getModelComponent()->GetShader()->ID, "gradientTexture"), 0);
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -356,62 +360,67 @@ int main() {
 		if (gameMode.getMode() == GameMode::Game) {
 			pm->ManagePlayer(deltaTime, deltaTime2);
 		}
-
-		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+		if (sm->getActiveScene()->findByName("box")!=nullptr) {
+			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("box")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("box")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+			}
 		}
 
-		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+		if (sm->getActiveScene()->findByName("sphere") != nullptr) {
+			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("sphere")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("sphere")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("sphere")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("sphere")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("sphere")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("sphere")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+			}
 		}
-		if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+
+		if (sm->getActiveScene()->findByName("capsule2") != nullptr) {
+			if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+			}
 		}
 		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			frustumTest = !frustumTest;

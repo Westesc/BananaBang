@@ -26,15 +26,12 @@ GameObject::GameObject(YAML::Node node) {
     this->modelComponent = new Model(node["model"]);
     if (isRotating) {
         this->setRotating(true, node["rotateSpeed"].as<float>(), nodeIntoVec3(node["rotateAxis"]));
-        //this->rotateSpeed = node["rotateSpeed"].as<float>();
-        //this->rotateAxis = nodeIntoVec3(node["rotateAxis"]);
-        
     }
     
     if (node["children"]) {
         YAML::Node childrenNode = node["children"];
         for (auto childNode : childrenNode) {
-            this->children.push_back(new GameObject(childNode));
+            this->addChild(new GameObject(childNode));
         }
     }
 }
@@ -55,6 +52,7 @@ void GameObject::setParent(GameObject* Parent)
 
 void GameObject::addChild(GameObject* Child)
 {
+    Child->setParent(this);
     children.push_back(Child);
 }
 
@@ -114,12 +112,11 @@ void GameObject::Move(glm::vec3 translation) {
 
 void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
     if (modelComponent != nullptr) {
-        glm::mat4 M = glm::translate(glm::mat4(1.f), localTransform->localPosition);
-        if (isRotating) {
-            M = glm::rotate(M, rotateSpeed * glm::radians(time), rotateAxis);
+        if (isRotating) {/*
+            localTransform->localRotation.x = rotateAxis.x * rotateSpeed * glm::radians(time);
+            localTransform->localRotation.y = rotateAxis.y * rotateSpeed * glm::radians(time);
+            localTransform->localRotation.z = rotateAxis.z * rotateSpeed * glm::radians(time);*/
         }
-        M = glm::scale(M, localTransform->localScale);
-        modelComponent->setTransform(M);
 
         //modelComponent->updateBoundingBox(M);
         //std::cout << name << "M1:" << glm::to_string(M) << std::endl;
@@ -163,6 +160,13 @@ void GameObject::checkResolveCollisions(GameObject* other, float deltaTime) {
 }
 
 void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
+    glm::mat4 M = glm::translate(glm::mat4(1.f), localTransform->localPosition);
+    M = glm::rotate(M, localTransform->localRotation.x, glm::vec3(1.0f, 0.f, 0.f));
+    M = glm::rotate(M, localTransform->localRotation.y, glm::vec3(0.f, 1.f, 0.f));
+    M = glm::rotate(M, localTransform->localRotation.z, glm::vec3(0.f, 0.f, 1.f));
+    M = glm::scale(M, localTransform->localScale);
+    modelComponent->setTransform(M);
+
     modelComponent->GetShader()->use();
     modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
     modelComponent->GetShader()->setMat4("view", view);

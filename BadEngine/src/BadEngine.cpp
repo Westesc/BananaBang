@@ -221,6 +221,29 @@ int main() {
 	Model* skydomeModel = new Model(meshSphere);
 
 
+	//drzewa
+	Model* treelog = new Model(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"));
+	Model* treetrunk = new Model(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"));
+	Shader* phongShader = new Shader("../../../../src/shaders/phong.vert", "../../../../src/shaders/phong.frag");
+	Model* treebranch2= new Model(const_cast<char*>("../../../../res/objects/trees/tree_branch_2.obj"));
+	Model* treebranch3 = new Model(const_cast<char*>("../../../../res/objects/trees/tree_branch_3.obj"));
+	Model* treebranch6 = new Model(const_cast<char*>("../../../../res/objects/trees/tree_branch_6.obj"));
+	Model* treebranch10 = new Model(const_cast<char*>("../../../../res/objects/trees/tree_branch_10.obj"));
+	treebranch2->SetShader(phongShader);
+	treebranch3->SetShader(phongShader);
+	treebranch6->SetShader(phongShader);
+	treebranch10->SetShader(phongShader);
+	std::vector<Model*> branches;
+	branches.push_back(treebranch2);
+	branches.push_back(treebranch3);
+	branches.push_back(treebranch6);
+	branches.push_back(treebranch10);
+	Model* planeSectormodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
+	treetrunk->SetShader(phongShader);
+	treelog->SetShader(phongShader);
+	treebranch2->SetShader(phongShader);
+	planeSectormodel->SetShader(shaders);
+
 
 	boxmodel->SetShader(mapsShader);
 	planemodel->SetShader(shaders);
@@ -236,6 +259,8 @@ int main() {
 	capsule2->addModelComponent(capsule2model);
 	skydome->addModelComponent(skydomeModel);
 	rampBox->addModelComponent(rampModel);
+
+	skydome->localTransform->localScale=glm::vec3(100.f);
 
 	sm->getActiveScene()->addObject(box);
 	sm->getActiveScene()->addObject(box2);
@@ -439,6 +464,9 @@ int main() {
 				}
 			}
 		}
+		
+		//skydome->getTransform()->localPosition = camera->transform->localPosition;
+		sm->getActiveScene()->gameObjects.back()->getTransform()->localPosition = camera->transform->localPosition;
 		sm->getActiveScene()->Draw(V, P);
 
 		mapsShader->use();
@@ -476,7 +504,7 @@ int main() {
 			}
 		}
 		if (buttonPressed) {
-			sectors = sectorsPom;
+			/*sectors = sectorsPom;
 			mojaTablica.clear();
 			for (int i = 0; i < sectors * sectors; ++i) {
 				mojaTablica.push_back(losujLiczbe(a, b));
@@ -488,7 +516,55 @@ int main() {
 			for (int i = 0; i < ilosc; ++i) {
 				placeX.push_back(losujLiczbe2());
 				placeY.push_back(losujLiczbe2());
+			}*/
+			for (auto go : sm->getActiveScene()->gameObjects) {
+				//if(go->name != sm->getActiveScene()->findByName("skydome")->name)
+					delete go;
 			}
+			sm->getActiveScene()->gameObjects.clear();
+			Scene* scenaNowa = new Scene("Nowa");
+			sm->scenes.push_back(scenaNowa);
+			sm->activeScene = sm->scenes.back();
+
+			for (int i = 0; i < sectorsPom; i++) {
+				for (int j = 0; j < sectorsPom; j++) {
+					GameObject* planeSector = new GameObject("sector"+(i*j));
+					planeSector->localTransform->localScale = glm::vec3(5.f, 5.f, 5.f);
+					planeSector->addModelComponent(planeSectormodel);
+					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, -.5f, j * 20*planeSector->localTransform->localScale.z);
+					int treeCount = losujLiczbe(a, b);
+					for (int k = 0; k < treeCount; k++) {
+						int treeX = losujLiczbe2()* planeSector->localTransform->localScale.x;
+							int treeZ = losujLiczbe2()* planeSector->localTransform->localScale.z;
+						GameObject* tree = new GameObject("tree_"+k);
+						tree->addModelComponent(treetrunk);
+						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
+						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
+						GameObject* log = new GameObject("log");
+						log->addModelComponent(treelog);
+						log->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX;
+						log->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
+
+						tree->addChild(log);
+						planeSector->addChild(tree);
+						/*int branchCount = losujLiczbe(2, 5);
+						for (int m = 0; m < branchCount; m++) {
+							GameObject* branch = new GameObject("branch" + m);
+							branch->addModelComponent(branches.at(losujLiczbe(0, branches.size() - 1)));
+							branch->localTransform->localRotation.y = float(losujLiczbe(m * 360 / branchCount, (m + 1) * 360 / branchCount));
+							log->addChild(branch);
+						}*/
+					}
+
+					sm->activeScene->addObject(planeSector);
+					
+				}
+			}
+			GameObject* skydome = new GameObject("sky");
+			skydome->addModelComponent(skydomeModel);
+			skydome->getTransform()->localScale = glm::vec3(100.f);
+			sm->getActiveScene()->addObject(skydome);
+				//sm->saveScene("first");
 			buttonPressed = false;
 		}
 		if (input->IsKeobarodAction(window)) {
@@ -548,8 +624,21 @@ int main() {
 				}
 			}
 		}
+		for (auto object : sm->getActiveScene()->gameObjects) {
+			for (auto ch : object->children) {
+				if (glm::distance(ch->getTransform()->localPosition, camera->transform->localPosition) > 100.f) {
+					ch->modelComponent = box2model;
+					ch->children.at(0)->modelComponent = box2model;
+				}
+				else {
+					ch->modelComponent = treetrunk;
+					ch->children.at(0)->modelComponent = treelog;
+				}
+			}
+		}
 		int pom = 0;
-		if (plane->getModelComponent() != nullptr) {
+		skydome->getTransform()->localPosition = camera->transform->localPosition;
+		/*if (plane->getModelComponent() != nullptr) {
 			for (int i = 0; i < sectors; i++)
 			{
 				for (int j = 0; j < sectors; j++) {
@@ -560,7 +649,7 @@ int main() {
 					}
 				}
 			}
-		}
+		}*/
 		renderImGui();
 		glfwSwapBuffers(window);
 		glfwPollEvents();

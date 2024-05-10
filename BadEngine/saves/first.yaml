@@ -284,14 +284,14 @@ Scenes:
             vertexShader: ../../../../src/shaders/phong.vert
             fragmentShader: ../../../../src/shaders/phong.frag
         children:
-          - name: box
+          - name: log
             tag: none
             layer: 0
             isRotating: false
             transform:
               position:
                 x: 0
-                y: 0.05
+                y: 0.0500000007
                 z: 0
               rotation:
                 x: 0
@@ -306,6 +306,29 @@ Scenes:
               shader:
                 vertexShader: ../../../../src/shaders/phong.vert
                 fragmentShader: ../../../../src/shaders/phong.frag
+            children:
+              - name: branch1
+                tag: none
+                layer: 0
+                isRotating: false
+                transform:
+                  position:
+                    x: 0
+                    y: 0
+                    z: 0
+                  rotation:
+                    x: 0
+                    y: 0
+                    z: 0
+                  scale:
+                    x: 1
+                    y: 1
+                    z: 1
+                model:
+                  path: ../../../../res/objects/trees/tree_branch_13.obj
+                  shader:
+                    vertexShader: ../../../../src/shaders/phong.vert
+                    fragmentShader: ../../../../src/shaders/phong.frag
       - name: skydome
         tag: none
         layer: 0

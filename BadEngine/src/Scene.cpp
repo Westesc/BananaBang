@@ -1,6 +1,11 @@
 #include "../lib/Scene.h"
 Scene::Scene(std::string Name) : name(Name) {}
-Scene::~Scene() {}
+Scene::~Scene() {
+	for (auto go : gameObjects) {
+		delete go;
+	}
+	gameObjects.clear();
+}
 void Scene::Start() {
 
 }

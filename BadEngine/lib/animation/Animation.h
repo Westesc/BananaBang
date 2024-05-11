@@ -22,7 +22,7 @@ class Animation
 public:
 	Animation() = default;
 
-	Animation(const std::string& animationPath, Model* model)
+	Animation(const std::string& animationPath, ModelAnimation* model)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(animationPath, aiProcess_Triangulate);
@@ -62,7 +62,7 @@ public:
 	}
 
 private:
-	void ReadMissingBones(const aiAnimation* animation, Model& model)
+	void ReadMissingBones(const aiAnimation* animation, ModelAnimation& model)
 	{
 		int size = animation->mNumChannels;
 

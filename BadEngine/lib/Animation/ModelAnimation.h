@@ -10,7 +10,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "MeshAnimation.h"
+#include "../Mesh.h"
 #include "../Shader.h"
 
 #include <string>
@@ -27,13 +27,15 @@ using namespace std;
 class ModelAnimation
 {
 public:
-	// model data 
-	vector<Texture> textures_loaded;	// stores all the textures loaded so far, optimization to make sure textures aren't loaded more than once.
-	vector<MeshAnimation>    meshes;
+	glm::mat4* Transform;
+	vector<Texture> textures_loaded;	
+	vector<Mesh>    meshes;
 	string directory;
 	bool gammaCorrection;
-
-
+	bool isFromFile;
+	bool rotating;
+	bool isBlue, iswhite;
+	Shader* shader;
 
 	// constructor, expects a filepath to a 3D model.
 	ModelAnimation(string const& path, bool gamma = false) : gammaCorrection(gamma)
@@ -42,10 +44,12 @@ public:
 	}
 
 	// draws the model, and thus all its meshes
-	void Draw(Shader& shader)
+	void Draw()
 	{
 		for (unsigned int i = 0; i < meshes.size(); i++)
-			meshes[i].Draw(shader);
+		{
+			meshes[i].Draw(shader, textures_loaded, Transform, isFromFile, rotating, isBlue);
+		}
 	}
 
 	auto& GetBoneInfoMap() { return m_BoneInfoMap; }
@@ -105,7 +109,7 @@ private:
 	}
 
 
-	MeshAnimation processMesh(aiMesh* mesh, const aiScene* scene)
+	Mesh processMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		vector<Vertex> vertices;
 		vector<unsigned int> indices;
@@ -149,7 +153,7 @@ private:
 
 		ExtractBoneWeightForVertices(vertices, mesh, scene);
 
-		return MeshAnimation(vertices, indices, textures);
+		return Mesh(vertices, indices, textures);
 	}
 
 	void SetVertexBoneData(Vertex& vertex, int boneID, float weight)

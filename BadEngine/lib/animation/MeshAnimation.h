@@ -1,12 +1,12 @@
-#ifndef MESH_H
+/*#ifndef MESH_H
 #define MESH_H
 
-#include <glad/glad.h> // holds all OpenGL type declarations
+#include <glad/glad.h> 
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <learnopengl/shader.h>
+#include "../Shader.h"
 
 #include <string>
 #include <vector>
@@ -39,6 +39,7 @@ struct Texture {
 
 class MeshAnimation {
 public:
+
     // mesh Data
     vector<Vertex>       vertices;
     vector<unsigned int> indices;
@@ -143,4 +144,4 @@ private:
         glBindVertexArray(0);
     }
 };
-#endif
+#endif*/

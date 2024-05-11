@@ -28,6 +28,7 @@
 #include "../lib/CollisionManager.h"
 #include "../lib/PlayerMovement.h"
 #include "../lib/GameMode.h"
+#include "../lib/TimeManager.h"
 
 //bool test = true;
 bool test = false;
@@ -48,15 +49,17 @@ GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _m
 
 using Clock = std::chrono::high_resolution_clock;
 using TimePoint = Clock::time_point;
-PlayerMovement* pm;
 
-Camera* camera = new Camera();
+Camera* camera;
 using Duration = std::chrono::duration<float, std::ratio<1, 1>>;
 
 constexpr int wys = 800, szer = 1000;
 GLFWwindow* window;
 SceneManager* sm;
 Input* input;
+PlayerMovement* pm;
+TimeManager* tm = new TimeManager();
+
 float boxSpeed = 4.f;
 
 float scale = 5.f;
@@ -97,6 +100,8 @@ void Start() {
 	sm->scenes.push_back(scene);
 	sm->activeScene = sm->scenes.at(0);
 	input = new Input(window);
+	camera = new Camera(sm);
+	pm = new PlayerMovement(sm, input, camera, tm);
 	/*GameObject* go = new GameObject("test object");
 	Transform* trans = new Transform();
 	Component* comp = new Component();
@@ -105,7 +110,6 @@ void Start() {
 	RigidBody* rb = new RigidBody();
 	Axis* axis = new Axis("axis");
 	go->getTransform();*/
-	pm = new PlayerMovement(sm, input);
 }
 
 std::array<glm::vec4, 6> calculateFrustumPlanes(const glm::mat4& viewProjectionMatrix) {
@@ -195,6 +199,14 @@ int main() {
 		placeY.push_back(losujLiczbe2());
 	}
 
+	//player
+	Shader* shader = new Shader("../../../../src/shaders/vs_player.vert", "../../../../src/shaders/fs_player.frag");
+	GameObject* player = new GameObject("player");
+	Model* playermodel = new Model(const_cast<char*>("../../../../res/player.obj"));
+	playermodel->SetShader(shader);
+	player->addModelComponent(playermodel);
+	sm->getActiveScene()->addObject(player);
+
 	Shader* shaders = new Shader("../../../../src/shaders/vs.vert", "../../../../src/shaders/fs.frag");
 	Shader* skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
 	Shader* mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");
@@ -263,6 +275,8 @@ int main() {
 	
 	glm::vec3 lightPos(0.5f, 10.0f, 0.3f);
 
+	sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(-1.f, -1.f, 1.f);
+	sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(0.1f, 0.1f, 0.1f);
 
 
 	/*box->localTransform->localPosition = glm::vec3(-1.f, -1.f, 0.f);
@@ -301,8 +315,8 @@ int main() {
 	glBindTexture(GL_TEXTURE_2D, sm->getActiveScene()->findByName("rampBox")->getModelComponent()->TextureFromFile("../../../../res/gradient.png"));
 	glUniform1i(glGetUniformLocation(sm->getActiveScene()->findByName("rampBox")->getModelComponent()->GetShader()->ID,"gradientTexture"), 0);
 
-	sm->loadScene("first");
-	sm->activeScene = sm->scenes.at(3);
+	//sm->loadScene("first");
+	//sm->activeScene = sm->scenes.at(3);
 	//sm->getActiveScene()->findByName("tree_1")->addChild(new GameObject("log"));
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -315,9 +329,19 @@ int main() {
 		deltaTime = time - lastTime;
 		deltaTime2 += time - lastTime;
 		lastTime = time;
+
+		tm->setTime(deltaTime);
 		//std::cout << "Delta time: " << deltaTime << std::endl;
 
-		glm::mat4 V = camera->getViewMatrix();
+		glm::mat4 V(1.f);
+		if (gameMode.getMode() == GameMode::Game) {
+			pm->ManagePlayer(deltaTime2);
+			V = camera->getViewMatrixPlayer();
+		}
+		else if (gameMode.getMode() != GameMode::Game) {
+
+			V = camera->getViewMatrix();
+		}
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
 		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
@@ -355,7 +379,7 @@ int main() {
 		}
 
 		if (gameMode.getMode() == GameMode::Game) {
-			pm->ManagePlayer(deltaTime, deltaTime2);
+			pm->ManagePlayer(deltaTime2);
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
@@ -469,12 +493,13 @@ int main() {
 		shaders->setMat4("projection", P);
 		capsule2->getModelComponent()->Draw();
 		capsule2->getModelComponent()->UpdateCollider(*capsule2->getModelComponent()->getTransform());*/
-		if (input->IsMove()) {
+		while (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			if (glfwGetInputMode(window, GLFW_CURSOR) != 212993) {
 				camera->updateCamera(dpos);
 			}
 		}
+
 		if (buttonPressed) {
 			sectors = sectorsPom;
 			mojaTablica.clear();

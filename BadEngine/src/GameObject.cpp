@@ -118,23 +118,26 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
         if (isRotating) {
             M = glm::rotate(M, rotateSpeed * glm::radians(time), rotateAxis);
         }
-        M = glm::scale(M, localTransform->localScale);
+        else {
+            M = glm::rotate(M, rotateSpeed, rotateAxis);
+        }
+        M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
         modelComponent->setTransform(M);
-
         //modelComponent->updateBoundingBox(M);
         //std::cout << name << "M1:" << glm::to_string(M) << std::endl;
         //std::cout << "M2:" << glm::to_string(*modelComponent->getTransform()) << std::endl;
     }
-    for (auto ch : children) {
-        ch->Update(view, perspective,time);
-    }
 }
 
-void GameObject::setRotating(bool rotating,float speed,glm::vec3 rotateAxis) {
+void GameObject::setRotating(bool rotating, float speed, glm::vec3 rotateAxis) {
     isRotating = rotating;
     rotateSpeed = speed;
     this->rotateAxis = rotateAxis;
 }
+float GameObject::getRotate() {
+    return rotateSpeed;
+}
+
 
 void GameObject::checkResolveCollisions(GameObject* other, float deltaTime) {
     if (modelComponent->checkCollision(other->modelComponent)) {

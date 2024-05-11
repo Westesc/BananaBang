@@ -1,7 +1,11 @@
 #include "../lib/RigidBody.h"
 
-RigidBody::RigidBody()
+
+RigidBody::RigidBody(std::string tag, SceneManager* sm, TimeManager* tm)
 {
+	this->tag = tag;
+	this->sm = sm;
+	this->tm = tm;
 }
 
 RigidBody::~RigidBody()
@@ -10,6 +14,8 @@ RigidBody::~RigidBody()
 
 void RigidBody::useGravity()
 {
+	upwardsSpeed += gravity * tm->getFramePerSeconds();
+	sm->getActiveScene()->findByName(tag)->Move(glm::vec3(0.0f, upwardsSpeed * tm->getFramePerSeconds(), 0.0f));
 }
 
 bool RigidBody::checkCollision()

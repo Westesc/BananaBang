@@ -23,7 +23,7 @@ public:
 	Transform* localTransform;
 	Model* modelComponent;
 	bool isRotating;
-	float rotateSpeed;
+	float rotateSpeed = 0.f;
 	glm::vec3 rotateAxis;
 	bool isVisible = true;
 
@@ -40,6 +40,7 @@ public:
 	void Move(glm::vec3 translation);
 	void Update(glm::mat4 view, glm::mat4 perspective, float time);
 	void setRotating(bool rotating, float speed = 100.f, glm::vec3 rotateAxis = glm::vec3(0.f, 0.f, 1.f));
+	float getRotate();
 	void checkResolveCollisions(GameObject* other, float deltaTime);
 	void Draw(glm::mat4 view, glm::mat4 perspective);
 	YAML::Node serialize();

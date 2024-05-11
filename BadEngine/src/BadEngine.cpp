@@ -201,6 +201,11 @@ int main() {
 		placeY.push_back(losujLiczbe2());
 	}
 
+	ModelAnimation* animodel = new ModelAnimation(const_cast<char*>("../../../../res/dancing_vampire.dae"));
+	Animation* walkAnimation = new Animation(const_cast<char*>("../../../../res/dancing_vampire.dae"), animodel);
+	//Animator* animator = new Animator(walkAnimation);
+
+
 	//player
 	Shader* shader = new Shader("../../../../src/shaders/vs_player.vert", "../../../../src/shaders/fs_player.frag");
 	GameObject* player = new GameObject("player");
@@ -209,12 +214,15 @@ int main() {
 	player->addModelComponent(playermodel);
 	sm->getActiveScene()->addObject(player);
 
+	Shader* shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
+
 	Shader* shaders = new Shader("../../../../src/shaders/vs.vert", "../../../../src/shaders/fs.frag");
 	Shader* skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
 	Shader* mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");
 	Shader* shaderTree = new Shader("../../../../src/shaders/vsTree.vert", "../../../../src/shaders/fsTree.frag");
 	Shader* rampShader = new Shader("../../../../src/shaders/ramp.vert", "../../../../src/shaders/ramp.frag");
 
+	GameObject* anim = new GameObject("animation");
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
 	GameObject* box2 = new GameObject("box2");
@@ -223,6 +231,7 @@ int main() {
 	GameObject* skydome = new GameObject("skydome");
 	GameObject* rampBox = new GameObject("rampBox");
 
+	
 	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
 	Model* box2model = new Model(const_cast<char*>("../../../../res/tree.obj"));

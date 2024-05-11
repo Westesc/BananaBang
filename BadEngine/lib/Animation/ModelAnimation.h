@@ -29,7 +29,7 @@ class ModelAnimation
 public:
 	glm::mat4* Transform;
 	vector<Texture> textures_loaded;	
-	vector<Mesh>    meshes;
+	vector<Mesh*> meshes;
 	string directory;
 	bool gammaCorrection;
 	bool isFromFile;
@@ -48,7 +48,7 @@ public:
 	{
 		for (unsigned int i = 0; i < meshes.size(); i++)
 		{
-			meshes[i].Draw(shader, textures_loaded, Transform, isFromFile, rotating, isBlue);
+			meshes[i]->Draw(shader, textures_loaded, Transform, isFromFile, rotating, isBlue);
 		}
 	}
 
@@ -109,7 +109,7 @@ private:
 	}
 
 
-	Mesh processMesh(aiMesh* mesh, const aiScene* scene)
+	Mesh* processMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		vector<Vertex> vertices;
 		vector<unsigned int> indices;
@@ -153,7 +153,7 @@ private:
 
 		ExtractBoneWeightForVertices(vertices, mesh, scene);
 
-		return Mesh(vertices, indices, textures);
+		return new Mesh(vertices, indices, textures);
 	}
 
 	void SetVertexBoneData(Vertex& vertex, int boneID, float weight)

@@ -1,34 +1,80 @@
 #pragma once
 
-#include<assimp/quaternion.h>
-#include<assimp/vector3.h>
-#include<assimp/matrix4x4.h>
-#include<glm/glm.hpp>
-#include<glm/gtc/quaternion.hpp>
+#include <glm/glm.hpp>
+#include <map>
+#include <vector>
+#include <assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include "Animation.h"
+#include "Bone.h"
 
-
-class AssimpGLMHelpers
+class Animator
 {
 public:
-
-	static inline glm::mat4 ConvertMatrixToGLMFormat(const aiMatrix4x4& from)
+	Animator(Animation* animation)
 	{
-		glm::mat4 to;
-		//the a,b,c,d in assimp is the row ; the 1,2,3,4 is the column
-		to[0][0] = from.a1; to[1][0] = from.a2; to[2][0] = from.a3; to[3][0] = from.a4;
-		to[0][1] = from.b1; to[1][1] = from.b2; to[2][1] = from.b3; to[3][1] = from.b4;
-		to[0][2] = from.c1; to[1][2] = from.c2; to[2][2] = from.c3; to[3][2] = from.c4;
-		to[0][3] = from.d1; to[1][3] = from.d2; to[2][3] = from.d3; to[3][3] = from.d4;
-		return to;
+		m_CurrentTime = 0.0;
+		m_CurrentAnimation = animation;
+
+		m_FinalBoneMatrices.reserve(100);
+
+		for (int i = 0; i < 100; i++)
+			m_FinalBoneMatrices.push_back(glm::mat4(1.0f));
 	}
 
-	static inline glm::vec3 GetGLMVec(const aiVector3D& vec)
+	void UpdateAnimation(float dt)
 	{
-		return glm::vec3(vec.x, vec.y, vec.z);
+		m_DeltaTime = dt;
+		if (m_CurrentAnimation)
+		{
+			m_CurrentTime += m_CurrentAnimation->GetTicksPerSecond() * dt;
+			m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->GetDuration());
+			CalculateBoneTransform(&m_CurrentAnimation->GetRootNode(), glm::mat4(1.0f));
+		}
 	}
 
-	static inline glm::quat GetGLMQuat(const aiQuaternion& pOrientation)
+	void PlayAnimation(Animation* pAnimation)
 	{
-		return glm::quat(pOrientation.w, pOrientation.x, pOrientation.y, pOrientation.z);
+		m_CurrentAnimation = pAnimation;
+		m_CurrentTime = 0.0f;
 	}
+
+	void CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform)
+	{
+		std::string nodeName = node->name;
+		glm::mat4 nodeTransform = node->transformation;
+
+		Bone* Bone = m_CurrentAnimation->FindBone(nodeName);
+
+		if (Bone)
+		{
+			Bone->Update(m_CurrentTime);
+			nodeTransform = Bone->GetLocalTransform();
+		}
+
+		glm::mat4 globalTransformation = parentTransform * nodeTransform;
+
+		auto boneInfoMap = m_CurrentAnimation->GetBoneIDMap();
+		if (boneInfoMap.find(nodeName) != boneInfoMap.end())
+		{
+			int index = boneInfoMap[nodeName].id;
+			glm::mat4 offset = boneInfoMap[nodeName].offset;
+			m_FinalBoneMatrices[index] = globalTransformation * offset;
+		}
+
+		for (int i = 0; i < node->childrenCount; i++)
+			CalculateBoneTransform(&node->children[i], globalTransformation);
+	}
+
+	std::vector<glm::mat4> GetFinalBoneMatrices()
+	{
+		return m_FinalBoneMatrices;
+	}
+
+private:
+	std::vector<glm::mat4> m_FinalBoneMatrices;
+	Animation* m_CurrentAnimation;
+	float m_CurrentTime;
+	float m_DeltaTime;
+
 };

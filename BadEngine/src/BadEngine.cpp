@@ -29,6 +29,8 @@
 #include "../lib/PlayerMovement.h"
 #include "../lib/GameMode.h"
 #include "../lib/TimeManager.h"
+#include "../lib/animation/Animator.h"
+#include "../lib/animation/ModelAnimation.h"
 
 //bool test = true;
 bool test = false;

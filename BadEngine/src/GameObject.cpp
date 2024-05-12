@@ -118,11 +118,12 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
         glm::mat4 M = glm::translate(glm::mat4(1.f), localTransform->localPosition);
         if (isRotating) {
             M = glm::rotate(M, rotateSpeed * glm::radians(time), rotateAxis);
+            M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
         }
         else {
             M = glm::rotate(M, rotateSpeed, rotateAxis);
+            M = localTransform->getLocalScale(M);
         }
-        M = glm::scale(M, glm::vec3(0.1f, 0.1f, 0.1f));
         modelComponent->setTransform(M);
         //modelComponent->updateBoundingBox(M);
         //std::cout << name << "M1:" << glm::to_string(M) << std::endl;

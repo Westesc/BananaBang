@@ -200,8 +200,8 @@ int main() {
 		placeY.push_back(losujLiczbe2());
 	}
 	//animacja
-	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/Crouched Walking.fbx"), true);
-	Animation* walkAnimation = new Animation(const_cast<char*>("../../../../res/animations/Crouched Walking.fbx"), animodel);
+	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/Crouched Walking.dae"), true);
+	Animation* walkAnimation = new Animation(const_cast<char*>("../../../../res/animations/Crouched Walking.dae"), animodel);
 	Animator* animator = new Animator(walkAnimation);
 	Shader* shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
 	GameObject* anim = new GameObject("animation");
@@ -302,13 +302,15 @@ int main() {
 	box2->getModelComponent()->addCollider(1, box->localTransform->localPosition);*/
 
 	sm->getActiveScene()->findByName("animation")->getModelComponent()->AddTexture("../../../../res/cegla.png", "diffuseMap");
-	sm->getActiveScene()->findByName("animation")->getTransform()->localPosition = glm::vec3(-1.f, 3.f, 1.f);
+	sm->getActiveScene()->findByName("animation")->getTransform()->localPosition = glm::vec3(-4.f, 5.f, 1.f);
+	//sm->getActiveScene()->findByName("animation")->getTransform()->localScale = glm::vec3(100.f, 100.f, 100.f);
 
 	sm->getActiveScene()->findByName("box")->getTransform()->localPosition = glm::vec3(-1.f, -1.f, 0.f);
 	sm->getActiveScene()->findByName("box2")->getTransform()->localPosition = glm::vec3(-4.f, -4.f, 0.f);
 	sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition = glm::vec3(4.f, 4.f, 0.f);
 	sm->getActiveScene()->findByName("capsule2")->getTransform()->localPosition = glm::vec3(8.f, 8.f, 0.f);
 	sm->getActiveScene()->findByName("rampBox")->getTransform()->localPosition = glm::vec3(0.f, 5.f, 0.f);
+	sm->getActiveScene()->findByName("rampBox")->getTransform()->localScale = glm::vec3(0.1f, 0.1f, 0.1f);
 	sm->getActiveScene()->findByName("box")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box")->getTransform()->localPosition);
 	sm->getActiveScene()->findByName("box2")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box2")->getTransform()->localPosition);
 	sm->getActiveScene()->findByName("capsule")->getModelComponent()->addCollider(2, sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition);

@@ -60,6 +60,11 @@ glm::vec3 Transform::getLocalScale()
 	return localScale;
 }
 
+glm::mat4 Transform::getLocalScale(glm::mat4 M)
+{
+	return glm::scale(M, localScale);
+}
+
 glm::vec3 Transform::getGlobalScale()
 {
 	return glm::vec3();

@@ -13,6 +13,7 @@ set(GLFW_INSTALL        OFF CACHE INTERNAL "Generate installation target")
 
 # Set Assimp variables
 set(BUILD_SHARED_LIBS                     OFF CACHE INTERNAL "Build package with shared libraries.")
+set(ASSIMP_BUILD_COLLADA_IMPORTER		  ON CACHE BOOL "")
 set(ASSIMP_NO_EXPORT                      ON  CACHE BOOL "")
 set(ASSIMP_BUILD_ASSIMP_TOOLS             OFF CACHE BOOL "")
 set(ASSIMP_BUILD_TESTS                    OFF CACHE BOOL "")

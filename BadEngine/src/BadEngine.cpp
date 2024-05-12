@@ -30,7 +30,6 @@
 #include "../lib/GameMode.h"
 #include "../lib/TimeManager.h"
 #include "../lib/animation/Animator.h"
-#include "../lib/animation/ModelAnimation.h"
 
 //bool test = true;
 bool test = false;
@@ -200,21 +199,25 @@ int main() {
 		placeX.push_back(losujLiczbe2());
 		placeY.push_back(losujLiczbe2());
 	}
-
-	ModelAnimation* animodel = new ModelAnimation(const_cast<char*>("../../../../res/dancing_vampire.dae"));
-	Animation* walkAnimation = new Animation(const_cast<char*>("../../../../res/dancing_vampire.dae"), animodel);
-	//Animator* animator = new Animator(walkAnimation);
-
+	//animacja
+	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/Crouched Walking.fbx"), true);
+	Animation* walkAnimation = new Animation(const_cast<char*>("../../../../res/animations/Crouched Walking.fbx"), animodel);
+	Animator* animator = new Animator(walkAnimation);
+	Shader* shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
+	GameObject* anim = new GameObject("animation");
+	animodel->SetShader(shaderAnimation);
+	anim->addModelComponent(animodel);
+	sm->getActiveScene()->addObject(anim);
 
 	//player
 	Shader* shader = new Shader("../../../../src/shaders/vs_player.vert", "../../../../src/shaders/fs_player.frag");
 	GameObject* player = new GameObject("player");
-	Model* playermodel = new Model(const_cast<char*>("../../../../res/player.obj"));
+	Model* playermodel = new Model(const_cast<char*>("../../../../res/player.obj"), false);
 	playermodel->SetShader(shader);
 	player->addModelComponent(playermodel);
 	sm->getActiveScene()->addObject(player);
 
-	Shader* shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
+
 
 	Shader* shaders = new Shader("../../../../src/shaders/vs.vert", "../../../../src/shaders/fs.frag");
 	Shader* skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
@@ -222,7 +225,7 @@ int main() {
 	Shader* shaderTree = new Shader("../../../../src/shaders/vsTree.vert", "../../../../src/shaders/fsTree.frag");
 	Shader* rampShader = new Shader("../../../../src/shaders/ramp.vert", "../../../../src/shaders/ramp.frag");
 
-	GameObject* anim = new GameObject("animation");
+
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
 	GameObject* box2 = new GameObject("box2");
@@ -232,13 +235,13 @@ int main() {
 	GameObject* rampBox = new GameObject("rampBox");
 
 	
-	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
-	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
-	Model* box2model = new Model(const_cast<char*>("../../../../res/tree.obj"));
-	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
-	Model* rampModel = new Model(const_cast<char*>("../../../../res/box.obj"));
+	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"), false);
+	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"), false);
+	Model* box2model = new Model(const_cast<char*>("../../../../res/tree.obj"), false);
+	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"), false);
+	Model* rampModel = new Model(const_cast<char*>("../../../../res/box.obj"), false);
 
-	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"));
+	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"), false);
 	Mesh* meshSphere = new Mesh();
 	meshSphere->createDome(20, 20, 50);
 	Model* skydomeModel = new Model(meshSphere);
@@ -297,6 +300,10 @@ int main() {
 	box->getModelComponent()->addCollider(1, box->localTransform->localPosition);
 	capsule->getModelComponent()->addCollider(2, capsule->localTransform->localPosition);
 	box2->getModelComponent()->addCollider(1, box->localTransform->localPosition);*/
+
+	sm->getActiveScene()->findByName("animation")->getModelComponent()->AddTexture("../../../../res/cegla.png", "diffuseMap");
+	sm->getActiveScene()->findByName("animation")->getTransform()->localPosition = glm::vec3(-1.f, 3.f, 1.f);
+
 	sm->getActiveScene()->findByName("box")->getTransform()->localPosition = glm::vec3(-1.f, -1.f, 0.f);
 	sm->getActiveScene()->findByName("box2")->getTransform()->localPosition = glm::vec3(-4.f, -4.f, 0.f);
 	sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition = glm::vec3(4.f, 4.f, 0.f);
@@ -353,6 +360,12 @@ int main() {
 
 			V = camera->getViewMatrix();
 		}
+		//animacje
+		animator->UpdateAnimation(deltaTime/10);
+		shaderAnimation->use();
+		auto transforms = animator->GetFinalBoneMatrices();
+		for (int i = 0; i < transforms.size(); ++i)
+			shaderAnimation->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
 		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());

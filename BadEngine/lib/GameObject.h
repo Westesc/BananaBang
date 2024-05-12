@@ -7,6 +7,7 @@
 #include "Transform.h"
 #include "Component.h"
 #include "Model.h"
+#include "animation/ModelAnimation.h"
 
 class GameObject {
 public:

@@ -91,6 +91,7 @@ void GameObject::addModelComponent(Model* model) {
     modelComponent = model;
 }
 
+
 Model* GameObject::getModelComponent() const {
     return modelComponent;
 }

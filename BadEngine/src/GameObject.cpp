@@ -112,10 +112,10 @@ void GameObject::Move(glm::vec3 translation) {
 
 void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
     if (modelComponent != nullptr) {
-        if (isRotating) {/*
-            localTransform->localRotation.x = rotateAxis.x * rotateSpeed * glm::radians(time);
-            localTransform->localRotation.y = rotateAxis.y * rotateSpeed * glm::radians(time);
-            localTransform->localRotation.z = rotateAxis.z * rotateSpeed * glm::radians(time);*/
+        if (isRotating) {
+            localTransform->localRotation.x += rotateAxis.x * rotateSpeed * glm::radians(time);
+            localTransform->localRotation.y += rotateAxis.y * rotateSpeed * glm::radians(time);
+            localTransform->localRotation.z += rotateAxis.z * rotateSpeed * glm::radians(time);
         }
 
         //modelComponent->updateBoundingBox(M);
@@ -161,9 +161,9 @@ void GameObject::checkResolveCollisions(GameObject* other, float deltaTime) {
 
 void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
     glm::mat4 M = glm::translate(glm::mat4(1.f), localTransform->localPosition);
-    M = glm::rotate(M, localTransform->localRotation.x, glm::vec3(1.0f, 0.f, 0.f));
-    M = glm::rotate(M, localTransform->localRotation.y, glm::vec3(0.f, 1.f, 0.f));
-    M = glm::rotate(M, localTransform->localRotation.z, glm::vec3(0.f, 0.f, 1.f));
+    M = glm::rotate(M, glm::radians(localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
+    M = glm::rotate(M, glm::radians(localTransform->localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
+    M = glm::rotate(M, glm::radians(localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
     M = glm::scale(M, localTransform->localScale);
     modelComponent->setTransform(M);
 

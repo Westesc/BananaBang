@@ -194,6 +194,7 @@ int main() {
 		placeX.push_back(losujLiczbe2());
 		placeY.push_back(losujLiczbe2());
 	}
+	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	Shader* shaders = new Shader("../../../../src/shaders/vs.vert", "../../../../src/shaders/fs.frag");
 	Shader* skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
@@ -225,23 +226,11 @@ int main() {
 	Model* treelog = new Model(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"));
 	Model* treetrunk = new Model(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"));
 	Shader* phongShader = new Shader("../../../../src/shaders/phong.vert", "../../../../src/shaders/phong.frag");
-	Model* treebranch2= new Model(const_cast<char*>("../../../../res/objects/trees/tree_branch_2.obj"));
-	Model* treebranch3 = new Model(const_cast<char*>("../../../../res/objects/trees/tree_branch_3.obj"));
-	Model* treebranch6 = new Model(const_cast<char*>("../../../../res/objects/trees/tree_branch_6.obj"));
-	Model* treebranch10 = new Model(const_cast<char*>("../../../../res/objects/trees/tree_branch_10.obj"));
-	treebranch2->SetShader(phongShader);
-	treebranch3->SetShader(phongShader);
-	treebranch6->SetShader(phongShader);
-	treebranch10->SetShader(phongShader);
-	std::vector<Model*> branches;
-	branches.push_back(treebranch2);
-	branches.push_back(treebranch3);
-	branches.push_back(treebranch6);
-	branches.push_back(treebranch10);
+	Model* treebranch1= new Model(const_cast<char*>("../../../../res/objects/trees/tree_branch_1.obj"));
+	treebranch1->SetShader(phongShader);
 	Model* planeSectormodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
 	treetrunk->SetShader(phongShader);
 	treelog->SetShader(phongShader);
-	treebranch2->SetShader(phongShader);
 	planeSectormodel->SetShader(shaders);
 
 
@@ -547,13 +536,21 @@ int main() {
 
 						tree->addChild(log);
 						planeSector->addChild(tree);
-						/*int branchCount = losujLiczbe(2, 5);
+						int branchCount = losujLiczbe(5, 10);
 						for (int m = 0; m < branchCount; m++) {
 							GameObject* branch = new GameObject("branch" + m);
-							branch->addModelComponent(branches.at(losujLiczbe(0, branches.size() - 1)));
+							branch->addModelComponent(treebranch1);
+							branch->localTransform->localPosition.x = planeSector->localTransform->localPosition.x + treeX;
+							branch->localTransform->localPosition.y = float(losujLiczbe((m * 13 / branchCount)+5, ((m + 1) * 13 / branchCount)+5));
+							branch->localTransform->localScale.x = 12 / branch->localTransform->localPosition.y;
+							branch->localTransform->localScale.y = 12 / branch->localTransform->localPosition.y;
+							branch->localTransform->localScale.z = 12 / branch->localTransform->localPosition.y;
+							branch->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
 							branch->localTransform->localRotation.y = float(losujLiczbe(m * 360 / branchCount, (m + 1) * 360 / branchCount));
+							branch->localTransform->localRotation.x =losujLiczbe(10,45) ;
+							std::cout << branch->localTransform->localRotation.x << std::endl;
 							log->addChild(branch);
-						}*/
+						}
 					}
 
 					sm->activeScene->addObject(planeSector);
@@ -718,9 +715,9 @@ void DrawTree(float scaleT, float scale, Shader* shaders, GameObject* plane, glm
 }
 
 int losujLiczbe(int a, int b) {
-	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 	return std::rand() % (b - a + 1) + a;
 }
+
 //-2, 15
 int losujLiczbe2() {
 	return std::rand() % 18 - 2;

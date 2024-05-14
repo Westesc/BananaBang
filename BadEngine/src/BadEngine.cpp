@@ -439,7 +439,7 @@ int main() {
 		//sm->getActiveScene()->findByName("plane")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("plane")->getModelComponent()->getTransform(), glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
 		if (sm->getActiveScene()->findByName("player")) {
 			cm.addObject(sm->getActiveScene()->findByName("player"));
-			std::cout << sm->getActiveScene()->findByName("player")->isVisible << std::endl;
+			std::cout << glm::to_string(sm->getActiveScene()->findByName("player")->localTransform->localPosition) << std::endl;
 		}
 		
 		cm.checkResolveCollisions(deltaTime);
@@ -558,10 +558,7 @@ int main() {
 					
 				}
 			}
-			GameObject* skydome = new GameObject("sky");
-			skydome->addModelComponent(skydomeModel);
-			skydome->getTransform()->localScale = glm::vec3(100.f);
-			sm->getActiveScene()->addObject(skydome);
+			
 			GameObject* player = new GameObject("player");
 			player->addModelComponent(box2model);
 			player->modelComponent->SetShader(phongShader);
@@ -584,6 +581,10 @@ int main() {
 				sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
 
 			}
+			GameObject* skydome = new GameObject("sky");
+			skydome->addModelComponent(skydomeModel);
+			skydome->getTransform()->localScale = glm::vec3(100.f);
+			sm->getActiveScene()->addObject(skydome);
 		}
 		if (input->IsKeobarodAction(window)) {
 			input->GetMessage(key, action);

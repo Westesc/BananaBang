@@ -31,7 +31,10 @@ public:
 			if (it != section->objects.end()) {
 				section->objects.erase(it);
 			}
-			if (section->checkCollision(go->getModelComponent())) {
+			/*if (section->checkCollision(go->getModelComponent())) {
+				section->objects.push_back(go);
+			}*/
+			if (section->checkCollision(go)) {
 				section->objects.push_back(go);
 			}
 		}
@@ -40,8 +43,11 @@ public:
 	void checkResolveCollisions(float deltaTime) {
 		for (auto section : sections) {
 			for (int i = 0; i < section->objects.size(); i++) {
-				for (int j = i + 1; j < section->objects.size(); j++) { //TODO: rozwi¹zaæ problem (n-1)! sprawdzeñ
-					if (checkCollision(section->objects.at(i)->getModelComponent(), section->objects.at(j)->getModelComponent())) {
+				for (int j = i + 1; j < section->objects.size(); j++) {
+					/*if (checkCollision(section->objects.at(i)->getModelComponent(), section->objects.at(j)->getModelComponent())) {
+						resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
+					}*/
+					if (section->objects.at(i)->name == "player" && checkCollision(section->objects.at(i), section->objects.at(j))) {
 						resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
 					}
 				}
@@ -67,6 +73,27 @@ public:
 			}
 		}
 
+		return false;
+	}
+
+	bool checkCollision(GameObject* first, GameObject* second) {
+		if (first->boundingBox != nullptr) {
+			if (second->boundingBox != nullptr) {
+				glm::mat4 M = glm::translate(glm::mat4(1.f), first->localTransform->localPosition);
+				M = glm::rotate(M, glm::radians(first->localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
+				M = glm::rotate(M, glm::radians(first->localTransform->localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
+				M = glm::rotate(M, glm::radians(first->localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
+				M = glm::scale(M, first->localTransform->localScale);
+
+				glm::mat4 M2 = glm::translate(glm::mat4(1.f), second->localTransform->localPosition);
+				M2 = glm::rotate(M2, glm::radians(second->localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
+				M2 = glm::rotate(M2, glm::radians(second->localTransform->localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
+				M2 = glm::rotate(M2, glm::radians(second->localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
+				M2 = glm::scale(M2, second->localTransform->localScale);
+				return checkBoundingBoxCollision(*first->boundingBox, *second->boundingBox, M, M2);
+			}
+			
+		}
 		return false;
 	}
 
@@ -161,7 +188,7 @@ public:
 		return distanceY <= sumRadius;
 	}
 
-	void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
+	/*void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
 		std::cout << "KOLIZJA" << std::endl;
 		glm::vec3 displacement = calculateCollisionResponse(first->getModelComponent(), second->getModelComponent());
 		glm::vec3 otherDisplacement = -displacement;
@@ -182,6 +209,27 @@ public:
 			second->localTransform->localPosition += otherDisplacement;
 			first->modelComponent->setTransform(glm::translate(*first->getModelComponent()->getTransform(), displacement));
 			second->modelComponent->setTransform(glm::translate(*second->getModelComponent()->getTransform(), otherDisplacement));
+		}
+	}*/
+	void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
+		std::cout << "KOLIZJA" << std::endl;
+		glm::vec3 displacement = calculateCollisionResponse(first, second);
+		glm::vec3 otherDisplacement = -displacement;
+		displacement *= 0.1f * deltaTime;
+		if (first->getModelComponent()->boundingBox != nullptr) {
+			displacement *= 0.1f * deltaTime;
+		}
+		else {
+			displacement *= deltaTime;
+		}
+		if (second->getModelComponent()->boundingBox != nullptr) {
+			otherDisplacement *= 0.1f * deltaTime;
+		}
+		else {
+			otherDisplacement *= deltaTime;
+		}
+		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement))) && first->name == "player") {
+			first->localTransform->localPosition += displacement;
 		}
 	}
 
@@ -214,6 +262,30 @@ public:
 				displacement += direction * magnitude;
 				std::cout << "2capsule" << glm::to_string(displacement) << std::endl;
 			}
+		}
+		return displacement;
+	}
+	glm::vec3 calculateCollisionResponse(GameObject* first, GameObject* second) {
+		glm::vec3 displacement(0.0f);
+		if (first->boundingBox != nullptr) {
+			if (second->boundingBox != nullptr) {
+				glm::mat4 M = glm::translate(glm::mat4(1.f), first->localTransform->localPosition);
+				M = glm::rotate(M, glm::radians(first->localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
+				M = glm::rotate(M, glm::radians(first->localTransform->localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
+				M = glm::rotate(M, glm::radians(first->localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
+				M = glm::scale(M, first->localTransform->localScale);
+
+				glm::mat4 M2 = glm::translate(glm::mat4(1.f), second->localTransform->localPosition);
+				M2 = glm::rotate(M2, glm::radians(second->localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
+				M2 = glm::rotate(M2, glm::radians(second->localTransform->localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
+				M2 = glm::rotate(M2, glm::radians(second->localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
+				M2 = glm::scale(M2, second->localTransform->localScale);
+				glm::vec3 direction = glm::normalize(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)) - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+				float magnitude = (first->boundingBox->radius() + second->boundingBox->radius()) - glm::distance(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)), glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+				displacement += direction * magnitude;
+				std::cout << "2box" << glm::to_string(displacement) << std::endl;
+			}
+			
 		}
 		return displacement;
 	}

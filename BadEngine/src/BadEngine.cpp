@@ -371,24 +371,25 @@ int main() {
 		if (gameMode.getMode() == GameMode::Game) {
 			pm->ManagePlayer(deltaTime, deltaTime2);
 		}
-
-		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+		if (sm->getActiveScene()->findByName("player")) {
+			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+			}
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
@@ -436,16 +437,13 @@ int main() {
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::scale(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(50.f, 50.0f, 50.0f)));
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::radians(time), glm::vec3(0.f, 1.f, 0.f)));
 		//sm->getActiveScene()->findByName("plane")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("plane")->getModelComponent()->getTransform(), glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
-		for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
-			if (sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->boundingBox != nullptr || sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->capsuleCollider != nullptr)
-			{
-				cm.addObject(sm->getActiveScene()->gameObjects.at(i));
-			}
-			sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
-			
+		if (sm->getActiveScene()->findByName("player")) {
+			cm.addObject(sm->getActiveScene()->findByName("player"));
+			std::cout << sm->getActiveScene()->findByName("player")->isVisible << std::endl;
 		}
+		
 		cm.checkResolveCollisions(deltaTime);
-		performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
+		//performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
 		if (frustumTest) {
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 				if (sm->getActiveScene()->gameObjects.at(i)->isVisible) {
@@ -456,6 +454,7 @@ int main() {
 		
 		//skydome->getTransform()->localPosition = camera->transform->localPosition;
 		sm->getActiveScene()->gameObjects.back()->getTransform()->localPosition = camera->transform->localPosition;
+		
 		sm->getActiveScene()->Draw(V, P);
 
 		mapsShader->use();
@@ -518,9 +517,9 @@ int main() {
 			for (int i = 0; i < sectorsPom; i++) {
 				for (int j = 0; j < sectorsPom; j++) {
 					GameObject* planeSector = new GameObject("sector"+(i*j));
-					planeSector->localTransform->localScale = glm::vec3(5.f, 5.f, 5.f);
+					planeSector->localTransform->localScale = glm::vec3(2.f, 2.f, 2.f);
 					planeSector->addModelComponent(planeSectormodel);
-					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, -.5f, j * 20*planeSector->localTransform->localScale.z);
+					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, 0.f, j * 20*planeSector->localTransform->localScale.z);
 					int treeCount = losujLiczbe(a, b);
 					for (int k = 0; k < treeCount; k++) {
 						int treeX = losujLiczbe2()* planeSector->localTransform->localScale.x;
@@ -529,14 +528,15 @@ int main() {
 						tree->addModelComponent(treetrunk);
 						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
 						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
+						tree->addColider();
 						GameObject* log = new GameObject("log");
 						log->addModelComponent(treelog);
 						log->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX;
 						log->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
-
+						log->addColider();
 						tree->addChild(log);
 						planeSector->addChild(tree);
-						int branchCount = losujLiczbe(5, 10);
+						int branchCount = losujLiczbe(3, 8);
 						for (int m = 0; m < branchCount; m++) {
 							GameObject* branch = new GameObject("branch" + m);
 							branch->addModelComponent(treebranch1);
@@ -548,7 +548,8 @@ int main() {
 							branch->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
 							branch->localTransform->localRotation.y = float(losujLiczbe(m * 360 / branchCount, (m + 1) * 360 / branchCount));
 							branch->localTransform->localRotation.x =losujLiczbe(10,45) ;
-							std::cout << branch->localTransform->localRotation.x << std::endl;
+							branch->localTransform->localRotation.z = losujLiczbe(0, 360);
+							branch->addColider();
 							log->addChild(branch);
 						}
 					}
@@ -561,8 +562,28 @@ int main() {
 			skydome->addModelComponent(skydomeModel);
 			skydome->getTransform()->localScale = glm::vec3(100.f);
 			sm->getActiveScene()->addObject(skydome);
+			GameObject* player = new GameObject("player");
+			player->addModelComponent(box2model);
+			player->modelComponent->SetShader(phongShader);
+			player->localTransform->localPosition = glm::vec3(0.f);
+			player->localTransform->localScale = glm::vec3(0.1f);
+			player->addColider();
+			sm->getActiveScene()->addObject(player);
 				//sm->saveScene("first");
 			buttonPressed = false;
+			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
+				for (auto go : sm->getActiveScene()->gameObjects.at(i)->children)
+				{
+					cm.addObject(go);
+					cm.addObject(go->children.at(0));
+					for (auto ch : go->children.at(0)->children)
+					{
+						cm.addObject(ch);
+					}
+				}
+				sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
+
+			}
 		}
 		if (input->IsKeobarodAction(window)) {
 			input->GetMessage(key, action);

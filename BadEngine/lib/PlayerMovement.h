@@ -11,6 +11,7 @@ private:
 	Camera* camera;
 	TimeManager* tm;
 	RigidBody* rb;
+	AnimateBody* animateBody;
 
 	//movement
 	float moveSpeed = 4.f;
@@ -61,7 +62,7 @@ private:
 		float angle = atan2(camera->getFront().x, camera->getFront().z);
 		sm->getActiveScene()->findByName("player")->setRotating(false, angle + glm::radians(rotateAngle), glm::vec3(0.f, 1.f, 0.f));
 
-		float distance = -speed * tm->getFramePerSeconds();
+		float distance = speed * tm->getFramePerSeconds();
 		float dx = distance * sin(sm->getActiveScene()->findByName("player")->getRotate());
 		float dz = distance * cos(sm->getActiveScene()->findByName("player")->getRotate());
 		sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.0f, dz));
@@ -78,22 +79,19 @@ private:
 			}
 			if (input->checkKey(GLFW_KEY_W))
 			{
-				currentTurn = 0.f;
+				currentTurn = 180.f;
 			}
 			else if (input->checkKey(GLFW_KEY_S))
 			{
-				currentTurn = 180.f;
+				currentTurn = 0.f;
 			}
 			if (input->checkKey(GLFW_KEY_D))
 			{
-				currentTurn = -90;
+				currentTurn = 90;
 			}
 			else if (input->checkKey(GLFW_KEY_A))
 			{
-				currentTurn = 90;
-			}
-			if (input->checkSequence(GLFW_KEY_1, GLFW_KEY_2)) {
-				std::cout << "Wykryto sekwencje!" << std::endl;
+				currentTurn = -90;
 			}
 		}
 		if (input->checkAnyKey()) {
@@ -116,11 +114,18 @@ private:
 
 	void checkState() {
 		if (input->checkAnyKey()) {
+			if (state == walking) {
+				animateBody->setActiveAnimation("walking");
+			}
 			if (input->checkKey(GLFW_KEY_SPACE) && state != air && state != jump_up)
 			{
+				animateBody->setActiveAnimation("jumping");
 				state = jump_up;
 				initialPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
 			}
+		}
+		else {
+			animateBody->setActiveAnimation("standing");
 		}
 		//tyczasowo jeœli kolizuje z czymœ o tagu ground do wy³¹cz grawitacje
 		if (glm::length(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y - initialPosition.y) < 0.5f && state == air) {
@@ -153,6 +158,10 @@ public:
 			rb->useGravity();
 		}
 	}
+	void addAnimationPlayer(AnimateBody* ab) {
+		animateBody = ab;
+	}
+
 
 	~PlayerMovement();
 

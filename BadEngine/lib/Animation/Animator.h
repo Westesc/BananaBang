@@ -38,7 +38,11 @@ public:
 		m_CurrentAnimation = pAnimation;
 		m_CurrentTime = 0.0f;
 	}
-
+	void getTransform() {
+		if (&m_CurrentAnimation->GetRootNode()!= nullptr) {
+			std::cout << glm::to_string((&m_CurrentAnimation->GetRootNode())->transformation) << std::endl;
+		}
+	}
 	void CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform)
 	{
 		std::string nodeName = node->name;

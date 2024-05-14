@@ -201,21 +201,28 @@ int main() {
 	}
 	//animacja
 	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/Crouched Walking.dae"), true);
-	Animation* walkAnimation = new Animation(const_cast<char*>("../../../../res/animations/Crouched Walking.dae"), animodel);
-	Animator* animator = new Animator(walkAnimation);
+	AnimateBody* animPlayer = new AnimateBody(animodel);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Crouched Walking.dae"), "walking");
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing");
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping.dae"), "jumping");
+	pm->addAnimationPlayer(animPlayer);
+
+	//Animation* walkAnimation = new Animation(const_cast<char*>("../../../../res/animations/Crouched Walking.dae"), animodel);
+	//Animator* animator = new Animator(walkAnimation);
+
 	Shader* shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
-	GameObject* anim = new GameObject("animation");
+	GameObject* anim = new GameObject("player");
 	animodel->SetShader(shaderAnimation);
 	anim->addModelComponent(animodel);
 	sm->getActiveScene()->addObject(anim);
 
 	//player
-	Shader* shader = new Shader("../../../../src/shaders/vs_player.vert", "../../../../src/shaders/fs_player.frag");
-	GameObject* player = new GameObject("player");
-	Model* playermodel = new Model(const_cast<char*>("../../../../res/player.obj"), false);
-	playermodel->SetShader(shader);
-	player->addModelComponent(playermodel);
-	sm->getActiveScene()->addObject(player);
+	//Shader* shader = new Shader("../../../../src/shaders/vs_player.vert", "../../../../src/shaders/fs_player.frag");
+	//GameObject* player = new GameObject("player");
+	//Model* playermodel = new Model(const_cast<char*>("../../../../res/player.obj"), false);
+	//playermodel->SetShader(shader);
+	//player->addModelComponent(playermodel);
+	//sm->getActiveScene()->addObject(player);
 
 
 
@@ -289,8 +296,9 @@ int main() {
 	
 	glm::vec3 lightPos(0.5f, 10.0f, 0.3f);
 
+	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/bialy.png", "diffuseMap");
 	sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(-1.f, -1.f, 1.f);
-	sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(0.1f, 0.1f, 0.1f);
+	sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
 
 
 	/*box->localTransform->localPosition = glm::vec3(-1.f, -1.f, 0.f);
@@ -301,8 +309,8 @@ int main() {
 	capsule->getModelComponent()->addCollider(2, capsule->localTransform->localPosition);
 	box2->getModelComponent()->addCollider(1, box->localTransform->localPosition);*/
 
-	sm->getActiveScene()->findByName("animation")->getModelComponent()->AddTexture("../../../../res/cegla.png", "diffuseMap");
-	sm->getActiveScene()->findByName("animation")->getTransform()->localPosition = glm::vec3(-4.f, 5.f, 1.f);
+	//sm->getActiveScene()->findByName("animation")->getModelComponent()->AddTexture("../../../../res/cegla.png", "diffuseMap");
+	//sm->getActiveScene()->findByName("animation")->getTransform()->localPosition = glm::vec3(-4.f, 5.f, 1.f);
 	//sm->getActiveScene()->findByName("animation")->getTransform()->localScale = glm::vec3(100.f, 100.f, 100.f);
 
 	sm->getActiveScene()->findByName("box")->getTransform()->localPosition = glm::vec3(-1.f, -1.f, 0.f);
@@ -338,6 +346,7 @@ int main() {
 	//sm->loadScene("first");
 	//sm->activeScene = sm->scenes.at(3);
 	//sm->getActiveScene()->findByName("tree_1")->addChild(new GameObject("log"));
+	int gh = 0;
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -363,11 +372,12 @@ int main() {
 			V = camera->getViewMatrix();
 		}
 		//animacje
-		animator->UpdateAnimation(deltaTime/10);
-		shaderAnimation->use();
-		auto transforms = animator->GetFinalBoneMatrices();
-		for (int i = 0; i < transforms.size(); ++i)
-			shaderAnimation->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+		animPlayer->UpdateAnimation(deltaTime);
+		//animator->UpdateAnimation(deltaTime / 2);
+		//shaderAnimation->use();
+		//auto transforms = animator->GetFinalBoneMatrices();
+		//for (int i = 0; i < transforms.size(); ++i)
+			//shaderAnimation->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
 		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());

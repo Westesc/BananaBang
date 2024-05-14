@@ -28,6 +28,8 @@
 #include "../lib/CollisionManager.h"
 #include "../lib/PlayerMovement.h"
 #include "../lib/GameMode.h"
+#include "../lib/Pathfinder.h"
+#include "../lib/Enemy.h"
 
 //bool test = true;
 bool test = false;
@@ -66,6 +68,9 @@ int sectorsPom = 1;
 int a = 0;
 int b = 0;
 bool buttonPressed;
+unsigned int maxEnemies = 10;
+unsigned int spawnedEnemies = 0;
+bool loaded = false;
 
 void Start() {
 	glfwInit();
@@ -201,6 +206,9 @@ int main() {
 	Shader* mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");
 	Shader* shaderTree = new Shader("../../../../src/shaders/vsTree.vert", "../../../../src/shaders/fsTree.frag");
 	Shader* rampShader = new Shader("../../../../src/shaders/ramp.vert", "../../../../src/shaders/ramp.frag");
+	Shader* enemyShader = new Shader("../../../../src/shaders/enemy.vert", "../../../../src/shaders/enemy.frag");
+	Model* enemyModel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
+	enemyModel->SetShader(enemyShader);
 
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
@@ -303,6 +311,7 @@ int main() {
 	float deltaTime = 0;
 	float deltaTime2 = 0;
 	float lastTime = 0;
+	float spawnerTime = 0;
 	GameMode gameMode;
 	bool isFromFile = false;
 	bool rotating = true;
@@ -318,6 +327,8 @@ int main() {
 	sm->loadScene("first");
 	sm->activeScene = sm->scenes.at(3);
 	//sm->getActiveScene()->findByName("tree_1")->addChild(new GameObject("log"));
+
+	Pathfinder* pathfinder = new Pathfinder();
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
@@ -329,6 +340,7 @@ int main() {
 		deltaTime = time - lastTime;
 		deltaTime2 += time - lastTime;
 		lastTime = time;
+		spawnerTime += deltaTime;
 		//std::cout << "Delta time: " << deltaTime << std::endl;
 
 		glm::mat4 V = camera->getViewMatrix();
@@ -431,6 +443,15 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			frustumTest = !frustumTest;
 		}
+		for (GameObject* object : sm->getActiveScene()->gameObjects) {
+			if (object->name.starts_with("enemy")) {
+				Enemy* enemy = static_cast<Enemy*>(object);
+				glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->localTransform->getLocalPosition(), 0);
+				glm::vec3 direction = destination - enemy->localTransform->getLocalPosition();
+				enemy->Move(direction * deltaTime * glm::normalize(direction));
+				//std::cout << enemy->name << " " << glm::to_string(direction) << std::endl;
+			}
+		}
 		sm->getActiveScene()->Update(V, P, time);
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::translate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(20.f, 0.f, 18.f)));
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::scale(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(50.f, 50.0f, 50.0f)));
@@ -455,7 +476,9 @@ int main() {
 		}
 		
 		//skydome->getTransform()->localPosition = camera->transform->localPosition;
-		sm->getActiveScene()->gameObjects.back()->getTransform()->localPosition = camera->transform->localPosition;
+		if (sm->getActiveScene()->findByName("sky")) {
+			sm->getActiveScene()->findByName("sky")->getTransform()->localPosition = camera->transform->localPosition;
+		}
 		sm->getActiveScene()->Draw(V, P);
 
 		mapsShader->use();
@@ -514,17 +537,17 @@ int main() {
 			Scene* scenaNowa = new Scene("Nowa");
 			sm->scenes.push_back(scenaNowa);
 			sm->activeScene = sm->scenes.back();
-
+			pathfinder->trees.clear();
 			for (int i = 0; i < sectorsPom; i++) {
 				for (int j = 0; j < sectorsPom; j++) {
-					GameObject* planeSector = new GameObject("sector"+(i*j));
+					GameObject* planeSector = new GameObject("sector"+((i+1)*j));
 					planeSector->localTransform->localScale = glm::vec3(5.f, 5.f, 5.f);
 					planeSector->addModelComponent(planeSectormodel);
 					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, -.5f, j * 20*planeSector->localTransform->localScale.z);
 					int treeCount = losujLiczbe(a, b);
 					for (int k = 0; k < treeCount; k++) {
 						int treeX = losujLiczbe2()* planeSector->localTransform->localScale.x;
-							int treeZ = losujLiczbe2()* planeSector->localTransform->localScale.z;
+						int treeZ = losujLiczbe2()* planeSector->localTransform->localScale.z;
 						GameObject* tree = new GameObject("tree_"+k);
 						tree->addModelComponent(treetrunk);
 						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
@@ -554,8 +577,14 @@ int main() {
 					}
 
 					sm->activeScene->addObject(planeSector);
-					
+					for(auto ch : planeSector->children)
+					{
+						pathfinder->trees.push_back(std::make_pair((i+1)*j, glm::vec2(ch->getTransform()->localPosition.x, ch->getTransform()->getLocalPosition().z)));
+					}
+					pathfinder->sortTrees();
 				}
+				loaded = true;
+				spawnerTime = 0;
 			}
 			GameObject* skydome = new GameObject("sky");
 			skydome->addModelComponent(skydomeModel);
@@ -647,6 +676,14 @@ int main() {
 				}
 			}
 		}*/
+		if (spawnerTime > 8.f && loaded) {
+			spawnerTime = 0;
+			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(0.f), glm::vec3(0.1f), glm::vec3(0.f));
+			enemy->addModelComponent(enemyModel);
+			sm->getActiveScene()->addObject(enemy);
+			spawnedEnemies++;
+			enemy->chosenTreePos = pathfinder->decideInitalDestination(0);
+		}
 		renderImGui();
 		glfwSwapBuffers(window);
 		glfwPollEvents();

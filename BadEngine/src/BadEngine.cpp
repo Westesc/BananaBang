@@ -222,6 +222,8 @@ int main() {
 	Model* skydomeModel = new Model(meshSphere);
 
 
+	Shader* hudShader = new Shader("../../../../src/shaders/hud.vert", "../../../../src/shaders/hud.frag");
+
 	//drzewa
 	Model* treelog = new Model(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"));
 	Model* treetrunk = new Model(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"));
@@ -232,6 +234,7 @@ int main() {
 	treetrunk->SetShader(phongShader);
 	treelog->SetShader(phongShader);
 	planeSectormodel->SetShader(shaders);
+
 
 
 	boxmodel->SetShader(mapsShader);

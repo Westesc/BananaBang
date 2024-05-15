@@ -20,6 +20,7 @@ public:
 	int layer;
 	GameObject* parent;
 	std::vector<GameObject*> children;
+	std::vector<Component> components;
 	Transform* localTransform;
 	Model* modelComponent= nullptr;
 	bool isRotating;

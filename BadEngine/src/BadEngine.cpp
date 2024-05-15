@@ -391,43 +391,46 @@ int main() {
 				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 			}
 		}
+		if (sm->getActiveScene()->findByName("rampBox")) {
+			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+			}
+		}
 
-		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+		if (sm->getActiveScene()->findByName("capsule2")) {
+			if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+			}
 		}
 		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			frustumTest = !frustumTest;

@@ -306,6 +306,7 @@ int main() {
 	float deltaTime = 0;
 	float deltaTime2 = 0;
 	float lastTime = 0;
+	float staticupdateTime = 0;
 	GameMode gameMode;
 	bool isFromFile = false;
 	bool rotating = true;
@@ -332,6 +333,7 @@ int main() {
 		deltaTime = time - lastTime;
 		deltaTime2 += time - lastTime;
 		lastTime = time;
+		staticupdateTime += deltaTime;
 		//std::cout << "Delta time: " << deltaTime << std::endl;
 
 		glm::mat4 V = camera->getViewMatrix();
@@ -445,11 +447,17 @@ int main() {
 		//sm->getActiveScene()->findByName("plane")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("plane")->getModelComponent()->getTransform(), glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
 		if (sm->getActiveScene()->findByName("player")) {
 			cm.addObject(sm->getActiveScene()->findByName("player"));
-			std::cout << glm::to_string(sm->getActiveScene()->findByName("player")->localTransform->localPosition) << std::endl;
+			if (staticupdateTime > 1.0f) {
+				GameObject* player = sm->getActiveScene()->findByName("player");
+				std::cout << "player: " << glm::to_string(player->localTransform->localPosition) << std::endl;
+				std::cout << "collider: " << glm::to_string(player->boundingBox->min) << std::endl;
+				std::cout << "transform: " << glm::to_string(glm::vec3(player->getTransform()->getMatrix() * glm::vec4(player->boundingBox->vertices.at(0), 1.0f))) << std::endl;
+				staticupdateTime = 0;
+			}
 		}
 		
 		cm.checkResolveCollisions(deltaTime);
-		//performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
+		performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
 		if (frustumTest) {
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 				if (sm->getActiveScene()->gameObjects.at(i)->isVisible) {

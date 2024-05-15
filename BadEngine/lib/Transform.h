@@ -27,6 +27,7 @@ public:
 	glm::vec3 getLocalRotation();
 	glm::vec3 getLocalScale();
 	YAML::Node serialize();
+	glm::mat4 getMatrix();
 
 	friend Transform operator+(const Transform& lhs, const Transform& rhs) {
 		Transform result(lhs); 

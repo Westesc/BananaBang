@@ -1,6 +1,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
-
-extern int windowHeight= 800;
-extern int windowWidth=1000;
+extern struct Window {
+	const static int windowHeight = 800;
+	const static int windowWidth = 1000;
+};
 #endif // GLOBALS_H

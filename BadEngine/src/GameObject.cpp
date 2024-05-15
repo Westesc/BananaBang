@@ -173,13 +173,13 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
         modelComponent->GetShader()->setMat4("view", view);
         modelComponent->GetShader()->setMat4("projection", perspective);
         modelComponent->Draw();
-        if (modelComponent->boundingBox != nullptr) {
+        /*if (modelComponent->boundingBox != nullptr) {
             modelComponent->DrawBoundingBoxes(modelComponent->GetShader(), *modelComponent->getTransform());
         }
         else if (modelComponent->capsuleCollider != nullptr) {
             modelComponent->UpdateCollider(*modelComponent->getTransform());
         }
-        modelComponent->setPrevTransform(*modelComponent->getTransform());
+        modelComponent->setPrevTransform(*modelComponent->getTransform());*/
     }
     for (auto ch : children) {
         if (ch->isVisible) {
@@ -224,5 +224,6 @@ void GameObject::lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 l
 
 void GameObject::addColider() {
     modelComponent->addCollider(1, localTransform->localPosition);
-    this->boundingBox = modelComponent->boundingBox;
+    boundingBox = new BoundingBox(glm::vec3(0.f), glm::vec3(0.f));
+    *boundingBox = *modelComponent->boundingBox;
 }

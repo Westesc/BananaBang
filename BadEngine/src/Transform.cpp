@@ -82,3 +82,12 @@ YAML::Node Transform::serialize()
 	node["scale"] = nodeVec3(localScale);
 	return node;
 }
+
+glm::mat4 Transform::getMatrix() {
+	glm::mat4 M = glm::translate(glm::mat4(1.f), localPosition);
+	M = glm::rotate(M, glm::radians(localRotation.y), glm::vec3(0.f, 1.f, 0.f));
+	M = glm::rotate(M, glm::radians(localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
+	M = glm::rotate(M, glm::radians(localRotation.z), glm::vec3(0.f, 0.f, 1.f));
+	//M = glm::scale(M, localScale);
+	return M;
+}

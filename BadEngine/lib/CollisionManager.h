@@ -47,6 +47,7 @@ public:
 					/*if (checkCollision(section->objects.at(i)->getModelComponent(), section->objects.at(j)->getModelComponent())) {
 						resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
 					}*/
+					if(section->objects.at(i)->name == "player") std::cout<<"dupa"<<std::endl;
 					if (section->objects.at(i)->name == "player" && checkCollision(section->objects.at(i), section->objects.at(j))) {
 						resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
 					}
@@ -79,17 +80,9 @@ public:
 	bool checkCollision(GameObject* first, GameObject* second) {
 		if (first->boundingBox != nullptr) {
 			if (second->boundingBox != nullptr) {
-				glm::mat4 M = glm::translate(glm::mat4(1.f), first->localTransform->localPosition);
-				M = glm::rotate(M, glm::radians(first->localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
-				M = glm::rotate(M, glm::radians(first->localTransform->localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
-				M = glm::rotate(M, glm::radians(first->localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
-				M = glm::scale(M, first->localTransform->localScale);
+				glm::mat4 M = first->getTransform()->getMatrix();
 
-				glm::mat4 M2 = glm::translate(glm::mat4(1.f), second->localTransform->localPosition);
-				M2 = glm::rotate(M2, glm::radians(second->localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
-				M2 = glm::rotate(M2, glm::radians(second->localTransform->localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
-				M2 = glm::rotate(M2, glm::radians(second->localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
-				M2 = glm::scale(M2, second->localTransform->localScale);
+				glm::mat4 M2 = second->getTransform()->getMatrix();
 				return checkBoundingBoxCollision(*first->boundingBox, *second->boundingBox, M, M2);
 			}
 			

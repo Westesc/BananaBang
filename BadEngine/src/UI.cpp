@@ -102,7 +102,7 @@ bool UI::loadFreetype() {
 
 void UI::addShader(Shader* shader) {
 	this->shader = shader;
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(windowWidth), 0.0f, static_cast<float>(windowHeight), -1.0f, 1.0f);
+	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Window::windowWidth), 0.0f, static_cast<float>(Window::windowHeight), -1.0f, 1.0f);
 	shader->use();
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 }

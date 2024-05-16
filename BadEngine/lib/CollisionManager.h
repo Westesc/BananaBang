@@ -11,10 +11,12 @@ public:
 
 	CollisionManager(float worldSize, float sectionSize) : sectionSize(sectionSize) {
 		int numSections = worldSize / sectionSize;
+		int IDcounter = 0;
 		for (int i = -numSections*0.5f; i < numSections*0.5f; i++) {
 			for (int j = -numSections * 0.5f; j < numSections * 0.5f; j++) { //TODO: ograniczyæ wysokoœæ do realnych potrzeb
 				for (int k = -numSections * 0.5f; k < numSections * 0.5f; k++) {
-					sections.push_back(new Section(i * sectionSize, j * sectionSize, k * sectionSize, sectionSize));
+					sections.push_back(new Section(i * sectionSize, j * sectionSize, k * sectionSize, sectionSize, IDcounter));
+					IDcounter++;
 				}
 			}
 		}
@@ -40,19 +42,36 @@ public:
 		}
 	}
 
-	void checkResolveCollisions(float deltaTime) {
+	void addStaticObject(GameObject* go) {
+		for (auto section : sections) {
+			if (section->checkCollision(go)) {
+				section->staticObjects.push_back(go);
+			}
+		}
+	}
+
+	void checkResolveCollisions(float deltaTime,float &staticdUpdate) {
 		for (auto section : sections) {
 			for (int i = 0; i < section->objects.size(); i++) {
-				for (int j = i + 1; j < section->objects.size(); j++) {
+				for (int j = 0; j < section->staticObjects.size(); j++) {
 					/*if (checkCollision(section->objects.at(i)->getModelComponent(), section->objects.at(j)->getModelComponent())) {
 						resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
 					}*/
-					if(section->objects.at(i)->name == "player") std::cout<<"dupa"<<std::endl;
-					if (section->objects.at(i)->name == "player" && checkCollision(section->objects.at(i), section->objects.at(j))) {
-						resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
+					/*if (staticdUpdate > 1.0f) {
+						for (auto object : section->objects) {
+							if (!object->name.starts_with("branch"))
+							std::cout<< section->ID << ": "<<object->name << std::endl;
+						}
+					}*/
+					if (checkCollision(section->objects.at(i), section->staticObjects.at(j))) {
+						std::cout << "KOLIZJA" << std::endl;
+						resolveCollision(section->objects.at(i), section->staticObjects.at(j), deltaTime);
 					}
 				}
 			}
+		}
+		if (staticdUpdate > 1.0f) {
+			staticdUpdate = 0.0f;
 		}
 	}
 
@@ -205,10 +224,12 @@ public:
 		}
 	}*/
 	void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
-		std::cout << "KOLIZJA" << std::endl;
 		glm::vec3 displacement = calculateCollisionResponse(first, second);
 		glm::vec3 otherDisplacement = -displacement;
-		displacement *= 0.1f * deltaTime;
+		displacement *= 400.f * deltaTime;
+		if (second->name.starts_with("branch")) {
+			displacement *= 0.1f;
+		}
 		if (first->getModelComponent()->boundingBox != nullptr) {
 			displacement *= 0.1f * deltaTime;
 		}
@@ -276,7 +297,7 @@ public:
 				glm::vec3 direction = glm::normalize(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)) - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
 				float magnitude = (first->boundingBox->radius() + second->boundingBox->radius()) - glm::distance(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)), glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
 				displacement += direction * magnitude;
-				std::cout << "2box" << glm::to_string(displacement) << std::endl;
+				std::cout << first->name<<", "<<second->name << glm::to_string(displacement) << std::endl;
 			}
 			
 		}

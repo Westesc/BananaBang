@@ -7,8 +7,10 @@ class Section {
 public:
 	BoundingBox* bounds;
 	std::vector<GameObject*> objects;
+	std::vector<GameObject*> staticObjects;
+	int ID;
 
-	Section(float x, float y, float z, float size) {
+	Section(float x, float y, float z, float size,int ID) : ID(ID) {
 		bounds = new BoundingBox(glm::vec3(x, y, z), glm::vec3(x + size, y + size, z + size), true);
 	}
 
@@ -66,11 +68,7 @@ public:
 	bool checkCollision(GameObject* object) {
 		if (object->boundingBox != nullptr) {
 
-			glm::mat4 M = glm::translate(glm::mat4(1.f), object->localTransform->localPosition);
-			M = glm::rotate(M, glm::radians(object->localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
-			M = glm::rotate(M, glm::radians(object->localTransform->localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
-			M = glm::rotate(M, glm::radians(object->localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
-			M = glm::scale(M, object->localTransform->localScale);
+			glm::mat4 M = object->getTransform()->getMatrix();
 			glm::vec3 vertices1[] = {
 				glm::vec3(M * glm::vec4(object->boundingBox->vertices.at(0), 1.0f)),
 				glm::vec3(M * glm::vec4(object->boundingBox->vertices.at(1), 1.0f)),

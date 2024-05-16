@@ -447,16 +447,17 @@ int main() {
 		//sm->getActiveScene()->findByName("plane")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("plane")->getModelComponent()->getTransform(), glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
 		if (sm->getActiveScene()->findByName("player")) {
 			cm.addObject(sm->getActiveScene()->findByName("player"));
-			if (staticupdateTime > 1.0f) {
+			/*if (staticupdateTime > 1.0f) {
 				GameObject* player = sm->getActiveScene()->findByName("player");
 				std::cout << "player: " << glm::to_string(player->localTransform->localPosition) << std::endl;
-				std::cout << "collider: " << glm::to_string(player->boundingBox->min) << std::endl;
-				std::cout << "transform: " << glm::to_string(glm::vec3(player->getTransform()->getMatrix() * glm::vec4(player->boundingBox->vertices.at(0), 1.0f))) << std::endl;
+				std::cout << "collider: " << glm::to_string(player->boundingBox->center()) << std::endl;
+				std::cout << "transform: " << glm::to_string(glm::vec3(player->getTransform()->getMatrix() * glm::vec4(player->boundingBox->center(), 1.0f))) << std::endl;
+				std::cout << "distance: " << glm::distance(player->boundingBox->min.y, player->boundingBox->max.y) << std::endl;
 				staticupdateTime = 0;
-			}
+			}*/
 		}
 		
-		cm.checkResolveCollisions(deltaTime);
+		cm.checkResolveCollisions(deltaTime,staticupdateTime);
 		performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
 		if (frustumTest) {
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
@@ -530,7 +531,7 @@ int main() {
 
 			for (int i = 0; i < sectorsPom; i++) {
 				for (int j = 0; j < sectorsPom; j++) {
-					GameObject* planeSector = new GameObject("sector"+(i*j));
+					GameObject* planeSector = new GameObject("sector"+std::to_string((i+1)*j));
 					planeSector->localTransform->localScale = glm::vec3(2.f, 2.f, 2.f);
 					planeSector->addModelComponent(planeSectormodel);
 					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, 0.f, j * 20*planeSector->localTransform->localScale.z);
@@ -538,12 +539,12 @@ int main() {
 					for (int k = 0; k < treeCount; k++) {
 						int treeX = losujLiczbe2()* planeSector->localTransform->localScale.x;
 							int treeZ = losujLiczbe2()* planeSector->localTransform->localScale.z;
-						GameObject* tree = new GameObject("tree_"+k);
+						GameObject* tree = new GameObject("tree_"+std::to_string(k));
 						tree->addModelComponent(treetrunk);
 						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
 						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
 						tree->addColider();
-						GameObject* log = new GameObject("log");
+						GameObject* log = new GameObject("log"+std::to_string(k));
 						log->addModelComponent(treelog);
 						log->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX;
 						log->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
@@ -552,7 +553,7 @@ int main() {
 						planeSector->addChild(tree);
 						int branchCount = losujLiczbe(3, 8);
 						for (int m = 0; m < branchCount; m++) {
-							GameObject* branch = new GameObject("branch" + m);
+							GameObject* branch = new GameObject("branch" + std::to_string(m));
 							branch->addModelComponent(treebranch1);
 							branch->localTransform->localPosition.x = planeSector->localTransform->localPosition.x + treeX;
 							branch->localTransform->localPosition.y = float(losujLiczbe((m * 13 / branchCount)+5, ((m + 1) * 13 / branchCount)+5));
@@ -561,8 +562,8 @@ int main() {
 							branch->localTransform->localScale.z = 12 / branch->localTransform->localPosition.y;
 							branch->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
 							branch->localTransform->localRotation.y = float(losujLiczbe(m * 360 / branchCount, (m + 1) * 360 / branchCount));
-							branch->localTransform->localRotation.x =losujLiczbe(10,45) ;
-							branch->localTransform->localRotation.z = losujLiczbe(0, 360);
+							//branch->localTransform->localRotation.x =losujLiczbe(10,45) ;
+							//branch->localTransform->localRotation.z = losujLiczbe(0, 360);
 							branch->addColider();
 							log->addChild(branch);
 						}
@@ -585,11 +586,11 @@ int main() {
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 				for (auto go : sm->getActiveScene()->gameObjects.at(i)->children)
 				{
-					cm.addObject(go);
-					cm.addObject(go->children.at(0));
+					cm.addStaticObject(go);
+					cm.addStaticObject(go->children.at(0));
 					for (auto ch : go->children.at(0)->children)
 					{
-						cm.addObject(ch);
+						cm.addStaticObject(ch);
 					}
 				}
 				sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));

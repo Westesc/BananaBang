@@ -85,7 +85,7 @@ void Start() {
 	glEnable(GL_CULL_FACE);
 
 	glFrontFace(GL_CCW);
-
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
 	sm = new SceneManager();
@@ -127,16 +127,16 @@ std::array<glm::vec4, 6> calculateFrustumPlanes(const glm::mat4& viewProjectionM
 	return planes;
 }
 
-bool isBoxInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, BoundingBox& box, glm::mat4* transform) {
+bool isBoxInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, BoundingBox& box, glm::mat4 transform) {
 	glm::vec3 vertices[] = {
-			glm::vec3(*transform * glm::vec4(box.vertices.at(0), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(1), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(2), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(3), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(4), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(5), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(6), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(7), 1.0f))
+			glm::vec3(transform * glm::vec4(box.vertices.at(0), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(1), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(2), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(3), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(4), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(5), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(6), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(7), 1.0f))
 	};
 	for (const auto& plane : frustumPlanes) {
 		glm::vec4 normalizedPlane = plane / glm::length(glm::vec3(plane));
@@ -165,14 +165,14 @@ bool isCapsuleInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, CapsuleCo
 
 void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const std::vector<GameObject*>& objects) {
 	for (auto object : objects) {
-		if (object->getModelComponent()->boundingBox != nullptr) {
-			bool isVisible = isBoxInFrustum(frustumPlanes, *object->getModelComponent()->boundingBox, object->getModelComponent()->getTransform());
+		if (object->boundingBox != nullptr) {
+			bool isVisible = isBoxInFrustum(frustumPlanes, *object->boundingBox, object->getTransform()->getMatrix());
 			object->setVisible(isVisible);
 		}
-		else if (object->getModelComponent()->capsuleCollider != nullptr) {
+		/*else if (object->getModelComponent()->capsuleCollider != nullptr) {
 			bool isVisible = isCapsuleInFrustum(frustumPlanes, object->getModelComponent()->capsuleCollider, object->getModelComponent()->getTransform());
 			object->setVisible(isVisible);
-		}
+		}*/
 	}
 }
 
@@ -475,8 +475,9 @@ int main() {
 		}
 		
 		//skydome->getTransform()->localPosition = camera->transform->localPosition;
-		sm->getActiveScene()->gameObjects.back()->getTransform()->localPosition = camera->transform->localPosition;
-		
+		if (sm->getActiveScene()->findByName("skydome")) {
+			sm->getActiveScene()->findByName("skydome")->getTransform()->localPosition = camera->transform->localPosition;
+		}
 		sm->getActiveScene()->Draw(V, P);
 
 		mapsShader->use();
@@ -603,6 +604,7 @@ int main() {
 				sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
 
 			}
+			sm->getActiveScene()->addObject(HPcount);
 			GameObject* skydome = new GameObject("sky");
 			skydome->addModelComponent(skydomeModel);
 			skydome->getTransform()->localScale = glm::vec3(100.f);

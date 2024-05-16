@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Section.h"
+#include <cmath>
 
 class CollisionManager {
 public:
@@ -283,20 +284,26 @@ public:
 		glm::vec3 displacement(0.0f);
 		if (first->boundingBox != nullptr) {
 			if (second->boundingBox != nullptr) {
-				glm::mat4 M = glm::translate(glm::mat4(1.f), first->localTransform->localPosition);
-				M = glm::rotate(M, glm::radians(first->localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
-				M = glm::rotate(M, glm::radians(first->localTransform->localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
-				M = glm::rotate(M, glm::radians(first->localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
-				M = glm::scale(M, first->localTransform->localScale);
+				glm::mat4 M = first->getTransform()->getMatrix();
 
-				glm::mat4 M2 = glm::translate(glm::mat4(1.f), second->localTransform->localPosition);
-				M2 = glm::rotate(M2, glm::radians(second->localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
-				M2 = glm::rotate(M2, glm::radians(second->localTransform->localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
-				M2 = glm::rotate(M2, glm::radians(second->localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
-				M2 = glm::scale(M2, second->localTransform->localScale);
-				glm::vec3 direction = glm::normalize(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)) - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
-				float magnitude = (first->boundingBox->radius() + second->boundingBox->radius()) - glm::distance(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)), glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
-				displacement += direction * magnitude;
+				glm::mat4 M2 = second->getTransform()->getMatrix();
+				glm::vec3 direction = (glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)) - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+				if (!second->name.starts_with("branch")) {
+					direction = glm::normalize(direction);
+					float magnitude = (first->boundingBox->radius() + second->boundingBox->radius()) - glm::distance(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)), glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+					displacement += direction * magnitude;
+				}
+				else {
+					glm::vec2 branchlogdist = glm::vec2(second->boundingBox->center().x - second->parent->boundingBox->center().x,second->boundingBox->center().z - second->parent->boundingBox->center().z);
+					float costoX = glm::cos(glm::dot(glm::normalize(branchlogdist), glm::vec2(1.0f, 0.0f)));
+					float sintoX = glm::sin(glm::dot(glm::normalize(branchlogdist), glm::vec2(1.0f, 0.0f)));
+					glm::mat4 tmpM = glm::translate(M , glm::vec3(direction.x * costoX, 0.0f, 0.0f));
+					tmpM = glm::translate(M, glm::vec3(0.0f, 0.0f, direction.z * costoX));
+					glm::vec3 tmpCenter = glm::vec3(tmpM * glm::vec4(first->boundingBox->center(), 1.0f));
+					direction = tmpCenter - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f));
+					float magnitude = (first->boundingBox->radius() + second->boundingBox->radius()) - glm::distance(tmpCenter, glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+					displacement += direction * magnitude;
+				}
 				std::cout << first->name<<", "<<second->name << glm::to_string(displacement) << std::endl;
 			}
 			

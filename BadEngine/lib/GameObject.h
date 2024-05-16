@@ -7,6 +7,7 @@
 #include "Transform.h"
 #include "Component.h"
 #include "Model.h"
+#include "UI.h"
 
 class GameObject {
 public:
@@ -20,9 +21,11 @@ public:
 	int layer;
 	GameObject* parent;
 	std::vector<GameObject*> children;
-	std::vector<Component> components;
+	std::vector<Component*> components;
 	Transform* localTransform;
 	Model* modelComponent= nullptr;
+
+	UI* uiComponent = nullptr;
 	bool isRotating;
 	float rotateSpeed;
 	glm::vec3 rotateAxis;

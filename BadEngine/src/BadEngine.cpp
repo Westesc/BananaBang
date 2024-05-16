@@ -235,7 +235,14 @@ int main() {
 	treelog->SetShader(phongShader);
 	planeSectormodel->SetShader(shaders);
 
-
+	//UI
+	GameObject* HPcount = new GameObject("HPcount");
+	UI* ui = new UI(writing);
+	Shader* UIShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
+	ui->addShader(UIShader);
+	HPcount->localTransform->localPosition = glm::vec3(25.f);
+	ui->setText("Ala ma kota");
+	HPcount->uiComponent = ui;
 
 	boxmodel->SetShader(mapsShader);
 	planemodel->SetShader(shaders);

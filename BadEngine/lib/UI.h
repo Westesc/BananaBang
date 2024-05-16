@@ -14,6 +14,7 @@
 #include <iostream>
 #include "Globals.h"
 #include "Shader.h"
+#include "Transform.h"
 
 enum typeUI {
 	writing,
@@ -31,7 +32,6 @@ struct Character {
 class UI : Component {
 private:
 	std::string text;
-	glm::vec2 size;
 	glm::vec3 color;
 	typeUI type;
 	std::map<GLchar, Character> Characters;
@@ -39,11 +39,11 @@ private:
 	Shader* shader;
 	unsigned int VAO, VBO;
 public:
-	UI(typeUI type,glm::vec3 size,glm::vec3 color = glm::vec3(1.f));
+	UI(typeUI type,glm::vec3 color = glm::vec3(1.f));
 	
 	~UI();
 	void setText(std::string text);
-	void Draw();
+	void Draw(Transform* transform);
 	void addShader(Shader* shader);
 	std::string getText();
 };

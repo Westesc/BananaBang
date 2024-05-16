@@ -181,6 +181,9 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
         }
         modelComponent->setPrevTransform(*modelComponent->getTransform());*/
     }
+    else if (uiComponent != nullptr) {
+        uiComponent->Draw(localTransform);
+    }
     for (auto ch : children) {
         if (ch->isVisible) {
             ch->Draw(view, perspective);

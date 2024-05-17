@@ -227,7 +227,8 @@ public:
 	void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
 		glm::vec3 displacement = calculateCollisionResponse(first, second);
 		glm::vec3 otherDisplacement = -displacement;
-		displacement *= 400.f * deltaTime;
+		float scalar = glm::length(glm::normalize(displacement));
+		displacement *= 400.f * scalar * deltaTime;
 		if (second->name.starts_with("branch")) {
 			displacement *= 0.1f;
 		}

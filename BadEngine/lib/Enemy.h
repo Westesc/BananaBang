@@ -6,6 +6,8 @@
 class Enemy : public GameObject {
 public:
 	glm::vec3 chosenTreePos = glm::vec3(0.f);
+	float timeSpentWalking = 0.f;
+	int sector = 0;
 	Enemy(std::string name, glm::vec3 pos, glm::vec3 scale, glm::vec3 rot) : GameObject(name) {
 		this->localTransform->localPosition = pos;
 		this->localTransform->localScale = scale;

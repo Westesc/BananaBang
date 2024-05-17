@@ -312,6 +312,7 @@ int main() {
 	float deltaTime2 = 0;
 	float lastTime = 0;
 	float spawnerTime = 0;
+	float staticUpdateTime = 0;
 	GameMode gameMode;
 	bool isFromFile = false;
 	bool rotating = true;
@@ -341,6 +342,7 @@ int main() {
 		deltaTime2 += time - lastTime;
 		lastTime = time;
 		spawnerTime += deltaTime;
+		staticUpdateTime += deltaTime;
 		//std::cout << "Delta time: " << deltaTime << std::endl;
 
 		glm::mat4 V = camera->getViewMatrix();
@@ -443,14 +445,45 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			frustumTest = !frustumTest;
 		}
-		for (GameObject* object : sm->getActiveScene()->gameObjects) {
+		for (auto object : sm->getActiveScene()->gameObjects) {
 			if (object->name.starts_with("enemy")) {
 				Enemy* enemy = static_cast<Enemy*>(object);
-				glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->localTransform->getLocalPosition(), 0);
-				glm::vec3 direction = destination - enemy->localTransform->getLocalPosition();
-				enemy->Move(direction * deltaTime * glm::normalize(direction));
-				//std::cout << enemy->name << " " << glm::to_string(direction) << std::endl;
+				if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
+					glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->localTransform->getLocalPosition(), enemy->sector);
+					glm::vec3 direction = destination - enemy->localTransform->getLocalPosition();
+					if (staticUpdateTime > 0.5f && glm::length(direction) > 50.0f) {
+						std::cout << enemy->name << " dupa " << glm::to_string(direction) << std::endl;
+					}
+					/*if (glm::abs(glm::cos(glm::dot(direction, glm::vec3(1.0f, 0.0f, 0.0f)))) < 0.7f) {
+						if (glm::abs(direction.x < 2.f)) {
+							direction.x = direction.x > 0.0f ? 2.0f : -2.0f;
+						}
+						if (glm::abs(direction.x > 15.f)) {
+							direction.x = direction.x > 0.0f ? 15.0f : -15.0f;
+						}
+					}
+					if (glm::abs(glm::cos(glm::dot(direction, glm::vec3(0.0f, 0.0f, 1.0f)))) < 0.7f) {
+						if (glm::abs(direction.z < 2.f)) {
+							direction.z = direction.z > 0.0f ? 2.0f : -2.0f;
+						}
+						if (glm::abs(direction.z > 15.f)) {
+							direction.z = direction.z > 0.0f ? 15.0f : -15.0f;
+						}
+					}*/
+					enemy->Move(direction * deltaTime * glm::normalize(direction));
+					enemy->timeSpentWalking+=deltaTime;
+					if (enemy->timeSpentWalking > 15.f) {
+						enemy->chosenTreePos = pathfinder->decideInitalDestination(enemy->sector);
+						enemy->timeSpentWalking = 0.f;
+					}
+					if (staticUpdateTime > 0.5f) {
+						std::cout << enemy->name << " pos" << glm::to_string(enemy->localTransform->getLocalPosition()) << " dest" << glm::to_string(destination) << std::endl;
+					}
+				}
 			}
+		}
+		if (staticUpdateTime > 1.0f) {
+			staticUpdateTime = 0.f;
 		}
 		sm->getActiveScene()->Update(V, P, time);
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::translate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(20.f, 0.f, 18.f)));
@@ -544,6 +577,7 @@ int main() {
 					planeSector->localTransform->localScale = glm::vec3(5.f, 5.f, 5.f);
 					planeSector->addModelComponent(planeSectormodel);
 					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, -.5f, j * 20*planeSector->localTransform->localScale.z);
+					//planeSector->addColider();
 					int treeCount = losujLiczbe(a, b);
 					for (int k = 0; k < treeCount; k++) {
 						int treeX = losujLiczbe2()* planeSector->localTransform->localScale.x;
@@ -676,7 +710,7 @@ int main() {
 				}
 			}
 		}*/
-		if (spawnerTime > 8.f && loaded) {
+		if (spawnerTime > 8.f && loaded && spawnedEnemies <= maxEnemies) {
 			spawnerTime = 0;
 			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(0.f), glm::vec3(0.1f), glm::vec3(0.f));
 			enemy->addModelComponent(enemyModel);

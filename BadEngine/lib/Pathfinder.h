@@ -41,6 +41,9 @@ public:
 				treePositions.push_back(tree.second);
 			}
 		}
+		if (trees.size() < 3) {
+			return chosenTreePos;
+		}
 		glm::vec2 closestTree;
 		glm::vec2 secondClosestTree;
 		/*for (auto tree : treePositions) {
@@ -79,7 +82,7 @@ public:
 
 	int findTreeByPosition(glm::vec3 position, std::vector<glm::vec2> vector) {
 		for (int i = 0; i < vector.size(); i++) {
-			if (glm::distance(glm::vec2(position.x, position.z), trees[i].second) < 0.1f) {
+			if (glm::distance(glm::vec2(position.x, position.z), vector[i]) < 0.1f) {
 				return i;
 			}
 		}

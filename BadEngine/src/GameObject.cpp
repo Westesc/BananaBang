@@ -219,3 +219,9 @@ void GameObject::lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 l
         ch->lightSetting(viewPos, lightPos, lightColor);
     }
 }
+
+void GameObject::addColider() {
+    modelComponent->addCollider(1, localTransform->localPosition);
+    boundingBox = new BoundingBox(glm::vec3(0.f), glm::vec3(0.f));
+    *boundingBox = *modelComponent->boundingBox;
+}

@@ -372,7 +372,7 @@ int main() {
 			V = camera->getViewMatrix();
 		}
 		//animacje
-		animPlayer->UpdateAnimation(deltaTime/4);
+		animPlayer->UpdateAnimation(deltaTime);
 		//animator->UpdateAnimation(deltaTime / 2);
 		//shaderAnimation->use();
 		//auto transforms = animator->GetFinalBoneMatrices();

@@ -62,13 +62,11 @@ private:
 		float angle = atan2(camera->getFront().x, camera->getFront().z);
 		sm->getActiveScene()->findByName("player")->setRotating(false, angle + glm::radians(rotateAngle), glm::vec3(0.f, 1.f, 0.f));
 
-		//float distance = speed * tm->getFramePerSeconds();
-		//float dx = animateBody->getPosition().x * sin(sm->getActiveScene()->findByName("player")->getRotate());
-		//float dz = animateBody->getPosition().z * cos(sm->getActiveScene()->findByName("player")->getRotate());
-		//sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.0f, dz));
+		float distance = speed * tm->getFramePerSeconds();
+		float dx = animateBody->getPosition().z * sin(sm->getActiveScene()->findByName("player")->getRotate());
+		float dz = animateBody->getPosition().z * cos(sm->getActiveScene()->findByName("player")->getRotate());
+		sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.0f, dz));
 		//sm->getActiveScene()->findByName("player")->getTransform()->localPosition += animateBody->getPosition();//glm::vec3(animateBody->getPosition().x, 0.f, 0.f);
-		//1. transform tylko braæ main koœci i to edytowaæ
-		//2. wszystkie animacji z main koœci¹ w miejscu
 	}
 
 	void MovePlayer(float speed)

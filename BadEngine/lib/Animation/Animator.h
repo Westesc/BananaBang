@@ -96,7 +96,9 @@ public:
 				position.x = globalTransformation[3][0];
 				//position.y = globalTransformation[3][1];
 				position.z = globalTransformation[3][2];
-				deltaPostion = position - lastPosition;
+				if (glm::distance(position, lastPosition) < 0.7f) {
+					deltaPostion = position - lastPosition;
+				}
 				lastPosition = position;
 				//m_FinalBoneMatrices[index][3][0] -= position.x;
 				//m_FinalBoneMatrices[index][3][1] -= position.y;

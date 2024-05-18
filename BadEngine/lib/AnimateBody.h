@@ -17,6 +17,7 @@ class AnimateBody : Component {
 	Animator* animator;
 	std::vector<Animacje> allAnimation;
 	std::string activeAnimation;
+
 	Animacje searchActiveAnimation() {
 		for (auto& anim : allAnimation) {
 			if (anim.name == activeAnimation) {
@@ -36,6 +37,7 @@ public:
 	void addAnimation(char* path, std::string nameAnim);
 	void UpdateAnimation(float deltaTime);
 	void setActiveAnimation(std::string name);
+	glm::vec3 getPosition();
 
 	void play();
 	bool isPlay();

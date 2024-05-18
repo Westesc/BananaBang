@@ -200,10 +200,10 @@ int main() {
 		placeY.push_back(losujLiczbe2());
 	}
 	//animacja
-	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/Crouched Walking.dae"), true);
+	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/walk.dae"), true);
 	AnimateBody* animPlayer = new AnimateBody(animodel);
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Crouched Walking.dae"), "walking");
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing");
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/walk.dae"), "walking");
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/stand.dae"), "standing");
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping.dae"), "jumping");
 	pm->addAnimationPlayer(animPlayer);
 
@@ -297,7 +297,7 @@ int main() {
 	glm::vec3 lightPos(0.5f, 10.0f, 0.3f);
 
 	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/bialy.png", "diffuseMap");
-	sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(-1.f, -1.f, 1.f);
+	sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(7.f, 1.f, 1.f);
 	sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
 
 
@@ -372,14 +372,14 @@ int main() {
 			V = camera->getViewMatrix();
 		}
 		//animacje
-		animPlayer->UpdateAnimation(deltaTime);
+		animPlayer->UpdateAnimation(deltaTime/4);
 		//animator->UpdateAnimation(deltaTime / 2);
 		//shaderAnimation->use();
 		//auto transforms = animator->GetFinalBoneMatrices();
 		//for (int i = 0; i < transforms.size(); ++i)
 			//shaderAnimation->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
 
-		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
+		glm::mat4 P = glm::perspective(glm::radians(20.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
 		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
 
 		/*if (skydome->getModelComponent() != nullptr) {

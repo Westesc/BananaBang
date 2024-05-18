@@ -11,6 +11,7 @@
 class Animator
 {
 public:
+
 	Animator(Animation* animation)
 	{
 		m_CurrentTime = 0.0;
@@ -38,10 +39,36 @@ public:
 		m_CurrentAnimation = pAnimation;
 		m_CurrentTime = 0.0f;
 	}
-	void getTransform() {
-		if (&m_CurrentAnimation->GetRootNode()!= nullptr) {
-			std::cout << glm::to_string((&m_CurrentAnimation->GetRootNode())->transformation) << std::endl;
+
+	glm::mat4 GetBoneOffset(const std::string& boneName)
+	{
+		auto boneInfoMap = m_CurrentAnimation->GetBoneIDMap();
+		if (boneInfoMap.find("mixamorig_Hips") != boneInfoMap.end())
+		{
+			//std::cout << "aasd";
+			//std::cout << glm::to_string(boneInfoMap[boneName].offset) << std::endl;
+			return boneInfoMap[boneName].offset;
 		}
+		return glm::mat4(1.0f);
+	}
+
+
+	glm::mat4 GetRootNodeTransform() const
+	{
+		if (m_CurrentAnimation)
+		{
+			return m_CurrentAnimation->GetRootNode().transformation;
+		}
+		return glm::mat4(1.0f);
+	}
+
+	glm::vec3 position;
+	glm::vec3 lastPosition = glm::vec3(0.f, 0.f, 0.f);
+
+	glm::vec3 deltaPostion = glm::vec3(0.f, 0.f, 0.f);
+
+	glm::vec3 getposition() {
+		return deltaPostion;
 	}
 	void CalculateBoneTransform(const AssimpNodeData* node, glm::mat4 parentTransform)
 	{
@@ -49,6 +76,7 @@ public:
 		glm::mat4 nodeTransform = node->transformation;
 
 		Bone* Bone = m_CurrentAnimation->FindBone(nodeName);
+		//std::cout << nodeName << std::endl;
 
 		if (Bone)
 		{
@@ -64,6 +92,25 @@ public:
 			int index = boneInfoMap[nodeName].id;
 			glm::mat4 offset = boneInfoMap[nodeName].offset;
 			m_FinalBoneMatrices[index] = globalTransformation * offset;
+			if (nodeName == "mixamorig_Hips") {
+				position.x = globalTransformation[3][0];
+				//position.y = globalTransformation[3][1];
+				position.z = globalTransformation[3][2];
+				deltaPostion = position - lastPosition;
+				lastPosition = position;
+				//m_FinalBoneMatrices[index][3][0] -= position.x;
+				//m_FinalBoneMatrices[index][3][1] -= position.y;
+				//m_FinalBoneMatrices[index][3][2] -= position.z;
+				//position = position - lastPosition;
+				//lastPosition = position;
+				std::cout << glm::to_string(deltaPostion) << std::endl;
+				//std::cout << glm::to_string(globalTransformation)<<std::endl;
+			}
+			//else {
+				m_FinalBoneMatrices[index][3][0] -= position.x;
+				//m_FinalBoneMatrices[index][3][1] -= position.y;
+				m_FinalBoneMatrices[index][3][2] -= position.z;
+			//}
 		}
 
 		for (int i = 0; i < node->childrenCount; i++)

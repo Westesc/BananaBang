@@ -62,10 +62,13 @@ private:
 		float angle = atan2(camera->getFront().x, camera->getFront().z);
 		sm->getActiveScene()->findByName("player")->setRotating(false, angle + glm::radians(rotateAngle), glm::vec3(0.f, 1.f, 0.f));
 
-		float distance = speed * tm->getFramePerSeconds();
-		float dx = distance * sin(sm->getActiveScene()->findByName("player")->getRotate());
-		float dz = distance * cos(sm->getActiveScene()->findByName("player")->getRotate());
-		sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.0f, dz));
+		//float distance = speed * tm->getFramePerSeconds();
+		//float dx = animateBody->getPosition().x * sin(sm->getActiveScene()->findByName("player")->getRotate());
+		//float dz = animateBody->getPosition().z * cos(sm->getActiveScene()->findByName("player")->getRotate());
+		//sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.0f, dz));
+		//sm->getActiveScene()->findByName("player")->getTransform()->localPosition += animateBody->getPosition();//glm::vec3(animateBody->getPosition().x, 0.f, 0.f);
+		//1. transform tylko braæ main koœci i to edytowaæ
+		//2. wszystkie animacji z main koœci¹ w miejscu
 	}
 
 	void MovePlayer(float speed)
@@ -80,12 +83,16 @@ private:
 			if (input->checkKey(GLFW_KEY_W))
 			{
 				currentTurn = 180.f;
+				if (input->checkKey(GLFW_KEY_A)) currentTurn = -135.f;
+				else if (input->checkKey(GLFW_KEY_D)) currentTurn = 135.f;
 			}
 			else if (input->checkKey(GLFW_KEY_S))
 			{
 				currentTurn = 0.f;
+				if (input->checkKey(GLFW_KEY_A)) currentTurn = -45.f;
+				else if (input->checkKey(GLFW_KEY_D)) currentTurn = 45.f;
 			}
-			if (input->checkKey(GLFW_KEY_D))
+			else if (input->checkKey(GLFW_KEY_D))
 			{
 				currentTurn = 90;
 			}
@@ -95,6 +102,7 @@ private:
 			}
 		}
 		if (input->checkAnyKey()) {
+			//speed = 0.f;
 			move(speed);
 		}
 	}
@@ -116,6 +124,7 @@ private:
 		if (input->checkAnyKey()) {
 			if (state == walking) {
 				animateBody->setActiveAnimation("walking");
+				std::cout << "walk:" << std::endl;
 			}
 			if (input->checkKey(GLFW_KEY_SPACE) && state != air && state != jump_up)
 			{
@@ -124,7 +133,7 @@ private:
 				initialPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
 			}
 		}
-		else {
+		else if (state == walking){
 			animateBody->setActiveAnimation("standing");
 		}
 		//tyczasowo jeœli kolizuje z czymœ o tagu ground do wy³¹cz grawitacje

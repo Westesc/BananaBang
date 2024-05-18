@@ -30,6 +30,11 @@ void AnimateBody::addAnimation(char* path, std::string nameAnim)
 	}
 }
 
+glm::vec3 AnimateBody::getPosition() {
+
+	return animator->getposition();
+}
+
 void AnimateBody::UpdateAnimation(float deltaTime) {
 	Animacje anim = searchActiveAnimation();
 	animator->UpdateAnimation(deltaTime);
@@ -44,9 +49,7 @@ void AnimateBody::setActiveAnimation(std::string name) {
 		activeAnimation = name;
 		Animacje anim = searchActiveAnimation();
 		animator->PlayAnimation(anim.animation);
-		animator->getTransform();
 	}
-	
 }
 
 void AnimateBody::play()

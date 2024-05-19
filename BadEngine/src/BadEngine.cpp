@@ -30,6 +30,7 @@
 #include "../lib/GameMode.h"
 #include "../lib/Pathfinder.h"
 #include "../lib/Enemy.h"
+#include "../lib/Tree.h"
 
 //bool test = true;
 bool test = false;
@@ -448,42 +449,38 @@ int main() {
 		for (auto object : sm->getActiveScene()->gameObjects) {
 			if (object->name.starts_with("enemy")) {
 				Enemy* enemy = static_cast<Enemy*>(object);
-				if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
-					glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->localTransform->getLocalPosition(), enemy->sector);
-					glm::vec3 direction = destination - enemy->localTransform->getLocalPosition();
-					if (staticUpdateTime > 0.5f && glm::length(direction) > 50.0f) {
-						std::cout << enemy->name << " dupa " << glm::to_string(direction) << std::endl;
-					}
-					/*if (glm::abs(glm::cos(glm::dot(direction, glm::vec3(1.0f, 0.0f, 0.0f)))) < 0.7f) {
-						if (glm::abs(direction.x < 2.f)) {
-							direction.x = direction.x > 0.0f ? 2.0f : -2.0f;
+				switch (enemy->state) {
+					case EnemyState::Idle:
+						//enemy->velocity = glm::vec3(0.0f);
+						break;
+					case EnemyState::Walking:
+						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
+							enemy->timeSinceDirChange += deltaTime;
+							glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->localTransform->getLocalPosition(), enemy->sector);
+							glm::vec3 direction = glm::normalize(destination - enemy->localTransform->getLocalPosition());
+							enemy->setVel(direction);
+							enemy->Move(enemy->velocity * deltaTime);
+							enemy->timeSpentWalking += deltaTime;
+							if (enemy->timeSpentWalking > 15.f) {
+								enemy->chosenTreePos = pathfinder->decideInitalDestination(enemy->sector);
+								enemy->timeSpentWalking = 0.f;
+								//enemy->velocity = glm::vec3(0.0f);
+							}
+							/*if (staticUpdateTime > 0.5f) {
+								std::cout << enemy->name << " pos" << glm::to_string(enemy->localTransform->getLocalPosition()) << " dest" << glm::to_string(destination) << std::endl;
+							}*/
 						}
-						if (glm::abs(direction.x > 15.f)) {
-							direction.x = direction.x > 0.0f ? 15.0f : -15.0f;
+						else if (enemy->state == EnemyState::Walking) {
+							enemy->state = EnemyState::Chopping;
+							enemy->timeSpentWalking = 0.f;
 						}
-					}
-					if (glm::abs(glm::cos(glm::dot(direction, glm::vec3(0.0f, 0.0f, 1.0f)))) < 0.7f) {
-						if (glm::abs(direction.z < 2.f)) {
-							direction.z = direction.z > 0.0f ? 2.0f : -2.0f;
-						}
-						if (glm::abs(direction.z > 15.f)) {
-							direction.z = direction.z > 0.0f ? 15.0f : -15.0f;
-						}
-					}*/
-					enemy->Move(direction * deltaTime * glm::normalize(direction));
-					enemy->timeSpentWalking+=deltaTime;
-					if (enemy->timeSpentWalking > 15.f) {
-						enemy->chosenTreePos = pathfinder->decideInitalDestination(enemy->sector);
-						enemy->timeSpentWalking = 0.f;
-					}
-					if (staticUpdateTime > 0.5f) {
-						std::cout << enemy->name << " pos" << glm::to_string(enemy->localTransform->getLocalPosition()) << " dest" << glm::to_string(destination) << std::endl;
-					}
+						break;
+					case EnemyState::Chopping:
+						break;
+					case EnemyState::Attacking:
+						break;
 				}
 			}
-		}
-		if (staticUpdateTime > 1.0f) {
-			staticUpdateTime = 0.f;
 		}
 		sm->getActiveScene()->Update(V, P, time);
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::translate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(20.f, 0.f, 18.f)));
@@ -573,7 +570,7 @@ int main() {
 			pathfinder->trees.clear();
 			for (int i = 0; i < sectorsPom; i++) {
 				for (int j = 0; j < sectorsPom; j++) {
-					GameObject* planeSector = new GameObject("sector"+((i+1)*j));
+					GameObject* planeSector = new GameObject("sector"+std::to_string((i+1)*j));
 					planeSector->localTransform->localScale = glm::vec3(5.f, 5.f, 5.f);
 					planeSector->addModelComponent(planeSectormodel);
 					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, -.5f, j * 20*planeSector->localTransform->localScale.z);
@@ -582,7 +579,7 @@ int main() {
 					for (int k = 0; k < treeCount; k++) {
 						int treeX = losujLiczbe2()* planeSector->localTransform->localScale.x;
 						int treeZ = losujLiczbe2()* planeSector->localTransform->localScale.z;
-						GameObject* tree = new GameObject("tree_"+k);
+						Tree* tree = new Tree("tree_"+std::to_string(k));
 						tree->addModelComponent(treetrunk);
 						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
 						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
@@ -595,7 +592,7 @@ int main() {
 						planeSector->addChild(tree);
 						int branchCount = losujLiczbe(5, 10);
 						for (int m = 0; m < branchCount; m++) {
-							GameObject* branch = new GameObject("branch" + m);
+							GameObject* branch = new GameObject("branch" + std::to_string(m));
 							branch->addModelComponent(treebranch1);
 							branch->localTransform->localPosition.x = planeSector->localTransform->localPosition.x + treeX;
 							branch->localTransform->localPosition.y = float(losujLiczbe((m * 13 / branchCount)+5, ((m + 1) * 13 / branchCount)+5));
@@ -712,11 +709,13 @@ int main() {
 		}*/
 		if (spawnerTime > 8.f && loaded && spawnedEnemies <= maxEnemies) {
 			spawnerTime = 0;
-			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(0.f), glm::vec3(0.1f), glm::vec3(0.f));
+			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(0.f), glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 14.f));
 			enemy->addModelComponent(enemyModel);
 			sm->getActiveScene()->addObject(enemy);
 			spawnedEnemies++;
 			enemy->chosenTreePos = pathfinder->decideInitalDestination(0);
+			enemy->velocity = enemy->chosenTreePos - enemy->localTransform->localPosition;
+			enemy->state = EnemyState::Walking;
 		}
 		renderImGui();
 		glfwSwapBuffers(window);

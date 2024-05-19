@@ -31,9 +31,6 @@ public:
 	AnimateBody(Model* m);
 	~AnimateBody();
 
-	//float time;
-	//int Animation; //temp
-
 	void changeModel(Model* m);
 	void addAnimation(char* path, std::string nameAnim, float time);
 	void UpdateAnimation(float deltaTime);

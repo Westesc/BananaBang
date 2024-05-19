@@ -252,7 +252,7 @@ int main() {
 
 	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"), false);
 	Mesh* meshSphere = new Mesh();
-	meshSphere->createDome(20, 20, 50);
+	meshSphere->createDome(20, 20, 200);
 	Model* skydomeModel = new Model(meshSphere);
 
 
@@ -290,7 +290,7 @@ int main() {
 
 	setupImGui(window);
 
-	sm->getActiveScene()->findByName("skydome")->getModelComponent()->AddTexture("../../../../res/chmury1.png","diffuseMap");
+	sm->getActiveScene()->findByName("skydome")->getModelComponent()->AddTexture("../../../../res/niebo.png","diffuseMap");
 
 	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/cegla.png", "diffuseMap");
 	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/specular2.png", "specularMap");
@@ -375,11 +375,6 @@ int main() {
 		}
 		//animacje
 		animPlayer->UpdateAnimation(deltaTime);
-		//animator->UpdateAnimation(deltaTime / 2);
-		//shaderAnimation->use();
-		//auto transforms = animator->GetFinalBoneMatrices();
-		//for (int i = 0; i < transforms.size(); ++i)
-			//shaderAnimation->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
 
 		glm::mat4 P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(szer) / wys, 1.f, 500.f);
 		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
@@ -502,6 +497,10 @@ int main() {
 			}
 		}
 		sm->getActiveScene()->Draw(V, P);
+
+		skydomeShader->use();
+		skydomeShader->setFloat("iTime", time/7);
+		skydomeShader->setVec2("iResolution", 10, 10);
 
 		mapsShader->use();
 		mapsShader->setVec3("viewPos", camera->transform->getLocalPosition());

@@ -200,11 +200,12 @@ int main() {
 		placeY.push_back(losujLiczbe2());
 	}
 	//animacja
-	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/walk.dae"), true);
+	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
 	AnimateBody* animPlayer = new AnimateBody(animodel);
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/walk.dae"), "walking");
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/stand.dae"), "standing");
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping.dae"), "jumping");
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking");
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing");
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up");
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down");
 	pm->addAnimationPlayer(animPlayer);
 
 	//Animation* walkAnimation = new Animation(const_cast<char*>("../../../../res/animations/Crouched Walking.dae"), animodel);
@@ -372,14 +373,14 @@ int main() {
 			V = camera->getViewMatrix();
 		}
 		//animacje
-		animPlayer->UpdateAnimation(deltaTime);
+		animPlayer->UpdateAnimation(deltaTime/3);
 		//animator->UpdateAnimation(deltaTime / 2);
 		//shaderAnimation->use();
 		//auto transforms = animator->GetFinalBoneMatrices();
 		//for (int i = 0; i < transforms.size(); ++i)
 			//shaderAnimation->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
 
-		glm::mat4 P = glm::perspective(glm::radians(20.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
+		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
 		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
 
 		/*if (skydome->getModelComponent() != nullptr) {

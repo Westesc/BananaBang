@@ -94,25 +94,16 @@ public:
 			m_FinalBoneMatrices[index] = globalTransformation * offset;
 			if (nodeName == "mixamorig_Hips") {
 				position.x = globalTransformation[3][0];
-				//position.y = globalTransformation[3][1];
+				position.y = globalTransformation[3][1];
 				position.z = globalTransformation[3][2];
-				if (glm::distance(position, lastPosition) < 0.7f) {
+				if (glm::length(position - lastPosition) < 0.7f) {
 					deltaPostion = position - lastPosition;
 				}
 				lastPosition = position;
-				//m_FinalBoneMatrices[index][3][0] -= position.x;
-				//m_FinalBoneMatrices[index][3][1] -= position.y;
-				//m_FinalBoneMatrices[index][3][2] -= position.z;
-				//position = position - lastPosition;
-				//lastPosition = position;
-				std::cout << glm::to_string(deltaPostion) << std::endl;
-				//std::cout << glm::to_string(globalTransformation)<<std::endl;
 			}
-			//else {
-				m_FinalBoneMatrices[index][3][0] -= position.x;
-				//m_FinalBoneMatrices[index][3][1] -= position.y;
-				m_FinalBoneMatrices[index][3][2] -= position.z;
-			//}
+			m_FinalBoneMatrices[index][3][0] -= position.x;
+			m_FinalBoneMatrices[index][3][1] -= position.y;
+			m_FinalBoneMatrices[index][3][2] -= position.z;
 		}
 
 		for (int i = 0; i < node->childrenCount; i++)

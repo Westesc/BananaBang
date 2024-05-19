@@ -15,19 +15,18 @@ void AnimateBody::changeModel(Model* m) {
 
 void AnimateBody::addAnimation(char* path, std::string nameAnim)
 {
-	if (model != nullptr) {
-		//Model* animodel = new Model(path, true);
-		Animation* animationModel = new Animation(path, model);
-		Animator* animatorModel = new Animator(animationModel);
+        if (model != nullptr) {
+            Animation* animationModel = new Animation(path, model);
+            Animator* animatorModel = new Animator(animationModel);
 
-		Animacje newAnimacje;
-		newAnimacje.name = nameAnim;
-		newAnimacje.animation = animationModel;
-		animator = animatorModel;
+            Animacje newAnimacje;
+            newAnimacje.name = nameAnim;
+            newAnimacje.animation = animationModel;
+            animator = animatorModel;
 
-		allAnimation.push_back(newAnimacje);
-		activeAnimation = nameAnim;
-	}
+            allAnimation.push_back(newAnimacje);
+            activeAnimation = nameAnim;
+        }
 }
 
 glm::vec3 AnimateBody::getPosition() {

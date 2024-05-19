@@ -13,7 +13,7 @@ void AnimateBody::changeModel(Model* m) {
 	*model = *m;
 }
 
-void AnimateBody::addAnimation(char* path, std::string nameAnim)
+void AnimateBody::addAnimation(char* path, std::string nameAnim, float time)
 {
         if (model != nullptr) {
             Animation* animationModel = new Animation(path, model);
@@ -22,6 +22,7 @@ void AnimateBody::addAnimation(char* path, std::string nameAnim)
             Animacje newAnimacje;
             newAnimacje.name = nameAnim;
             newAnimacje.animation = animationModel;
+			newAnimacje.speedAnimation = time;
             animator = animatorModel;
 
             allAnimation.push_back(newAnimacje);
@@ -36,7 +37,7 @@ glm::vec3 AnimateBody::getPosition() {
 
 void AnimateBody::UpdateAnimation(float deltaTime) {
 	Animacje anim = searchActiveAnimation();
-	animator->UpdateAnimation(deltaTime);
+	animator->UpdateAnimation(deltaTime*anim.speedAnimation);
 	model->GetShader()->use();
 	auto transforms = animator->GetFinalBoneMatrices();
 	for (int i = 0; i < transforms.size(); ++i)

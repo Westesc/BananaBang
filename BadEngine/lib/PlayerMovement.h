@@ -6,174 +6,194 @@
 
 class PlayerMovement {
 private:
-	SceneManager* sm;
-	Input* input;
-	Camera* camera;
-	TimeManager* tm;
-	RigidBody* rb;
-	AnimateBody* animateBody;
+    SceneManager* sm;
+    Input* input;
+    Camera* camera;
+    TimeManager* tm;
+    RigidBody* rb;
+    AnimateBody* animateBody;
 
-	//movement
-	float moveSpeed = 4.f;
-	float deltaTime2 = 0.f;
-	float runSpeed = 10.f;
-	float turnSpeed = 90.f;
+    float moveSpeed = 4.f;
+    float deltaTime2 = 0.f;
+    float runSpeed = 10.f;
+    float turnSpeed = 90.f;
 
-	//nie dotykaæ
-	//float currentSpeed = 0.f;
-	float currentTurn = 0.f;
-	float rotateAngle = 0.f;
+    float currentTurn = 0.f;
+    float rotateAngle = 0.f;
 
-	//jumping
-	float limitJump = 2.f;
-	float jumpPower = 5.f;
-	glm::vec3 initialPosition;
-	float airSpeed = 5.f;
+    float limitJump = 7.f;
+    float jumpPower = 5.f;
+    glm::vec3 initialPosition;
+    float airSpeed = 5.f;
 
-	//state
-	enum State {
-		walking,
-		jump_up,
-		air,
-		climbing
-	};
-	State state = walking;
+    enum State {
+        walking,
+        jump_up,
+        air,
+        climbing
+    };
+    State state = walking;
 
-	void getRotate()
-	{
-		float rotationSpeed = 500.f;
-		float angleDifference = currentTurn - rotateAngle;
-		float rotationAmount = rotationSpeed * tm->getFramePerSeconds();
+    bool wasSpacePressed = false;
 
-		while (angleDifference < -180.0f) angleDifference += 360.0f;
-		while (angleDifference > 180.0f) angleDifference -= 360.0f;
+    void getRotate() {
+        float rotationSpeed = 500.f;
+        float angleDifference = currentTurn - rotateAngle;
+        float rotationAmount = rotationSpeed * tm->getFramePerSeconds();
 
-		if (fabs(angleDifference) <= rotationAmount) {
-			rotateAngle = currentTurn;
-		}
-		else {
-			int direction = (angleDifference > 0) ? 1 : -1;
-			rotateAngle += direction * rotationAmount;
-		}
-	}
+        while (angleDifference < -180.0f) angleDifference += 360.0f;
+        while (angleDifference > 180.0f) angleDifference -= 360.0f;
 
-	void move() {
-		getRotate();
-		float angle = atan2(camera->getFront().x, camera->getFront().z);
-		sm->getActiveScene()->findByName("player")->setRotating(false, angle + glm::radians(rotateAngle), glm::vec3(0.f, 1.f, 0.f));
+        if (fabs(angleDifference) <= rotationAmount) {
+            rotateAngle = currentTurn;
+        }
+        else {
+            int direction = (angleDifference > 0) ? 1 : -1;
+            rotateAngle += direction * rotationAmount;
+        }
+    }
+    void move() {
+        getRotate();
+        float angle = atan2(camera->getFront().x, camera->getFront().z);
+        sm->getActiveScene()->findByName("player")->setRotating(false, angle + glm::radians(rotateAngle), glm::vec3(0.f, 1.f, 0.f));
 
-		float dx = animateBody->getPosition().z * sin(sm->getActiveScene()->findByName("player")->getRotate());
-		float dz = animateBody->getPosition().z * cos(sm->getActiveScene()->findByName("player")->getRotate());
-		sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.f, dz));
-		//sm->getActiveScene()->findByName("player")->getTransform()->localPosition += animateBody->getPosition();//glm::vec3(animateBody->getPosition().x, 0.f, 0.f);
-	}
+        float rotate = sm->getActiveScene()->findByName("player")->getRotate();
+        float sinRotate = sin(rotate);
+        float cosRotate = cos(rotate);
 
-	void MovePlayer()
-	{
-		if (input->checkAnyKey() && deltaTime2 > 0.02f)
-		{
-			deltaTime2 = 0.f;
-			if (input->checkKey(GLFW_KEY_LEFT_SHIFT) && state == walking)
-			{
-				//speed = runSpeed;
-			}
-			if (input->checkKey(GLFW_KEY_W))
-			{
-				currentTurn = 180.f;
-				if (input->checkKey(GLFW_KEY_A)) currentTurn = -135.f;
-				else if (input->checkKey(GLFW_KEY_D)) currentTurn = 135.f;
-			}
-			else if (input->checkKey(GLFW_KEY_S))
-			{
-				currentTurn = 0.f;
-				if (input->checkKey(GLFW_KEY_A)) currentTurn = -45.f;
-				else if (input->checkKey(GLFW_KEY_D)) currentTurn = 45.f;
-			}
-			else if (input->checkKey(GLFW_KEY_D))
-			{
-				currentTurn = 90;
-			}
-			else if (input->checkKey(GLFW_KEY_A))
-			{
-				currentTurn = -90;
-			}
-		}
-		if (input->checkAnyKey()) {
-			//speed = 0.f;
-			move();
-		}
-	}
+        float dx = animateBody->getPosition().z * sinRotate + animateBody->getPosition().x * cosRotate;
+        float dz = animateBody->getPosition().z * cosRotate - animateBody->getPosition().x * sinRotate;
 
-	void jump() {
-		rb->upwardsSpeed = jumpPower;
-		//rb->useGravity();
-		//MovePlayer();
+        sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.f, dz));
+    }
 
-		glm::vec3 finalPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
-		float jumpDistance = glm::length(finalPosition.y - initialPosition.y);
-		if (jumpDistance > limitJump) {
-			state = air;
-			rb->upwardsSpeed = 0.f;
-			animateBody->setActiveAnimation("jumping down");
-		}
-	}
+    void moveInAir(float speed) {
+        getRotate();
+        float angle = atan2(camera->getFront().x, camera->getFront().z);
+        sm->getActiveScene()->findByName("player")->setRotating(false, angle + glm::radians(rotateAngle), glm::vec3(0.f, 1.f, 0.f));
+        float distance = speed * tm->getFramePerSeconds();
+        float dx = distance * sin(sm->getActiveScene()->findByName("player")->getRotate());
+        float dz = distance * cos(sm->getActiveScene()->findByName("player")->getRotate());
+        sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.f, dz));
+    }
 
+    void MovePlayer() {
+        float speed = 0.f;
+        if (input->checkAnyKey() && deltaTime2 > 0.02f) {
+            deltaTime2 = 0.f;
+            if (input->checkKey(GLFW_KEY_LEFT_SHIFT) && state == walking) {
+                // speed = runSpeed;
+            }
+            if (input->checkKey(GLFW_KEY_W)) {
+                speed = airSpeed;
+                if (state == walking) {
+                    animateBody->setActiveAnimation("walking");
+                }
+                currentTurn = 180.f;
+                if (input->checkKey(GLFW_KEY_A)) currentTurn = -135.f;
+                else if (input->checkKey(GLFW_KEY_D)) currentTurn = 135.f;
+            }
+            else if (input->checkKey(GLFW_KEY_S)) {
+                speed = airSpeed;
+                if (state == walking) {
+                    animateBody->setActiveAnimation("walking");
+                }
+                currentTurn = 0.f;
+                if (input->checkKey(GLFW_KEY_A)) currentTurn = -45.f;
+                else if (input->checkKey(GLFW_KEY_D)) currentTurn = 45.f;
+            }
+            else if (input->checkKey(GLFW_KEY_D)) {
+                speed = airSpeed;
+                if (state == walking) {
+                    animateBody->setActiveAnimation("walking");
+                }
+                currentTurn = 90;
+            }
+            else if (input->checkKey(GLFW_KEY_A)) {
+                speed = airSpeed;
+                if (state == walking) {
+                    animateBody->setActiveAnimation("walking");
+                }
+                currentTurn = -90;
+            }
+        }
+        if (input->checkAnyKey()) {
+            if (state == air || state == jump_up) {
+                moveInAir(speed);
+            }
+            else
+            {
+                move();
+            }
+        }
+    }
 
-	void checkState() {
-		if (input->checkAnyKey()) {
-			if (state == walking) {
-				animateBody->setActiveAnimation("walking");
-			}
-			if (input->checkKey(GLFW_KEY_SPACE) && state != air && state != jump_up)
-			{
-				animateBody->setActiveAnimation("jumping up");
-				state = jump_up;
-				initialPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
-			}
-		}
-		else if (state == walking){
-			animateBody->setActiveAnimation("standing");
-		}
-		//tyczasowo jeœli kolizuje z czymœ o tagu ground do wy³¹cz grawitacje
-		if (glm::distance(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y, initialPosition.y) < 0.5f && state == air) {
-			state = walking;
-			sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y = initialPosition.y;
-		}
-	}
+    void jump() {
+        rb->upwardsSpeed = jumpPower;
+        rb->useGravity();
+        MovePlayer();
+
+        glm::vec3 finalPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
+        float jumpDistance = glm::length(finalPosition.y - initialPosition.y);
+        if (jumpDistance > limitJump) {
+            state = air;
+            rb->upwardsSpeed = 0.f;
+            animateBody->setActiveAnimation("jumping down");
+        }
+    }
+
+    void checkState() {
+        if (input->checkAnyKey()) {
+            if (input->checkKey(GLFW_KEY_SPACE) && state != air && state != jump_up && !wasSpacePressed) {
+                animateBody->setActiveAnimation("jumping up");
+                //animateBody->setActiveAnimation("standing");
+                state = jump_up;
+                initialPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
+               // std::cout << glm::to_string(initialPosition) << std::endl;
+            }
+        }
+        else if (state == walking) {
+            animateBody->setActiveAnimation("standing");
+        }
+        if (glm::distance(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y, initialPosition.y) < 0.5f && state == air) {
+            state = walking;
+            animateBody->setActiveAnimation("standing");
+            sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y = initialPosition.y;
+           // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
+        }
+        wasSpacePressed = input->checkKey(GLFW_KEY_SPACE);
+    }
 
 public:
-	PlayerMovement(SceneManager* sm, Input* input, Camera* camera, TimeManager* tm) {
-		this->sm = sm;
-		this->input = input;
-		this->camera = camera;
-		this->tm = tm;
-		rb = new RigidBody("player", sm, tm);
-	}
+    PlayerMovement(SceneManager* sm, Input* input, Camera* camera, TimeManager* tm) {
+        this->sm = sm;
+        this->input = input;
+        this->camera = camera;
+        this->tm = tm;
+        rb = new RigidBody("player", sm, tm);
+    }
 
-	void ManagePlayer(float& deltaTime2)
-	{
-		this->deltaTime2 = deltaTime2;
-		checkState();
-		if (state == walking) {
-			MovePlayer();
-		}
-		else if (state == jump_up) {
-			jump();
-			//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, animateBody->getPosition().y, 0.f));
-		}
-		else if (state == air) {
-			//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, animateBody->getPosition().y, 0.f));
-			//MovePlayer();
-			//rb->useGravity();
-		}
-	}
-	void addAnimationPlayer(AnimateBody* ab) {
-		animateBody = ab;
-	}
+    void ManagePlayer(float& deltaTime2) {
+        this->deltaTime2 = deltaTime2;
+        checkState();
+        if (state == walking) {
+            MovePlayer();
+            std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
+        }
+        else if (state == jump_up) {
+            jump();
+        }
+        else if (state == air) {
+            MovePlayer();
+            rb->useGravity();
+        }
+    }
 
+    void addAnimationPlayer(AnimateBody* ab) {
+        animateBody = ab;
+    }
 
-	~PlayerMovement();
-
+    ~PlayerMovement();
 };
 
 #endif

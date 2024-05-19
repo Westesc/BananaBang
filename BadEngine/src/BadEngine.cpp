@@ -202,10 +202,10 @@ int main() {
 	//animacja
 	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
 	AnimateBody* animPlayer = new AnimateBody(animodel);
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking");
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing");
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up");
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down");
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 1.15f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.3f);
 	pm->addAnimationPlayer(animPlayer);
 
 	//Animation* walkAnimation = new Animation(const_cast<char*>("../../../../res/animations/Crouched Walking.dae"), animodel);
@@ -373,7 +373,7 @@ int main() {
 			V = camera->getViewMatrix();
 		}
 		//animacje
-		animPlayer->UpdateAnimation(deltaTime/3);
+		animPlayer->UpdateAnimation(deltaTime);
 		//animator->UpdateAnimation(deltaTime / 2);
 		//shaderAnimation->use();
 		//auto transforms = animator->GetFinalBoneMatrices();

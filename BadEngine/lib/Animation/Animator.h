@@ -96,8 +96,14 @@ public:
 				position.x = globalTransformation[3][0];
 				position.y = globalTransformation[3][1];
 				position.z = globalTransformation[3][2];
-				if (glm::length(position - lastPosition) < 0.7f) {
-					deltaPostion = position - lastPosition;
+				if (abs(position.x - lastPosition.x) < 0.5f) {
+					deltaPostion.x = position.x - lastPosition.x;
+				}
+				if (abs(position.y - lastPosition.y) < 0.5f) {
+					deltaPostion.y = position.y - lastPosition.y;
+				}
+				if (abs(position.z - lastPosition.z) < 0.5f) {
+					deltaPostion.z = position.z - lastPosition.z;
 				}
 				lastPosition = position;
 			}

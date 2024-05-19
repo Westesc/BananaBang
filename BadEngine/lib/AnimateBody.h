@@ -12,6 +12,7 @@ class AnimateBody : Component {
 	struct Animacje {
 		std::string name;
 		Animation* animation;
+		float speedAnimation;
 	};
 
 	Animator* animator;
@@ -34,7 +35,7 @@ public:
 	//int Animation; //temp
 
 	void changeModel(Model* m);
-	void addAnimation(char* path, std::string nameAnim);
+	void addAnimation(char* path, std::string nameAnim, float time);
 	void UpdateAnimation(float deltaTime);
 	void setActiveAnimation(std::string name);
 	glm::vec3 getPosition();

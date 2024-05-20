@@ -226,8 +226,8 @@ public:
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
 		glm::vec3 displacement = calculateCollisionResponse(first, second);
 		glm::vec3 otherDisplacement = -displacement;
-		float scalar = glm::length(glm::normalize(displacement));
-		displacement *= 4.f * scalar * deltaTime;
+		//float scalar = glm::length(glm::normalize(displacement));
+		displacement *= 15.f * deltaTime;
 		if (second->name.starts_with("branch") || second->name.starts_with("log")) {
 			displacement *= 0.05f;
 		}
@@ -237,18 +237,6 @@ public:
 		if (second->boundingBox != nullptr) {
 			otherDisplacement *= 0.1f;
 		}
-		/*if (first->getModelComponent()->boundingBox != nullptr) {
-			displacement *= 0.1f * deltaTime;
-		}
-		else {
-			displacement *= deltaTime;
-		}
-		if (second->getModelComponent()->boundingBox != nullptr) {
-			otherDisplacement *= 0.1f * deltaTime;
-		}
-		else {
-			otherDisplacement *= deltaTime;
-		}*/
 		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
 			first->localTransform->localPosition += displacement;
 		}
@@ -257,8 +245,9 @@ public:
 	void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
 		glm::vec3 displacement = calculateCollisionResponse(first, second);
 		glm::vec3 otherDisplacement = -displacement;
-		float scalar = glm::length(glm::normalize(displacement));
-		displacement *= 4.f * scalar * deltaTime;
+		//float scalar = glm::length(glm::normalize(displacement));
+		displacement *= 2.f * deltaTime;
+		otherDisplacement *= 2.f * deltaTime;
 		if (first->boundingBox != nullptr) {
 			displacement *= 0.1f;
 		}
@@ -268,6 +257,9 @@ public:
 		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
 			first->localTransform->localPosition += displacement;
 			second->localTransform->localPosition += otherDisplacement;
+		}
+		else if (first->name.starts_with("enemy") && second->name.starts_with("enemy")) {
+			first->localTransform->localPosition += glm::vec3(1.0f,0.0f,1.0f);
 		}
 	}
 

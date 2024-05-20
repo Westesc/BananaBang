@@ -460,7 +460,8 @@ int main() {
 						//enemy->velocity = glm::vec3(0.0f);
 						break;
 					case EnemyState::Walking:
-						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 8.f) {
+						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
+							enemy->state = EnemyState::Walking;
 							enemy->timeSinceDirChange += deltaTime;
 							glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->localTransform->getLocalPosition(), enemy->sector);
 							glm::vec3 direction = glm::normalize(destination - enemy->localTransform->getLocalPosition());
@@ -482,6 +483,9 @@ int main() {
 						}
 						break;
 					case EnemyState::Chopping:
+						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
+							enemy->state = EnemyState::Walking;
+						}
 						break;
 					case EnemyState::Attacking:
 						break;
@@ -497,6 +501,18 @@ int main() {
 			cm.addObject(sm->getActiveScene()->findByName("player"));
 		}
 		cm.checkResolveCollisions(deltaTime);
+		for (auto section : cm.sections) {
+			for (auto object : section->objects) {
+				if (object->localTransform->localPosition.y < 0.0f) {
+					if (object->name.starts_with("enemy")) {
+						object->localTransform->localPosition.y = 5.0f;
+					}
+					else {
+						object->localTransform->localPosition.y = 0.0f;
+					}
+				}
+			}
+		}
 		performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
 		if (frustumTest) {
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {

@@ -160,25 +160,27 @@ void GameObject::checkResolveCollisions(GameObject* other, float deltaTime) {
 }
 
 void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
-    glm::mat4 M = glm::translate(glm::mat4(1.f), localTransform->localPosition);
-    M = glm::rotate(M, glm::radians(localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
-    M = glm::rotate(M, glm::radians(localTransform->localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
-    M = glm::rotate(M, glm::radians(localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
-    M = glm::scale(M, localTransform->localScale);
-    modelComponent->setTransform(M);
+    if (modelComponent != nullptr) {
+        glm::mat4 M = glm::translate(glm::mat4(1.f), localTransform->localPosition);
+        M = glm::rotate(M, glm::radians(localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
+        M = glm::rotate(M, glm::radians(localTransform->localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
+        M = glm::rotate(M, glm::radians(localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
+        M = glm::scale(M, localTransform->localScale);
+        modelComponent->setTransform(M);
 
-    modelComponent->GetShader()->use();
-    modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
-    modelComponent->GetShader()->setMat4("view", view);
-    modelComponent->GetShader()->setMat4("projection", perspective);
-    modelComponent->Draw();
-    if (modelComponent->boundingBox != nullptr) {
-        modelComponent->DrawBoundingBoxes(modelComponent->GetShader(), *modelComponent->getTransform());
+        modelComponent->GetShader()->use();
+        modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
+        modelComponent->GetShader()->setMat4("view", view);
+        modelComponent->GetShader()->setMat4("projection", perspective);
+        modelComponent->Draw();
+        /*if (modelComponent->boundingBox != nullptr) {
+            modelComponent->DrawBoundingBoxes(modelComponent->GetShader(), *modelComponent->getTransform());
+        }
+        else if (modelComponent->capsuleCollider != nullptr) {
+            modelComponent->UpdateCollider(*modelComponent->getTransform());
+        }
+        modelComponent->setPrevTransform(*modelComponent->getTransform());*/
     }
-    else if (modelComponent->capsuleCollider != nullptr) {
-        modelComponent->UpdateCollider(*modelComponent->getTransform());
-    }
-    modelComponent->setPrevTransform(*modelComponent->getTransform());
     for (auto ch : children) {
         if (ch->isVisible) {
             ch->Draw(view, perspective);
@@ -220,8 +222,14 @@ void GameObject::lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 l
     }
 }
 
-void GameObject::addColider() {
-    modelComponent->addCollider(1, localTransform->localPosition);
-    boundingBox = new BoundingBox(glm::vec3(0.f), glm::vec3(0.f));
-    *boundingBox = *modelComponent->boundingBox;
+void GameObject::addColider(int type) {
+    modelComponent->addCollider(type, localTransform->localPosition);
+    if (type == 1) {
+		boundingBox = new BoundingBox(glm::vec3(0.f), glm::vec3(0.f));
+		*boundingBox = *modelComponent->boundingBox;
+	}
+    else if (type == 2) {
+		capsuleCollider = new CapsuleCollider(glm::vec3(0.f), 0.f, 0.f);
+		*capsuleCollider = *modelComponent->capsuleCollider;
+	}
 }

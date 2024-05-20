@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "Section.h"
+#include <cmath>
 
 class CollisionManager {
 public:
@@ -11,10 +12,12 @@ public:
 
 	CollisionManager(float worldSize, float sectionSize) : sectionSize(sectionSize) {
 		int numSections = worldSize / sectionSize;
+		int IDcounter = 0;
 		for (int i = -numSections*0.5f; i < numSections*0.5f; i++) {
 			for (int j = -numSections * 0.5f; j < numSections * 0.5f; j++) { //TODO: ograniczyæ wysokoœæ do realnych potrzeb
 				for (int k = -numSections * 0.5f; k < numSections * 0.5f; k++) {
-					sections.push_back(new Section(i * sectionSize, j * sectionSize, k * sectionSize, sectionSize));
+					sections.push_back(new Section(i * sectionSize, j * sectionSize, k * sectionSize, sectionSize, IDcounter));
+					IDcounter++;
 				}
 			}
 		}
@@ -31,8 +34,16 @@ public:
 			if (it != section->objects.end()) {
 				section->objects.erase(it);
 			}
-			if (section->checkCollision(go->getModelComponent())) {
+			if (section->checkCollision(go)) {
 				section->objects.push_back(go);
+			}
+		}
+	}
+
+	void addStaticObject(GameObject* go) {
+		for (auto section : sections) {
+			if (section->checkCollision(go)) {
+				section->staticObjects.push_back(go);
 			}
 		}
 	}
@@ -40,8 +51,13 @@ public:
 	void checkResolveCollisions(float deltaTime) {
 		for (auto section : sections) {
 			for (int i = 0; i < section->objects.size(); i++) {
-				for (int j = i + 1; j < section->objects.size(); j++) { //TODO: rozwi¹zaæ problem (n-1)! sprawdzeñ
-					if (checkCollision(section->objects.at(i)->getModelComponent(), section->objects.at(j)->getModelComponent())) {
+				for (int j = 0; j < section->staticObjects.size(); j++) {
+					if (checkCollision(section->objects.at(i), section->staticObjects.at(j))) {
+						resolveCollisionStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
+					}
+				}
+				for (int j = i + 1; j < section->objects.size(); j++) {
+					if (checkCollision(section->objects.at(i), section->objects.at(j))) {
 						resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
 					}
 				}
@@ -67,6 +83,28 @@ public:
 			}
 		}
 
+		return false;
+	}
+
+	bool checkCollision(GameObject* first, GameObject* second) {
+		glm::mat4 M = first->getTransform()->getMatrix();
+		glm::mat4 M2 = second->getTransform()->getMatrix();
+		if (first->boundingBox != nullptr) {
+			if (second->boundingBox != nullptr) {
+				return checkBoundingBoxCollision(*first->boundingBox, *second->boundingBox, M, M2);
+			}
+			else if (second->capsuleCollider != nullptr) {
+				return checkBoxCapsuleCollision(*first->boundingBox, *second->capsuleCollider, M2, M);
+			}
+		}
+		else if (first->capsuleCollider != nullptr) {
+			if (second->boundingBox != nullptr) {
+				return checkBoxCapsuleCollision(*second->boundingBox, *first->capsuleCollider, M, M2);
+			}
+			else if (second->capsuleCollider != nullptr) {
+				return checkCapsuleCollision(*first->capsuleCollider, *second->capsuleCollider, M, M2);
+			}
+		}
 		return false;
 	}
 
@@ -161,7 +199,7 @@ public:
 		return distanceY <= sumRadius;
 	}
 
-	void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
+	/*void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
 		std::cout << "KOLIZJA" << std::endl;
 		glm::vec3 displacement = calculateCollisionResponse(first->getModelComponent(), second->getModelComponent());
 		glm::vec3 otherDisplacement = -displacement;
@@ -183,6 +221,130 @@ public:
 			first->modelComponent->setTransform(glm::translate(*first->getModelComponent()->getTransform(), displacement));
 			second->modelComponent->setTransform(glm::translate(*second->getModelComponent()->getTransform(), otherDisplacement));
 		}
+	}*/
+
+	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
+		glm::vec3 displacement = calculateCollisionResponse(first, second);
+		glm::vec3 otherDisplacement = -displacement;
+		float scalar = glm::length(glm::normalize(displacement));
+		displacement *= 4.f * scalar * deltaTime;
+		if (second->name.starts_with("branch") || second->name.starts_with("log")) {
+			displacement *= 0.05f;
+		}
+		if (first->boundingBox != nullptr) {
+			displacement *= 0.1f;
+		}
+		if (second->boundingBox != nullptr) {
+			otherDisplacement *= 0.1f;
+		}
+		/*if (first->getModelComponent()->boundingBox != nullptr) {
+			displacement *= 0.1f * deltaTime;
+		}
+		else {
+			displacement *= deltaTime;
+		}
+		if (second->getModelComponent()->boundingBox != nullptr) {
+			otherDisplacement *= 0.1f * deltaTime;
+		}
+		else {
+			otherDisplacement *= deltaTime;
+		}*/
+		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
+			first->localTransform->localPosition += displacement;
+		}
+	}
+
+	void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
+		glm::vec3 displacement = calculateCollisionResponse(first, second);
+		glm::vec3 otherDisplacement = -displacement;
+		float scalar = glm::length(glm::normalize(displacement));
+		displacement *= 4.f * scalar * deltaTime;
+		if (first->boundingBox != nullptr) {
+			displacement *= 0.1f;
+		}
+		if (second->boundingBox != nullptr) {
+			otherDisplacement *= 0.1f;
+		}
+		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
+			first->localTransform->localPosition += displacement;
+			second->localTransform->localPosition += otherDisplacement;
+		}
+	}
+
+	glm::vec3 calculateCollisionResponse(GameObject* first, GameObject* second) {
+		glm::vec3 displacement(0.0f);
+		glm::mat4 M = first->getTransform()->getMatrix();
+		glm::mat4 M2 = second->getTransform()->getMatrix();
+		if (first->boundingBox != nullptr) {
+			if (second->boundingBox != nullptr) {
+				glm::vec3 direction = (glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)) - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+				if (second->name.starts_with("branch")) {
+					glm::vec2 branchlogdist = glm::vec2(second->boundingBox->center().x - second->parent->boundingBox->center().x, second->boundingBox->center().z - second->parent->boundingBox->center().z);
+					float costoX = glm::cos(glm::dot(glm::normalize(branchlogdist), glm::vec2(1.0f, 0.0f)));
+					float sintoX = glm::sin(glm::dot(glm::normalize(branchlogdist), glm::vec2(1.0f, 0.0f)));
+					glm::mat4 tmpM = glm::translate(M, glm::vec3(direction.x * costoX, 0.0f, 0.0f));
+					tmpM = glm::translate(M, glm::vec3(0.0f, 0.0f, direction.z * costoX));
+					glm::vec3 tmpCenter = glm::vec3(tmpM * glm::vec4(first->boundingBox->center(), 1.0f));
+					direction = tmpCenter - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f));
+					float magnitude = (first->boundingBox->radius() + second->boundingBox->radius()) - glm::distance(tmpCenter, glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+					displacement += direction * magnitude;
+				}
+				else if (second->name.starts_with("log")) {
+					float yDiff = second->boundingBox->center().y - first->boundingBox->center().y;
+					glm::mat4 tmpM = glm::translate(M, glm::vec3(0.0f, yDiff, 0.0f));
+					glm::vec3 tmpCenter = glm::vec3(tmpM * glm::vec4(first->boundingBox->center(), 1.0f));
+					direction = tmpCenter - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f));
+					float magnitude = (first->boundingBox->radius() + second->boundingBox->radius()) - glm::distance(tmpCenter, glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+					displacement += direction * magnitude;
+				}
+				else {
+					direction = glm::normalize(direction);
+					float magnitude = (first->boundingBox->radius() + second->boundingBox->radius()) - glm::distance(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)), glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+					displacement += direction * magnitude;
+				}
+			}
+			else if (second->capsuleCollider != nullptr) {
+				glm::vec3 direction = glm::normalize(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)) - second->capsuleCollider->center);
+				float magnitude = (first->boundingBox->radius() + second->capsuleCollider->radius) - glm::distance(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)), second->capsuleCollider->center);
+				displacement += direction * magnitude;
+			}
+		}
+		else if (first->capsuleCollider != nullptr) {
+			if (second->boundingBox != nullptr) {
+				glm::vec3 direction = glm::normalize(first->capsuleCollider->center - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+				if (second->name.starts_with("branch")) {
+					glm::vec2 branchlogdist = glm::vec2(second->boundingBox->center().x - second->parent->boundingBox->center().x, second->boundingBox->center().z - second->parent->boundingBox->center().z);
+					float costoX = glm::cos(glm::dot(glm::normalize(branchlogdist), glm::vec2(1.0f, 0.0f)));
+					float sintoX = glm::sin(glm::dot(glm::normalize(branchlogdist), glm::vec2(1.0f, 0.0f)));
+					glm::mat4 tmpM = glm::translate(M, glm::vec3(direction.x * costoX, 0.0f, 0.0f));
+					tmpM = glm::translate(M, glm::vec3(0.0f, 0.0f, direction.z * costoX));
+					glm::vec3 tmpCenter = glm::vec3(tmpM * glm::vec4(first->capsuleCollider->center, 1.0f));
+					direction = tmpCenter - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f));
+					float magnitude = (first->capsuleCollider->radius + second->boundingBox->radius()) - glm::distance(tmpCenter, glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+					displacement += direction * magnitude;
+				}
+				else if (second->name.starts_with("log")) {
+					float yDiff = second->boundingBox->center().y - first->capsuleCollider->center.y;
+					glm::mat4 tmpM = glm::translate(M, glm::vec3(0.0f, yDiff, 0.0f));
+					glm::vec3 tmpCenter = glm::vec3(tmpM * glm::vec4(first->capsuleCollider->center, 1.0f));
+					direction = tmpCenter - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f));
+					float magnitude = (first->capsuleCollider->radius + second->boundingBox->radius()) - glm::distance(tmpCenter, glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+					displacement += direction * magnitude;
+				}
+				else {
+					direction = glm::normalize(direction);
+					float magnitude = (first->capsuleCollider->radius + second->boundingBox->radius()) - glm::distance(first->capsuleCollider->center, glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+					displacement += direction * magnitude;
+				}
+			}
+			else if (second->capsuleCollider != nullptr) {
+				glm::vec3 direction = glm::normalize(first->capsuleCollider->center - second->capsuleCollider->center);
+				float magnitude = (first->capsuleCollider->radius + second->capsuleCollider->radius) - glm::distance(first->capsuleCollider->center, second->capsuleCollider->center);
+				displacement += direction * magnitude;
+			}
+		}
+		std::cout << first->name << ", " << second->name << glm::to_string(displacement) << std::endl;
+		return displacement;
 	}
 
 	glm::vec3 calculateCollisionResponse(Model* first, Model* other) {

@@ -20,6 +20,7 @@ public:
 	int layer;
 	GameObject* parent;
 	std::vector<GameObject*> children;
+	std::vector<Component> components;
 	Transform* localTransform;
 	Model* modelComponent;
 	bool isRotating;
@@ -27,6 +28,7 @@ public:
 	glm::vec3 rotateAxis;
 	bool isVisible = true;
 	BoundingBox* boundingBox = nullptr;
+	CapsuleCollider* capsuleCollider = nullptr;
 
 	void setParent(GameObject* Parent);
 	void addChild(GameObject* Child);
@@ -46,7 +48,7 @@ public:
 	YAML::Node serialize();
 	void setVisible(bool visible);
 	void lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 lightColor);
-	void addColider();
+	void addColider(int type);
 };
 
 #endif

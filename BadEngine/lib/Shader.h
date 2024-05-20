@@ -2,6 +2,7 @@
 #define SHADER_H
 
 #include <yaml-cpp/yaml.h>
+#include <fstream>
 
 class Shader
 {

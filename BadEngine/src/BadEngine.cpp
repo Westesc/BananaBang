@@ -133,16 +133,16 @@ std::array<glm::vec4, 6> calculateFrustumPlanes(const glm::mat4& viewProjectionM
 	return planes;
 }
 
-bool isBoxInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, BoundingBox& box, glm::mat4* transform) {
+bool isBoxInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, BoundingBox& box, glm::mat4 transform) {
 	glm::vec3 vertices[] = {
-			glm::vec3(*transform * glm::vec4(box.vertices.at(0), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(1), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(2), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(3), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(4), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(5), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(6), 1.0f)),
-			glm::vec3(*transform * glm::vec4(box.vertices.at(7), 1.0f))
+			glm::vec3(transform * glm::vec4(box.vertices.at(0), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(1), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(2), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(3), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(4), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(5), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(6), 1.0f)),
+			glm::vec3(transform * glm::vec4(box.vertices.at(7), 1.0f))
 	};
 	for (const auto& plane : frustumPlanes) {
 		glm::vec4 normalizedPlane = plane / glm::length(glm::vec3(plane));
@@ -171,14 +171,14 @@ bool isCapsuleInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, CapsuleCo
 
 void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const std::vector<GameObject*>& objects) {
 	for (auto object : objects) {
-		if (object->getModelComponent()->boundingBox != nullptr) {
-			bool isVisible = isBoxInFrustum(frustumPlanes, *object->getModelComponent()->boundingBox, object->getModelComponent()->getTransform());
+		if (object->boundingBox != nullptr) {
+			bool isVisible = isBoxInFrustum(frustumPlanes, *object->boundingBox, object->getTransform()->getMatrix());
 			object->setVisible(isVisible);
 		}
-		else if (object->getModelComponent()->capsuleCollider != nullptr) {
+		/*else if (object->getModelComponent()->capsuleCollider != nullptr) {
 			bool isVisible = isCapsuleInFrustum(frustumPlanes, object->getModelComponent()->capsuleCollider, object->getModelComponent()->getTransform());
 			object->setVisible(isVisible);
-		}
+		}*/
 	}
 }
 
@@ -387,61 +387,67 @@ int main() {
 			pm->ManagePlayer(deltaTime, deltaTime2);
 		}
 
-		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+		if (sm->getActiveScene()->findByName("player")) {
+			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+			}
 		}
 
-		if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+		if (sm->getActiveScene()->findByName("rampBox")) {
+			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+			}
 		}
-		if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
-		}
-		if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
-		}
-		if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+
+		if (sm->getActiveScene()->findByName("capsule2")) {
+			if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+			}
 		}
 		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			frustumTest = !frustumTest;
@@ -454,12 +460,12 @@ int main() {
 						//enemy->velocity = glm::vec3(0.0f);
 						break;
 					case EnemyState::Walking:
-						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
+						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 8.f) {
 							enemy->timeSinceDirChange += deltaTime;
 							glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->localTransform->getLocalPosition(), enemy->sector);
 							glm::vec3 direction = glm::normalize(destination - enemy->localTransform->getLocalPosition());
 							enemy->setVel(direction);
-							enemy->Move(enemy->velocity * deltaTime);
+							enemy->Move(glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z) * deltaTime);
 							enemy->timeSpentWalking += deltaTime;
 							if (enemy->timeSpentWalking > 15.f) {
 								enemy->chosenTreePos = pathfinder->decideInitalDestination(enemy->sector);
@@ -487,13 +493,8 @@ int main() {
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::scale(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(50.f, 50.0f, 50.0f)));
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::radians(time), glm::vec3(0.f, 1.f, 0.f)));
 		//sm->getActiveScene()->findByName("plane")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("plane")->getModelComponent()->getTransform(), glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
-		for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
-			if (sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->boundingBox != nullptr || sm->getActiveScene()->gameObjects.at(i)->getModelComponent()->capsuleCollider != nullptr)
-			{
-				cm.addObject(sm->getActiveScene()->gameObjects.at(i));
-			}
-			sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
-			
+		if (sm->getActiveScene()->findByName("player")) {
+			cm.addObject(sm->getActiveScene()->findByName("player"));
 		}
 		cm.checkResolveCollisions(deltaTime);
 		performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
@@ -573,7 +574,7 @@ int main() {
 					GameObject* planeSector = new GameObject("sector"+std::to_string((i+1)*j));
 					planeSector->localTransform->localScale = glm::vec3(5.f, 5.f, 5.f);
 					planeSector->addModelComponent(planeSectormodel);
-					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, -.5f, j * 20*planeSector->localTransform->localScale.z);
+					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, 0.f, j * 20*planeSector->localTransform->localScale.z);
 					//planeSector->addColider();
 					int treeCount = losujLiczbe(a, b);
 					for (int k = 0; k < treeCount; k++) {
@@ -583,14 +584,15 @@ int main() {
 						tree->addModelComponent(treetrunk);
 						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
 						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
+						tree->addColider(1);
 						GameObject* log = new GameObject("log");
 						log->addModelComponent(treelog);
 						log->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX;
 						log->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
-
+						log->addColider(1);
 						tree->addChild(log);
 						planeSector->addChild(tree);
-						int branchCount = losujLiczbe(5, 10);
+						int branchCount = losujLiczbe(3,8);
 						for (int m = 0; m < branchCount; m++) {
 							GameObject* branch = new GameObject("branch" + std::to_string(m));
 							branch->addModelComponent(treebranch1);
@@ -601,8 +603,10 @@ int main() {
 							branch->localTransform->localScale.z = 12 / branch->localTransform->localPosition.y;
 							branch->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
 							branch->localTransform->localRotation.y = float(losujLiczbe(m * 360 / branchCount, (m + 1) * 360 / branchCount));
-							branch->localTransform->localRotation.x =losujLiczbe(10,45) ;
-							std::cout << branch->localTransform->localRotation.x << std::endl;
+							//branch->localTransform->localRotation.x =losujLiczbe(10,45) ;
+							//branch->localTransform->localRotation.z = losujLiczbe(0, 360);
+							branch->addColider(1);
+							//std::cout << branch->localTransform->localRotation.x << std::endl;
 							log->addChild(branch);
 						}
 					}
@@ -617,12 +621,32 @@ int main() {
 				loaded = true;
 				spawnerTime = 0;
 			}
+			GameObject* player = new GameObject("player");
+			player->addModelComponent(box2model);
+			player->modelComponent->SetShader(phongShader);
+			player->localTransform->localPosition = glm::vec3(0.f);
+			player->localTransform->localScale = glm::vec3(0.1f);
+			player->addColider(1);
+			sm->getActiveScene()->addObject(player);
+				//sm->saveScene("first");
+			buttonPressed = false;
+			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
+				for (auto go : sm->getActiveScene()->gameObjects.at(i)->children)
+				{
+					cm.addStaticObject(go);
+					cm.addStaticObject(go->children.at(0));
+					for (auto ch : go->children.at(0)->children)
+					{
+						cm.addStaticObject(ch);
+					}
+				}
+				sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
+
+			}
 			GameObject* skydome = new GameObject("sky");
 			skydome->addModelComponent(skydomeModel);
 			skydome->getTransform()->localScale = glm::vec3(100.f);
 			sm->getActiveScene()->addObject(skydome);
-				//sm->saveScene("first");
-			buttonPressed = false;
 		}
 		if (input->IsKeobarodAction(window)) {
 			input->GetMessage(key, action);
@@ -709,9 +733,11 @@ int main() {
 		}*/
 		if (spawnerTime > 8.f && loaded && spawnedEnemies <= maxEnemies) {
 			spawnerTime = 0;
-			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(0.f), glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 14.f));
+			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(0.f,5.f,0.f), glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 14.f));
 			enemy->addModelComponent(enemyModel);
+			enemy->addColider(2);
 			sm->getActiveScene()->addObject(enemy);
+			cm.addObject(enemy);
 			spawnedEnemies++;
 			enemy->chosenTreePos = pathfinder->decideInitalDestination(0);
 			enemy->velocity = enemy->chosenTreePos - enemy->localTransform->localPosition;

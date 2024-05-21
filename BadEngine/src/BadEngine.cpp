@@ -1,6 +1,8 @@
 ﻿#include "imgui.h"
 #include "imgui_impl/imgui_impl_glfw.h"
 #include "imgui_impl/imgui_impl_opengl3.h"
+#include "glad/glad.h"
+#include "stb_image.h"
 #include <stdio.h>
 #include<GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -91,6 +93,9 @@ void Start() {
 	glFrontFace(GL_CCW);
 
 	glEnable(GL_BLEND);
+
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 	sm = new SceneManager();
 	//Scene * scene = new Scene("main");
@@ -203,7 +208,7 @@ int main() {
 	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
 	AnimateBody* animPlayer = new AnimateBody(animodel);
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
+	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 1.15f);
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.3f);
@@ -227,7 +232,8 @@ int main() {
 	//sm->getActiveScene()->addObject(player);
 
 
-
+	Shader* fillingShader = new Shader("../../../../src/shaders/vs_filling.vert", "../../../../src/shaders/fs_filling.frag");
+	Shader* outlineShader = new Shader("../../../../src/shaders/vs_outline.vert", "../../../../src/shaders/fs_outline.frag");
 	Shader* shaders = new Shader("../../../../src/shaders/vs.vert", "../../../../src/shaders/fs.frag");
 	Shader* skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
 	Shader* mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");
@@ -242,8 +248,9 @@ int main() {
 	GameObject* capsule2 = new GameObject("capsule2");
 	GameObject* skydome = new GameObject("skydome");
 	GameObject* rampBox = new GameObject("rampBox");
+	GameObject* outlineObj = new GameObject("outline");
 
-	
+	Model* outlinemodel = new Model(const_cast<char*>("../../../../res/Lumberjack.obj"), false);
 	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"), false);
 	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"), false);
 	Model* box2model = new Model(const_cast<char*>("../../../../res/tree.obj"), false);
@@ -256,6 +263,9 @@ int main() {
 	Model* skydomeModel = new Model(meshSphere);
 
 
+	outlinemodel->SetShader(shaderTree);
+	outlinemodel->SetOutlineShader(outlineShader);
+	outlinemodel->SetFillingShader(fillingShader);
 
 	boxmodel->SetShader(mapsShader);
 	planemodel->SetShader(shaders);
@@ -264,6 +274,8 @@ int main() {
 	capsule2model->SetShader(shaders);
 	skydomeModel->SetShader(skydomeShader);
 	rampModel->SetShader(rampShader);
+
+	outlineObj->addModelComponent(outlinemodel);
 	box->addModelComponent(boxmodel);
 	plane->addModelComponent(planemodel);
 	box2->addModelComponent(box2model);
@@ -279,6 +291,7 @@ int main() {
 	sm->getActiveScene()->addObject(capsule2);
 	sm->getActiveScene()->addObject(skydome);
 	sm->getActiveScene()->addObject(rampBox);
+	sm->getActiveScene()->addObject(outlineObj);
 	int key, action;
 	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 20.0f);
 
@@ -301,6 +314,10 @@ int main() {
 	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/bialy.png", "diffuseMap");
 	sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(7.f, 1.f, 1.f);
 	sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
+
+	sm->getActiveScene()->findByName("outline")->getTransform()->localPosition = glm::vec3(0.f, 0.f, 0.f);
+	sm->getActiveScene()->findByName("outline")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
+	sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);
 
 
 	/*box->localTransform->localPosition = glm::vec3(-1.f, -1.f, 0.f);
@@ -355,7 +372,7 @@ int main() {
 		}
 		glClearColor(0.2f, 0.3f, 0.7f, 1.f);
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
 		deltaTime = time - lastTime;
 		deltaTime2 += time - lastTime;
@@ -363,6 +380,7 @@ int main() {
 
 		tm->setTime(deltaTime);
 		//std::cout << "Delta time: " << deltaTime << std::endl;
+
 
 		glm::mat4 V(1.f);
 		if (gameMode.getMode() == GameMode::Game) {
@@ -414,7 +432,12 @@ int main() {
 		if (gameMode.getMode() == GameMode::Game) {
 			pm->ManagePlayer(deltaTime2);
 		}
-
+		if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+			outlinemodel->SetOutlineShader(nullptr);
+		}
+		if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+			outlinemodel->SetOutlineShader(outlineShader);
+		}
 		if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
 			sm->getActiveScene()->findByName("box")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
 		}
@@ -489,6 +512,8 @@ int main() {
 		}
 		cm.checkResolveCollisions(deltaTime);
 		performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
+
+
 		if (frustumTest) {
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 				if (sm->getActiveScene()->gameObjects.at(i)->isVisible) {
@@ -496,7 +521,11 @@ int main() {
 				}
 			}
 		}
+
+		//outlinemodel->DrawWithOutline(V, P);
 		sm->getActiveScene()->Draw(V, P);
+
+		//outlinemodel->DrawWithOutline(V, P);
 
 		skydomeShader->use();
 		skydomeShader->setFloat("iTime", time/7);
@@ -615,9 +644,9 @@ int main() {
 			for (int i = 0; i < sectors; i++)
 			{
 				for (int j = 0; j < sectors; j++) {
-					DrawPlane(scale, shaders, plane, glm::vec3(i * 20, 0.f, j * 20));
+					//DrawPlane(scale, shaders, plane, glm::vec3(i * 20, 0.f, j * 20));
 					for (int z = 0; z < mojaTablica[i * sectors + j]; z++) {
-						DrawTree(scaleT, scale, shaderTree, box2, glm::vec3(i * 20 + placeX[pom] - 1.5, 0.f, j * 20 + placeY[pom]));
+						//DrawTree(scaleT, scale, shaderTree, box2, glm::vec3(i * 20 + placeX[pom] - 1.5, 0.f, j * 20 + placeY[pom]));
 						pom++;
 					}
 				}

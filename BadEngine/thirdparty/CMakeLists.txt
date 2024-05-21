@@ -16,12 +16,6 @@ set(stb_image_SOURCE_DIR ${STB_IMAGE_DIR} CACHE INTERNAL "")
 add_library(stb_image STATIC ${STB_IMAGE_DIR}/stb_image.cpp)
 target_include_directories(stb_image PRIVATE ${STB_IMAGE_DIR})
 
-# SOIL
-set(SOIL_DIR ${CMAKE_CURRENT_LIST_DIR}/SOIL)
-set(soil_SOURCE_DIR ${SOIL_DIR}/src CACHE INTERNAL "")
-add_library(soil STATIC ${SOIL_DIR}/src/SOIL.c)
-target_include_directories(soil PRIVATE ${SOIL_DIR}/src)
-
 # other
 CPMAddPackage("gh:assimp/assimp@5.2.5")
 CPMAddPackage("gh:glfw/glfw#3.3.8")
@@ -40,8 +34,7 @@ add_library(imgui STATIC ${imgui_SOURCE_DIR}/imgui.cpp
 					     ${imgui_SOURCE_DIR}/imgui_widgets.cpp)
 						 
 set_target_properties(glad
-                      stb_image 
-                      soil
+                      stb_image
                       assimp 
                       glfw 
                       glm 

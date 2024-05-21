@@ -168,11 +168,70 @@ void GameObject::checkResolveCollisions(GameObject* other, float deltaTime) {
 }
 
 void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
-    modelComponent->GetShader()->use();
-    modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
-    modelComponent->GetShader()->setMat4("view", view);
-    modelComponent->GetShader()->setMat4("projection", perspective);
-    modelComponent->Draw();
+
+    if (modelComponent->GetOutlineShader() != nullptr) {
+
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
+
+        modelComponent->GetShader()->use();
+        modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
+        modelComponent->GetShader()->setMat4("view", view);
+        modelComponent->GetShader()->setMat4("projection", perspective);
+        modelComponent->Draw();
+        
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        //glDisable(GL_DEPTH_TEST);
+
+
+        modelComponent->GetOutlineShader()->use();
+        modelComponent->GetOutlineShader()->setMat4("M", *modelComponent->getTransform());
+        modelComponent->GetOutlineShader()->setMat4("view", view);
+        modelComponent->GetOutlineShader()->setMat4("projection", perspective);
+        modelComponent->GetOutlineShader()->setFloat("outlineScale", 0.03f);
+        modelComponent->Draw(modelComponent->GetOutlineShader());
+
+        glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 0, 0xFF);
+        glEnable(GL_DEPTH_TEST);
+
+    }
+    else if (modelComponent->GetFillingShader() != nullptr) {
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
+
+        modelComponent->GetShader()->use();
+        modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
+        modelComponent->GetShader()->setMat4("view", view);
+        modelComponent->GetShader()->setMat4("projection", perspective);
+        modelComponent->Draw();
+
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        glDisable(GL_DEPTH_TEST);
+
+
+        modelComponent->GetFillingShader()->use();
+        modelComponent->GetFillingShader()->setMat4("M", *modelComponent->getTransform());
+        modelComponent->GetFillingShader()->setMat4("view", view);
+        modelComponent->GetFillingShader()->setMat4("projection", perspective);
+        modelComponent->GetFillingShader()->setFloat("outlineScale", 0.03f);
+        modelComponent->Draw(modelComponent->GetFillingShader());
+
+        glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 0, 0xFF);
+        glEnable(GL_DEPTH_TEST);
+    }
+    else {
+
+        modelComponent->GetShader()->use();
+        modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
+        modelComponent->GetShader()->setMat4("view", view);
+        modelComponent->GetShader()->setMat4("projection", perspective);
+        modelComponent->Draw();
+    }
+
     if (modelComponent->boundingBox != nullptr) {
         modelComponent->DrawBoundingBoxes(modelComponent->GetShader(), *modelComponent->getTransform());
     }

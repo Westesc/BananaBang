@@ -29,6 +29,8 @@ private:
     std::vector<Mesh*> meshes;
     std::string directory;
     Shader* shader;
+    Shader* outlineShader = nullptr;
+    Shader* fillingShader = nullptr;
     bool isFromFile;
     char* pathObj;
     bool gammaCorrection;
@@ -328,7 +330,11 @@ public:
     glm::mat4* getTransform() { return Transform; }
     glm::mat4* getPrevTransform() { return prevTransform; }
     void SetShader(Shader* s) { shader = s; }
+    void SetOutlineShader(Shader* s) { outlineShader = s; }
+    void SetFillingShader(Shader* s) { fillingShader = s; }
     Shader* GetShader() { return shader; }
+    Shader* GetOutlineShader() { return outlineShader; }
+    Shader* GetFillingShader() { return fillingShader; }
     BoundingBox* boundingBox = nullptr;
     CapsuleCollider* capsuleCollider = nullptr;
     void AddTexture(std::string const& filename, std::string typeName)
@@ -443,10 +449,50 @@ public:
 
     void Draw()
     {
+        //if (outlineShader) {
+        //    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        //    glStencilMask(0xFF);
+        //    glDisable(GL_DEPTH_TEST);
+
+        //    for (unsigned int i = 0; i < meshes.size(); i++)
+        //    {
+        //        meshes[i]->Draw(outlineShader, textures_loaded, Transform, isFromFile, rotating, isBlue);
+        //    }
+
+        //    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        //    glStencilMask(0x00);
+        //    glEnable(GL_DEPTH_TEST);
+        //}
         for (unsigned int i = 0; i < meshes.size(); i++)
         {
             meshes[i]->Draw(shader, textures_loaded, Transform, isFromFile, rotating, isBlue);
         }
+        //glStencilMask(0xFF); // Reset stencil buffer mask
+        //glStencilFunc(GL_ALWAYS, 0, 0xFF); // Reset stencil buffer function
+    }
+
+    void Draw(Shader *shader)
+    {
+        //if (outlineShader) {
+        //    glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        //    glStencilMask(0xFF);
+        //    glDisable(GL_DEPTH_TEST);
+
+        //    for (unsigned int i = 0; i < meshes.size(); i++)
+        //    {
+        //        meshes[i]->Draw(outlineShader, textures_loaded, Transform, isFromFile, rotating, isBlue);
+        //    }
+
+        //    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        //    glStencilMask(0x00);
+        //    glEnable(GL_DEPTH_TEST);
+        //}
+        for (unsigned int i = 0; i < meshes.size(); i++)
+        {
+            meshes[i]->Draw(shader, textures_loaded, Transform, isFromFile, rotating, isBlue);
+        }
+        //glStencilMask(0xFF); // Reset stencil buffer mask
+        //glStencilFunc(GL_ALWAYS, 0, 0xFF); // Reset stencil buffer function
     }
 
     void DrawBoundingBox(const BoundingBox& bbox) {

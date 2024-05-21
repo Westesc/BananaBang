@@ -69,7 +69,7 @@ int sectorsPom = 1;
 int a = 0;
 int b = 0;
 bool buttonPressed;
-unsigned int maxEnemies = 10;
+unsigned int maxEnemies = 5;
 unsigned int spawnedEnemies = 0;
 bool loaded = false;
 
@@ -469,7 +469,7 @@ int main() {
 							glm::vec3 tmpMove = glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z);
 							enemy->Move(tmpMove * deltaTime);
 							cm.addObjectPredict(enemy);
-							//enemy->setVel2(cm.checkPrediction());
+							enemy->setVel2(cm.checkPrediction());
 							enemy->Move(-tmpMove * deltaTime);
 							enemy->Move(glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z) * deltaTime);
 							if ((glm::any(glm::isnan(enemy->localTransform->localPosition)) || glm::any(glm::isinf(enemy->localTransform->localPosition)))) {

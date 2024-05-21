@@ -4,6 +4,7 @@
 #include <vector>
 #include "Section.h"
 #include <cmath>
+#include "Enemy.h"
 
 class CollisionManager {
 public:
@@ -64,7 +65,7 @@ public:
 		for (auto section : sections) {
 			if (section->predictObject != nullptr) {
 				for (int i = 0; i < section->objects.size(); i++) {
-					if (checkCollision(section->objects.at(i), section->predictObject)) {
+					if (section->predictObject != section->objects.at(i) && checkCollision(section->objects.at(i), section->predictObject)) {
 						collisions.push_back(section->objects.at(i));
 					}
 				}
@@ -289,7 +290,9 @@ public:
 			second->localTransform->localPosition += otherDisplacement;
 		}
 		else if (first->name.starts_with("enemy") && second->name.starts_with("enemy")) {
-			first->localTransform->localPosition += glm::vec3(1.0f,0.0f,1.0f) * deltaTime;
+			Enemy* enemy1 = static_cast<Enemy*>(first);
+			first->localTransform->localPosition += glm::vec3(enemy1->velocity.z ,0.0f,-enemy1->velocity.x) * deltaTime * 0.1f;
+			addObject(second);
 		}
 	}
 

@@ -43,9 +43,14 @@ public:
 		for (auto& collision : collisions) {
 			glm::vec3 toCollision = collision->localTransform->localPosition - localTransform->localPosition;
 			float distance = glm::length(toCollision);
-			if (distance > 0.0f) {
+			if (collision->name.starts_with("enemy") && distance > 0.1f) {
+				toCollision = glm::vec3(toCollision.z, toCollision.y, -toCollision.x);
 				avoid -= glm::normalize(toCollision) / distance;
 			}
+			else if (distance > 0.1f) {
+				avoid -= glm::normalize(toCollision) / distance;
+			}
+			
 		}
 		if (!collisions.empty()) {
 			avoid = glm::normalize(avoid);

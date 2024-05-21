@@ -33,6 +33,7 @@ class UI : Component {
 private:
 	std::string text;
 	glm::vec3 color;
+	unsigned int textureID;
 	typeUI type;
 	std::map<GLchar, Character> Characters;
 	bool loadFreetype();

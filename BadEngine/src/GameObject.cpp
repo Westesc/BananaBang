@@ -111,7 +111,7 @@ void GameObject::Move(glm::vec3 translation) {
 }
 
 void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
-    if (modelComponent != nullptr) {
+    if (modelComponent != nullptr && uiComponent!= nullptr) {
         if (isRotating) {
             localTransform->localRotation.x += rotateAxis.x * rotateSpeed * glm::radians(time);
             localTransform->localRotation.y += rotateAxis.y * rotateSpeed * glm::radians(time);

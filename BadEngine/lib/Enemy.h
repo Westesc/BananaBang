@@ -28,19 +28,6 @@ public:
 	~Enemy() {}
 
 	void setVel(glm::vec3 direction) {
-		/*if (state == EnemyState::Walking && glm::cos(glm::dot(velocity, direction)) < 0.0f) {
-			velocity *= 0.5f;
-			timeSpentWalking *= 2;
-		}
-		else if (glm::length(direction) < velLimits.first) {
-			velocity = glm::normalize(direction) * velLimits.first;
-		}
-		else if (glm::length(direction) > velLimits.second) {
-			velocity = glm::normalize(direction) * velLimits.second;
-		}
-		else {
-			velocity = direction;
-		}*/
 		glm::vec3 directionToTree = glm::normalize(chosenTreePos - localTransform->localPosition);
 		if (glm::dot(direction, directionToTree) < 0.0f) {
 			direction = directionToTree;
@@ -49,17 +36,24 @@ public:
 			direction = glm::normalize(direction + directionToTree);
 		}
 		velocity = direction * (velLimits.second - velLimits.first);
-		/*
-		if (glm::dot(velocity, direction) > 0.99f) {
-			velocity = direction * (velLimits.second - velLimits.first);
+	}
+
+	void setVel2(std::vector<GameObject*> collisions) {
+		glm::vec3 avoid = glm::vec3(0.f);
+		for (auto& collision : collisions) {
+			glm::vec3 toCollision = collision->localTransform->localPosition - localTransform->localPosition;
+			float distance = glm::length(toCollision);
+			if (distance > 0.0f) {
+				avoid -= glm::normalize(toCollision) / distance;
+			}
 		}
-		else if (timeSinceDirChange > 1.f) {
-			velocity = direction * (velLimits.second - velLimits.first);
-			timeSinceDirChange = 0.f;
+		if (!collisions.empty()) {
+			avoid = glm::normalize(avoid);
+			velocity = glm::normalize(velocity + avoid) * (velLimits.second - velLimits.first);
 		}
-		else {
-			timeSinceDirChange = 0.f;
-		}*/
+		if ((glm::any(glm::isnan(velocity)) || glm::any(glm::isinf(velocity)))) {
+			velocity = glm::vec3(0.f);
+		}
 	}
 };
 #endif

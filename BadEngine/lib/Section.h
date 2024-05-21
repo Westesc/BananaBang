@@ -8,6 +8,7 @@ public:
 	BoundingBox* bounds;
 	std::vector<GameObject*> objects;
 	std::vector<GameObject*> staticObjects;
+	GameObject* predictObject;
 	int ID;
 
 	Section(float x, float y, float z, float size, int ID) : ID(ID) {

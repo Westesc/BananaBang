@@ -466,16 +466,22 @@ int main() {
 							glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->localTransform->getLocalPosition(), enemy->sector);
 							glm::vec3 direction = glm::normalize(destination - enemy->localTransform->getLocalPosition());
 							enemy->setVel(direction);
+							glm::vec3 tmpMove = glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z);
+							enemy->Move(tmpMove * deltaTime);
+							cm.addObjectPredict(enemy);
+							//enemy->setVel2(cm.checkPrediction());
+							enemy->Move(-tmpMove * deltaTime);
 							enemy->Move(glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z) * deltaTime);
+							if ((glm::any(glm::isnan(enemy->localTransform->localPosition)) || glm::any(glm::isinf(enemy->localTransform->localPosition)))) {
+								enemy->localTransform->localPosition = glm::vec3(5.0f);
+							}
+							cm.addObject(enemy);
 							enemy->timeSpentWalking += deltaTime;
 							if (enemy->timeSpentWalking > 15.f) {
 								enemy->chosenTreePos = pathfinder->decideInitalDestination(enemy->sector);
 								enemy->timeSpentWalking = 0.f;
 								//enemy->velocity = glm::vec3(0.0f);
 							}
-							/*if (staticUpdateTime > 0.5f) {
-								std::cout << enemy->name << " pos" << glm::to_string(enemy->localTransform->getLocalPosition()) << " dest" << glm::to_string(destination) << std::endl;
-							}*/
 						}
 						else if (enemy->state == EnemyState::Walking) {
 							enemy->state = EnemyState::Chopping;
@@ -491,6 +497,9 @@ int main() {
 						break;
 				}
 			}
+		}
+		if (staticUpdateTime > 0.5f) {
+			staticUpdateTime = 0.f;
 		}
 		sm->getActiveScene()->Update(V, P, time);
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::translate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(20.f, 0.f, 18.f)));
@@ -641,7 +650,7 @@ int main() {
 			player->addModelComponent(box2model);
 			player->modelComponent->SetShader(phongShader);
 			player->localTransform->localPosition = glm::vec3(0.f);
-			player->localTransform->localScale = glm::vec3(0.1f);
+			player->localTransform->localScale = glm::vec3(0.5f);
 			player->addColider(1);
 			sm->getActiveScene()->addObject(player);
 				//sm->saveScene("first");

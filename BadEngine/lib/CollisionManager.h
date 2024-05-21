@@ -48,6 +48,36 @@ public:
 		}
 	}
 
+	void addObjectPredict(GameObject* go) {
+		for (auto section : sections) {
+			if (section->checkCollision(go)) {
+				section->predictObject = go;
+			}
+			else {
+				section->predictObject = nullptr;
+			}
+		}
+	}
+
+	std::vector<GameObject*> checkPrediction() {
+		std::vector<GameObject*> collisions;
+		for (auto section : sections) {
+			if (section->predictObject != nullptr) {
+				for (int i = 0; i < section->objects.size(); i++) {
+					if (checkCollision(section->objects.at(i), section->predictObject)) {
+						collisions.push_back(section->objects.at(i));
+					}
+				}
+				for (int i = 0; i < section->staticObjects.size(); i++) {
+					if (checkCollision(section->staticObjects.at(i), section->predictObject)) {
+						collisions.push_back(section->staticObjects.at(i));
+					}
+				}
+			}
+		}
+		return collisions;
+	}
+
 	void checkResolveCollisions(float deltaTime) {
 		for (auto section : sections) {
 			for (int i = 0; i < section->objects.size(); i++) {
@@ -259,7 +289,7 @@ public:
 			second->localTransform->localPosition += otherDisplacement;
 		}
 		else if (first->name.starts_with("enemy") && second->name.starts_with("enemy")) {
-			first->localTransform->localPosition += glm::vec3(1.0f,0.0f,1.0f);
+			first->localTransform->localPosition += glm::vec3(1.0f,0.0f,1.0f) * deltaTime;
 		}
 	}
 

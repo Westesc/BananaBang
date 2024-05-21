@@ -64,10 +64,10 @@ public:
 							std::cout<< section->ID << ": "<<object->name << std::endl;
 						}
 					}*/
-					/*if (checkCollision(section->objects.at(i), section->staticObjects.at(j))) {
+					if (checkCollision(section->objects.at(i), section->staticObjects.at(j))) {
 						std::cout << "KOLIZJA" << std::endl;
 						resolveCollision(section->objects.at(i), section->staticObjects.at(j), deltaTime);
-					}*/
+					}
 				}
 			}
 		}

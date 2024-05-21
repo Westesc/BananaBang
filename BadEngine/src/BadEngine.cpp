@@ -240,13 +240,6 @@ int main() {
 	planeSectormodel->SetShader(shaders);
 
 	//UI
-	GameObject* HPcount = new GameObject("HPcount");
-	UI* ui = new UI(writing);
-	Shader* UIShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
-	ui->addShader(UIShader);
-	HPcount->localTransform->localPosition = glm::vec3(25.f);
-	ui->setText("Ala ma kota");
-	HPcount->uiComponent = ui;
 
 	boxmodel->SetShader(mapsShader);
 	planemodel->SetShader(shaders);
@@ -381,7 +374,7 @@ int main() {
 			else if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_4))
 			{
 				gameMode.setMode(GameMode::Menu);
-			}
+			} 
 		}
 
 		if (gameMode.getMode() == GameMode::Game) {
@@ -538,11 +531,12 @@ int main() {
 			}
 			for (auto sect : cm.sections) {
 				sect->staticObjects.clear();
+				sect->objects.clear();
 			}
 			sm->getActiveScene()->gameObjects.clear();
-			Scene* scenaNowa = new Scene("Nowa");
+			/*Scene* scenaNowa = new Scene("Nowa");
 			sm->scenes.push_back(scenaNowa);
-			sm->activeScene = sm->scenes.back();
+			sm->activeScene = sm->scenes.back();*/
 
 			for (int i = 0; i < sectorsPom; i++) {
 				for (int j = 0; j < sectorsPom; j++) {
@@ -606,7 +600,14 @@ int main() {
 			sm->getActiveScene()->addObject(player);
 				//sm->saveScene("first");
 			buttonPressed = false;
-			
+			GameObject* HPcount = new GameObject("HPcount");
+			UI* ui = new UI(writing);
+			Shader* UIShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
+			ui->addShader(UIShader);
+			HPcount->localTransform->localPosition = glm::vec3(25.f);
+			ui->setText("Ala ma kota");
+			HPcount->uiComponent = ui;
+
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 				for (auto go : sm->getActiveScene()->gameObjects.at(i)->children)
 				{
@@ -735,6 +736,11 @@ void renderImGui() {
 	ImGui::SliderInt("Max drzew", &b, a, 20);
 	if (ImGui::Button("Generate")) {
 		buttonPressed = true;
+	}
+	for (auto go : sm->getActiveScene()->gameObjects) {
+		ImGui::Text(go->name.c_str());
+		ImGui::Text("x: %.2f, y: %.2f, z: %.2f",go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);
+		
 	}
 	ImGui::End();
 

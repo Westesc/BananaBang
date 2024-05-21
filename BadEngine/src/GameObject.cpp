@@ -37,12 +37,13 @@ GameObject::GameObject(YAML::Node node) {
 }
 
 GameObject::~GameObject() {
+    delete localTransform;
     for (auto child : children)
     {
         delete child;
     }
     children.clear();
-    delete localTransform;
+    
 }
 
 void GameObject::setParent(GameObject* Parent)

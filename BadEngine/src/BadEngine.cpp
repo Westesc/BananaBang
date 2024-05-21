@@ -12,6 +12,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "../thirdparty/tracy/public/tracy/Tracy.hpp"
 #include "../lib/GraphNode.h"
 #include "../lib/Shader.h"
 #include "../lib/GameObject.h"
@@ -184,7 +185,7 @@ void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const 
 
 
 int main() {
-	
+	ZoneScoped;
 	Start();
 	int ilosc = 0;
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));

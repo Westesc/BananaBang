@@ -28,6 +28,8 @@
 #include "../lib/CollisionManager.h"
 #include "../lib/PlayerMovement.h"
 #include "../lib/GameMode.h"
+#include "../lib/TimeManager.h"
+#include "../lib/animation/Animator.h"
 
 //bool test = true;
 bool test = false;
@@ -49,15 +51,16 @@ GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _m
 
 using Clock = std::chrono::high_resolution_clock;
 using TimePoint = Clock::time_point;
-PlayerMovement* pm;
 
-Camera* camera = new Camera();
 using Duration = std::chrono::duration<float, std::ratio<1, 1>>;
 
 constexpr int wys = 800, szer = 1000;
 GLFWwindow* window;
 SceneManager* sm;
 Input* input;
+PlayerMovement* pm;
+Camera* camera;
+TimeManager* tm = new TimeManager();
 float boxSpeed = 4.f;
 
 float scale = 5.f;
@@ -89,6 +92,9 @@ void Start() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
 
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+
 	sm = new SceneManager();
 	//Scene * scene = new Scene("main");
 	//sm->scenes.push_back(scene);
@@ -98,6 +104,8 @@ void Start() {
 	sm->scenes.push_back(scene);
 	sm->activeScene = sm->scenes.at(0);
 	input = new Input(window);
+	camera = new Camera(sm);
+	pm = new PlayerMovement(sm, input, camera, tm);
 	/*GameObject* go = new GameObject("test object");
 	Transform* trans = new Transform();
 	Component* comp = new Component();
@@ -106,7 +114,6 @@ void Start() {
 	RigidBody* rb = new RigidBody();
 	Axis* axis = new Axis("axis");
 	go->getTransform();*/
-	pm = new PlayerMovement(sm, input);
 }
 
 std::array<glm::vec4, 6> calculateFrustumPlanes(const glm::mat4& viewProjectionMatrix) {
@@ -197,6 +204,23 @@ int main() {
 	}
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
+	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
+	AnimateBody* animPlayer = new AnimateBody(animodel);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
+	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 1.15f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.3f);
+	pm->addAnimationPlayer(animPlayer);
+
+	Shader* shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
+	GameObject* anim = new GameObject("player");
+	animodel->SetShader(shaderAnimation);
+	anim->addModelComponent(animodel);
+	sm->getActiveScene()->addObject(anim);
+
+	Shader* fillingShader = new Shader("../../../../src/shaders/vs_filling.vert", "../../../../src/shaders/fs_filling.frag");
+	Shader* outlineShader = new Shader("../../../../src/shaders/vs_outline.vert", "../../../../src/shaders/fs_outline.frag");
 	Shader* shaders = new Shader("../../../../src/shaders/vs.vert", "../../../../src/shaders/fs.frag");
 	Shader* skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
 	Shader* mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");
@@ -211,13 +235,13 @@ int main() {
 	GameObject* skydome = new GameObject("skydome");
 	GameObject* rampBox = new GameObject("rampBox");
 
-	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
-	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
-	Model* box2model = new Model(const_cast<char*>("../../../../res/tree.obj"));
-	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
-	Model* rampModel = new Model(const_cast<char*>("../../../../res/box.obj"));
+	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"), false);
+	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"), false);
+	Model* box2model = new Model(const_cast<char*>("../../../../res/tree.obj"), false);
+	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"), false);
+	Model* rampModel = new Model(const_cast<char*>("../../../../res/box.obj"), false);
 
-	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"));
+	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"), false);
 	Mesh* meshSphere = new Mesh();
 	meshSphere->createDome(20, 20, 50);
 	Model* skydomeModel = new Model(meshSphere);
@@ -226,15 +250,15 @@ int main() {
 	Shader* hudShader = new Shader("../../../../src/shaders/hud.vert", "../../../../src/shaders/hud.frag");
 
 	//drzewa
-	Model* treelog = new Model(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"));
+	Model* treelog = new Model(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"), false);
 	treelog->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	Model* treetrunk = new Model(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"));
+	Model* treetrunk = new Model(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"), false);
 	treetrunk->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	Shader* phongShader = new Shader("../../../../src/shaders/phong.vert", "../../../../src/shaders/phong.frag");
-	Model* treebranch1= new Model(const_cast<char*>("../../../../res/objects/trees/tree_branch_1.obj"));
+	Model* treebranch1= new Model(const_cast<char*>("../../../../res/objects/trees/tree_branch_1.obj"), false);
 	treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	treebranch1->SetShader(phongShader);
-	Model* planeSectormodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
+	Model* planeSectormodel = new Model(const_cast<char*>("../../../../res/plane.obj"), false);
 	treetrunk->SetShader(phongShader);
 	treelog->SetShader(phongShader);
 	planeSectormodel->SetShader(shaders);
@@ -269,12 +293,14 @@ int main() {
 	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 20.0f);
 
 	const TimePoint tpStart = Clock::now();
-	static bool sequenceStarted = false;
-	static bool firstKeyPressed = false;
-	static bool secondKeyPressed = false;
+
 	std::string name = "src";
 
 	setupImGui(window);
+
+	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/bialy.png", "diffuseMap");
+	sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(7.f, 1.f, 1.f);
+	sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
 
 	sm->getActiveScene()->findByName("skydome")->getModelComponent()->AddTexture("../../../../res/chmury1.png","diffuseMap");
 
@@ -325,6 +351,7 @@ int main() {
 
 	sm->loadScene("first");
 	sm->activeScene = sm->scenes.at(3);
+	//std::cout << "player:" << sm->getActiveScene()->findByName("box") << std::endl;
 	//sm->getActiveScene()->findByName("tree_1")->addChild(new GameObject("log"));
 	while (!glfwWindowShouldClose(window)) {
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -340,7 +367,18 @@ int main() {
 		staticupdateTime += deltaTime;
 		//std::cout << "Delta time: " << deltaTime << std::endl;
 
-		glm::mat4 V = camera->getViewMatrix();
+		tm->setTime(deltaTime);
+		glm::mat4 V(1.f);
+		if (gameMode.getMode() == GameMode::Game) {
+			pm->ManagePlayer(deltaTime2);
+			V = camera->getViewMatrixPlayer();
+		}
+		else if (gameMode.getMode() != GameMode::Game) {
+
+			V = camera->getViewMatrix();
+		}
+		//animacje
+		animPlayer->UpdateAnimation(deltaTime);
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
 		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
@@ -377,9 +415,6 @@ int main() {
 			} 
 		}
 
-		if (gameMode.getMode() == GameMode::Game) {
-			pm->ManagePlayer(deltaTime, deltaTime2);
-		}
 		if (sm->getActiveScene()->findByName("player")) {
 			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
 				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
@@ -505,7 +540,7 @@ int main() {
 		shaders->setMat4("projection", P);
 		capsule2->getModelComponent()->Draw();
 		capsule2->getModelComponent()->UpdateCollider(*capsule2->getModelComponent()->getTransform());*/
-		if (input->IsMove()) {
+		while (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			if (glfwGetInputMode(window, GLFW_CURSOR) != 212993) {
 				camera->updateCamera(dpos);
@@ -591,13 +626,13 @@ int main() {
 				}
 			}
 			
-			GameObject* player = new GameObject("player");
-			player->addModelComponent(box2model);
-			player->modelComponent->SetShader(phongShader);
-			player->localTransform->localPosition = glm::vec3(0.f);
-			player->localTransform->localScale = glm::vec3(0.1f);
-			player->addColider();
-			sm->getActiveScene()->addObject(player);
+			//GameObject* player = new GameObject("player");
+			//player->addModelComponent(box2model);
+			//player->modelComponent->SetShader(phongShader);
+			//player->localTransform->localPosition = glm::vec3(0.f);
+			//player->localTransform->localScale = glm::vec3(0.1f);
+			//player->addColider();
+			//sm->getActiveScene()->addObject(anim);
 				//sm->saveScene("first");
 			buttonPressed = false;
 			GameObject* HPcount = new GameObject("HPcount");
@@ -628,27 +663,12 @@ int main() {
 			sm->getActiveScene()->addObject(skydome);
 			sm->getActiveScene()->addObject(HPcount);
 		}
-		if (input->IsKeobarodAction(window)) {
-			input->GetMessage(key, action);
+		while (input->IsKeobarodAction(window)) {
+			input->getMessage(key, action);
 
 			if (gameMode.getMode() == GameMode::Debug) {
-				// Obsługa sekwencji klawiszy
-				if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-					if (!sequenceStarted) {
-						sequenceStarted = true;
-						secondKeyPressed = false;
-						firstKeyPressed = true;
-						std::cout << "W" << std::endl;
-						camera->ProcessKeyboard(FORWARD, time);
-					}
-					else if (firstKeyPressed && !secondKeyPressed) {
-						secondKeyPressed = true;
-						sequenceStarted = false;
-						firstKeyPressed = false;
-						std::cout << "Sekwencja klawiszy W + W została wykryta!" << std::endl;
-					}
-				}
-				else if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
+
+				if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
 					camera->ProcessKeyboard(FORWARD, time);
 				}
 				else if (key == GLFW_KEY_S && action == GLFW_REPEAT) {

@@ -73,7 +73,7 @@ private:
 
     void moveInAir(float speed) {
         getRotate();
-        float angle = atan2(camera->getFront().x, camera->getFront().z);
+        float angle = atan2(camera->getFront().x, camera->getFront().z) * (180.0 / M_PI);
          sm->getActiveScene()->findByName("player")->getTransform()->localRotation.y = angle + rotateAngle;
         float distance = speed * tm->getFramePerSeconds();
         float dx = distance * sin(glm::radians(sm->getActiveScene()->findByName("player")->getTransform()->getLocalRotation().y));

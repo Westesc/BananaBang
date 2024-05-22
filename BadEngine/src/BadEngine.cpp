@@ -382,7 +382,7 @@ int main() {
 		animPlayer->UpdateAnimation(deltaTime);
 		sm->getActiveScene()->findByName("skydome")->timeSetting(time / 7, glm::vec2(10, 10));
 
-		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
+		glm::mat4 P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(szer) / wys, 1.f, 5000.f);
 		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
 
 		/*if (skydome->getModelComponent() != nullptr) {
@@ -662,10 +662,10 @@ int main() {
 			animodel->SetShader(shaderAnimation);
 			anim->addModelComponent(animodel);
 			sm->getActiveScene()->addObject(anim);
-			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 1.f, 0.f));
+			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
+			sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
 
 			GameObject* skydome = new GameObject("skydome");
-			//skydomeModel->SetShader(skydomeShader);
 			skydome->addModelComponent(skydomeModel);
 			skydome->getTransform()->localScale = glm::vec3(100.f);
 			sm->getActiveScene()->addObject(skydome);

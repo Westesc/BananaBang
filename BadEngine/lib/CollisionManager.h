@@ -260,7 +260,7 @@ public:
 	}*/
 
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
-		glm::vec3 displacement = calculateCollisionResponse(first, second);
+		/*glm::vec3 displacement = calculateCollisionResponse(first, second);
 		glm::vec3 otherDisplacement = -displacement;
 		//float scalar = glm::length(glm::normalize(displacement));
 		displacement *= 15.f * deltaTime;
@@ -275,11 +275,15 @@ public:
 		}
 		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
 			first->localTransform->localPosition += displacement;
+		}*/
+		glm::vec3 displacement = calculateCollisionResponse(first, second);
+		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
+			first->localTransform->localPosition += displacement * deltaTime;
 		}
 	}
 
 	void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
-		glm::vec3 displacement = calculateCollisionResponse(first, second);
+		/*glm::vec3 displacement = calculateCollisionResponse(first, second);
 		glm::vec3 otherDisplacement = -displacement;
 		//float scalar = glm::length(glm::normalize(displacement));
 		displacement *= 2.f * deltaTime;
@@ -298,11 +302,22 @@ public:
 			Enemy* enemy1 = static_cast<Enemy*>(first);
 			first->localTransform->localPosition += glm::vec3(enemy1->velocity.z ,0.0f,-enemy1->velocity.x) * deltaTime * 0.1f;
 			addObject(second);
+		}*/
+		glm::vec3 displacement = calculateCollisionResponse(first, second);
+		glm::vec3 otherDisplacement = -displacement;
+		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
+			first->predictedPosition += displacement * 0.5f;
+			second->predictedPosition += otherDisplacement * 0.5f;
+		}
+		else if (first->name.starts_with("enemy") && second->name.starts_with("enemy")) {
+			Enemy* enemy1 = static_cast<Enemy*>(first);
+			first->localTransform->localPosition += glm::vec3(enemy1->velocity.z, 0.0f, -enemy1->velocity.x) * deltaTime * 0.1f;
+			addObject(second);
 		}
 	}
 
 	glm::vec3 calculateCollisionResponse(GameObject* first, GameObject* second) {
-		glm::vec3 displacement(0.0f);
+		/*glm::vec3 displacement(0.0f);
 		glm::mat4 M = first->getTransform()->getMatrix();
 		glm::mat4 M2 = second->getTransform()->getMatrix();
 		if (first->boundingBox != nullptr) {
@@ -374,7 +389,47 @@ public:
 			}
 		}
 		std::cout << first->name << ", " << second->name << glm::to_string(displacement) << std::endl;
-		return displacement;
+		return displacement;*/
+		glm::vec3 delta = second->getTransform()->localPosition - first->getTransform()->localPosition;
+		float distance = glm::length(delta);
+		float penetrationDepth = (first->boundingBox->radius() + second->boundingBox->radius()) - distance;
+		if (penetrationDepth > 0) {
+			return glm::normalize(delta) * penetrationDepth;
+		}
+		return glm::vec3(0.0f);
+	}
+
+	void stepSimulation(float deltaTime) {
+		for (auto section : sections) {
+			for (auto object : section->objects) {
+				object->predictedPosition = object->getTransform()->localPosition + object->velocity * deltaTime;
+			}
+		}
+
+		for (int i = 0; i < 10; i++) {
+			for (auto section : sections) {
+				for (int j = 0; j < section->objects.size(); j++) {
+					for (int k = j + 1; k < section->objects.size(); k++) {
+						if (checkCollision(section->objects[j], section->objects[k])) {
+							resolveCollision(section->objects[j], section->objects[k], deltaTime);
+						}
+					}
+					for (int k = 0; k < section->staticObjects.size(); k++) {
+						if (checkCollision(section->objects[j], section->staticObjects[k])) {
+							resolveCollisionStatic(section->objects[j], section->staticObjects[k], deltaTime);
+						}
+					}
+				}
+			}
+		}
+
+		for (auto section : sections) {
+			for (auto object : section->objects) {
+				glm::vec3 displacement = object->predictedPosition - object->getTransform()->localPosition;
+				object->velocity = displacement / deltaTime;
+				object->getTransform()->localPosition = object->predictedPosition;
+			}
+		}
 	}
 
 	glm::vec3 calculateCollisionResponse(Model* first, Model* other) {

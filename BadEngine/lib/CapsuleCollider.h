@@ -4,16 +4,37 @@
 #include <yaml-cpp/yaml.h>
 #include "Serialize.h"
 #include "Collider.h"
+#include "Particle.h"
 
-class CapsuleCollider : Collider {
+struct CapsuleConstraint {
+    Particle* p1;
+    Particle* p2;
+    float radius;
+
+    CapsuleConstraint(Particle* particle1, Particle* particle2, float radius)
+        : p1(particle1), p2(particle2), radius(radius) {}
+
+    void solve() {
+        glm::vec3 delta = p1->predictedPosition - p2->predictedPosition;
+        float distance = glm::length(delta);
+        glm::vec3 correction = (distance - radius) * delta / distance * 0.5f;
+        p1->predictedPosition -= correction;
+        p2->predictedPosition += correction;
+    }
+};
+
+class CapsuleCollider : public Collider {
 public:
     glm::vec3 center;
     float radius;
     float height;
     bool customSize;
+    bool isTriggerOnly = false;
+    Particle top = Particle(glm::vec3(0.0f), 1.0f);
+    Particle bottom = Particle(glm::vec3(0.0f), 1.0f);
 
-    CapsuleCollider(const glm::vec3& center, float radius, float height, bool custom = false)
-        : center(center), radius(radius), height(height), customSize(custom) {}
+    CapsuleCollider(const glm::vec3& center, float radius, float height, float mass, bool custom = false)
+        : center(center), radius(radius), height(height), customSize(custom), top(center + glm::vec3(0.0f, height * 0.5f, 0.0f), mass), bottom(center - glm::vec3(0.0f, height * 0.5f, 0.0f), mass) {}
 
     glm::vec3 nodeToVec3(YAML::Node node) {
         return glm::vec3(node["x"].as<float>(), node["y"].as<float>(), node["z"].as<float>());
@@ -25,6 +46,8 @@ public:
         }
         radius = node["radius"].as<float>();
         height = node["height"].as<float>();
+        top = Particle(nodeToVec3(node["top"]["position"]), node["top"]["mass"].as<float>());
+        bottom = Particle(nodeToVec3(node["bottom"]["position"]), node["bottom"]["mass"].as<float>());
     }
 
     glm::vec3 getCenter() const { return center; }
@@ -43,11 +66,24 @@ public:
         node["z"] = vector.z;
         return node;
     }
+    YAML::Node nodeParticle(Particle particle)
+    {
+		YAML::Node node;
+		node["position"] = nodeVec3(particle.position);
+		node["predictedPosition"] = nodeVec3(particle.predictedPosition);
+		node["velocity"] = nodeVec3(particle.velocity);
+		node["force"] = nodeVec3(particle.force);
+		node["mass"] = particle.mass;
+		return node;
+	}
+
     YAML::Node serialize() {
         YAML::Node node;
         node["center"] = nodeVec3(center);
         node["radius"] = radius;
         node["height"] = height;
+        node["top"] = nodeParticle(top);
+        node["bottom"] = nodeParticle(bottom);
         return node;
     }
 };

@@ -37,6 +37,7 @@ Scenes:
               y: 19.4657173
               z: 9.08929253
             customSize: false
+            mass: 1.0
           shader:
             vertexShader: ../../../../src/shaders/v_maps.vert
             fragmentShader: ../../../../src/shaders/f_maps.frag
@@ -74,6 +75,7 @@ Scenes:
               y: 14.4835129
               z: 3
             customSize: false
+            mass: 1.0
           shader:
             vertexShader: ../../../../src/shaders/vsTree.vert
             fragmentShader: ../../../../src/shaders/fsTree.frag
@@ -108,6 +110,42 @@ Scenes:
               z: 0.448072523
             radius: 1.36705923
             height: 3.43535995
+            top:
+              position:
+                x: 12.0517015
+                y: 5.321614265
+                z: 0.448072523
+              predictedPosition:
+                x: 12.0517015
+                y: 5.321614265
+                z: 0.448072523
+              velocity:
+                x: 0
+                y: 0
+                z: 0
+              force:
+                x: 0
+                y: 0
+                z: 0
+              mass: 1
+            bottom:
+              position:
+                x: 12.0517015
+                y: 1.886254315
+                z: 0.448072523
+              predictedPosition:
+                x: 12.0517015
+                y: 1.886254315
+                z: 0.448072523
+              velocity:
+                x: 0
+                y: 0
+                z: 0
+              force:
+                x: 0
+                y: 0
+                z: 0
+              mass: 1
           shader:
             vertexShader: ../../../../src/shaders/vs.vert
             fragmentShader: ../../../../src/shaders/fs.frag
@@ -164,6 +202,42 @@ Scenes:
               z: 0
             radius: 1.36705923
             height: 3.43535995
+            top:
+              position:
+                x: 16
+                y: 9.717679975
+                z: 0
+              predictedPosition:
+                x: 16
+                y: 9.717679975
+                z: 0
+              velocity:
+                x: 0
+                y: 0
+                z: 0
+              force:
+                x: 0
+                y: 0
+                z: 0
+              mass: 1
+            bottom:
+              position:
+                x: 16
+                y: 6.282320025
+                z: 0
+              predictedPosition:
+                x: 16
+                y: 6.282320025
+                z: 0
+              velocity:
+                x: 0
+                y: 0
+                z: 0
+              force:
+                x: 0
+                y: 0
+                z: 0
+              mass: 1
           shader:
             vertexShader: ../../../../src/shaders/vs.vert
             fragmentShader: ../../../../src/shaders/fs.frag

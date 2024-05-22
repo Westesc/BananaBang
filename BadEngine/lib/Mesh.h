@@ -89,7 +89,7 @@ public:
         return *capsuleCollider;
     }
 
-    void updateBoundingBox(glm::mat4& modelMatrix) {
+    /*void updateBoundingBox(glm::mat4& modelMatrix) {
         if (boundingBox->customSize) {
             glm::vec3 transformedMin = glm::vec3(modelMatrix * glm::vec4(boundingBox->min, 1.0f));
             glm::vec3 transformedMax = glm::vec3(modelMatrix * glm::vec4(boundingBox->max, 1.0f));
@@ -110,7 +110,7 @@ public:
             // Update bounding box
             boundingBox = new BoundingBox(min, max);
         }
-    }
+    }*/
 
     void updateCapsuleCollider(glm::mat4& modelMatrix) {
         glm::vec3 transformedCenter = glm::vec3(modelMatrix * glm::vec4(capsuleCollider->center, 1.0f));
@@ -121,7 +121,7 @@ public:
         boundingBox = new BoundingBox(customMin, customMax, true);
     }
 
-    void setCapsuleCollider(float radius, float height, glm::vec3 position) {
+    /*void setCapsuleCollider(float radius, float height, glm::vec3 position) {
         if (capsuleCollider != nullptr) {
             capsuleCollider = new CapsuleCollider(capsuleCollider->getCenter(), radius, height, true);
         }
@@ -129,9 +129,9 @@ public:
             calculateBoundingCapsule(position);
             capsuleCollider = new CapsuleCollider(capsuleCollider->getCenter(), radius, height, true);
         }
-    }
+    }*/
 
-    void calculateBoundingBox() {
+    /*void calculateBoundingBox() {
         glm::vec3 min(FLT_MAX);
         glm::vec3 max(-FLT_MAX);
 
@@ -141,9 +141,9 @@ public:
         }
 
         boundingBox = new BoundingBox(min, max);
-    }
+    }*/
 
-    void calculateBoundingCapsule(glm::vec3 position) {
+    /*void calculateBoundingCapsule(glm::vec3 position) {
         float minY = FLT_MAX;
         float maxY = -FLT_MAX;
         float maxRadius = 0.0f;
@@ -156,7 +156,7 @@ public:
         }
         float height = maxY - minY;
         capsuleCollider = new CapsuleCollider(glm::vec3(position.x, (minY + maxY) * 0.5f* 0.1f, position.z), maxRadius* 0.1f, height *0.1f);
-    }
+    }*/
 
     // render the mesh
     void Draw(Shader* shader, std::vector<Texture> texture, glm::mat4* model, bool& isFromFile, bool& rotating, bool& isBlue)

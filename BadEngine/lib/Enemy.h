@@ -16,7 +16,6 @@ public:
 	float timeSpentWalking = 0.f;
 	int sector = 0;
 	EnemyState state = EnemyState::Idle;
-	glm::vec3 velocity = glm::vec3(0.f);
 	std::pair <float, float> velLimits;
 	float timeSinceDirChange = 0.f;
 	Enemy(std::string name, glm::vec3 pos, glm::vec3 scale, glm::vec3 rot, std::pair<float,float> velLimits) : GameObject(name) {

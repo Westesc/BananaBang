@@ -29,6 +29,9 @@ public:
 	bool isVisible = true;
 	BoundingBox* boundingBox = nullptr;
 	CapsuleCollider* capsuleCollider = nullptr;
+	glm::vec3 velocity = glm::vec3(0.f);
+	glm::vec3 predictedPosition = glm::vec3(0.f);
+	float inverseMass = 1.f;
 
 	void setParent(GameObject* Parent);
 	void addChild(GameObject* Child);

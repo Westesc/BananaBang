@@ -301,10 +301,10 @@ int main() {
 	sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition = glm::vec3(4.f, 4.f, 0.f);
 	sm->getActiveScene()->findByName("capsule2")->getTransform()->localPosition = glm::vec3(8.f, 8.f, 0.f);
 	sm->getActiveScene()->findByName("rampBox")->getTransform()->localPosition = glm::vec3(0.f, 5.f, 0.f);
-	sm->getActiveScene()->findByName("box")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box")->getTransform()->localPosition);
-	sm->getActiveScene()->findByName("box2")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box2")->getTransform()->localPosition);
-	sm->getActiveScene()->findByName("capsule")->getModelComponent()->addCollider(2, sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition);
-	sm->getActiveScene()->findByName("capsule2")->getModelComponent()->addCollider(2, sm->getActiveScene()->findByName("capsule2")->getTransform()->localPosition);
+	sm->getActiveScene()->findByName("box")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box")->getTransform()->localPosition,1.0f);
+	sm->getActiveScene()->findByName("box2")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box2")->getTransform()->localPosition, 1.0f);
+	sm->getActiveScene()->findByName("capsule")->getModelComponent()->addCollider(2, sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition, 1.0f);
+	sm->getActiveScene()->findByName("capsule2")->getModelComponent()->addCollider(2, sm->getActiveScene()->findByName("capsule2")->getTransform()->localPosition, 1.0f);
 	sm->getActiveScene()->findByName("box2")->setRotating(true);
 	sm->getActiveScene()->findByName("plane")->setRotating(true);
 	sm->getActiveScene()->findByName("capsule")->setRotating(true);
@@ -511,7 +511,8 @@ int main() {
 		if (sm->getActiveScene()->findByName("player")) {
 			cm.addObject(sm->getActiveScene()->findByName("player"));
 		}
-		cm.checkResolveCollisions(deltaTime);
+		//cm.checkResolveCollisions(deltaTime);
+		cm.stepSimulation(deltaTime);
 		for (auto section : cm.sections) {
 			for (auto object : section->objects) {
 				if (object->localTransform->localPosition.y < 0.0f) {
@@ -599,6 +600,7 @@ int main() {
 			for (int i = 0; i < sectorsPom; i++) {
 				for (int j = 0; j < sectorsPom; j++) {
 					GameObject* planeSector = new GameObject("sector"+std::to_string((i+1)*j));
+					planeSector->inverseMass = 0.0f;
 					planeSector->localTransform->localScale = glm::vec3(5.f, 5.f, 5.f);
 					planeSector->addModelComponent(planeSectormodel);
 					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, 0.f, j * 20*planeSector->localTransform->localScale.z);
@@ -608,11 +610,13 @@ int main() {
 						int treeX = losujLiczbe2()* planeSector->localTransform->localScale.x;
 						int treeZ = losujLiczbe2()* planeSector->localTransform->localScale.z;
 						Tree* tree = new Tree("tree_"+std::to_string(k));
+						tree->inverseMass = 0.0f;
 						tree->addModelComponent(treetrunk);
 						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
 						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
 						tree->addColider(1);
 						GameObject* log = new GameObject("log");
+						log->inverseMass = 0.0f;
 						log->addModelComponent(treelog);
 						log->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX;
 						log->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
@@ -622,6 +626,7 @@ int main() {
 						int branchCount = losujLiczbe(3,8);
 						for (int m = 0; m < branchCount; m++) {
 							GameObject* branch = new GameObject("branch" + std::to_string(m));
+							branch->inverseMass = 0.0f;
 							branch->addModelComponent(treebranch1);
 							branch->localTransform->localPosition.x = planeSector->localTransform->localPosition.x + treeX;
 							branch->localTransform->localPosition.y = float(losujLiczbe((m * 13 / branchCount)+5, ((m + 1) * 13 / branchCount)+5));

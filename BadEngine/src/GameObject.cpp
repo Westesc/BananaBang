@@ -223,13 +223,13 @@ void GameObject::lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 l
 }
 
 void GameObject::addColider(int type) {
-    modelComponent->addCollider(type, localTransform->localPosition);
+    modelComponent->addCollider(type, localTransform->localPosition, 1/inverseMass);
     if (type == 1) {
-		boundingBox = new BoundingBox(glm::vec3(0.f), glm::vec3(0.f));
+		boundingBox = new BoundingBox(glm::vec3(0.f), glm::vec3(0.f), 1/inverseMass);
 		*boundingBox = *modelComponent->boundingBox;
 	}
     else if (type == 2) {
-		capsuleCollider = new CapsuleCollider(glm::vec3(0.f), 0.f, 0.f);
+		capsuleCollider = new CapsuleCollider(glm::vec3(0.f), 0.f, 0.f, 1/inverseMass);
 		*capsuleCollider = *modelComponent->capsuleCollider;
 	}
 }

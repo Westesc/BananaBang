@@ -57,9 +57,10 @@ void AnimateBody::play()
 
 bool AnimateBody::isPlay()
 {
-    return false;
+    return animator->IsPlaying();
 }
 
 void AnimateBody::reset()
 {
+    animator->Reset();
 }

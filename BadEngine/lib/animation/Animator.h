@@ -29,6 +29,13 @@ public:
         if (m_CurrentAnimation)
         {
             m_CurrentTime += m_CurrentAnimation->GetTicksPerSecond() * dt;
+
+            if (m_CurrentTime >= m_CurrentAnimation->GetDuration()) {
+                m_Playing = false;
+                m_Finished = true;
+            }
+
+
             m_CurrentTime = fmod(m_CurrentTime, m_CurrentAnimation->GetDuration());
             CalculateBoneTransform(&m_CurrentAnimation->GetRootNode(), glm::mat4(1.0f));
 
@@ -50,9 +57,27 @@ public:
         m_PreviousBoneMatrices = m_FinalBoneMatrices;
         m_CurrentAnimation = pAnimation;
         m_CurrentTime = 0.0f;
-        m_BlendFactor = 0.0f;
+        m_BlendFactor = 0.8f;
         m_Blending = true;
+        m_Playing = true;
+        m_Finished = false;
+
     }
+
+    bool IsPlaying() const {
+        return m_Playing;
+    }
+
+    bool IsFinished() const {
+        return m_Finished;
+    }
+
+    void Reset() {
+        m_CurrentTime = 0.0f;
+        m_Playing = false;
+        m_Finished = false;
+    }
+
 
     glm::mat4 GetBoneOffset(const std::string& boneName)
     {
@@ -128,6 +153,9 @@ public:
     }
 
 private:
+    bool m_Playing = false;
+    bool m_Finished = false;
+
     void BlendBoneMatrices()
     {
         for (int i = 0; i < m_FinalBoneMatrices.size(); ++i)
@@ -149,7 +177,7 @@ private:
     float m_DeltaTime;
     float m_BlendFactor;
     bool m_Blending;
-    const float m_BlendSpeed = 1.0f;
+    const float m_BlendSpeed = 0.1f;
     glm::vec3 position;
     glm::vec3 lastPosition = glm::vec3(0.f, 0.f, 0.f);
     glm::vec3 deltaPostion = glm::vec3(0.f, 0.f, 0.f);

@@ -211,6 +211,8 @@ int main() {
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 1.15f);
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.3f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
 	pm->addAnimationPlayer(animPlayer);
 
 	Shader* shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");

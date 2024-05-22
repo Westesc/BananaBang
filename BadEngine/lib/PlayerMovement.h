@@ -33,6 +33,8 @@ private:
         walking,
         jump_up,
         air,
+        attack1,
+        dodge,
         climbing
     };
     State state = walking;
@@ -148,12 +150,19 @@ private:
 
     void checkState() {
         if (input->checkAnyKey()) {
-            if (input->checkKey(GLFW_KEY_SPACE) && state != air && state != jump_up && !wasSpacePressed) {
+            if (input->checkKey(GLFW_MOUSE_BUTTON_RIGHT))
+            {
+                state = dodge;
+            }
+            else if (input->checkKey(GLFW_KEY_SPACE) && state != air && state != jump_up && !wasSpacePressed) {
                 animateBody->setActiveAnimation("jumping up");
                 //animateBody->setActiveAnimation("standing");
                 state = jump_up;
                 initialPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
                 // std::cout << glm::to_string(initialPosition) << std::endl;
+            } 
+            else if (input->checkKey(GLFW_MOUSE_BUTTON_LEFT)) {
+                state = attack1;
             }
         }
         else if (state == walking) {
@@ -183,6 +192,20 @@ public:
         if (state == walking) {
             MovePlayer();
             // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
+        }
+        else if (state == attack1) {
+            animateBody->setActiveAnimation("attack1");
+            if (animateBody->isPlay() == false) {
+                state = walking;
+            }
+        }
+        else if (state == dodge) {
+            animateBody->setActiveAnimation("dodge");
+            //currentTurn = 180.f;
+            move();
+            if (animateBody->isPlay() == false) {
+                state = walking;
+            }
         }
         else if (state == jump_up) {
             jump();

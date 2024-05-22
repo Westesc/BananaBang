@@ -8,14 +8,14 @@ public:
 	struct AbalityCoolDown
 	{
 		std::string name;
-		std::float coolDownTime;
-		std::float timeToRefresh;
+		float coolDownTime;
+		float timeToRefresh;
 	}; 
 
 	struct AbilityCount
 	{
 		std::string name;
-		std::int count;
+		int count;
 	};
 
 	std::vector<AbalityCoolDown> abilityCollDown;

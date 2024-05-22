@@ -1,4 +1,5 @@
 #include "../lib/Scene.h"
+
 Scene::Scene(std::string Name) : name(Name) {}
 Scene::~Scene() {
 	for (auto go : gameObjects) {
@@ -20,9 +21,11 @@ Scene::Scene(YAML::Node node) {
 	}
 }
 void Scene::Update(glm::mat4 view, glm::mat4 perspective, float time) {
+	FrameMarkStart("Update");
 	for (auto go : gameObjects) {
 		go->Update(view, perspective, time);
 	}
+	FrameMarkEnd("Update");
 }
 
 void Scene::addObject(GameObject* go) {
@@ -30,20 +33,25 @@ void Scene::addObject(GameObject* go) {
 }
 
 GameObject* Scene::findByName(std::string name) {
+	FrameMarkStart("findByName");
 	for (auto go : gameObjects) {
 		if (go->name == name) {
 			return go;
 		}
 	}
 	return nullptr;
+	FrameMarkEnd("findByName");
 }
 
 void Scene::Draw(glm::mat4 view, glm::mat4 perspective) {
+	//ZoneScopedN("Draw");
+	FrameMarkStart("Draw");
 	for (auto go : gameObjects) {
 		if (go->isVisible) {
 			go->Draw(view, perspective);
 		}
 	}
+	FrameMarkEnd("Draw");
 }
 
 void Scene::checkResolveCollisions(float deltaTime) {

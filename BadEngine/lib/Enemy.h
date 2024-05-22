@@ -28,6 +28,7 @@ public:
 	~Enemy() {}
 
 	void setVel(glm::vec3 direction) {
+		ZoneScopedN("setVel");
 		glm::vec3 directionToTree = glm::normalize(chosenTreePos - localTransform->localPosition);
 		if (glm::dot(direction, directionToTree) < 0.0f) {
 			direction = directionToTree;
@@ -39,6 +40,7 @@ public:
 	}
 
 	void setVel2(std::vector<GameObject*> collisions) {
+		ZoneScopedN("setVel2");
 		glm::vec3 avoid = glm::vec3(0.f);
 		for (auto& collision : collisions) {
 			glm::vec3 toCollision = collision->localTransform->localPosition - localTransform->localPosition;

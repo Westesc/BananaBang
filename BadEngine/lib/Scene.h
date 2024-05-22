@@ -5,6 +5,7 @@
 #include <vector>
 #include <yaml-cpp/yaml.h>
 #include "GameObject.h"
+#include "../thirdparty/tracy/public/tracy/Tracy.hpp"
 
 class Scene {
 public:

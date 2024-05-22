@@ -7,6 +7,7 @@ class Pathfinder {
 public:
 	std::vector<std::pair<int,glm::vec2>> trees;
 	void sortTrees() {
+		ZoneScopedN("sortTrees");
 		for (int i = 0; i< trees.size(); i++) {
 			for (int j = 0; j < trees.size(); j++) {
 				if (glm::min(trees[i].second,trees[j].second) == trees[j].second) {
@@ -35,6 +36,7 @@ public:
 	}
 
 	glm::vec3 decideDestination(glm::vec3 chosenTreePos, glm::vec3 position, int sector) {
+		ZoneScopedN("decideDestination");
 		std::vector<glm::vec2> treePositions;
 		for (auto tree : trees) {
 			if (tree.first == sector) {

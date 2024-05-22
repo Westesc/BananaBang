@@ -13,6 +13,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 include(global_settings)
 # ---- Dependencies ----
 add_subdirectory(thirdparty)
+#add_subdirectory(thirdparty/tracy)
 
 # ---- Main project's files ----
 add_subdirectory(src)

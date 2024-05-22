@@ -171,6 +171,7 @@ bool isCapsuleInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, CapsuleCo
 }
 
 void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const std::vector<GameObject*>& objects) {
+	FrameMarkStart("Frustum culling");
 	for (auto object : objects) {
 		if (object->boundingBox != nullptr) {
 			bool isVisible = isBoxInFrustum(frustumPlanes, *object->boundingBox, object->getTransform()->getMatrix());
@@ -181,11 +182,11 @@ void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const 
 			object->setVisible(isVisible);
 		}*/
 	}
+	FrameMarkEnd("Frustum culling");
 }
 
 
 int main() {
-	ZoneScoped;
 	Start();
 	int ilosc = 0;
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -333,6 +334,7 @@ int main() {
 
 	Pathfinder* pathfinder = new Pathfinder();
 	while (!glfwWindowShouldClose(window)) {
+		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
 		}

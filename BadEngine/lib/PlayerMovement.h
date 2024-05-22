@@ -31,6 +31,7 @@ private:
 	State state = walking;
 	void MovePlayer(float speed)
 	{
+		ZoneScopedN("MovePlayer");
 		if (input->checkAnyKey() && deltaTime2 > 0.02f)
 		{
 			deltaTime2 = 0.f;

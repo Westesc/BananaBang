@@ -11,6 +11,7 @@ glm::mat4 Camera::getViewMatrix() {
 }
 
 void Camera::updateCamera(glm::vec2 vector) {
+	FrameMarkStart("updateCamera");
 	glm::vec3 Front;
 	transform->localRotation += glm::vec3(vector.x/300,-vector.y/300, 0);
 	if(transform->localRotation.y>1.56)
@@ -23,7 +24,7 @@ void Camera::updateCamera(glm::vec2 vector) {
 	front = glm::normalize(Front);
 	right = glm::normalize(glm::cross(front, glm::vec3(0, 1, 0)));
 	up = glm::normalize(glm::cross(right, front));
-	
+	FrameMarkEnd("updateCamera");
 }
 
 void Camera::ProcessKeyboard(Camera_Movement direction, float deltaTime)

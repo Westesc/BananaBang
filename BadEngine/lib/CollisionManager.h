@@ -30,6 +30,7 @@ public:
 	}
 
 	void addObject(GameObject* go) { //TODO: dla obiektów, które zostan¹ dodane do sektora, sprawdziæ tylko przylegaj¹ce sektory
+		ZoneScopedN("AddObject");
 		for (auto section : sections) {
 			auto it = std::find(section->objects.begin(), section->objects.end(), go);
 			if (it != section->objects.end()) {
@@ -42,6 +43,7 @@ public:
 	}
 
 	void addStaticObject(GameObject* go) {
+		ZoneScopedN("AddStaticObject");
 		for (auto section : sections) {
 			if (section->checkCollision(go)) {
 				section->staticObjects.push_back(go);
@@ -50,6 +52,7 @@ public:
 	}
 
 	void addObjectPredict(GameObject* go) {
+		ZoneScopedN("AddObjectPredict");
 		for (auto section : sections) {
 			if (section->checkCollision(go)) {
 				section->predictObject = go;
@@ -61,6 +64,7 @@ public:
 	}
 
 	std::vector<GameObject*> checkPrediction() {
+		ZoneScopedN("CheckPrediction");
 		std::vector<GameObject*> collisions;
 		for (auto section : sections) {
 			if (section->predictObject != nullptr) {
@@ -80,6 +84,7 @@ public:
 	}
 
 	void checkResolveCollisions(float deltaTime) {
+		ZoneScopedN("CheckResolveCollisions");
 		for (auto section : sections) {
 			for (int i = 0; i < section->objects.size(); i++) {
 				for (int j = 0; j < section->staticObjects.size(); j++) {

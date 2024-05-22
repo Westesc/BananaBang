@@ -171,7 +171,7 @@ bool isCapsuleInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, CapsuleCo
 }
 
 void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const std::vector<GameObject*>& objects) {
-	FrameMarkStart("Frustum culling");
+	ZoneTransientN(zoneName, "performFrustumCulling", true);
 	for (auto object : objects) {
 		if (object->boundingBox != nullptr) {
 			bool isVisible = isBoxInFrustum(frustumPlanes, *object->boundingBox, object->getTransform()->getMatrix());
@@ -182,7 +182,6 @@ void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const 
 			object->setVisible(isVisible);
 		}*/
 	}
-	FrameMarkEnd("Frustum culling");
 }
 
 

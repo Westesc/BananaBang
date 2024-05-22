@@ -351,6 +351,7 @@ int main() {
 
 	sm->loadScene("first");
 	sm->activeScene = sm->scenes.at(3);
+	sm->getActiveScene()->addObject(anim);
 	//std::cout << "player:" << sm->getActiveScene()->findByName("box") << std::endl;
 	//sm->getActiveScene()->findByName("tree_1")->addChild(new GameObject("log"));
 	while (!glfwWindowShouldClose(window)) {
@@ -379,6 +380,7 @@ int main() {
 		}
 		//animacje
 		animPlayer->UpdateAnimation(deltaTime);
+		sm->getActiveScene()->findByName("skydome")->timeSetting(time / 7, glm::vec2(10, 10));
 
 		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
 		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
@@ -654,14 +656,21 @@ int main() {
 					}
 				}
 				sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
-
 			}
 			
+			GameObject* anim = new GameObject("player");
+			animodel->SetShader(shaderAnimation);
+			anim->addModelComponent(animodel);
+			sm->getActiveScene()->addObject(anim);
+			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 1.f, 0.f));
+
 			GameObject* skydome = new GameObject("skydome");
+			//skydomeModel->SetShader(skydomeShader);
 			skydome->addModelComponent(skydomeModel);
 			skydome->getTransform()->localScale = glm::vec3(100.f);
 			sm->getActiveScene()->addObject(skydome);
 			sm->getActiveScene()->addObject(HPcount);
+			sm->getActiveScene()->findByName("skydome")->timeSetting(time / 7, glm::vec2(10, 10));
 		}
 		while (input->IsKeobarodAction(window)) {
 			input->getMessage(key, action);

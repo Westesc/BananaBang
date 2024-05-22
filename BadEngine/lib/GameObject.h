@@ -50,7 +50,7 @@ public:
 	YAML::Node serialize();
 	void setVisible(bool visible);
 	void lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 lightColor);
-
+	void timeSetting(float time, glm::vec2 iResolution);
 	void addColider();
 
 };

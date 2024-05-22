@@ -454,6 +454,14 @@ public:
         }
     }
 
+    void Draw(Shader* shader)
+    {
+        for (unsigned int i = 0; i < meshes.size(); i++)
+        {
+            meshes[i]->Draw(shader, textures_loaded, Transform, isFromFile, rotating, isBlue);
+        }
+    }
+
     void DrawBoundingBox(const BoundingBox& bbox) {
         glm::vec3 vertices[] = {
             glm::vec3(bbox.min.x, bbox.min.y, bbox.min.z),

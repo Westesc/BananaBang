@@ -4,23 +4,6 @@
 #include "Collider.h"
 #include "Particle.h"
 
-struct BoxConstraint {
-    Particle* p1;
-    Particle* p2;
-    float restLength;
-
-    BoxConstraint(Particle* particle1, Particle* particle2)
-        : p1(particle1), p2(particle2), restLength(glm::distance(particle1->position, particle2->position)) {}
-
-    void solve() {
-        glm::vec3 delta = p1->predictedPosition - p2->predictedPosition;
-        float distance = glm::length(delta);
-        glm::vec3 correction = (distance - restLength) * delta / distance * 0.5f;
-        p1->predictedPosition -= correction;
-        p2->predictedPosition += correction;
-    }
-};
-
 class BoundingBox : public Collider {
 public:
     glm::vec3 min;
@@ -29,6 +12,7 @@ public:
     std::vector<glm::vec3> vertices;
     bool isTriggerOnly = false;
     std::vector<Particle> particles;
+    std::vector<DistanceConstraint> constraints;
 
     glm::vec3 nodeToVec3(YAML::Node node) {
         return glm::vec3(node["x"].as<float>(), node["y"].as<float>(), node["z"].as<float>());

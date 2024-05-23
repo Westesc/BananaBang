@@ -6,23 +6,6 @@
 #include "Collider.h"
 #include "Particle.h"
 
-struct CapsuleConstraint {
-    Particle* p1;
-    Particle* p2;
-    float radius;
-
-    CapsuleConstraint(Particle* particle1, Particle* particle2, float radius)
-        : p1(particle1), p2(particle2), radius(radius) {}
-
-    void solve() {
-        glm::vec3 delta = p1->predictedPosition - p2->predictedPosition;
-        float distance = glm::length(delta);
-        glm::vec3 correction = (distance - radius) * delta / distance * 0.5f;
-        p1->predictedPosition -= correction;
-        p2->predictedPosition += correction;
-    }
-};
-
 class CapsuleCollider : public Collider {
 public:
     glm::vec3 center;
@@ -32,6 +15,7 @@ public:
     bool isTriggerOnly = false;
     Particle top = Particle(glm::vec3(0.0f), 1.0f);
     Particle bottom = Particle(glm::vec3(0.0f), 1.0f);
+    std::vector<DistanceConstraint> constraints;
 
     CapsuleCollider(const glm::vec3& center, float radius, float height, float mass, bool custom = false)
         : center(center), radius(radius), height(height), customSize(custom), top(center + glm::vec3(0.0f, height * 0.5f, 0.0f), mass), bottom(center - glm::vec3(0.0f, height * 0.5f, 0.0f), mass) {}

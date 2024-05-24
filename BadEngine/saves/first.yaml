@@ -38,6 +38,7 @@ Scenes:
               z: 9.08929253
             customSize: false
             mass: 1.0
+            dampingFactor: 1.0
           shader:
             vertexShader: ../../../../src/shaders/v_maps.vert
             fragmentShader: ../../../../src/shaders/f_maps.frag
@@ -76,6 +77,7 @@ Scenes:
               z: 3
             customSize: false
             mass: 1.0
+            dampingFactor: 1.0
           shader:
             vertexShader: ../../../../src/shaders/vsTree.vert
             fragmentShader: ../../../../src/shaders/fsTree.frag
@@ -146,6 +148,7 @@ Scenes:
                 y: 0
                 z: 0
               mass: 1
+            dampingFactor: 1.0
           shader:
             vertexShader: ../../../../src/shaders/vs.vert
             fragmentShader: ../../../../src/shaders/fs.frag
@@ -238,6 +241,7 @@ Scenes:
                 y: 0
                 z: 0
               mass: 1
+            dampingFactor: 1.0
           shader:
             vertexShader: ../../../../src/shaders/vs.vert
             fragmentShader: ../../../../src/shaders/fs.frag

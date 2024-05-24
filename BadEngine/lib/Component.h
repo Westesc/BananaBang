@@ -1,9 +1,9 @@
-#ifndef Component_H
-#define Component_H
+#ifndef COMPONENT_H
+#define COMPONENT_H
 
 class Component {
 public:
-	bool enable;
+	bool enable = true;
 };
 
 #endif

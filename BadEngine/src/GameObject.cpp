@@ -233,3 +233,53 @@ void GameObject::addColider(int type) {
 		*capsuleCollider = *modelComponent->capsuleCollider;
 	}
 }
+
+void GameObject::predictPosition(float deltaTime) {
+	this->predictedPosition = localTransform->localPosition + velocity * deltaTime;
+    if (boundingBox) {
+        for (auto particle : boundingBox->particles) {
+			particle->PredictPosition(deltaTime);
+		}
+    }
+    else if (capsuleCollider) {
+        capsuleCollider->top->PredictPosition(deltaTime);
+        capsuleCollider->bottom->PredictPosition(deltaTime);
+    }
+}
+
+void GameObject::updateVelocity(float deltaTime) {
+    velocity += deltaTime * inverseMass * glm::vec3(0.0f, -9.81f, 0.0f);
+	if (boundingBox) {
+		for (auto& particle : boundingBox->particles) {
+			particle->velocity += deltaTime * particle->inverseMass * glm::vec3(0.0f, -9.81f, 0.0f);
+		}
+	}
+	else if (capsuleCollider) {
+		capsuleCollider->top->velocity += deltaTime * capsuleCollider->top->inverseMass * glm::vec3(0.0f, -9.81f, 0.0f);
+		capsuleCollider->bottom->velocity += deltaTime * capsuleCollider->bottom->inverseMass * glm::vec3(0.0f, -9.81f, 0.0f);
+	}
+}
+
+void GameObject::calculateOffset() {
+    if (boundingBox) {
+        colliderOffset = localTransform->localPosition - boundingBox->center();
+    }
+    else if (capsuleCollider) {
+		colliderOffset = localTransform->localPosition - capsuleCollider->center;
+	}
+}
+
+void GameObject::updatePredictedPosition() {
+    if (boundingBox) {
+        glm::vec3 center = glm::vec3(0.0f);
+        for (int i = 0; i < 8; ++i) {
+            center += boundingBox->particles[i]->predictedPosition;
+        }
+        center /= 8.0f;
+        predictedPosition = center + colliderOffset;
+    }
+    else if (capsuleCollider) {
+        glm::vec3 center = (capsuleCollider->top->predictedPosition + capsuleCollider->bottom->predictedPosition) / 2.0f;
+        predictedPosition = center + colliderOffset;
+    }
+}

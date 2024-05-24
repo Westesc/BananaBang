@@ -1,5 +1,5 @@
-#ifndef GameObject_H
-#define GameObject_H
+#ifndef GAMEOBJECT_H
+#define GAMEOBJECT_H
 
 #include <string>
 #include <vector>
@@ -32,6 +32,8 @@ public:
 	glm::vec3 velocity = glm::vec3(0.f);
 	glm::vec3 predictedPosition = glm::vec3(0.f);
 	float inverseMass = 1.f;
+	float dampingFactor = 1.f;
+	glm::vec3 colliderOffset = glm::vec3(0.f);
 
 	void setParent(GameObject* Parent);
 	void addChild(GameObject* Child);
@@ -52,6 +54,10 @@ public:
 	void setVisible(bool visible);
 	void lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 lightColor);
 	void addColider(int type);
+	void predictPosition(float deltaTime);
+	void updateVelocity(float deltaTime);
+	void calculateOffset();
+	void updatePredictedPosition();
 };
 
 #endif

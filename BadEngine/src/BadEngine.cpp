@@ -32,6 +32,7 @@
 #include "../lib/Pathfinder.h"
 #include "../lib/Enemy.h"
 #include "../lib/Tree.h"
+#include "../lib/PBD.h"
 
 //bool test = true;
 bool test = false;
@@ -332,6 +333,7 @@ int main() {
 	//sm->getActiveScene()->findByName("tree_1")->addChild(new GameObject("log"));
 
 	Pathfinder* pathfinder = new Pathfinder();
+	PBDManager* pbd = new PBDManager(10);
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -391,22 +393,28 @@ int main() {
 
 		if (sm->getActiveScene()->findByName("player")) {
 			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+				sm->getActiveScene()->findByName("player")->velocity+=glm::vec3(0.0f, 0.0f, boxSpeed);
 			}
 			if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, 0.0f, -boxSpeed);
 			}
 			if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-				sm->getActiveScene()->findByName("player")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(-boxSpeed, 0.0f, 0.0f);
 			}
 			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-				sm->getActiveScene()->findByName("player")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(boxSpeed, 0.0f, 0.0f);
 			}
 			if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, boxSpeed, 0.0f);
 			}
 			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-				sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
+				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, -boxSpeed, 0.0f);
 			}
 		}
 
@@ -473,7 +481,7 @@ int main() {
 							cm.addObjectPredict(enemy);
 							enemy->setVel2(cm.checkPrediction());
 							enemy->Move(-tmpMove * deltaTime);
-							enemy->Move(glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z) * deltaTime);
+							//enemy->Move(glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z) * deltaTime);
 							if ((glm::any(glm::isnan(enemy->localTransform->localPosition)) || glm::any(glm::isinf(enemy->localTransform->localPosition)))) {
 								enemy->localTransform->localPosition = glm::vec3(5.0f);
 							}
@@ -512,7 +520,7 @@ int main() {
 			cm.addObject(sm->getActiveScene()->findByName("player"));
 		}
 		//cm.checkResolveCollisions(deltaTime);
-		cm.stepSimulation(deltaTime);
+		cm.simulate(pbd, deltaTime);
 		for (auto section : cm.sections) {
 			for (auto object : section->objects) {
 				if (object->localTransform->localPosition.y < 0.0f) {
@@ -615,22 +623,12 @@ int main() {
 						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
 						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
 						tree->addColider(1);
-						for (int n = 0; n < 8; n++) {
-							for (int o = n + 1; o < 8; o++) {
-								tree->boundingBox->constraints.push_back(DistanceConstraint(n, o));
-							}
-						}
 						GameObject* log = new GameObject("log");
 						log->inverseMass = 0.0f;
 						log->addModelComponent(treelog);
 						log->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX;
 						log->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
 						log->addColider(1);
-						for (int n = 0; n < 8; n++) {
-							for (int o = n + 1; o < 8; o++) {
-								log->boundingBox->constraints.push_back(DistanceConstraint(i, j));
-							}
-						}
 						tree->addChild(log);
 						planeSector->addChild(tree);
 						int branchCount = losujLiczbe(3,8);
@@ -648,11 +646,6 @@ int main() {
 							//branch->localTransform->localRotation.x =losujLiczbe(10,45) ;
 							//branch->localTransform->localRotation.z = losujLiczbe(0, 360);
 							branch->addColider(1);
-							for (int n = 0; n < 8; n++) {
-								for (int o = n + 1; o < 8; o++) {
-									branch->boundingBox->constraints.push_back(DistanceConstraint(i, j));
-								}
-							}
 							//std::cout << branch->localTransform->localRotation.x << std::endl;
 							log->addChild(branch);
 						}
@@ -674,11 +667,6 @@ int main() {
 			player->localTransform->localPosition = glm::vec3(0.f);
 			player->localTransform->localScale = glm::vec3(0.5f);
 			player->addColider(1);
-			for (int i = 0; i < 8; i++) {
-				for (int j = i + 1; j < 8; j++) {
-					player->boundingBox->constraints.push_back(DistanceConstraint(i, j));
-				}
-			}
 			sm->getActiveScene()->addObject(player);
 				//sm->saveScene("first");
 			buttonPressed = false;
@@ -788,7 +776,6 @@ int main() {
 			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(0.f,5.f,0.f), glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 14.f));
 			enemy->addModelComponent(enemyModel);
 			enemy->addColider(2);
-			enemy->capsuleCollider->constraints.push_back(DistanceConstraint(0, 1));
 			sm->getActiveScene()->addObject(enemy);
 			cm.addObject(enemy);
 			spawnedEnemies++;

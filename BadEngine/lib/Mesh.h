@@ -1,5 +1,5 @@
-#ifndef Mesh_H
-#define Mesh_H
+#ifndef MESH_H
+#define MESH_H
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/glm.hpp>

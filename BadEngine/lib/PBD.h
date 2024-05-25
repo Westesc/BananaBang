@@ -4,6 +4,7 @@
 #include "Component.h"
 #include "../thirdparty/tracy/public/tracy/Tracy.hpp"
 #include "Section.h"
+#include <string>
 
 class PBDManager {
 public:
@@ -36,7 +37,7 @@ public:
 							positions.push_back(particle->predictedPosition);
 						}
                         for (DistanceConstraint* constraint : object->boundingBox->constraints) {
-							constraint->project(positions, object->boundingBox->particles[0]->mass);
+							constraint->project(positions, object->boundingBox->particles[0]->inverseMass);
 						}
                         object->updatePredictedPosition();
                         glm::vec3 displacement = object->predictedPosition - object->getTransform()->localPosition;
@@ -49,8 +50,8 @@ public:
                         }
                         for (int i = 0; i < 8; i++) {
                             object->boundingBox->particles[i]->position = object->boundingBox->particles[i]->predictedPosition;
-                            object->boundingBox->particles[i]->position.y -= belowGround;
-                            object->boundingBox->vertices[i].y -= belowGround;
+                            object->boundingBox->particles[i]->position.y += belowGround;
+                            object->boundingBox->vertices[i].y += belowGround;
                         }
                     }
                     else if (object->capsuleCollider) {
@@ -59,7 +60,7 @@ public:
                             object->capsuleCollider->bottom->predictedPosition
                         };
                         for (CapsuleConstraint* constraint : object->capsuleCollider->constraints) {
-                            constraint->project(positions, object->capsuleCollider->top->mass);
+                            constraint->project(positions, object->capsuleCollider->top->inverseMass);
                         }
                         object->updatePredictedPosition();
                         glm::vec3 displacement = object->predictedPosition - object->getTransform()->localPosition;
@@ -70,11 +71,15 @@ public:
                             belowGround = -object->getTransform()->localPosition.y;
                             object->getTransform()->localPosition.y = 0.0f;
                         }
+                        if (object->name.starts_with("enemy") && object->getTransform()->localPosition.y < 5.0f) {
+                            belowGround = 5.0f - object->getTransform()->localPosition.y;
+                            object->getTransform()->localPosition.y = 5.0f;
+                        }
                         object->capsuleCollider->top->position = object->capsuleCollider->top->predictedPosition;
-                        object->capsuleCollider->top->position.y -= belowGround;
+                        object->capsuleCollider->top->position.y += belowGround;
                         object->capsuleCollider->bottom->position = object->capsuleCollider->bottom->predictedPosition;
-                        object->capsuleCollider->bottom->position.y -= belowGround;
-                        object->capsuleCollider->center.y -= belowGround;
+                        object->capsuleCollider->bottom->position.y += belowGround;
+                        object->capsuleCollider->center.y += belowGround;
                     }
 				}
 			}

@@ -275,11 +275,11 @@ void GameObject::updatePredictedPosition() {
         for (int i = 0; i < 8; ++i) {
             center += boundingBox->particles[i]->predictedPosition;
         }
-        center /= 8.0f;
+        center *= 0.125f;
         predictedPosition = center + colliderOffset;
     }
     else if (capsuleCollider) {
-        glm::vec3 center = (capsuleCollider->top->predictedPosition + capsuleCollider->bottom->predictedPosition) / 2.0f;
+        glm::vec3 center = (capsuleCollider->top->predictedPosition + capsuleCollider->bottom->predictedPosition) * 0.5f;
         predictedPosition = center + colliderOffset;
     }
 }

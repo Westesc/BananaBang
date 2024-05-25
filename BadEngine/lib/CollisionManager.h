@@ -340,12 +340,12 @@ public:
 		for (auto section : sections) {
 			for (int i = 0; i < section->objects.size(); i++) {
 				for (int j = 0; j < section->staticObjects.size(); j++) {
-					if (checkCollision(section->objects.at(i), section->staticObjects.at(j))) {
+					if (checkCollisionParticle(section->objects.at(i), section->staticObjects.at(j))) {
 						resolveCollisionStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
 					}
 				}
 				for (int j = i + 1; j < section->objects.size(); j++) {
-					if (checkCollision(section->objects.at(i), section->objects.at(j))) {
+					if (checkCollisionParticle(section->objects.at(i), section->objects.at(j))) {
 						resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
 					}
 				}

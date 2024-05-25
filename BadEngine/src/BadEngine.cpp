@@ -158,13 +158,13 @@ bool isBoxInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, BoundingBox& 
 	return true;
 }
 
-bool isCapsuleInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, CapsuleCollider* capsule, glm::mat4* transform) {
+bool isCapsuleInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, CapsuleCollider& capsule, glm::mat4 transform) {
 	for (const auto& plane : frustumPlanes) {
-		float distance = glm::dot(glm::vec3(plane), glm::vec3(*transform * glm::vec4(capsule->center, 1.0f))) + plane.w;
-		if (distance <= -capsule->radius) {
+		float distance = glm::dot(glm::vec3(plane), glm::vec3(transform * glm::vec4(capsule.center, 1.0f))) + plane.w;
+		if (distance <= -capsule.radius) {
 			return false;
 		}
-		if (distance >= capsule->height + capsule->radius) {
+		if (distance >= capsule.height + capsule.radius) {
 			continue;
 		}
 	}
@@ -174,14 +174,15 @@ bool isCapsuleInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, CapsuleCo
 void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const std::vector<GameObject*>& objects) {
 	ZoneTransientN(zoneName, "performFrustumCulling", true);
 	for (auto object : objects) {
-		if (object->boundingBox != nullptr) {
+		if (object->boundingBox) {
 			bool isVisible = isBoxInFrustum(frustumPlanes, *object->boundingBox, object->getTransform()->getMatrix());
 			object->setVisible(isVisible);
 		}
-		/*else if (object->getModelComponent()->capsuleCollider != nullptr) {
-			bool isVisible = isCapsuleInFrustum(frustumPlanes, object->getModelComponent()->capsuleCollider, object->getModelComponent()->getTransform());
+		else if (object->capsuleCollider) {
+			bool isVisible = isCapsuleInFrustum(frustumPlanes, *object->capsuleCollider, object->getTransform()->getMatrix());
 			object->setVisible(isVisible);
-		}*/
+		}
+		performFrustumCulling(frustumPlanes, object->children);
 	}
 }
 
@@ -416,7 +417,6 @@ int main() {
 				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, -boxSpeed, 0.0f);
 			}
-			std::cout<< glm::to_string(sm->getActiveScene()->findByName("player")->getTransform()->localPosition) << std::endl;
 		}
 
 		if (sm->getActiveScene()->findByName("rampBox")) {
@@ -518,25 +518,15 @@ int main() {
 		if (sm->getActiveScene()->findByName("player")) {
 			cm.addObject(sm->getActiveScene()->findByName("player"));
 		}
-		//cm.checkResolveCollisions(deltaTime);
 		cm.simulate(pbd, deltaTime);
-		for (auto section : cm.sections) {
-			for (auto object : section->objects) {
-				if (object->localTransform->localPosition.y < 0.0f) {
-					if (object->name.starts_with("enemy")) {
-						object->localTransform->localPosition.y = 5.0f;
-					}
-					else {
-						object->localTransform->localPosition.y = 0.0f;
-					}
-				}
-			}
-		}
-		performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
+		//performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
 		if (frustumTest) {
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 				if (sm->getActiveScene()->gameObjects.at(i)->isVisible) {
 					std::cout << sm->getActiveScene()->gameObjects.at(i)->name << " " << std::endl;
+					for (int j = 0; j < sm->getActiveScene()->gameObjects.at(i)->children.size(); j++) {
+						std::cout << sm->getActiveScene()->gameObjects.at(i)->children.at(j)->name << " " << std::endl;
+					}
 				}
 			}
 		}

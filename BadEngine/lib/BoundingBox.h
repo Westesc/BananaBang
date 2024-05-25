@@ -2,7 +2,8 @@
 #define BOUNDINGBOX_H
 
 #include "Collider.h"
-#include "PBD.h"
+#include "Particle.h"
+#include "Constraints.h"
 
 class BoundingBox : public Collider {
 public:
@@ -28,7 +29,7 @@ public:
         vertices.push_back(glm::vec3(min.x, max.y, max.z));
         vertices.push_back(glm::vec3(max.x, min.y, max.z));
         vertices.push_back(glm::vec3(max.x, max.y, min.z));
-        for (auto vertex : vertices) {
+        for (auto& vertex : vertices) {
 			particles.push_back(new Particle(vertex, mass, 1.0f));
 		}
         addConstraints();
@@ -60,7 +61,7 @@ public:
         vertices.push_back(glm::vec3(min.x, max.y, max.z));
         vertices.push_back(glm::vec3(max.x, min.y, max.z));
         vertices.push_back(glm::vec3(max.x, max.y, min.z));
-        for (auto vertex : vertices) {
+        for (auto& vertex : vertices) {
             particles.push_back(new Particle(vertex, node["mass"].as<float>(), node["dampingFactor"].as<float>()));
         }
     }

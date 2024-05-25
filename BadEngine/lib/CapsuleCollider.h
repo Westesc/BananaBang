@@ -2,9 +2,6 @@
 #define CAPSULECOLLIDER_H
 
 #include <yaml-cpp/yaml.h>
-#include "Serialize.h"
-#include "Collider.h"
-#include "PBD.h"
 
 class CapsuleCollider : public Collider {
 public:

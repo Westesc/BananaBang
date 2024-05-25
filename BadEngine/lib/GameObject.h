@@ -1,11 +1,8 @@
 #ifndef GAMEOBJECT_H
 #define GAMEOBJECT_H
 
-#include <string>
-#include <vector>
 #include <yaml-cpp/yaml.h>
 #include "Transform.h"
-#include "Component.h"
 #include "Model.h"
 
 class GameObject {

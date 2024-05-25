@@ -416,6 +416,7 @@ int main() {
 				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, -boxSpeed, 0.0f);
 			}
+			std::cout<< glm::to_string(sm->getActiveScene()->findByName("player")->getTransform()->localPosition) << std::endl;
 		}
 
 		if (sm->getActiveScene()->findByName("rampBox")) {
@@ -481,7 +482,6 @@ int main() {
 							cm.addObjectPredict(enemy);
 							enemy->setVel2(cm.checkPrediction());
 							enemy->Move(-tmpMove * deltaTime);
-							//enemy->Move(glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z) * deltaTime);
 							if ((glm::any(glm::isnan(enemy->localTransform->localPosition)) || glm::any(glm::isinf(enemy->localTransform->localPosition)))) {
 								enemy->localTransform->localPosition = glm::vec3(5.0f);
 							}
@@ -490,7 +490,6 @@ int main() {
 							if (enemy->timeSpentWalking > 15.f) {
 								enemy->chosenTreePos = pathfinder->decideInitalDestination(enemy->sector);
 								enemy->timeSpentWalking = 0.f;
-								//enemy->velocity = glm::vec3(0.0f);
 							}
 						}
 						else if (enemy->state == EnemyState::Walking) {

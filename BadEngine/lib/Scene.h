@@ -18,7 +18,7 @@ public:
 	void addObject(GameObject* go);
 	GameObject* findByName(std::string name);
 	void Update(glm::mat4 view, glm::mat4 perspective, float time);
-	void checkResolveCollisions(float deltaTime);
+	//void checkResolveCollisions(float deltaTime);
 	void Draw(glm::mat4 view, glm::mat4 perspective);
 	YAML::Node serialize();
 

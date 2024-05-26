@@ -333,47 +333,72 @@ public:
 		return displacement;
 	}
 
-	void simulate(PBDManager* pbd, float deltaTime) {
+	void simulate(float deltaTime) {
 		ZoneScopedN("simulate");
-
-		pbd->simulateB4Collisions(sections, deltaTime);
 		for (auto section : sections) {
 			for (int i = 0; i < section->objects.size(); i++) {
 				for (int j = 0; j < section->staticObjects.size(); j++) {
-					if (checkCollisionParticle(section->objects.at(i), section->staticObjects.at(j))) {
-						resolveCollisionStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
+					if (checkCollisionPBDStatic(section->objects.at(i), section->staticObjects.at(j))) {
+						separateStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
+						//resolveCollisionStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
 					}
 				}
 				for (int j = i + 1; j < section->objects.size(); j++) {
-					if (checkCollisionParticle(section->objects.at(i), section->objects.at(j))) {
-						resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
+					if (checkCollisionPBD(section->objects.at(i), section->objects.at(j))) {
+						separate(section->objects.at(i), section->objects.at(j));
+						if (section->objects.at(i)->name.starts_with("enemy") && section->objects.at(j)->name.starts_with("enemy") &&
+							glm::distance(section->objects.at(i)->getTransform()->predictedPosition, section->objects.at(j)->getTransform()->predictedPosition) < section->objects.at(j)->capsuleCollider->radius * section->objects.at(j)->getTransform()->localScale.x) {
+							auto object = section->objects.at(i);
+							object->getTransform()->predictedPosition += glm::vec3(object->velocity.z,object->velocity.y, -object->velocity.x) * deltaTime;
+						}
+						//resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
 					}
 				}
 			}
 		}
-		pbd->simulateAfterCollisions(sections, deltaTime);
 	}
 
-	bool checkCollisionParticle(GameObject* first, GameObject* second) {
+	bool checkCollisionPBD(GameObject* first, GameObject* second) {
 		if (first->boundingBox) {
 			if (second->boundingBox) {
-				return checkBoundingBoxParticleCollision(first->boundingBox, second->boundingBox, first->getTransform()->getMatrix(), second->getTransform()->getMatrix());
+				return checkBoundingBoxPBDCollision(first->boundingBox, second->boundingBox, first->getTransform()->getPredictedMatrix(), second->getTransform()->getPredictedMatrix());
 			}
 			else if (second->capsuleCollider) {
-				return checkBoxCapsuleParticleCollision(first->boundingBox, second->capsuleCollider, first->getTransform()->getMatrix(), second->getTransform()->getMatrix());
+				return checkBoxCapsulePBDCollision(first->boundingBox, second->capsuleCollider, first->getTransform()->getPredictedMatrix(), second->getTransform()->getPredictedMatrix());
 			}
 		}
 		else if (first->capsuleCollider) {
 			if (second->boundingBox) {
-				return checkBoxCapsuleParticleCollision(second->boundingBox, first->capsuleCollider, second->getTransform()->getMatrix(), first->getTransform()->getMatrix());
+				return checkBoxCapsulePBDCollision(second->boundingBox, first->capsuleCollider, second->getTransform()->getPredictedMatrix(), first->getTransform()->getPredictedMatrix());
 			}
 			else if (second->capsuleCollider) {
-				return checkCapsuleParticleCollision(first->capsuleCollider, second->capsuleCollider, first->getTransform()->getMatrix(), second->getTransform()->getMatrix());
+				return checkCapsulePBDCollision(first->capsuleCollider, second->capsuleCollider, first->getTransform()->getPredictedMatrix(), second->getTransform()->getPredictedMatrix());
 			}
 		}
+		return false;
 	}
 
-	bool checkBoundingBoxParticleCollision(const BoundingBox* box, const BoundingBox* other, const glm::mat4& transform, const glm::mat4& otherTransform) {
+	bool checkCollisionPBDStatic(GameObject* first, GameObject* second) {
+		if (first->boundingBox) {
+			if (second->boundingBox) {
+				return checkBoundingBoxPBDCollision(first->boundingBox, second->boundingBox, first->getTransform()->getPredictedMatrix(), second->getTransform()->getMatrix());
+			}
+			else if (second->capsuleCollider) {
+				return checkBoxCapsulePBDCollision(first->boundingBox, second->capsuleCollider, first->getTransform()->getPredictedMatrix(), second->getTransform()->getMatrix());
+			}
+		}
+		else if (first->capsuleCollider) {
+			if (second->boundingBox) {
+				return checkBoxCapsulePBDCollision(second->boundingBox, first->capsuleCollider, second->getTransform()->getMatrix(), first->getTransform()->getPredictedMatrix());
+			}
+			else if (second->capsuleCollider) {
+				return checkCapsulePBDCollision(first->capsuleCollider, second->capsuleCollider, first->getTransform()->getPredictedMatrix(), second->getTransform()->getMatrix());
+			}
+		}
+		return false;
+	}
+
+	bool checkBoundingBoxPBDCollision(const BoundingBox* box, const BoundingBox* other, const glm::mat4& transform, const glm::mat4& otherTransform) {
 		glm::vec3 vertices1[] = {
 			glm::vec3(transform * glm::vec4(box->particles.at(0)->predictedPosition, 1.0f)),
 			glm::vec3(transform * glm::vec4(box->particles.at(1)->predictedPosition, 1.0f)),
@@ -412,7 +437,7 @@ public:
 		return false;
 	}
 
-	bool checkBoxCapsuleParticleCollision(const BoundingBox* meshBox, const CapsuleCollider* otherCapsule, glm::mat4 transform, glm::mat4 boxtransform) {
+	bool checkBoxCapsulePBDCollision(const BoundingBox* meshBox, const CapsuleCollider* otherCapsule, glm::mat4 transform, glm::mat4 boxtransform) {
 		glm::vec3 boxMin = glm::vec3(boxtransform * glm::vec4(meshBox->particles.at(0)->predictedPosition, 1.0f));
 		glm::vec3 boxMax = glm::vec3(boxtransform * glm::vec4(meshBox->particles.at(1)->predictedPosition, 1.0f));
 		float capsuleHeight = glm::distance(otherCapsule->top->predictedPosition, otherCapsule->bottom->predictedPosition);
@@ -444,7 +469,7 @@ public:
 		return insideBox || distanceToBox <= minDistance * minDistance;
 	}
 
-	bool checkCapsuleParticleCollision(const CapsuleCollider* capsule1, const CapsuleCollider* capsule2, glm::mat4 transform1, glm::mat4 transform2) {
+	bool checkCapsulePBDCollision(const CapsuleCollider* capsule1, const CapsuleCollider* capsule2, glm::mat4 transform1, glm::mat4 transform2) {
 		float height1 = glm::distance(capsule1->top->predictedPosition, capsule1->bottom->predictedPosition);
 		float height2 = glm::distance(capsule2->top->predictedPosition, capsule2->bottom->predictedPosition);
 		glm::vec3 center1 = capsule1->bottom->predictedPosition + height1 * 0.5f;
@@ -464,14 +489,68 @@ public:
 		return distanceY <= sumRadius;
 	}
 
-	/*void separation(Collider* a, Collider* b) {
-		glm::vec3 n = glm::normalize(a->center - b->center);
-		float d = glm::distance(a->center, b->center);
-		float penetration = a->radius + b->radius - d;
-		glm::vec3 separation = n * penetration;
-		a->center += separation * 0.5f;
-		b->center -= separation * 0.5f;
-	}*/
+	void separate(GameObject* first, GameObject* second) {
+		glm::vec3 normal = glm::vec3(0.0f);
+		float penetration = 0.0f;
+		if (first->boundingBox) {
+			if (second->boundingBox) {
+				normal = glm::normalize(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->boundingBox->center(), 1.0f)) - glm::vec3(second->getTransform()->getPredictedMatrix() * glm::vec4(second->boundingBox->center(), 1.0f)));
+				float distance = glm::distance(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->boundingBox->center(), 1.0f)), glm::vec3(second->getTransform()->getPredictedMatrix() * glm::vec4(second->boundingBox->center(), 1.0f)));
+				penetration = (first->boundingBox->radius() * first->getTransform()->localScale.x + second->boundingBox->radius() * second->getTransform()->localScale.x) - distance;
+			}
+			else if (second->capsuleCollider) {
+				normal = glm::normalize(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->boundingBox->center(), 1.0f)) - glm::vec3(second->getTransform()->getPredictedMatrix() * glm::vec4(second->capsuleCollider->center, 1.0f)));
+				float distance = glm::distance(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->boundingBox->center(), 1.0f)), glm::vec3(second->getTransform()->getPredictedMatrix() * glm::vec4(second->capsuleCollider->center, 1.0f)));
+				penetration = (first->boundingBox->radius() * first->getTransform()->localScale.x + second->capsuleCollider->radius * second->getTransform()->localScale.x) - distance;
+			}
+		}
+		else if (first->capsuleCollider) {
+			if (second->boundingBox) {
+				normal = glm::normalize(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->capsuleCollider->center, 1.0f)) - glm::vec3(second->getTransform()->getPredictedMatrix() * glm::vec4(second->boundingBox->center(), 1.0f)));
+				float distance = glm::distance(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->capsuleCollider->center, 1.0f)), glm::vec3(second->getTransform()->getPredictedMatrix() * glm::vec4(second->boundingBox->center(), 1.0f)));
+				penetration = (first->capsuleCollider->radius * first->getTransform()->localScale.x + second->boundingBox->radius() * second->getTransform()->localScale.x) - distance;
+			}
+			else if (second->capsuleCollider) {
+				normal = glm::normalize(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->capsuleCollider->center, 1.0f)) - glm::vec3(second->getTransform()->getPredictedMatrix() * glm::vec4(second->capsuleCollider->center, 1.0f)));
+				float distance = glm::distance(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->capsuleCollider->center, 1.0f)), glm::vec3(second->getTransform()->getPredictedMatrix() * glm::vec4(second->capsuleCollider->center, 1.0f)));
+				penetration = (first->capsuleCollider->radius * first->getTransform()->localScale.x + second->capsuleCollider->radius * second->getTransform()->localScale.x) - distance;
+			}
+		}
+		glm::vec3 separation = normal * penetration;
+		first->localTransform->predictedPosition += separation;
+		second->localTransform->predictedPosition -= separation;
+	}
+
+	void separateStatic(GameObject* first, GameObject* second, float deltaTime) {
+		glm::vec3 normal = glm::vec3(0.0f);
+		float penetration = 0.0f;
+		if (first->boundingBox) {
+			if (second->boundingBox) {
+				normal = glm::normalize(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->boundingBox->center(), 1.0f)) - glm::vec3(second->getTransform()->getMatrix() * glm::vec4(second->boundingBox->center(), 1.0f)));
+				float distance = glm::distance(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->boundingBox->center(), 1.0f)), glm::vec3(second->getTransform()->getMatrix() * glm::vec4(second->boundingBox->center(), 1.0f)));
+				penetration = (first->boundingBox->radius() * first->getTransform()->localScale.x + second->boundingBox->radius() * second->getTransform()->localScale.x) - distance;
+			}
+			else if (second->capsuleCollider) {
+				normal = glm::normalize(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->boundingBox->center(), 1.0f)) - glm::vec3(second->getTransform()->getMatrix() * glm::vec4(second->capsuleCollider->center, 1.0f)));
+				float distance = glm::distance(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->boundingBox->center(), 1.0f)), glm::vec3(second->getTransform()->getMatrix() * glm::vec4(second->capsuleCollider->center, 1.0f)));
+				penetration = (first->boundingBox->radius() * first->getTransform()->localScale.x + second->capsuleCollider->radius * second->getTransform()->localScale.x) - distance;
+			}
+		}
+		else if (first->capsuleCollider) {
+			if (second->boundingBox) {
+				normal = glm::normalize(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->capsuleCollider->center, 1.0f)) - glm::vec3(second->getTransform()->getMatrix() * glm::vec4(second->boundingBox->center(), 1.0f)));
+				float distance = glm::distance(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->capsuleCollider->center, 1.0f)), glm::vec3(second->getTransform()->getMatrix() * glm::vec4(second->boundingBox->center(), 1.0f)));
+				penetration = (first->capsuleCollider->radius * first->getTransform()->localScale.x + second->boundingBox->radius() * second->getTransform()->localScale.x) - distance;
+			}
+			else if (second->capsuleCollider) {
+				normal = glm::normalize(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->capsuleCollider->center, 1.0f)) - glm::vec3(second->getTransform()->getMatrix() * glm::vec4(second->capsuleCollider->center, 1.0f)));
+				float distance = glm::distance(glm::vec3(first->getTransform()->getPredictedMatrix() * glm::vec4(first->capsuleCollider->center, 1.0f)), glm::vec3(second->getTransform()->getMatrix() * glm::vec4(second->capsuleCollider->center, 1.0f)));
+				penetration = (first->capsuleCollider->radius * first->getTransform()->localScale.x + second->capsuleCollider->radius * second->getTransform()->localScale.x) - distance;
+			}
+		}
+		glm::vec3 separation = normal * penetration;
+		first->localTransform->predictedPosition += separation * deltaTime * 0.5f;
+	}
 };
 
 #endif

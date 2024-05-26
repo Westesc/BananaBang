@@ -19,7 +19,7 @@ public:
     }
 
     bool checkCollision(GameObject* object) {
-        if (object->boundingBox != nullptr) {
+        if (object->boundingBox) {
             glm::mat4 M = object->getTransform()->getMatrix();
             glm::vec3 vertices1[] = {
                 glm::vec3(M * glm::vec4(object->boundingBox->vertices.at(0), 1.0f)),
@@ -40,7 +40,7 @@ public:
             }
             return false;
         }
-        else if (object->capsuleCollider != nullptr) {
+        else if (object->capsuleCollider) {
             glm::vec3 capsuleCenter = object->capsuleCollider->center;
             float capsuleRadius = object->capsuleCollider->radius;
             float capsuleHeight = object->capsuleCollider->height;

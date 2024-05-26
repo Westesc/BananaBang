@@ -59,7 +59,6 @@ public:
 		}
 		if ((glm::any(glm::isnan(velocity)) || glm::any(glm::isinf(velocity)))) {
 			velocity = glm::vec3(0.f);
-			std::cout <<" dupa" << std::endl;
 		}
 	}
 };

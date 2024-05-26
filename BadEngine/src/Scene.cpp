@@ -28,7 +28,9 @@ void Scene::Update(glm::mat4 view, glm::mat4 perspective, float time) {
 }
 
 void Scene::addObject(GameObject* go) {
-	gameObjects.push_back(go);
+	if (std::find(gameObjects.begin(), gameObjects.end(), go) == gameObjects.end()) {
+		gameObjects.push_back(go);
+	}
 }
 
 GameObject* Scene::findByName(std::string name) {
@@ -50,13 +52,13 @@ void Scene::Draw(glm::mat4 view, glm::mat4 perspective) {
 	}
 }
 
-void Scene::checkResolveCollisions(float deltaTime) {
+/*void Scene::checkResolveCollisions(float deltaTime) {
 	for (int i = 0; i < gameObjects.size(); i++) {
 		for (int j = i + 1; j < gameObjects.size(); j++) {
 			gameObjects.at(i)->checkResolveCollisions(gameObjects.at(j), deltaTime);
 		}
 	}
-}
+}*/
 
 YAML::Node Scene::serialize() {
 	YAML::Node node;

@@ -23,7 +23,7 @@ GameObject::GameObject(YAML::Node node) {
     this->layer = node["layer"].as<int>();
     this->isRotating = node["isRotating"].as<bool>();
     this->localTransform = new Transform(node["transform"]);
-    this->modelComponent = new Model(node["model"]);
+    this->modelComponent = std::make_shared<Model>(node["model"]);
     if (isRotating) {
         this->setRotating(true, node["rotateSpeed"].as<float>(), nodeIntoVec3(node["rotateAxis"]));
     }
@@ -43,6 +43,13 @@ GameObject::~GameObject() {
     }
     children.clear();
     delete localTransform;
+    localTransform = nullptr;
+    modelComponent = nullptr;
+    components.clear();
+    delete boundingBox;
+    delete capsuleCollider;
+    boundingBox = nullptr;
+    capsuleCollider = nullptr;
 }
 
 void GameObject::setParent(GameObject* Parent)
@@ -85,11 +92,11 @@ Component* GameObject::getComponentInParent()
     return parent->getComponent();
 }
 
-void GameObject::addModelComponent(Model* model) {
+void GameObject::addModelComponent(std::shared_ptr<Model> model) {
     modelComponent = model;
 }
 
-Model* GameObject::getModelComponent() const {
+std::shared_ptr<Model> GameObject::getModelComponent() const {
     return modelComponent;
 }
 
@@ -133,7 +140,7 @@ void GameObject::setRotating(bool rotating,float speed,glm::vec3 rotateAxis) {
     this->rotateAxis = rotateAxis;
 }
 
-void GameObject::checkResolveCollisions(GameObject* other, float deltaTime) {
+/*void GameObject::checkResolveCollisions(GameObject* other, float deltaTime) {
     if (modelComponent->checkCollision(other->modelComponent)) {
         std::cout << "KOLIZJA" << std::endl;
         glm::vec3 displacement = modelComponent->calculateCollisionResponse(other->modelComponent);
@@ -157,7 +164,7 @@ void GameObject::checkResolveCollisions(GameObject* other, float deltaTime) {
             other->modelComponent->setTransform(glm::translate(*other->modelComponent->getTransform(), otherDisplacement));
         }
     }
-}
+}*/
 
 void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
     if (modelComponent != nullptr) {
@@ -235,7 +242,7 @@ void GameObject::addColider(int type) {
 }
 
 void GameObject::predictPosition(float deltaTime) {
-	this->predictedPosition = localTransform->localPosition + velocity * deltaTime;
+	localTransform->predictedPosition = localTransform->localPosition + velocity * deltaTime;
     if (boundingBox) {
         for (auto particle : boundingBox->particles) {
 			particle->PredictPosition(deltaTime);
@@ -276,10 +283,11 @@ void GameObject::updatePredictedPosition() {
             center += boundingBox->particles[i]->predictedPosition;
         }
         center *= 0.125f;
-        predictedPosition = center + colliderOffset;
+        localTransform->predictedPosition += center - colliderOffset;
+        //std::cout << "BoundingBox center: " << glm::to_string(center) << ", colliderOffset: " << glm::to_string(colliderOffset) << ", predictedPosition: " << glm::to_string(predictedPosition) << std::endl;
     }
     else if (capsuleCollider) {
         glm::vec3 center = (capsuleCollider->top->predictedPosition + capsuleCollider->bottom->predictedPosition) * 0.5f;
-        predictedPosition = center + colliderOffset;
+        localTransform->predictedPosition = center + colliderOffset;
     }
 }

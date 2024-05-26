@@ -48,15 +48,6 @@ public:
 		}
 		glm::vec2 closestTree;
 		glm::vec2 secondClosestTree;
-		/*for (auto tree : treePositions) {
-			if (glm::distance(tree, glm::vec2(position.x, position.z)) < glm::distance(closestTree, glm::vec2(position.x, position.z))) {
-				secondClosestTree = closestTree;
-				closestTree = tree;
-			}
-			else if (glm::distance(tree, glm::vec2(position.x, position.z)) < glm::distance(secondClosestTree, glm::vec2(position.x, position.z))) {
-				secondClosestTree = tree;
-			}
-		}*/
 		int treeIndex = findTreeByPosition(chosenTreePos, treePositions);
 		if (treeIndex == -1) {
 			return glm::vec3(0, 0, 0);

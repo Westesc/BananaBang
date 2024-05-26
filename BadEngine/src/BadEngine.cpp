@@ -62,7 +62,7 @@ constexpr int wys = 800, szer = 1000;
 GLFWwindow* window;
 SceneManager* sm;
 Input* input;
-float boxSpeed = 4.f;
+float boxSpeed = 3.f;
 
 float scale = 5.f;
 float scaleT = 1.f;
@@ -82,7 +82,7 @@ void Start() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(szer, wys, "Hello World", nullptr, nullptr);
+	window = glfwCreateWindow(szer, wys, "Monke", nullptr, nullptr);
 	if (!window) exit(1);
 
 	glfwMakeContextCurrent(window);
@@ -97,22 +97,10 @@ void Start() {
 	glEnable(GL_BLEND);
 
 	sm = new SceneManager();
-	//Scene * scene = new Scene("main");
-	//sm->scenes.push_back(scene);
-	//sm->loadScene("first");
-	//sm->activeScene = sm->scenes.at(0);
 	Scene* scene = new Scene("main");
 	sm->scenes.push_back(scene);
 	sm->activeScene = sm->scenes.at(0);
 	input = new Input(window);
-	/*GameObject* go = new GameObject("test object");
-	Transform* trans = new Transform();
-	Component* comp = new Component();
-	UI* ui = new UI();
-	AnimateBody* ab = new AnimateBody();
-	RigidBody* rb = new RigidBody();
-	Axis* axis = new Axis("axis");
-	go->getTransform();*/
 	pm = new PlayerMovement(sm, input);
 }
 
@@ -173,16 +161,22 @@ bool isCapsuleInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, CapsuleCo
 
 void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const std::vector<GameObject*>& objects) {
 	ZoneTransientN(zoneName, "performFrustumCulling", true);
+	bool isVisible = true;
 	for (auto object : objects) {
 		if (object->boundingBox) {
-			bool isVisible = isBoxInFrustum(frustumPlanes, *object->boundingBox, object->getTransform()->getMatrix());
+			isVisible = isBoxInFrustum(frustumPlanes, *object->boundingBox, object->getTransform()->getMatrix());
 			object->setVisible(isVisible);
 		}
 		else if (object->capsuleCollider) {
-			bool isVisible = isCapsuleInFrustum(frustumPlanes, *object->capsuleCollider, object->getTransform()->getMatrix());
+			isVisible = isCapsuleInFrustum(frustumPlanes, *object->capsuleCollider, object->getTransform()->getMatrix());
 			object->setVisible(isVisible);
 		}
-		performFrustumCulling(frustumPlanes, object->children);
+		for (auto child : object->children) {
+			child->setVisible(isVisible);
+			for (auto grandchild : child->children) {
+				grandchild->setVisible(isVisible);
+			}
+		}
 	}
 }
 
@@ -211,7 +205,7 @@ int main() {
 	Shader* shaderTree = new Shader("../../../../src/shaders/vsTree.vert", "../../../../src/shaders/fsTree.frag");
 	Shader* rampShader = new Shader("../../../../src/shaders/ramp.vert", "../../../../src/shaders/ramp.frag");
 	Shader* enemyShader = new Shader("../../../../src/shaders/enemy.vert", "../../../../src/shaders/enemy.frag");
-	Model* enemyModel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
+	auto enemyModel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"));
 	enemyModel->SetShader(enemyShader);
 
 	GameObject* box = new GameObject("box");
@@ -222,25 +216,25 @@ int main() {
 	GameObject* skydome = new GameObject("skydome");
 	GameObject* rampBox = new GameObject("rampBox");
 
-	Model* boxmodel = new Model(const_cast<char*>("../../../../res/box.obj"));
-	Model* planemodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
-	Model* box2model = new Model(const_cast<char*>("../../../../res/tree.obj"));
-	Model* capsulemodel = new Model(const_cast<char*>("../../../../res/capsule.obj"));
-	Model* rampModel = new Model(const_cast<char*>("../../../../res/box.obj"));
+	auto boxmodel = std::make_shared<Model>(const_cast<char*>("../../../../res/box.obj"));
+	auto planemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"));
+	auto box2model = std::make_shared<Model>(const_cast<char*>("../../../../res/tree.obj"));
+	auto capsulemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"));
+	auto rampModel = std::make_shared<Model>(const_cast<char*>("../../../../res/box.obj"));
 
-	Model* capsule2model = new Model(const_cast<char*>("../../../../res/capsule.obj"));
+	auto capsule2model = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"));
 	Mesh* meshSphere = new Mesh();
 	meshSphere->createDome(20, 20, 50);
-	Model* skydomeModel = new Model(meshSphere);
+	auto skydomeModel = std::make_shared<Model>(meshSphere);
 
 
 	//drzewa
-	Model* treelog = new Model(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"));
-	Model* treetrunk = new Model(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"));
+	auto treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"));
+	auto treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"));
 	Shader* phongShader = new Shader("../../../../src/shaders/phong.vert", "../../../../src/shaders/phong.frag");
-	Model* treebranch1= new Model(const_cast<char*>("../../../../res/objects/trees/tree_branch_1.obj"));
+	auto treebranch1= std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_branch_1.obj"));
 	treebranch1->SetShader(phongShader);
-	Model* planeSectormodel = new Model(const_cast<char*>("../../../../res/plane.obj"));
+	auto planeSectormodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"));
 	treetrunk->SetShader(phongShader);
 	treelog->SetShader(phongShader);
 	planeSectormodel->SetShader(shaders);
@@ -289,15 +283,6 @@ int main() {
 	
 	glm::vec3 lightPos(0.5f, 10.0f, 0.3f);
 
-
-
-	/*box->localTransform->localPosition = glm::vec3(-1.f, -1.f, 0.f);
-	box2->localTransform->localPosition = glm::vec3(-4.f, -4.f, 0.f);
-	capsule->localTransform->localPosition = glm::vec3(4.f, 4.f, 0.f);
-	//box2->getModelComponent()->setCustomBox(glm::vec3(-8.f,-8.f,0.f), glm::vec3(8.f,8.f,8.f));
-	box->getModelComponent()->addCollider(1, box->localTransform->localPosition);
-	capsule->getModelComponent()->addCollider(2, capsule->localTransform->localPosition);
-	box2->getModelComponent()->addCollider(1, box->localTransform->localPosition);*/
 	sm->getActiveScene()->findByName("box")->getTransform()->localPosition = glm::vec3(-1.f, -1.f, 0.f);
 	sm->getActiveScene()->findByName("box2")->getTransform()->localPosition = glm::vec3(-4.f, -4.f, 0.f);
 	sm->getActiveScene()->findByName("capsule")->getTransform()->localPosition = glm::vec3(4.f, 4.f, 0.f);
@@ -411,11 +396,11 @@ int main() {
 			}
 			if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
 				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
-				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, boxSpeed, 0.0f);
+				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, boxSpeed * 0.1f, 0.0f);
 			}
 			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
 				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
-				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, -boxSpeed, 0.0f);
+				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, -boxSpeed * 0.1f, 0.0f);
 			}
 		}
 
@@ -471,7 +456,7 @@ int main() {
 						//enemy->velocity = glm::vec3(0.0f);
 						break;
 					case EnemyState::Walking:
-						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
+						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 7.f) {
 							enemy->state = EnemyState::Walking;
 							enemy->timeSinceDirChange += deltaTime;
 							glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->localTransform->getLocalPosition(), enemy->sector);
@@ -498,7 +483,7 @@ int main() {
 						}
 						break;
 					case EnemyState::Chopping:
-						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
+						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 7.f) {
 							enemy->state = EnemyState::Walking;
 						}
 						break;
@@ -518,8 +503,10 @@ int main() {
 		if (sm->getActiveScene()->findByName("player")) {
 			cm.addObject(sm->getActiveScene()->findByName("player"));
 		}
-		cm.simulate(pbd, deltaTime);
-		//performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
+		pbd->simulateB4Collisions(deltaTime);
+		cm.simulate(deltaTime);
+		pbd->simulateAfterCollisions(deltaTime);
+		performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
 		if (frustumTest) {
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 				if (sm->getActiveScene()->gameObjects.at(i)->isVisible) {
@@ -553,18 +540,6 @@ int main() {
 		//box2->getModelComponent()->Draw();
 		//box2->getModelComponent()->DrawBoundingBoxes(shaders, *box2->getModelComponent()->getTransform());
 
-		/*shaders->use();
-		shaders->setMat4("M", *capsule->getModelComponent()->getTransform());
-		shaders->setMat4("view", V);
-		shaders->setMat4("projection", P);
-		capsule->getModelComponent()->Draw();
-		capsule->getModelComponent()->UpdateCollider(*capsule->getModelComponent()->getTransform());
-		shaders->use();
-		shaders->setMat4("M", *capsule2->getModelComponent()->getTransform());
-		shaders->setMat4("view", V);
-		shaders->setMat4("projection", P);
-		capsule2->getModelComponent()->Draw();
-		capsule2->getModelComponent()->UpdateCollider(*capsule2->getModelComponent()->getTransform());*/
 		if (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			if (glfwGetInputMode(window, GLFW_CURSOR) != 212993) {
@@ -656,7 +631,10 @@ int main() {
 			player->localTransform->localPosition = glm::vec3(0.f);
 			player->localTransform->localScale = glm::vec3(0.5f);
 			player->addColider(1);
-			sm->getActiveScene()->addObject(player);
+			pbd->objects.push_back(player);
+			if (sm->getActiveScene()->findByName("player") == nullptr) {
+				sm->getActiveScene()->addObject(player);
+			}
 				//sm->saveScene("first");
 			buttonPressed = false;
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
@@ -764,6 +742,7 @@ int main() {
 			spawnerTime = 0;
 			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(0.f,5.f,0.f), glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 14.f));
 			enemy->addModelComponent(enemyModel);
+			pbd->objects.push_back(enemy);
 			enemy->addColider(2);
 			sm->getActiveScene()->addObject(enemy);
 			cm.addObject(enemy);
@@ -797,6 +776,10 @@ void renderImGui() {
 	ImGui::SliderInt("Max drzew", &b, a, 20);
 	if (ImGui::Button("Generate")) {
 		buttonPressed = true;
+	}
+	if (sm->getActiveScene()->findByName("player")) {
+		glm::vec3 pos = sm->getActiveScene()->findByName("player")->getTransform()->localPosition;
+		ImGui::Text("Player position: %f %f %f", pos.x, pos.y, pos.z);
 	}
 	ImGui::End();
 

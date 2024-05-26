@@ -91,3 +91,12 @@ glm::mat4 Transform::getMatrix() {
 	M = glm::scale(M, localScale);
 	return M;
 }
+
+glm::mat4 Transform::getPredictedMatrix() {
+	glm::mat4 M = glm::translate(glm::mat4(1.f), predictedPosition);
+	M = glm::rotate(M, glm::radians(localRotation.y), glm::vec3(0.f, 1.f, 0.f));
+	M = glm::rotate(M, glm::radians(localRotation.x), glm::vec3(1.0f, 0.f, 0.f));
+	M = glm::rotate(M, glm::radians(localRotation.z), glm::vec3(0.f, 0.f, 1.f));
+	M = glm::scale(M, localScale);
+	return M;
+}

@@ -16,6 +16,7 @@ public:
 	glm::vec3 localPosition;
 	glm::vec3 localRotation; //a to nie powinien byæ vec4?
 	glm::vec3 localScale;
+	glm::vec3 predictedPosition = glm::vec3(0.0f);
 
 	void Translate(glm::vec3 vector);
 	void Rotate(glm::vec3 vector);
@@ -28,6 +29,7 @@ public:
 	glm::vec3 getLocalScale();
 	YAML::Node serialize();
 	glm::mat4 getMatrix();
+	glm::mat4 getPredictedMatrix();
 
 	friend Transform operator+(const Transform& lhs, const Transform& rhs) {
 		Transform result(lhs); 

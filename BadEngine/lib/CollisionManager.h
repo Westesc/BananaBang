@@ -258,9 +258,12 @@ public:
 		glm::vec3 displacement = calculateCollisionResponseStatic(first, second);
 		glm::vec3 otherDisplacement = -displacement;
 		//float scalar = glm::length(glm::normalize(displacement));
-		displacement *= 15.f * deltaTime;
+		displacement *= deltaTime;
 		if (second->name.starts_with("branch") || second->name.starts_with("log")) {
-			displacement *= 0.05f;
+			displacement *= 0.1f;
+		}
+		if (second->name.starts_with("tree")) {
+			displacement.y = glm::clamp(displacement.y, 0.0f, 0.05f);
 		}
 		if (first->boundingBox != nullptr) {
 			displacement *= 0.1f;
@@ -277,8 +280,8 @@ public:
 		glm::vec3 displacement = calculateCollisionResponse(first, second);
 		glm::vec3 otherDisplacement = -displacement;
 		//float scalar = glm::length(glm::normalize(displacement));
-		displacement *= 2.f * deltaTime;
-		otherDisplacement *= 2.f * deltaTime;
+		displacement *= deltaTime;
+		otherDisplacement *= deltaTime;
 		if (first->boundingBox != nullptr) {
 			displacement *= 0.1f;
 		}
@@ -286,12 +289,12 @@ public:
 			otherDisplacement *= 0.1f;
 		}
 		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
-			first->localTransform->localPosition += displacement;
-			second->localTransform->localPosition += otherDisplacement;
+			first->localTransform->predictedPosition += displacement;
+			second->localTransform->predictedPosition += otherDisplacement;
 		}
 		else if (first->name.starts_with("enemy") && second->name.starts_with("enemy")) {
 			Enemy* enemy1 = static_cast<Enemy*>(first);
-			first->localTransform->localPosition += glm::vec3(enemy1->velocity.z ,0.0f,-enemy1->velocity.x) * deltaTime * 0.1f;
+			first->localTransform->predictedPosition += glm::vec3(enemy1->velocity.z ,0.0f,-enemy1->velocity.x) * deltaTime * 0.1f;
 			addObject(second);
 		}
 	}

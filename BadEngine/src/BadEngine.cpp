@@ -207,10 +207,9 @@ int main() {
 	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
 	AnimateBody* animPlayer = new AnimateBody(animodel);
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
-	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 1.15f);
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.3f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
 	pm->addAnimationPlayer(animPlayer);
@@ -663,6 +662,7 @@ int main() {
 			GameObject* anim = new GameObject("player");
 			animodel->SetShader(shaderAnimation);
 			anim->addModelComponent(animodel);
+			//anim->addColider();
 			sm->getActiveScene()->addObject(anim);
 			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
 			sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);

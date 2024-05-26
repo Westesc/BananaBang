@@ -43,11 +43,18 @@ void AnimateBody::UpdateAnimation(float deltaTime) {
         model->GetShader()->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
 }
 
-void AnimateBody::setActiveAnimation(std::string name) {
+void AnimateBody::setActiveAnimation(std::string name, bool playOnce) {
     if (activeAnimation != name) {
         activeAnimation = name;
         Animacje anim = searchActiveAnimation();
-        animator->PlayAnimation(anim.animation);
+        animator->PlayAnimation(anim.animation, playOnce);
+        if (name == "jumping up" || name == "jumping down") {
+            animator->setIsAnimY(false);
+        }
+        else {
+            animator->setIsAnimY(true);
+        }
+        animator->changeAnimation();
     }
 }
 

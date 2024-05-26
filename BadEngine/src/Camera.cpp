@@ -38,8 +38,8 @@ void Camera::updateCamera(glm::vec2 vector) {
 	Pitch += vector.y * sensitivity;
 	if (Pitch > 89.0f)
 		Pitch = 89.0f;
-	if (Pitch < -10.0f)
-		Pitch = -10.0f;
+	if (Pitch < 0.0f)
+		Pitch = 0.0f;
 
 	glm::vec3 Front;
 	transform->localRotation += glm::vec3(vector.x / 300, -vector.y / 300, 0);

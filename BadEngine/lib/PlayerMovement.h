@@ -27,7 +27,7 @@ private:
     float limitJump = 7.f;
     float jumpPower = 5.f;
     glm::vec3 initialPosition;
-    float airSpeed = 5.f;
+    float airSpeed = 4.f;
 
     enum State {
         walking,
@@ -67,10 +67,15 @@ private:
         float sinRotate = sin(glm::radians(rotate));
         float cosRotate = cos(glm::radians(rotate));
 
-        float dx = animateBody->getPosition().z * sinRotate + animateBody->getPosition().x * cosRotate;
-        float dz = animateBody->getPosition().z * cosRotate - animateBody->getPosition().x * sinRotate;
+        float dx = sm->getActiveScene()->findByName("player")->getTransform()->getLocalScale().x * animateBody->getPosition().z * sinRotate + animateBody->getPosition().x * cosRotate;
+        float dz = sm->getActiveScene()->findByName("player")->getTransform()->getLocalScale().z *animateBody->getPosition().z * cosRotate - animateBody->getPosition().x * sinRotate;
+
+       // float dy = animateBody->getPosition().y;
+
+       // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
 
         sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.f, dz));
+       // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
     }
 
     void moveInAir(float speed) {
@@ -144,7 +149,7 @@ private:
         if (jumpDistance > limitJump) {
             state = air;
             rb->upwardsSpeed = 0.f;
-            animateBody->setActiveAnimation("jumping down");
+            animateBody->setActiveAnimation("jumping down", true);
         }
     }
 
@@ -155,11 +160,9 @@ private:
                 state = dodge;
             }
             else if (input->checkKey(GLFW_KEY_SPACE) && state != air && state != jump_up && !wasSpacePressed) {
-                animateBody->setActiveAnimation("jumping up");
-                //animateBody->setActiveAnimation("standing");
+                animateBody->setActiveAnimation("jumping up", true);
                 state = jump_up;
                 initialPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
-                // std::cout << glm::to_string(initialPosition) << std::endl;
             } 
             else if (input->checkKey(GLFW_MOUSE_BUTTON_LEFT)) {
                 state = attack1;
@@ -172,7 +175,6 @@ private:
             state = walking;
             animateBody->setActiveAnimation("standing");
             sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y = initialPosition.y;
-            // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         }
         wasSpacePressed = input->checkKey(GLFW_KEY_SPACE);
     }
@@ -187,6 +189,7 @@ public:
     }
 
     void ManagePlayer(float& deltaTime2) {
+        //std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         this->deltaTime2 = deltaTime2;
         checkState();
         if (state == walking) {
@@ -195,6 +198,7 @@ public:
         }
         else if (state == attack1) {
             animateBody->setActiveAnimation("attack1");
+            move();
             if (animateBody->isPlay() == false) {
                 state = walking;
             }

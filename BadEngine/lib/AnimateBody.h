@@ -34,7 +34,7 @@ public:
 	void changeModel(Model* m);
 	void addAnimation(char* path, std::string nameAnim, float time);
 	void UpdateAnimation(float deltaTime);
-	void setActiveAnimation(std::string name);
+	void setActiveAnimation(std::string name, bool once = false);
 	glm::vec3 getPosition();
 
 	void play();

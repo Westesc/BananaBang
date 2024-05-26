@@ -396,11 +396,13 @@ int main() {
 			}
 			if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
 				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
-				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, boxSpeed * 0.1f, 0.0f);
+				if (sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y < 0.1f) {
+					sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, boxSpeed, 0.0f);
+				}
 			}
 			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
 				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
-				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, -boxSpeed * 0.1f, 0.0f);
+				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, -boxSpeed, 0.0f);
 			}
 		}
 
@@ -501,7 +503,7 @@ int main() {
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::radians(time), glm::vec3(0.f, 1.f, 0.f)));
 		//sm->getActiveScene()->findByName("plane")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("plane")->getModelComponent()->getTransform(), glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
 		if (sm->getActiveScene()->findByName("player")) {
-			cm.addObject(sm->getActiveScene()->findByName("player"));
+			//cm.addObject(sm->getActiveScene()->findByName("player"));
 		}
 		pbd->simulateB4Collisions(deltaTime);
 		cm.simulate(deltaTime);
@@ -629,11 +631,12 @@ int main() {
 			player->addModelComponent(box2model);
 			player->modelComponent->SetShader(phongShader);
 			player->localTransform->localPosition = glm::vec3(0.f);
-			player->localTransform->localScale = glm::vec3(0.5f);
+			player->localTransform->localScale = glm::vec3(0.2f);
 			player->addColider(1);
 			pbd->objects.push_back(player);
 			if (sm->getActiveScene()->findByName("player") == nullptr) {
 				sm->getActiveScene()->addObject(player);
+				cm.addObject(player);
 			}
 				//sm->saveScene("first");
 			buttonPressed = false;
@@ -778,8 +781,12 @@ void renderImGui() {
 		buttonPressed = true;
 	}
 	if (sm->getActiveScene()->findByName("player")) {
-		glm::vec3 pos = sm->getActiveScene()->findByName("player")->getTransform()->localPosition;
+		GameObject* player = sm->getActiveScene()->findByName("player");
+		glm::vec3 pos = player->getTransform()->localPosition;
 		ImGui::Text("Player position: %f %f %f", pos.x, pos.y, pos.z);
+		glm::vec3 transformedCenter = glm::vec3(player->getTransform()->getMatrix() * glm::vec4(player->boundingBox->center(), 1.0f));
+		ImGui::Text("bounding box: %f %f %f", transformedCenter.x, transformedCenter.y, transformedCenter.z);
+		ImGui::Text("vel: %f %f %f", player->velocity.x, player->velocity.y, player->velocity.z);
 	}
 	ImGui::End();
 

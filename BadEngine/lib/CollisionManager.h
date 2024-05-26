@@ -33,9 +33,11 @@ public:
 	void addObject(GameObject* go) { //TODO: dla obiektów, które zostan¹ dodane do sektora, sprawdziæ tylko przylegaj¹ce sektory
 		ZoneScopedN("AddObject");
 		for (auto section : sections) {
-			auto it = std::find(section->objects.begin(), section->objects.end(), go);
-			if (it != section->objects.end()) {
-				section->objects.erase(it);
+			if (go->name != "player") {
+				auto it = std::find(section->objects.begin(), section->objects.end(), go);
+				if (it != section->objects.end()) {
+					section->objects.erase(it);
+				}
 			}
 			if (section->checkCollision(go)) {
 				section->objects.push_back(go);
@@ -84,7 +86,7 @@ public:
 		return collisions;
 	}
 
-	void checkResolveCollisions(float deltaTime) {
+	/*void checkResolveCollisions(float deltaTime) {
 		ZoneScopedN("CheckResolveCollisions");
 		for (auto section : sections) {
 			for (int i = 0; i < section->objects.size(); i++) {
@@ -100,7 +102,7 @@ public:
 				}
 			}
 		}
-	}
+	}*/
 
 	bool checkCollision(GameObject* first, GameObject* second) {
 		glm::mat4 M = first->getTransform()->getMatrix();
@@ -110,15 +112,15 @@ public:
 				return checkBoundingBoxCollision(*first->boundingBox, *second->boundingBox, M, M2);
 			}
 			else if (second->capsuleCollider != nullptr) {
-				return checkBoxCapsuleCollision(*first->boundingBox, *second->capsuleCollider, M2, M);
+				return checkBoxCapsuleCollision(first, second, M2, M);
 			}
 		}
 		else if (first->capsuleCollider != nullptr) {
 			if (second->boundingBox != nullptr) {
-				return checkBoxCapsuleCollision(*second->boundingBox, *first->capsuleCollider, M, M2);
+				return checkBoxCapsuleCollision(second, first, M, M2);
 			}
 			else if (second->capsuleCollider != nullptr) {
-				return checkCapsuleCollision(*first->capsuleCollider, *second->capsuleCollider, M, M2);
+				return checkCapsuleCollision(first, second, M, M2);
 			}
 		}
 		return false;
@@ -163,60 +165,97 @@ public:
 		return false;
 	}
 
-	bool checkBoxCapsuleCollision(const BoundingBox& meshBox, const CapsuleCollider& otherCapsule, glm::mat4 transform, glm::mat4 boxtransform) {
-		glm::vec3 boxMin = glm::vec3(boxtransform * glm::vec4(meshBox.min, 1.0f));
-		glm::vec3 boxMax = glm::vec3(boxtransform * glm::vec4(meshBox.max, 1.0f));
-		glm::vec3 capsuleCenter = otherCapsule.center;
-		float capsuleRadius = otherCapsule.radius;
-		float capsuleHeight = otherCapsule.height;
+	bool checkBoxCapsuleCollision(const GameObject* box, const GameObject* capsule, const glm::mat4& boxTransform, const glm::mat4& capsuleTransform) {
+		glm::vec3 capsuleCenter = capsule->capsuleCollider->center;
+		float capsuleRadius = capsule->capsuleCollider->radius * capsule->localTransform->localScale.x;
+		float capsuleHeight = capsule->capsuleCollider->height * capsule->localTransform->localScale.y;
 
-		glm::vec3 transformedCapsuleCenter = glm::vec3(transform * glm::vec4(capsuleCenter, 1.0f));
-		bool insideBox = transformedCapsuleCenter.x >= boxMin.x && transformedCapsuleCenter.x <= boxMax.x &&
-			transformedCapsuleCenter.y >= boxMin.y && transformedCapsuleCenter.y <= boxMax.y &&
-			transformedCapsuleCenter.z >= boxMin.z && transformedCapsuleCenter.z <= boxMax.z;
-		float distanceToBox = 0.0f;
-		if (!insideBox) {
-			if (transformedCapsuleCenter.x < boxMin.x)
-				distanceToBox += (transformedCapsuleCenter.x - boxMin.x) * (transformedCapsuleCenter.x - boxMin.x);
-			else if (transformedCapsuleCenter.x > boxMax.x)
-				distanceToBox += (transformedCapsuleCenter.x - boxMax.x) * (transformedCapsuleCenter.x - boxMax.x);
+		glm::vec3 top = capsuleCenter + glm::vec3(0.0f, capsuleHeight * 0.5f, 0.0f);
+		glm::vec3 bottom = capsuleCenter - glm::vec3(0.0f, capsuleHeight * 0.5f, 0.0f);
 
-			if (transformedCapsuleCenter.y < boxMin.y)
-				distanceToBox += (transformedCapsuleCenter.y - boxMin.y) * (transformedCapsuleCenter.y - boxMin.y);
-			else if (transformedCapsuleCenter.y > boxMax.y)
-				distanceToBox += (transformedCapsuleCenter.y - boxMax.y) * (transformedCapsuleCenter.y - boxMax.y);
+		glm::vec3 worldTop = glm::vec3(capsuleTransform * glm::vec4(top, 1.0f));
+		glm::vec3 worldBottom = glm::vec3(capsuleTransform * glm::vec4(bottom, 1.0f));
 
-			if (transformedCapsuleCenter.z < boxMin.z)
-				distanceToBox += (transformedCapsuleCenter.z - boxMin.z) * (transformedCapsuleCenter.z - boxMin.z);
-			else if (transformedCapsuleCenter.z > boxMax.z)
-				distanceToBox += (transformedCapsuleCenter.z - boxMax.z) * (transformedCapsuleCenter.z - boxMax.z);
+		std::vector<glm::vec3> boxVertices;
+		for (const auto& vertex : box->boundingBox->vertices) {
+			boxVertices.push_back(glm::vec3(boxTransform * glm::vec4(vertex, 1.0f)));
 		}
-		float minDistance = capsuleRadius;
-		return insideBox || distanceToBox <= minDistance * minDistance;
+
+		for (const auto& vertex : boxVertices) {
+			glm::vec3 closestPointOnCapsule = ClosestPointOnLineSegment(worldTop, worldBottom, vertex);
+			float distanceSquared = glm::length(vertex - closestPointOnCapsule);
+			distanceSquared *= distanceSquared;
+			if (distanceSquared <= capsuleRadius * capsuleRadius) {
+				return true;
+			}
+		}
+
+		glm::vec3 boxMin = glm::vec3(boxTransform * glm::vec4(box->boundingBox->min, 1.0f));
+		glm::vec3 boxMax = glm::vec3(boxTransform * glm::vec4(box->boundingBox->max, 1.0f));
+
+		glm::vec3 closestPointOnBoxToTop = glm::clamp(worldTop, boxMin, boxMax);
+		glm::vec3 closestPointOnBoxToBottom = glm::clamp(worldBottom, boxMin, boxMax);
+
+		if (glm::length(worldTop - closestPointOnBoxToTop) * glm::length(worldTop - closestPointOnBoxToTop)  <= capsuleRadius * capsuleRadius ||
+			glm::length(worldBottom - closestPointOnBoxToBottom) * glm::length(worldBottom - closestPointOnBoxToBottom) <= capsuleRadius * capsuleRadius) {
+			return true;
+		}
+
+		return false;
 	}
 
-	bool checkCapsuleCollision(const CapsuleCollider& capsule1, const CapsuleCollider& capsule2, glm::mat4 transform1, glm::mat4 transform2) {
-		glm::vec3 center1 = capsule1.center;
-		glm::vec3 center2 = capsule2.center;
-		float radius1 = capsule1.radius;
-		float radius2 = capsule2.radius;
-		float height1 = capsule1.height;
-		float height2 = capsule2.height;
-		glm::vec3 transformedCenter1 = glm::vec3(transform1 * glm::vec4(center1, 1.0f));
-		glm::vec3 transformedCenter2 = glm::vec3(transform2 * glm::vec4(center2, 1.0f));
-
-		float distanceSquared = glm::length(transformedCenter1 - transformedCenter2);
-		distanceSquared *= distanceSquared;
-		float sumRadius = radius1 + radius2;
-		if (distanceSquared > sumRadius * sumRadius) {
-			return false;
+	bool checkCapsuleCollision(const GameObject* capsule1, const GameObject* capsule2, glm::mat4 transform1, glm::mat4 transform2) {
+		glm::vec3 center1 = capsule1->capsuleCollider->center;
+		glm::vec3 center2 = capsule2->capsuleCollider->center;
+		float radius1 = capsule1->capsuleCollider->radius;
+		float radius2 = capsule2->capsuleCollider->radius;
+		float height1 = capsule1->capsuleCollider->height * capsule1->localTransform->localScale.y;
+		float height2 = capsule2->capsuleCollider->height * capsule2->localTransform->localScale.y;
+		glm::vec3 top1 = center1 + glm::vec3(0.0f, height1 * 0.5f, 0.0f);
+		glm::vec3 bottom1 = center1 - glm::vec3(0.0f, height1 * 0.5f, 0.0f);
+		glm::vec3 top2 = center2 + glm::vec3(0.0f, height2 * 0.5f, 0.0f);
+		glm::vec3 bottom2 = center2 - glm::vec3(0.0f, height2 * 0.5f, 0.0f);
+		glm::vec3 Normal1 = glm::normalize(glm::vec3(transform1 * glm::vec4(top1, 1.0f)) - glm::vec3(transform1 * glm::vec4(bottom1,1.0f)));
+		glm::vec3 LineEndOffset1 = Normal1 * (radius1 * capsule1->localTransform->localScale.x);
+		glm::vec A1 = glm::vec3(transform1 * glm::vec4(bottom1, 1.0f)) + LineEndOffset1;
+		glm::vec B1 = glm::vec3(transform1 * glm::vec4(top1, 1.0f)) - LineEndOffset1;
+		glm::vec3 Normal2 = glm::normalize(glm::vec3(transform2 * glm::vec4(top2, 1.0f)) - glm::vec3(transform2 * glm::vec4(bottom2, 1.0f)));
+		glm::vec3 LineEndOffset2 = Normal2 * (radius2 * capsule2->localTransform->localScale.x);
+		glm::vec3 A2 = glm::vec3(transform2 * glm::vec4(bottom2, 1.0f)) + LineEndOffset2;
+		glm::vec3 B2 = glm::vec3(transform2 * glm::vec4(top2, 1.0f)) - LineEndOffset2;
+		glm::vec3 v0 = A2 - A1;
+		glm::vec3 v1 = B2 - A1;
+		glm::vec3 v2 = A2 - B1;
+		glm::vec3 v3 = B2 - B1;
+		float d0 = glm::dot(v0, v0);
+		float d1 = glm::dot(v1, v1);
+		float d2 = glm::dot(v2, v2);
+		float d3 = glm::dot(v3, v3);
+		glm::vec3 bestA;
+		if (d2 < d0 || d2 < d1 || d3 < d0 || d3 < d1) {
+			bestA = B1;
 		}
-		float distanceY = std::abs(transformedCenter1.y - transformedCenter2.y) - (height1 + height2) / 2.0f;
-		return distanceY <= sumRadius;
+		else {
+			bestA = A1;
+		}
+		glm::vec3 bestB = ClosestPointOnLineSegment(A2, B2, bestA);
+		bestA = ClosestPointOnLineSegment(A1, B1, bestB);
+		glm::vec3 penetration = bestA - bestB;
+		float len = glm::length(penetration);
+		penetration = glm::normalize(penetration);
+		float penetrationDepth = radius1 + radius2 - len;
+		return penetrationDepth > 0.0f;
+	}
+
+	glm::vec3 ClosestPointOnLineSegment(glm::vec3 A, glm::vec3 B, glm::vec3 Point)
+	{
+		glm::vec3 AB = B - A;
+		float t = dot(Point - A, AB) / dot(AB, AB);
+		return A + glm::min(glm::max(t, 0.0f), 1.0f) * AB;
 	}
 
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
-		glm::vec3 displacement = calculateCollisionResponse(first, second);
+		glm::vec3 displacement = calculateCollisionResponseStatic(first, second);
 		glm::vec3 otherDisplacement = -displacement;
 		//float scalar = glm::length(glm::normalize(displacement));
 		displacement *= 15.f * deltaTime;
@@ -230,7 +269,7 @@ public:
 			otherDisplacement *= 0.1f;
 		}
 		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
-			first->localTransform->localPosition += displacement;
+			first->localTransform->predictedPosition += displacement;
 		}
 	}
 
@@ -257,9 +296,9 @@ public:
 		}
 	}
 
-	glm::vec3 calculateCollisionResponse(GameObject* first, GameObject* second) {
+	glm::vec3 calculateCollisionResponseStatic(GameObject* first, GameObject* second) {
 		glm::vec3 displacement(0.0f);
-		glm::mat4 M = first->getTransform()->getMatrix();
+		glm::mat4 M = first->getTransform()->getPredictedMatrix();
 		glm::mat4 M2 = second->getTransform()->getMatrix();
 		if (first->boundingBox != nullptr) {
 			if (second->boundingBox != nullptr) {
@@ -333,25 +372,60 @@ public:
 		return displacement;
 	}
 
+	glm::vec3 calculateCollisionResponse(GameObject* first, GameObject* second) {
+		glm::vec3 displacement(0.0f);
+		glm::mat4 M = first->getTransform()->getPredictedMatrix();
+		glm::mat4 M2 = second->getTransform()->getPredictedMatrix();
+		if (first->boundingBox != nullptr) {
+			if (second->boundingBox != nullptr) {
+				glm::vec3 direction = (glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)) - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+				direction = glm::normalize(direction);
+				float magnitude = (first->boundingBox->radius() + second->boundingBox->radius()) - glm::distance(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)), glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+				displacement += direction * magnitude;
+			}
+			else if (second->capsuleCollider != nullptr) {
+				glm::vec3 direction = glm::normalize(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)) - second->capsuleCollider->center);
+				float magnitude = (first->boundingBox->radius() + second->capsuleCollider->radius) - glm::distance(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)), second->capsuleCollider->center);
+				displacement += direction * magnitude;
+			}
+		}
+		else if (first->capsuleCollider != nullptr) {
+			if (second->boundingBox != nullptr) {
+				glm::vec3 direction = glm::normalize(first->capsuleCollider->center - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+				direction = glm::normalize(direction);
+				float magnitude = (first->capsuleCollider->radius + second->boundingBox->radius()) - glm::distance(first->capsuleCollider->center, glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
+				displacement += direction * magnitude;
+			}
+			else if (second->capsuleCollider != nullptr) {
+				glm::vec3 direction = glm::normalize(first->capsuleCollider->center - second->capsuleCollider->center);
+				float magnitude = (first->capsuleCollider->radius + second->capsuleCollider->radius) - glm::distance(first->capsuleCollider->center, second->capsuleCollider->center);
+				displacement += direction * magnitude;
+			}
+		}
+		std::cout << first->name << ", " << second->name << glm::to_string(displacement) << std::endl;
+		return displacement;
+	}
+
 	void simulate(float deltaTime) {
 		ZoneScopedN("simulate");
 		for (auto section : sections) {
 			for (int i = 0; i < section->objects.size(); i++) {
 				for (int j = 0; j < section->staticObjects.size(); j++) {
 					if (checkCollisionPBDStatic(section->objects.at(i), section->staticObjects.at(j))) {
-						separateStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
-						//resolveCollisionStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
+						//separateStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
+						resolveCollisionStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
 					}
 				}
 				for (int j = i + 1; j < section->objects.size(); j++) {
 					if (checkCollisionPBD(section->objects.at(i), section->objects.at(j))) {
 						separate(section->objects.at(i), section->objects.at(j));
+						resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
 						if (section->objects.at(i)->name.starts_with("enemy") && section->objects.at(j)->name.starts_with("enemy") &&
-							glm::distance(section->objects.at(i)->getTransform()->predictedPosition, section->objects.at(j)->getTransform()->predictedPosition) < section->objects.at(j)->capsuleCollider->radius * section->objects.at(j)->getTransform()->localScale.x) {
+							glm::distance(section->objects.at(i)->getTransform()->predictedPosition, section->objects.at(j)->getTransform()->predictedPosition) < section->objects.at(j)->capsuleCollider->radius * section->objects.at(j)->getTransform()->localScale.x * 2.0f) {
 							auto object = section->objects.at(i);
-							object->getTransform()->predictedPosition += glm::vec3(object->velocity.z,object->velocity.y, -object->velocity.x) * deltaTime;
+							object->getTransform()->predictedPosition += glm::vec3(object->velocity.z,object->velocity.y, -object->velocity.x) * deltaTime * 5.f;
 						}
-						//resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
+						
 					}
 				}
 			}
@@ -361,18 +435,18 @@ public:
 	bool checkCollisionPBD(GameObject* first, GameObject* second) {
 		if (first->boundingBox) {
 			if (second->boundingBox) {
-				return checkBoundingBoxPBDCollision(first->boundingBox, second->boundingBox, first->getTransform()->getPredictedMatrix(), second->getTransform()->getPredictedMatrix());
+				return checkBoundingBoxCollision(*first->boundingBox, *second->boundingBox, first->getTransform()->getPredictedMatrix(), second->getTransform()->getPredictedMatrix());
 			}
 			else if (second->capsuleCollider) {
-				return checkBoxCapsulePBDCollision(first->boundingBox, second->capsuleCollider, first->getTransform()->getPredictedMatrix(), second->getTransform()->getPredictedMatrix());
+				return checkBoxCapsuleCollision(first, second, first->getTransform()->getPredictedMatrix(), second->getTransform()->getPredictedMatrix());
 			}
 		}
 		else if (first->capsuleCollider) {
 			if (second->boundingBox) {
-				return checkBoxCapsulePBDCollision(second->boundingBox, first->capsuleCollider, second->getTransform()->getPredictedMatrix(), first->getTransform()->getPredictedMatrix());
+				return checkBoxCapsuleCollision(second, first, second->getTransform()->getPredictedMatrix(), first->getTransform()->getPredictedMatrix());
 			}
 			else if (second->capsuleCollider) {
-				return checkCapsulePBDCollision(first->capsuleCollider, second->capsuleCollider, first->getTransform()->getPredictedMatrix(), second->getTransform()->getPredictedMatrix());
+				return checkCapsuleCollision(first, second, first->getTransform()->getPredictedMatrix(), second->getTransform()->getPredictedMatrix());
 			}
 		}
 		return false;
@@ -381,18 +455,18 @@ public:
 	bool checkCollisionPBDStatic(GameObject* first, GameObject* second) {
 		if (first->boundingBox) {
 			if (second->boundingBox) {
-				return checkBoundingBoxPBDCollision(first->boundingBox, second->boundingBox, first->getTransform()->getPredictedMatrix(), second->getTransform()->getMatrix());
+				return checkBoundingBoxCollision(*first->boundingBox, *second->boundingBox, first->getTransform()->getPredictedMatrix(), second->getTransform()->getMatrix());
 			}
 			else if (second->capsuleCollider) {
-				return checkBoxCapsulePBDCollision(first->boundingBox, second->capsuleCollider, first->getTransform()->getPredictedMatrix(), second->getTransform()->getMatrix());
+				return checkBoxCapsuleCollision(first, second, first->getTransform()->getPredictedMatrix(), second->getTransform()->getMatrix());
 			}
 		}
 		else if (first->capsuleCollider) {
 			if (second->boundingBox) {
-				return checkBoxCapsulePBDCollision(second->boundingBox, first->capsuleCollider, second->getTransform()->getMatrix(), first->getTransform()->getPredictedMatrix());
+				return checkBoxCapsuleCollision(second, first, second->getTransform()->getMatrix(), first->getTransform()->getPredictedMatrix());
 			}
 			else if (second->capsuleCollider) {
-				return checkCapsulePBDCollision(first->capsuleCollider, second->capsuleCollider, first->getTransform()->getPredictedMatrix(), second->getTransform()->getMatrix());
+				return checkCapsuleCollision(first, second, first->getTransform()->getPredictedMatrix(), second->getTransform()->getMatrix());
 			}
 		}
 		return false;
@@ -440,7 +514,7 @@ public:
 	bool checkBoxCapsulePBDCollision(const BoundingBox* meshBox, const CapsuleCollider* otherCapsule, glm::mat4 transform, glm::mat4 boxtransform) {
 		glm::vec3 boxMin = glm::vec3(boxtransform * glm::vec4(meshBox->particles.at(0)->predictedPosition, 1.0f));
 		glm::vec3 boxMax = glm::vec3(boxtransform * glm::vec4(meshBox->particles.at(1)->predictedPosition, 1.0f));
-		float capsuleHeight = glm::distance(otherCapsule->top->predictedPosition, otherCapsule->bottom->predictedPosition);
+		float capsuleHeight = glm::distance(glm::vec3(transform * glm::vec4(otherCapsule->top->predictedPosition, 1.0f)), glm::vec3(transform * glm::vec4(otherCapsule->bottom->predictedPosition, 1.0f)));
 		glm::vec3 capsuleCenter = otherCapsule->bottom->predictedPosition + capsuleHeight * 0.5f;
 		float capsuleRadius = otherCapsule->radius;
 
@@ -517,8 +591,11 @@ public:
 			}
 		}
 		glm::vec3 separation = normal * penetration;
-		first->localTransform->predictedPosition += separation;
-		second->localTransform->predictedPosition -= separation;
+		if (!(glm::any(glm::isnan(separation)) || glm::any(glm::isinf(separation)))) {
+			first->localTransform->predictedPosition += separation;
+			second->localTransform->predictedPosition -= separation;
+			std::cout << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
+		}
 	}
 
 	void separateStatic(GameObject* first, GameObject* second, float deltaTime) {
@@ -550,6 +627,7 @@ public:
 		}
 		glm::vec3 separation = normal * penetration;
 		first->localTransform->predictedPosition += separation * deltaTime * 0.5f;
+		std::cout << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
 	}
 };
 

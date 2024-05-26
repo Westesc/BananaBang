@@ -30,7 +30,7 @@ public:
 	float inverseMass = 1.f;
 	float dampingFactor = 1.f;
 	glm::vec3 colliderOffset = glm::vec3(0.f);
-	bool friction = false;
+	bool friction = true;
 
 	void setParent(GameObject* Parent);
 	void addChild(GameObject* Child);

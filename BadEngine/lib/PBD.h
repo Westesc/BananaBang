@@ -20,7 +20,9 @@ public:
         ZoneScopedN("PBD Simulation before collisions");
         for (auto& object : objects) {
             object->updateVelocity(deltaTime);
+            float yVel = object->velocity.y;
             object->velocity *= (object->dampingFactor - (int(object->friction) * 0.25f * object->dampingFactor));
+            object->velocity.y = yVel;
             object->predictPosition(deltaTime);
             if (object->name == "player") {
                 //std::cout << "first predict: " << glm::to_string(object->predictedPosition) << std::endl;
@@ -57,17 +59,13 @@ public:
             glm::vec3 displacement = object->localTransform->predictedPosition - object->getTransform()->localPosition;
             object->velocity = displacement / deltaTime;
             object->getTransform()->localPosition = object->localTransform->predictedPosition;
-            float belowGround = 0.0f;
-            object->friction = false;
             if (object->getTransform()->localPosition.y <= 0.0f) {
-                belowGround = -object->getTransform()->localPosition.y;
                 object->getTransform()->localPosition.y = 0.0f;
-                object->friction = true;
+                object->velocity.y = 0.0f;
             }
             if (object->name.starts_with("enemy") && object->getTransform()->localPosition.y <= 5.0f) {
-                belowGround = 5.0f - object->getTransform()->localPosition.y;
                 object->getTransform()->localPosition.y = 5.0f;
-                object->friction = true;
+                object->velocity.y = 0.0f;
             }
         }
 	}

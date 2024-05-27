@@ -612,6 +612,10 @@ int main() {
 							//branch->localTransform->localRotation.x =losujLiczbe(10,45) ;
 							//branch->localTransform->localRotation.z = losujLiczbe(0, 360);
 							branch->addColider(1);
+							/*glm::vec3 bpos = branch->localTransform->localPosition;
+							glm::vec3 bscale = branch->localTransform->localScale;
+							branch->boundingBox = new BoundingBox(glm::vec3(bpos.x * bscale.x * 1.1f, bpos.y * bscale.y,bpos.z * bscale.z * 1.1f),
+								glm::vec3(bpos.x * bscale.x * 1.1f, bpos.y * bscale.y, (bpos.z +4.5f) * bscale.z * 1.1f), 0.0f, true);*/
 							//std::cout << branch->localTransform->localRotation.x << std::endl;
 							log->addChild(branch);
 						}

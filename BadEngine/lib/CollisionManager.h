@@ -255,24 +255,29 @@ public:
 	}
 
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
-		glm::vec3 displacement = calculateCollisionResponseStatic(first, second);
-		glm::vec3 otherDisplacement = -displacement;
-		//float scalar = glm::length(glm::normalize(displacement));
-		displacement *= deltaTime;
-		if (second->name.starts_with("branch") || second->name.starts_with("log")) {
-			displacement *= 0.1f;
+		if (first->name == "player" && !second->name.starts_with("tree")) {
+			first->localTransform->predictedPosition = first->localTransform->localPosition;
 		}
-		if (second->name.starts_with("tree")) {
-			displacement.y = glm::clamp(displacement.y, 0.0f, 0.05f);
-		}
-		if (first->boundingBox != nullptr) {
-			displacement *= 0.1f;
-		}
-		if (second->boundingBox != nullptr) {
-			otherDisplacement *= 0.1f;
-		}
-		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
-			first->localTransform->predictedPosition += displacement;
+		else {
+			glm::vec3 displacement = calculateCollisionResponseStatic(first, second);
+			glm::vec3 otherDisplacement = -displacement;
+			//float scalar = glm::length(glm::normalize(displacement));
+			displacement *= deltaTime;
+			if (second->name.starts_with("branch") || second->name.starts_with("log")) {
+				displacement *= 0.1f;
+			}
+			if (second->name.starts_with("tree") || second->name.starts_with("log")) {
+				displacement.y = 0.0f;
+			}
+			if (first->boundingBox != nullptr) {
+				displacement *= 0.1f;
+			}
+			if (second->boundingBox != nullptr) {
+				otherDisplacement *= 0.1f;
+			}
+			if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
+				first->localTransform->predictedPosition += displacement;
+			}
 		}
 	}
 
@@ -415,7 +420,7 @@ public:
 			for (int i = 0; i < section->objects.size(); i++) {
 				for (int j = 0; j < section->staticObjects.size(); j++) {
 					if (checkCollisionPBDStatic(section->objects.at(i), section->staticObjects.at(j))) {
-						//separateStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
+						separateStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
 						resolveCollisionStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
 					}
 				}
@@ -629,7 +634,10 @@ public:
 			}
 		}
 		glm::vec3 separation = normal * penetration;
-		first->localTransform->predictedPosition += separation * deltaTime * 0.5f;
+		if (second->name.starts_with("tree") || second->name.starts_with("log")) {
+			separation.y = 0.0f;
+		}
+		first->localTransform->predictedPosition += separation * deltaTime;
 		std::cout << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
 	}
 };

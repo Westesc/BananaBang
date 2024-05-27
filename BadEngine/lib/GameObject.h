@@ -47,9 +47,11 @@ public:
 	void setRotating(bool rotating, float speed = 100.f, glm::vec3 rotateAxis = glm::vec3(0.f, 0.f, 1.f));
 	void checkResolveCollisions(GameObject* other, float deltaTime);
 	void Draw(glm::mat4 view, glm::mat4 perspective);
+	void Draw(Shader* shader);
 	YAML::Node serialize();
 	void setVisible(bool visible);
 	void lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 lightColor);
+	void shadowSetting(glm::mat4 LSMatrix);
 	void timeSetting(float time, glm::vec2 iResolution);
 	void addColider();
 

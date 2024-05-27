@@ -59,14 +59,14 @@ public:
             glm::vec3 displacement = object->localTransform->predictedPosition - object->getTransform()->localPosition;
             object->velocity = displacement / deltaTime;
             object->getTransform()->localPosition = object->localTransform->predictedPosition;
-            if (object->getTransform()->localPosition.y <= 0.0f) {
+            if (object->getTransform()->localPosition.y <= object->capsuleCollider->height * 0.5f * object->localTransform->localScale.y) {
                 object->getTransform()->localPosition.y = 0.0f;
                 object->velocity.y = 0.0f;
             }
-            if (object->name.starts_with("enemy") && object->getTransform()->localPosition.y <= 5.0f) {
+            /*if (object->name.starts_with("enemy") && object->getTransform()->localPosition.y <= 5.0f) {
                 object->getTransform()->localPosition.y = 5.0f;
                 object->velocity.y = 0.0f;
-            }
+            }*/
         }
 	}
 };

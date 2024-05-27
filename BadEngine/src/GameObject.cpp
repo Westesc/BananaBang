@@ -349,6 +349,7 @@ void GameObject::updatePredictedPosition() {
         glm::vec3 center = (capsuleCollider->top->predictedPosition + capsuleCollider->bottom->predictedPosition) * 0.5f;
         localTransform->predictedPosition = center + colliderOffset;
     }
+}
 void GameObject::timeSetting(float time, glm::vec2 iResolution) {
     if (modelComponent != nullptr) {
         modelComponent->GetShader()->use();

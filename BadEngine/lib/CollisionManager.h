@@ -587,30 +587,6 @@ public:
 			std::cout << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
 		}
 	}
-	void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
-		glm::vec3 displacement = calculateCollisionResponse(first, second);
-		glm::vec3 otherDisplacement = -displacement;
-		float scalar = glm::length(glm::normalize(displacement));
-		displacement *= 400.f * scalar * deltaTime;
-		if (second->name.starts_with("branch")) {
-			displacement *= 0.1f;
-		}
-		if (first->getModelComponent()->boundingBox != nullptr) {
-			displacement *= 0.1f * deltaTime;
-		}
-		else {
-			displacement *= deltaTime;
-		}
-		if (second->getModelComponent()->boundingBox != nullptr) {
-			otherDisplacement *= 0.1f * deltaTime;
-		}
-		else {
-			otherDisplacement *= deltaTime;
-		}
-		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement))) && first->name == "player") {
-			first->localTransform->localPosition += displacement;
-		}
-	}
 
 	void separateStatic(GameObject* first, GameObject* second, float deltaTime) {
 		glm::vec3 normal = glm::vec3(0.0f);
@@ -645,36 +621,6 @@ public:
 		}
 		first->localTransform->predictedPosition += separation * deltaTime;
 		std::cout << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
-	}
-	glm::vec3 calculateCollisionResponse(GameObject* first, GameObject* second) {
-		glm::vec3 displacement(0.0f);
-		if (first->boundingBox != nullptr) {
-			if (second->boundingBox != nullptr) {
-				glm::mat4 M = first->getTransform()->getMatrix();
-
-				glm::mat4 M2 = second->getTransform()->getMatrix();
-				glm::vec3 direction = (glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)) - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
-				if (!second->name.starts_with("branch")) {
-					direction = glm::normalize(direction);
-					float magnitude = (first->boundingBox->radius() + second->boundingBox->radius()) - glm::distance(glm::vec3(M * glm::vec4(first->boundingBox->center(), 1.0f)), glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
-					displacement += direction * magnitude;
-				}
-				else {
-					glm::vec2 branchlogdist = glm::vec2(second->boundingBox->center().x - second->parent->boundingBox->center().x,second->boundingBox->center().z - second->parent->boundingBox->center().z);
-					float costoX = glm::cos(glm::dot(glm::normalize(branchlogdist), glm::vec2(1.0f, 0.0f)));
-					float sintoX = glm::sin(glm::dot(glm::normalize(branchlogdist), glm::vec2(1.0f, 0.0f)));
-					glm::mat4 tmpM = glm::translate(M , glm::vec3(direction.x * costoX, 0.0f, 0.0f));
-					tmpM = glm::translate(M, glm::vec3(0.0f, 0.0f, direction.z * costoX));
-					glm::vec3 tmpCenter = glm::vec3(tmpM * glm::vec4(first->boundingBox->center(), 1.0f));
-					direction = tmpCenter - glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f));
-					float magnitude = (first->boundingBox->radius() + second->boundingBox->radius()) - glm::distance(tmpCenter, glm::vec3(M2 * glm::vec4(second->boundingBox->center(), 1.0f)));
-					displacement += direction * magnitude;
-				}
-				std::cout << first->name<<", "<<second->name << glm::to_string(displacement) << std::endl;
-			}
-			
-		}
-		return displacement;
 	}
 };
 

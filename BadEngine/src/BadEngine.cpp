@@ -206,8 +206,8 @@ int main() {
 	}
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
-	AnimateBody* animPlayer = new AnimateBody(animodel);
+	auto animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
+	AnimateBody* animPlayer = new AnimateBody(animodel.get());
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
@@ -230,7 +230,7 @@ int main() {
 	Shader* shaderTree = new Shader("../../../../src/shaders/vsTree.vert", "../../../../src/shaders/fsTree.frag");
 	Shader* rampShader = new Shader("../../../../src/shaders/ramp.vert", "../../../../src/shaders/ramp.frag");
 	Shader* enemyShader = new Shader("../../../../src/shaders/enemy.vert", "../../../../src/shaders/enemy.frag");
-	auto enemyModel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"));
+	auto enemyModel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"), false);
 	enemyModel->SetShader(enemyShader);
 
 	GameObject* box = new GameObject("box");
@@ -440,7 +440,7 @@ int main() {
 		}
 
 		if (gameMode.getMode() == GameMode::Game) {
-			pm->ManagePlayer(deltaTime, deltaTime2);
+			pm->ManagePlayer(deltaTime2);
 		}
 
 		if (sm->getActiveScene()->findByName("player")) {
@@ -660,14 +660,14 @@ int main() {
 						tree->addModelComponent(treetrunk);
 						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
 						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
-						tree->addColider();
+						tree->addColider(1);
 						GameObject* log = new GameObject("log"+std::to_string(k));
 						log->addModelComponent(treelog);
 						log->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX;
 						log->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
 						log->localTransform->localPosition.y = planeSector->localTransform->localPosition.y+ 1.2;
 						log->localTransform->localRotation.y = losujLiczbe(0, 360);
-						log->addColider();
+						log->addColider(1);
 						tree->addChild(log);
 						planeSector->addChild(tree);
 						int branchCount = losujLiczbe(3, 8);
@@ -703,17 +703,7 @@ int main() {
 				loaded = true;
 				spawnerTime = 0;
 			}
-			GameObject* player = new GameObject("player");
-			player->addModelComponent(box2model);
-			player->modelComponent->SetShader(phongShader);
-			player->localTransform->localPosition = glm::vec3(0.f);
-			player->localTransform->localScale = glm::vec3(0.2f);
-			player->addColider(1);
-			pbd->objects.push_back(player);
-			if (sm->getActiveScene()->findByName("player") == nullptr) {
-				sm->getActiveScene()->addObject(player);
-				cm.addObject(player);
-			}
+			
 				//sm->saveScene("first");
 			buttonPressed = false;
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
@@ -763,9 +753,14 @@ int main() {
 			GameObject* anim = new GameObject("player");
 			animodel->SetShader(shaderAnimation);
 			anim->addModelComponent(animodel);
-			//anim->addColider();
+			anim->addColider(2);
+			pbd->objects.push_back(anim);
+			if (sm->getActiveScene()->findByName("player") == nullptr) {
+				sm->getActiveScene()->addObject(anim);
+				cm.addObject(anim);
+			}
 			sm->getActiveScene()->addObject(anim);
-			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
+			//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
 			sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
 
 			GameObject* skydome = new GameObject("skydome");
@@ -881,14 +876,6 @@ void renderImGui() {
 	ImGui::SliderInt("Max drzew", &b, a, 20);
 	if (ImGui::Button("Generate")) {
 		buttonPressed = true;
-	}
-	if (sm->getActiveScene()->findByName("player")) {
-		GameObject* player = sm->getActiveScene()->findByName("player");
-		glm::vec3 pos = player->getTransform()->localPosition;
-		ImGui::Text("Player position: %f %f %f", pos.x, pos.y, pos.z);
-		glm::vec3 transformedCenter = glm::vec3(player->getTransform()->getMatrix() * glm::vec4(player->boundingBox->center(), 1.0f));
-		ImGui::Text("bounding box: %f %f %f", transformedCenter.x, transformedCenter.y, transformedCenter.z);
-		ImGui::Text("vel: %f %f %f", player->velocity.x, player->velocity.y, player->velocity.z);
 	}
 	ImGui::End();
 

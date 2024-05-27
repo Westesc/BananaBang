@@ -57,7 +57,7 @@ private:
             rotateAngle += direction * rotationAmount;
         }
     }
-    void move() {
+    void move(float deltaTime) {
         getRotate();
         float angle = atan2(camera->getFront().x, camera->getFront().z) * (180.0 / M_PI);
        // sm->getActiveScene()->findByName("player")->setRotating(false, angle + glm::radians(rotateAngle), glm::vec3(0.f, 1.f, 0.f));
@@ -73,8 +73,8 @@ private:
        // float dy = animateBody->getPosition().y;
 
        // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
-
-        sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.f, dz));
+        glm::vec3 vel = glm::vec3(dx, 0.f, dz)/ deltaTime;
+        sm->getActiveScene()->findByName("player")->velocity = vel;
        // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
     }
 
@@ -88,7 +88,7 @@ private:
         sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.f, dz));
     }
 
-    void MovePlayer() {
+    void MovePlayer(float deltaTime) {
         float speed = 0.f;
         if (input->checkAnyKey() && deltaTime2 > 0.02f) {
             deltaTime2 = 0.f;
@@ -134,15 +134,15 @@ private:
             }
             else
             {
-                move();
+                move(deltaTime);
             }
         }
     }
 
-    void jump() {
+    void jump(float deltaTime) {
         rb->upwardsSpeed = jumpPower;
         rb->useGravity();
-        MovePlayer();
+        MovePlayer(deltaTime);
 
         glm::vec3 finalPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
         float jumpDistance = glm::length(finalPosition.y - initialPosition.y);
@@ -188,17 +188,17 @@ public:
         rb = new RigidBody("player", sm, tm);
     }
 
-    void ManagePlayer(float& deltaTime2) {
+    void ManagePlayer(float& deltaTime2, float deltaTime) {
         //std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         this->deltaTime2 = deltaTime2;
         checkState();
         if (state == walking) {
-            MovePlayer();
+            MovePlayer(deltaTime);
             // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         }
         else if (state == attack1) {
             animateBody->setActiveAnimation("attack1");
-            move();
+            move(deltaTime);
             if (animateBody->isPlay() == false) {
                 state = walking;
             }
@@ -206,16 +206,16 @@ public:
         else if (state == dodge) {
             animateBody->setActiveAnimation("dodge");
             //currentTurn = 180.f;
-            move();
+            move(deltaTime);
             if (animateBody->isPlay() == false) {
                 state = walking;
             }
         }
         else if (state == jump_up) {
-            jump();
+            jump(deltaTime);
         }
         else if (state == air) {
-            MovePlayer();
+            MovePlayer(deltaTime);
             rb->useGravity();
         }
     }

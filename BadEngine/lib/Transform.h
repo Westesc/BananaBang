@@ -14,7 +14,7 @@ public:
 	~Transform();
 
 	glm::vec3 localPosition;
-	glm::vec3 localRotation; //a to nie powinien by� vec4?
+	glm::vec3 localRotation;
 	glm::vec3 localScale;
 	glm::vec3 predictedPosition = glm::vec3(0.0f);
 

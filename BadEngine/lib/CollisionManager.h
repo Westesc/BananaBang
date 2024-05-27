@@ -265,6 +265,7 @@ public:
 
 	void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
 		glm::vec3 displacement = calculateCollisionResponse(first, second);
+		displacement.y = 0.0f;
 		glm::vec3 otherDisplacement = -displacement;
 		//float scalar = glm::length(glm::normalize(displacement));
 		displacement *= deltaTime;
@@ -279,10 +280,18 @@ public:
 			first->localTransform->predictedPosition += displacement;
 			second->localTransform->predictedPosition += otherDisplacement;
 		}
-		else if (first->name.starts_with("enemy") && second->name.starts_with("enemy")) {
-			Enemy* enemy1 = static_cast<Enemy*>(first);
-			first->localTransform->predictedPosition += glm::vec3(enemy1->velocity.z ,0.0f,-enemy1->velocity.x) * deltaTime * 0.1f;
-			addObject(second);
+		else {
+			//Enemy* enemy1 = static_cast<Enemy*>(first);
+			glm::vec3 direction = second->localTransform->predictedPosition -first->localTransform->predictedPosition;
+			glm::quat rotation = glm::quat(first->localTransform->localRotation);
+			glm::quat rotation2 = glm::quat(second->localTransform->localRotation);
+			//first->localTransform->predictedPosition -= direction * /*first->velocity * rotation **/ deltaTime * 0.0001f;
+			//second->localTransform->predictedPosition += direction * /*second->velocity **/ rotation2 * deltaTime * 0.1f;
+			glm::vec3 firstcorrection = first->velocity * rotation;
+			glm::vec3 secondcorretion = second->velocity * rotation2;
+			first->localTransform->predictedPosition += glm::vec3(firstcorrection.x, 0.0f,firstcorrection.z) * deltaTime * 0.01f;
+			second->localTransform->predictedPosition -= glm::vec3(secondcorretion.x, 0.0f, secondcorretion.z) * deltaTime * 0.01f;
+			//addObject(second);
 		}
 	}
 
@@ -410,8 +419,8 @@ public:
 					if (checkCollisionPBD(section->objects.at(i), section->objects.at(j))) {
 						separate(section->objects.at(i), section->objects.at(j));
 						resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
-						if (section->objects.at(i)->name.starts_with("enemy") && section->objects.at(j)->name.starts_with("enemy") &&
-							glm::distance(section->objects.at(i)->getTransform()->predictedPosition, section->objects.at(j)->getTransform()->predictedPosition) < section->objects.at(j)->capsuleCollider->radius * section->objects.at(j)->getTransform()->localScale.x * 2.0f) {
+						if (glm::distance(section->objects.at(i)->getTransform()->predictedPosition, section->objects.at(j)->getTransform()->predictedPosition) 
+							< section->objects.at(j)->capsuleCollider->radius * section->objects.at(j)->getTransform()->localScale.x * 2.0f) {
 							auto object = section->objects.at(i);
 							object->getTransform()->predictedPosition += glm::vec3(object->velocity.z,object->velocity.y, -object->velocity.x) * deltaTime * 5.f;
 						}
@@ -581,11 +590,12 @@ public:
 			}
 		}
 		glm::vec3 separation = normal * penetration;
+		separation.y = 0.0f;
 		if (!(glm::any(glm::isnan(separation)) || glm::any(glm::isinf(separation)))) {
 			first->localTransform->predictedPosition += separation;
 			second->localTransform->predictedPosition -= separation;
-			std::cout << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
 		}
+		std::cout <<"separation: " << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
 	}
 
 	void separateStatic(GameObject* first, GameObject* second, float deltaTime) {

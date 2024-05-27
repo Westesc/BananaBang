@@ -373,7 +373,7 @@ int main() {
 		tm->setTime(deltaTime);
 		glm::mat4 V(1.f);
 		if (gameMode.getMode() == GameMode::Game) {
-			pm->ManagePlayer(deltaTime2);
+			pm->ManagePlayer(deltaTime2, deltaTime);
 			V = camera->getViewMatrixPlayer();
 		}
 		else if (gameMode.getMode() != GameMode::Game) {
@@ -440,7 +440,7 @@ int main() {
 		}
 
 		if (gameMode.getMode() == GameMode::Game) {
-			pm->ManagePlayer(deltaTime2);
+			pm->ManagePlayer(deltaTime2, deltaTime);
 		}
 
 		if (sm->getActiveScene()->findByName("player")) {
@@ -523,7 +523,7 @@ int main() {
 						//enemy->velocity = glm::vec3(0.0f);
 						break;
 					case EnemyState::Walking:
-						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 7.f) {
+						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
 							enemy->state = EnemyState::Walking;
 							enemy->timeSinceDirChange += deltaTime;
 							glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->localTransform->getLocalPosition(), enemy->sector);
@@ -546,11 +546,12 @@ int main() {
 						}
 						else if (enemy->state == EnemyState::Walking) {
 							enemy->state = EnemyState::Chopping;
+							enemy->setVel(glm::vec3(0.0f));
 							enemy->timeSpentWalking = 0.f;
 						}
 						break;
 					case EnemyState::Chopping:
-						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 7.f) {
+						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
 							enemy->state = EnemyState::Walking;
 						}
 						break;
@@ -573,7 +574,7 @@ int main() {
 		pbd->simulateB4Collisions(deltaTime);
 		cm.simulate(deltaTime);
 		pbd->simulateAfterCollisions(deltaTime);
-		performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
+		//performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
 		if (frustumTest) {
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 				if (sm->getActiveScene()->gameObjects.at(i)->isVisible) {
@@ -684,10 +685,10 @@ int main() {
 							//branch->localTransform->localRotation.x =losujLiczbe(10,45) ;
 							//branch->localTransform->localRotation.z = losujLiczbe(0, 360);
 							branch->addColider(1);
-							/*glm::vec3 bpos = branch->localTransform->localPosition;
+							glm::vec3 bpos = branch->localTransform->localPosition;
 							glm::vec3 bscale = branch->localTransform->localScale;
 							branch->boundingBox = new BoundingBox(glm::vec3(bpos.x * bscale.x * 1.1f, bpos.y * bscale.y,bpos.z * bscale.z * 1.1f),
-								glm::vec3(bpos.x * bscale.x * 1.1f, bpos.y * bscale.y, (bpos.z +4.5f) * bscale.z * 1.1f), 0.0f, true);*/
+								glm::vec3(bpos.x * bscale.x * 1.1f, bpos.y * bscale.y, (bpos.z +4.5f) * bscale.z * 1.1f), 0.0f, true);
 							//std::cout << branch->localTransform->localRotation.x << std::endl;
 							log->addChild(branch);
 						}
@@ -753,14 +754,15 @@ int main() {
 			GameObject* anim = new GameObject("player");
 			animodel->SetShader(shaderAnimation);
 			anim->addModelComponent(animodel);
-			anim->addColider(2);
+			//anim->addColider(2);
+			anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
 			pbd->objects.push_back(anim);
 			if (sm->getActiveScene()->findByName("player") == nullptr) {
 				sm->getActiveScene()->addObject(anim);
 				cm.addObject(anim);
 			}
 			sm->getActiveScene()->addObject(anim);
-			//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
+			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
 			sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
 
 			GameObject* skydome = new GameObject("skydome");

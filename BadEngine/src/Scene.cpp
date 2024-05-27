@@ -51,6 +51,16 @@ void Scene::Draw(glm::mat4 view, glm::mat4 perspective) {
 		}
 	}
 }
+void Scene::Draw(Shader* shader) {
+	for (auto go : gameObjects) {
+		if (go->isVisible) {
+			go->Draw(shader);
+		}
+	}
+}
+
+
+
 
 /*void Scene::checkResolveCollisions(float deltaTime) {
 	for (int i = 0; i < gameObjects.size(); i++) {
@@ -67,4 +77,19 @@ YAML::Node Scene::serialize() {
 		node["gameObjects"].push_back(go->serialize());
 	}
 	return node;
+}
+
+void Scene::lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 lightColor) {
+	for (auto go : gameObjects) {
+		if (go->isVisible) {
+			go->lightSetting(viewPos, lightPos,  lightColor);
+		}
+	}
+}
+void Scene::shadowSetting(glm::mat4 LSMatrix) {
+	for (auto go : gameObjects) {
+		if (go->isVisible) {
+			go->shadowSetting(LSMatrix);
+		}
+	}
 }

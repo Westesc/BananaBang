@@ -20,7 +20,11 @@ public:
 	void Update(glm::mat4 view, glm::mat4 perspective, float time);
 	//void checkResolveCollisions(float deltaTime);
 	void Draw(glm::mat4 view, glm::mat4 perspective);
+	void Draw(Shader* shader);
 	YAML::Node serialize();
+
+	void lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 lightColor);
+	void shadowSetting(glm::mat4 LSMatrix);
 
 protected:
 	void Start();

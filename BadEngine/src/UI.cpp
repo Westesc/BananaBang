@@ -137,6 +137,7 @@ void UI::addShader(Shader* shader) {
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 }
 void UI::Draw(Transform* transform) {
+	glDisable(GL_DEPTH_TEST);
 	if (type == plane) {
 		shader->use();
 		glUniform3f(glGetUniformLocation(shader->ID, "color"), color.x, color.y, color.z);
@@ -194,6 +195,6 @@ void UI::Draw(Transform* transform) {
 		glBindVertexArray(0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
-
+	glEnable(GL_DEPTH_TEST);
 }
 

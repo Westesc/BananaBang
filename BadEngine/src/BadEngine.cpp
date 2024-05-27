@@ -35,6 +35,8 @@
 #include "../lib/PBD.h"
 #include "../lib/TimeManager.h"
 #include "../lib/animation/Animator.h"
+#include "../lib/Globals.h"
+
 
 bool test = false;
 bool frustumTest = false;
@@ -66,7 +68,7 @@ PlayerMovement* pm;
 Camera* camera;
 TimeManager* tm = new TimeManager();
 float boxSpeed = 3.f;
-
+glm::vec3 lightPos(0.5f, 20.0f, 0.3f);
 float scale = 5.f;
 float scaleT = 1.f;
 int sectors = 1;
@@ -85,7 +87,7 @@ void Start() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(szer, wys, "Monke", nullptr, nullptr);
+	window = glfwCreateWindow(Window::windowWidth, Window::windowHeight, "Monke", nullptr, nullptr);
 	if (!window) exit(1);
 
 	glfwMakeContextCurrent(window);
@@ -233,6 +235,9 @@ int main() {
 	auto enemyModel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"), false);
 	enemyModel->SetShader(enemyShader);
 
+	//depth shader
+	Shader* depthShader = new Shader("../../../../src/shaders/depthShader.vert", "../../../../src/shaders/depthShader.frag");
+
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
 	GameObject* box2 = new GameObject("box2");
@@ -265,10 +270,10 @@ int main() {
     treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	treebranch1->SetShader(phongShader);
 	auto planeSectormodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"), false);
+	planeSectormodel->AddTexture("../../../../res/drewno.png", "diffuseMap");
 	treetrunk->SetShader(phongShader);
 	treelog->SetShader(phongShader);
-	planeSectormodel->SetShader(shaders);
-
+	planeSectormodel->SetShader(phongShader);
 
 	boxmodel->SetShader(mapsShader);
 	planemodel->SetShader(shaders);
@@ -313,7 +318,29 @@ int main() {
 	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/specular2.png", "specularMap");
 	sm->getActiveScene()->findByName("box")->getModelComponent()->AddTexture("../../../../res/normal2.png", "normalMap");
 	
-	glm::vec3 lightPos(0.5f, 10.0f, 0.3f);
+	//glm::vec3 lightPos(0.5f, 20.0f, 0.3f);
+	glm::vec3* lightColor = new glm::vec3(1.f, 1.0f, 1.f);
+
+	//Depth map to generate shadows
+	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	unsigned int depthMapFBO;
+	glGenFramebuffers(1, &depthMapFBO);
+	//creating depth texture
+	unsigned int depthMap;
+	glGenTextures(1, &depthMap);
+	glBindTexture(GL_TEXTURE_2D, depthMap);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	//depth texture as FBO's depth buffer
+	glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 
 	sm->getActiveScene()->findByName("box")->getTransform()->localPosition = glm::vec3(-1.f, -1.f, 0.f);
 	sm->getActiveScene()->findByName("box2")->getTransform()->localPosition = glm::vec3(-4.f, -4.f, 0.f);
@@ -563,6 +590,31 @@ int main() {
 			staticUpdateTime = 0.f;
 		}
 		sm->getActiveScene()->Update(V, P, time);
+
+
+		//generating shadows
+
+		glm::mat4 lightProjection, lightView;
+		glm::mat4 lightSpaceMatrix;
+		float near_plane = 1.0f, far_plane = 500.f;
+		lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
+		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		lightSpaceMatrix = lightProjection * lightView;
+		// render scene from light's point of view
+		depthShader->use();
+		depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
+		sm->getActiveScene()->Draw(depthShader);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		planeSectormodel->AddTexture(depthMap, "depthMap");
+
+
+		sm->getActiveScene()->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
+		sm->getActiveScene()->shadowSetting(lightSpaceMatrix);
+
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::translate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(20.f, 0.f, 18.f)));
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::scale(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(50.f, 50.0f, 50.0f)));
 		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::radians(time), glm::vec3(0.f, 1.f, 0.f)));
@@ -748,6 +800,7 @@ int main() {
 					}
 				}
 				sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
+				sm->getActiveScene()->gameObjects.at(i)->shadowSetting(lightSpaceMatrix);
 			}
 			
 			GameObject* anim = new GameObject("player");
@@ -815,12 +868,25 @@ int main() {
 		for (auto object : sm->getActiveScene()->gameObjects) {
 			for (auto ch : object->children) {
 				if (glm::distance(ch->getTransform()->localPosition, camera->transform->localPosition) > 100.f) {
-					ch->modelComponent = box2model;
-					ch->children.at(0)->modelComponent = box2model;
+					if (ch->modelComponent != box2model) {
+						ch->modelComponent = box2model;
+						ch->children.at(0)->modelComponent = nullptr;
+						for (auto branch : ch->children.at(0)->children)
+						{
+							branch->modelComponent = nullptr;
+						}
+					}
 				}
 				else {
-					ch->modelComponent = treetrunk;
-					ch->children.at(0)->modelComponent = treelog;
+					if (ch->modelComponent != treetrunk)
+					{
+						ch->modelComponent = treetrunk;
+						ch->children.at(0)->modelComponent = treelog;
+						for (auto branch : ch->children.at(0)->children)
+						{
+							branch->modelComponent = treebranch1;
+						}
+					}
 				}
 			}
 		}
@@ -877,6 +943,14 @@ void renderImGui() {
 	if (ImGui::Button("Generate")) {
 		buttonPressed = true;
 	}
+	for (auto go : sm->getActiveScene()->gameObjects) {
+		ImGui::Text(go->name.c_str());
+		ImGui::Text("x: %.2f, y: %.2f, z: %.2f",go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);
+		
+	}
+	ImGui::SliderFloat("light x", &lightPos.x, -100, 100); 
+	ImGui::SliderFloat("light y", &lightPos.y, -100, 100);
+	ImGui::SliderFloat("light z", &lightPos.z, -100, 100);
 	ImGui::End();
 
 	ImGui::Render();

@@ -4,6 +4,7 @@
 #include <yaml-cpp/yaml.h>
 #include "Transform.h"
 #include "Model.h"
+#include "UI.h"
 
 class GameObject {
 public:
@@ -20,6 +21,7 @@ public:
 	std::vector<Component> components;
 	Transform* localTransform;
 	std::shared_ptr<Model> modelComponent;
+	UI* uiComponent = nullptr;
 	bool isRotating;
 	float rotateSpeed;
 	glm::vec3 rotateAxis;
@@ -55,6 +57,8 @@ public:
 	void updateVelocity(float deltaTime);
 	void calculateOffset();
 	void updatePredictedPosition();
+	void timeSetting(float time, glm::vec2 iResolution);
+	void addColider();
 };
 
 #endif

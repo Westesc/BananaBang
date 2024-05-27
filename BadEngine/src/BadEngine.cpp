@@ -33,8 +33,9 @@
 #include "../lib/Enemy.h"
 #include "../lib/Tree.h"
 #include "../lib/PBD.h"
+#include "../lib/TimeManager.h"
+#include "../lib/animation/Animator.h"
 
-//bool test = true;
 bool test = false;
 bool frustumTest = false;
 
@@ -42,6 +43,7 @@ void DrawPlane(float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor
 void DrawTree(float scaleT, float scale, Shader* shaders, GameObject* plane, glm::vec3 vektor);
 int losujLiczbe(int a, int b);
 int losujLiczbe2();
+bool checkLocations(float x1, float y1,float x2,float y2,float distance);
 
 void setupImGui(GLFWwindow* window);
 void renderImGui();
@@ -53,15 +55,16 @@ GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _m
 
 using Clock = std::chrono::high_resolution_clock;
 using TimePoint = Clock::time_point;
-PlayerMovement* pm;
 
-Camera* camera = new Camera();
 using Duration = std::chrono::duration<float, std::ratio<1, 1>>;
 
 constexpr int wys = 800, szer = 1000;
 GLFWwindow* window;
 SceneManager* sm;
 Input* input;
+PlayerMovement* pm;
+Camera* camera;
+TimeManager* tm = new TimeManager();
 float boxSpeed = 3.f;
 
 float scale = 5.f;
@@ -93,15 +96,19 @@ void Start() {
 	glEnable(GL_CULL_FACE);
 
 	glFrontFace(GL_CCW);
-
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
+
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
 	sm = new SceneManager();
 	Scene* scene = new Scene("main");
 	sm->scenes.push_back(scene);
 	sm->activeScene = sm->scenes.at(0);
 	input = new Input(window);
-	pm = new PlayerMovement(sm, input);
+	camera = new Camera(sm);
+	pm = new PlayerMovement(sm, input, camera, tm);
 }
 
 std::array<glm::vec4, 6> calculateFrustumPlanes(const glm::mat4& viewProjectionMatrix) {
@@ -199,6 +206,24 @@ int main() {
 	}
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
+	Model* animodel = new Model(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
+	AnimateBody* animPlayer = new AnimateBody(animodel);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
+	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
+	pm->addAnimationPlayer(animPlayer);
+
+	Shader* shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
+	GameObject* anim = new GameObject("player");
+	animodel->SetShader(shaderAnimation);
+	anim->addModelComponent(animodel);
+	sm->getActiveScene()->addObject(anim);
+
+	Shader* fillingShader = new Shader("../../../../src/shaders/vs_filling.vert", "../../../../src/shaders/fs_filling.frag");
+	Shader* outlineShader = new Shader("../../../../src/shaders/vs_outline.vert", "../../../../src/shaders/fs_outline.frag");
 	Shader* shaders = new Shader("../../../../src/shaders/vs.vert", "../../../../src/shaders/fs.frag");
 	Shader* skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
 	Shader* mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");
@@ -216,25 +241,30 @@ int main() {
 	GameObject* skydome = new GameObject("skydome");
 	GameObject* rampBox = new GameObject("rampBox");
 
-	auto boxmodel = std::make_shared<Model>(const_cast<char*>("../../../../res/box.obj"));
-	auto planemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"));
-	auto box2model = std::make_shared<Model>(const_cast<char*>("../../../../res/tree.obj"));
-	auto capsulemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"));
-	auto rampModel = std::make_shared<Model>(const_cast<char*>("../../../../res/box.obj"));
+	auto boxmodel = std::make_shared<Model>(const_cast<char*>("../../../../res/box.obj"), false);
+	auto planemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"), false);
+	auto box2model = std::make_shared<Model>(const_cast<char*>("../../../../res/tree.obj"), false);
+	auto capsulemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"), false);
+	auto rampModel = std::make_shared<Model>(const_cast<char*>("../../../../res/box.obj"), false);
 
-	auto capsule2model = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"));
+	auto capsule2model = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"), false);
 	Mesh* meshSphere = new Mesh();
 	meshSphere->createDome(20, 20, 50);
 	auto skydomeModel = std::make_shared<Model>(meshSphere);
 
 
+	Shader* hudShader = new Shader("../../../../src/shaders/hud.vert", "../../../../src/shaders/hud.frag");
+
 	//drzewa
-	auto treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"));
-	auto treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"));
+	auto treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"), false);
+    treelog->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	auto treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"), false);
+    treetrunk->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	Shader* phongShader = new Shader("../../../../src/shaders/phong.vert", "../../../../src/shaders/phong.frag");
-	auto treebranch1= std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_branch_1.obj"));
+	auto treebranch1= std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_branch_1.obj"), false);
+    treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	treebranch1->SetShader(phongShader);
-	auto planeSectormodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"));
+	auto planeSectormodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"), false);
 	treetrunk->SetShader(phongShader);
 	treelog->SetShader(phongShader);
 	planeSectormodel->SetShader(shaders);
@@ -268,12 +298,14 @@ int main() {
 	camera->transform->localPosition = glm::vec3(-1.0f, 2.0f, 20.0f);
 
 	const TimePoint tpStart = Clock::now();
-	static bool sequenceStarted = false;
-	static bool firstKeyPressed = false;
-	static bool secondKeyPressed = false;
+
 	std::string name = "src";
 
 	setupImGui(window);
+
+	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/bialy.png", "diffuseMap");
+	sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(7.f, 1.f, 1.f);
+	sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
 
 	sm->getActiveScene()->findByName("skydome")->getModelComponent()->AddTexture("../../../../res/chmury1.png","diffuseMap");
 
@@ -316,6 +348,8 @@ int main() {
 
 	sm->loadScene("first");
 	sm->activeScene = sm->scenes.at(3);
+	sm->getActiveScene()->addObject(anim);
+	//std::cout << "player:" << sm->getActiveScene()->findByName("box") << std::endl;
 	//sm->getActiveScene()->findByName("tree_1")->addChild(new GameObject("log"));
 
 	Pathfinder* pathfinder = new Pathfinder();
@@ -336,9 +370,21 @@ int main() {
 		staticUpdateTime += deltaTime;
 		//std::cout << "Delta time: " << deltaTime << std::endl;
 
-		glm::mat4 V = camera->getViewMatrix();
+		tm->setTime(deltaTime);
+		glm::mat4 V(1.f);
+		if (gameMode.getMode() == GameMode::Game) {
+			pm->ManagePlayer(deltaTime2);
+			V = camera->getViewMatrixPlayer();
+		}
+		else if (gameMode.getMode() != GameMode::Game) {
 
-		glm::mat4 P = glm::perspective(glm::radians(45.f), static_cast<float>(szer) / wys, 1.f, 5000.f);
+			V = camera->getViewMatrix();
+		}
+		//animacje
+		animPlayer->UpdateAnimation(deltaTime);
+		sm->getActiveScene()->findByName("skydome")->timeSetting(time / 7, glm::vec2(10, 10));
+
+		glm::mat4 P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(szer) / wys, 1.f, 5000.f);
 		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
 
 		/*if (skydome->getModelComponent() != nullptr) {
@@ -370,6 +416,26 @@ int main() {
 			else if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_4))
 			{
 				gameMode.setMode(GameMode::Menu);
+			} 
+		}
+		if (sm->getActiveScene()->findByName("rampBox")) {
+			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, 0.0f, -boxSpeed * deltaTime));
+			}
+			if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(-boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(boxSpeed * deltaTime, 0.0f, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, boxSpeed * deltaTime, 0.0f));
+			}
+			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
+				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 			}
 		}
 
@@ -426,7 +492,6 @@ int main() {
 				sm->getActiveScene()->findByName("rampBox")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 			}
 		}
-
 		if (sm->getActiveScene()->findByName("capsule2")) {
 			if (glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS) {
 				sm->getActiveScene()->findByName("capsule2")->Move(glm::vec3(0.0f, 0.0f, boxSpeed * deltaTime));
@@ -521,8 +586,8 @@ int main() {
 		}
 		
 		//skydome->getTransform()->localPosition = camera->transform->localPosition;
-		if (sm->getActiveScene()->findByName("sky")) {
-			sm->getActiveScene()->findByName("sky")->getTransform()->localPosition = camera->transform->localPosition;
+		if (sm->getActiveScene()->findByName("skydome")) {
+			sm->getActiveScene()->findByName("skydome")->getTransform()->localPosition = camera->transform->localPosition;
 		}
 		sm->getActiveScene()->Draw(V, P);
 
@@ -542,7 +607,7 @@ int main() {
 		//box2->getModelComponent()->Draw();
 		//box2->getModelComponent()->DrawBoundingBoxes(shaders, *box2->getModelComponent()->getTransform());
 
-		if (input->IsMove()) {
+		while (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
 			if (glfwGetInputMode(window, GLFW_CURSOR) != 212993) {
 				camera->updateCamera(dpos);
@@ -566,41 +631,48 @@ int main() {
 				//if(go->name != sm->getActiveScene()->findByName("skydome")->name)
 					delete go;
 			}
+			for (auto sect : cm.sections) {
+				sect->staticObjects.clear();
+				sect->objects.clear();
+			}
 			sm->getActiveScene()->gameObjects.clear();
-			Scene* scenaNowa = new Scene("Nowa");
+			/*Scene* scenaNowa = new Scene("Nowa");
 			sm->scenes.push_back(scenaNowa);
-			sm->activeScene = sm->scenes.back();
-			pathfinder->trees.clear();
+			sm->activeScene = sm->scenes.back();*/
+
 			for (int i = 0; i < sectorsPom; i++) {
 				for (int j = 0; j < sectorsPom; j++) {
-					GameObject* planeSector = new GameObject("sector"+std::to_string((i+1)*j));
-					planeSector->inverseMass = 0.0f;
-					planeSector->localTransform->localScale = glm::vec3(5.f, 5.f, 5.f);
+					GameObject* planeSector = new GameObject("sector"+std::to_string((i+1)*(j+1)));
+					planeSector->localTransform->localScale = glm::vec3(2.f, 2.f, 2.f);
 					planeSector->addModelComponent(planeSectormodel);
 					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, 0.f, j * 20*planeSector->localTransform->localScale.z);
-					//planeSector->addColider();
 					int treeCount = losujLiczbe(a, b);
 					for (int k = 0; k < treeCount; k++) {
-						int treeX = losujLiczbe2()* planeSector->localTransform->localScale.x;
-						int treeZ = losujLiczbe2()* planeSector->localTransform->localScale.z;
-						Tree* tree = new Tree("tree_"+std::to_string(k));
-						tree->inverseMass = 0.0f;
+							int treeX = losujLiczbe2()* planeSector->localTransform->localScale.x;
+							int treeZ = losujLiczbe2()* planeSector->localTransform->localScale.z;
+							/*for (int m = 0; m < planeSector->children.size(); m++) {
+								if (!checkLocations(planeSector->children.at(m)->localTransform->getLocalPosition().x, (planeSector->children.at(m)->localTransform->getLocalPosition().z), planeSector->localTransform->localPosition.x + treeX, planeSector->localTransform->localPosition.z + treeZ, 8))
+								{
+									treeX = losujLiczbe2() * planeSector->localTransform->localScale.x; treeZ = losujLiczbe2() * planeSector->localTransform->localScale.z;
+								}
+							}*/
+						GameObject* tree = new GameObject("tree_"+std::to_string(k));
 						tree->addModelComponent(treetrunk);
 						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
 						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
-						tree->addColider(1);
-						GameObject* log = new GameObject("log");
-						log->inverseMass = 0.0f;
+						tree->addColider();
+						GameObject* log = new GameObject("log"+std::to_string(k));
 						log->addModelComponent(treelog);
 						log->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX;
 						log->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
-						log->addColider(1);
+						log->localTransform->localPosition.y = planeSector->localTransform->localPosition.y+ 1.2;
+						log->localTransform->localRotation.y = losujLiczbe(0, 360);
+						log->addColider();
 						tree->addChild(log);
 						planeSector->addChild(tree);
-						int branchCount = losujLiczbe(3,8);
+						int branchCount = losujLiczbe(3, 8);
 						for (int m = 0; m < branchCount; m++) {
 							GameObject* branch = new GameObject("branch" + std::to_string(m));
-							branch->inverseMass = 0.0f;
 							branch->addModelComponent(treebranch1);
 							branch->localTransform->localPosition.x = planeSector->localTransform->localPosition.x + treeX;
 							branch->localTransform->localPosition.y = float(losujLiczbe((m * 13 / branchCount)+5, ((m + 1) * 13 / branchCount)+5));
@@ -657,32 +729,58 @@ int main() {
 				sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
 
 			}
-			GameObject* skydome = new GameObject("sky");
+			
+			//GameObject* player = new GameObject("player");
+			//player->addModelComponent(box2model);
+			//player->modelComponent->SetShader(phongShader);
+			//player->localTransform->localPosition = glm::vec3(0.f);
+			//player->localTransform->localScale = glm::vec3(0.1f);
+			//player->addColider();
+			//sm->getActiveScene()->addObject(anim);
+				//sm->saveScene("first");
+			buttonPressed = false;
+			GameObject* HPcount = new GameObject("HPcount");
+			UI* ui = new UI(writing);
+			Shader* UIShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
+			ui->addShader(UIShader);
+			HPcount->localTransform->localPosition = glm::vec3(25.f);
+			ui->setText("Ala ma kota");
+			HPcount->uiComponent = ui;
+
+			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
+				for (auto go : sm->getActiveScene()->gameObjects.at(i)->children)
+				{
+					cm.addStaticObject(go);
+					cm.addStaticObject(go->children.at(0));
+					for (auto ch : go->children.at(0)->children)
+					{
+						cm.addStaticObject(ch);
+					}
+				}
+				sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
+			}
+			
+			GameObject* anim = new GameObject("player");
+			animodel->SetShader(shaderAnimation);
+			anim->addModelComponent(animodel);
+			//anim->addColider();
+			sm->getActiveScene()->addObject(anim);
+			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
+			sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
+
+			GameObject* skydome = new GameObject("skydome");
 			skydome->addModelComponent(skydomeModel);
 			skydome->getTransform()->localScale = glm::vec3(100.f);
 			sm->getActiveScene()->addObject(skydome);
+			sm->getActiveScene()->addObject(HPcount);
+			sm->getActiveScene()->findByName("skydome")->timeSetting(time / 7, glm::vec2(10, 10));
 		}
-		if (input->IsKeobarodAction(window)) {
-			input->GetMessage(key, action);
+		while (input->IsKeobarodAction(window)) {
+			input->getMessage(key, action);
 
 			if (gameMode.getMode() == GameMode::Debug) {
-				// Obsługa sekwencji klawiszy
-				if (key == GLFW_KEY_W && action == GLFW_PRESS) {
-					if (!sequenceStarted) {
-						sequenceStarted = true;
-						secondKeyPressed = false;
-						firstKeyPressed = true;
-						std::cout << "W" << std::endl;
-						camera->ProcessKeyboard(FORWARD, time);
-					}
-					else if (firstKeyPressed && !secondKeyPressed) {
-						secondKeyPressed = true;
-						sequenceStarted = false;
-						firstKeyPressed = false;
-						std::cout << "Sekwencja klawiszy W + W została wykryta!" << std::endl;
-					}
-				}
-				else if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
+
+				if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
 					camera->ProcessKeyboard(FORWARD, time);
 				}
 				else if (key == GLFW_KEY_S && action == GLFW_REPEAT) {
@@ -732,7 +830,7 @@ int main() {
 			}
 		}
 		int pom = 0;
-		skydome->getTransform()->localPosition = camera->transform->localPosition;
+		//skydome->getTransform()->localPosition = camera->transform->localPosition;
 		/*if (plane->getModelComponent() != nullptr) {
 			for (int i = 0; i < sectors; i++)
 			{
@@ -868,3 +966,9 @@ GLuint compileShader(const GLchar* _source, GLenum _stage, const std::string& _m
 	return shdr;
 }
 
+bool checkLocations(float x1, float y1, float x2, float y2,float distance) {
+	if (((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) > (distance * distance)) {
+		return true;
+	}
+	return false;
+}

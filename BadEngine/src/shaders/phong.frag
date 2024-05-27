@@ -21,7 +21,24 @@ float shadowCal(vec4 FragPosLightSpace)
     float closestDepth = texture(depthMap,projCoords.xy).r;
     float currentDepth = projCoords.z;
     float bias = 0.005;
-    float shadow = currentDepth-bias > closestDepth ? 0.0 : 1.0;
+    //float shadow = currentDepth-bias > closestDepth ? 0.0 : 1.0;
+    //return shadow;
+    float shadow = 0.0;
+    vec2 texelSize = 1.0 / textureSize(depthMap, 0);
+    for(int x = -1; x <= 1; ++x)
+    {
+        for(int y = -1; y <= 1; ++y)
+        {
+            float pcfDepth = texture(depthMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
+        }    
+    }
+    shadow /= 9.0;
+    
+    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
+    if(projCoords.z > 1.0)
+        shadow = 0.0;
+        
     return shadow;
 }
 
@@ -46,6 +63,6 @@ void main()
         
     //shadow
     float shadow = shadowCal(LSMatrix * vec4(FragPos,1.0));
-    vec3 result = (ambient + shadow * (diffuse + specular))  ;
+    vec3 result = (ambient + (1.0f -shadow) * (diffuse + specular))  ;
     FragColor = vec4(result.xyz, 1.0f)* texture(diffuseMap, TexCoords);
 }

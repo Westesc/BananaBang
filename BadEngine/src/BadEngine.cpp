@@ -264,6 +264,7 @@ int main() {
 	treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	treebranch1->SetShader(phongShader);
 	Model* planeSectormodel = new Model(const_cast<char*>("../../../../res/plane.obj"), false);
+	planeSectormodel->AddTexture("../../../../res/drewno.png", "diffuseMap");
 	treetrunk->SetShader(phongShader);
 	treelog->SetShader(phongShader);
 	planeSectormodel->SetShader(phongShader);
@@ -513,7 +514,7 @@ int main() {
 
 		glm::mat4 lightProjection, lightView;
 		glm::mat4 lightSpaceMatrix;
-		float near_plane = 1.0f, far_plane = 30.f;
+		float near_plane = 1.0f, far_plane = 500.f;
 		lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
 		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 		lightSpaceMatrix = lightProjection * lightView;

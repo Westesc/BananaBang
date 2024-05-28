@@ -563,8 +563,9 @@ int main() {
 							glm::vec3 tmpMove = glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z);
 							enemy->Move(tmpMove * deltaTime);
 							cm.addObjectPredict(enemy);
-							enemy->setVel2(cm.checkPrediction());
+							std::vector<GameObject*> collisions = cm.checkPrediction();
 							enemy->Move(-tmpMove * deltaTime);
+							enemy->setVel2(collisions);
 							if ((glm::any(glm::isnan(enemy->localTransform->localPosition)) || glm::any(glm::isinf(enemy->localTransform->localPosition)))) {
 								enemy->localTransform->localPosition = glm::vec3(5.0f);
 							}
@@ -896,6 +897,7 @@ int main() {
 			enemy->addModelComponent(enemyModel);
 			pbd->objects.push_back(enemy);
 			enemy->addColider(2);
+			enemy->capsuleCollider = new CapsuleCollider(enemy->capsuleCollider->center, enemy->capsuleCollider->radius * 0.8f, enemy->capsuleCollider->height, 1.0f, true);
 			sm->getActiveScene()->addObject(enemy);
 			cm.addObject(enemy);
 			spawnedEnemies++;

@@ -281,17 +281,8 @@ public:
 			second->localTransform->predictedPosition += otherDisplacement;
 		}
 		else {
-			//Enemy* enemy1 = static_cast<Enemy*>(first);
-			glm::vec3 direction = second->localTransform->predictedPosition -first->localTransform->predictedPosition;
-			glm::quat rotation = glm::quat(first->localTransform->localRotation);
-			glm::quat rotation2 = glm::quat(second->localTransform->localRotation);
-			//first->localTransform->predictedPosition -= direction * /*first->velocity * rotation **/ deltaTime * 0.0001f;
-			//second->localTransform->predictedPosition += direction * /*second->velocity **/ rotation2 * deltaTime * 0.1f;
-			glm::vec3 firstcorrection = first->velocity * rotation;
-			glm::vec3 secondcorretion = second->velocity * rotation2;
-			first->localTransform->predictedPosition += glm::vec3(firstcorrection.x, 0.0f,firstcorrection.z) * deltaTime * 0.01f;
-			second->localTransform->predictedPosition -= glm::vec3(secondcorretion.x, 0.0f, secondcorretion.z) * deltaTime * 0.01f;
-			//addObject(second);
+			first->localTransform->predictedPosition = first->localTransform->localPosition;
+			second->localTransform->predictedPosition = second->localTransform->localPosition;
 		}
 	}
 
@@ -401,7 +392,7 @@ public:
 				displacement += direction * magnitude;
 			}
 		}
-		std::cout << first->name << ", " << second->name << glm::to_string(displacement) << std::endl;
+		//std::cout << first->name << ", " << second->name << glm::to_string(displacement) << std::endl;
 		return displacement;
 	}
 
@@ -595,7 +586,7 @@ public:
 			first->localTransform->predictedPosition += separation;
 			second->localTransform->predictedPosition -= separation;
 		}
-		std::cout <<"separation: " << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
+		//std::cout <<"separation: " << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
 	}
 
 	void separateStatic(GameObject* first, GameObject* second, float deltaTime) {

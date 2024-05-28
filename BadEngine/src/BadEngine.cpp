@@ -257,6 +257,10 @@ int main() {
 	meshSphere->createDome(20, 20, 50);
 	auto skydomeModel = std::make_shared<Model>(meshSphere);
 
+	Mesh* meshFruit = new Mesh();
+	meshFruit->createSphere(20, 20, 50);
+	auto FruitModel = std::make_shared<Model>(meshFruit);
+
 
 	Shader* hudShader = new Shader("../../../../src/shaders/hud.vert", "../../../../src/shaders/hud.frag");
 
@@ -616,10 +620,6 @@ int main() {
 		sm->getActiveScene()->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
 		sm->getActiveScene()->shadowSetting(lightSpaceMatrix);
 
-		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::translate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(20.f, 0.f, 18.f)));
-		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::scale(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::vec3(50.f, 50.0f, 50.0f)));
-		//sm->getActiveScene()->findByName("skydome")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("skydome")->getModelComponent()->getTransform(), glm::radians(time), glm::vec3(0.f, 1.f, 0.f)));
-		//sm->getActiveScene()->findByName("plane")->getModelComponent()->setTransform(glm::rotate(*sm->getActiveScene()->findByName("plane")->getModelComponent()->getTransform(), glm::radians(90.f), glm::vec3(1.f, 0.f, 0.f)));
 		if (sm->getActiveScene()->findByName("player")) {
 			//cm.addObject(sm->getActiveScene()->findByName("player"));
 		}
@@ -667,31 +667,15 @@ int main() {
 			}
 		}
 		if (buttonPressed) {
-			/*sectors = sectorsPom;
-			mojaTablica.clear();
-			for (int i = 0; i < sectors * sectors; ++i) {
-				mojaTablica.push_back(losujLiczbe(a, b));
-				ilosc += mojaTablica[i];
-				std::cout << mojaTablica[i] << std::endl;
-			}
-			placeX.clear();
-			placeY.clear();
-			for (int i = 0; i < ilosc; ++i) {
-				placeX.push_back(losujLiczbe2());
-				placeY.push_back(losujLiczbe2());
-			}*/
 			for (auto go : sm->getActiveScene()->gameObjects) {
-				//if(go->name != sm->getActiveScene()->findByName("skydome")->name)
 					delete go;
 			}
 			for (auto sect : cm.sections) {
 				sect->staticObjects.clear();
 				sect->objects.clear();
 			}
+			pbd->objects.clear();
 			sm->getActiveScene()->gameObjects.clear();
-			/*Scene* scenaNowa = new Scene("Nowa");
-			sm->scenes.push_back(scenaNowa);
-			sm->activeScene = sm->scenes.back();*/
 
 			for (int i = 0; i < sectorsPom; i++) {
 				for (int j = 0; j < sectorsPom; j++) {

@@ -318,6 +318,7 @@ private:
 public:
     bool rotating;
     bool isBlue, iswhite;
+    bool isAnim= false;
 
     auto& GetBoneInfoMap() { return m_BoneInfoMap; }
     int& GetBoneCount() { return m_BoneCounter; }
@@ -364,6 +365,7 @@ public:
 
     Model(char* path, bool isAnim, bool rotate = true, bool gamma = false) : gammaCorrection(gamma)
     {
+        this->isAnim = isAnim;
         if (isAnim) {
             rotating = rotate;
             isFromFile = true;

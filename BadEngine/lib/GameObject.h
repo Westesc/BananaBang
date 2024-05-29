@@ -5,6 +5,7 @@
 #include "Transform.h"
 #include "Model.h"
 #include "UI.h"
+#include "AnimateBody.h"
 
 class GameObject {
 public:
@@ -22,6 +23,7 @@ public:
 	Transform* localTransform;
 	std::shared_ptr<Model> modelComponent;
 	UI* uiComponent = nullptr;
+	AnimateBody* anim;
 	bool isRotating;
 	float rotateSpeed;
 	glm::vec3 rotateAxis;
@@ -42,6 +44,7 @@ public:
 	Component* getComponentInChildren();
 	Component* getComponentInParent();
 	void addModelComponent(std::shared_ptr<Model> model);
+	void addAnimateBody(AnimateBody * anim);
 	std::shared_ptr<Model> getModelComponent() const;
 	Transform* getGlobalTransform();
 	void Move(glm::vec3 translation);
@@ -49,7 +52,7 @@ public:
 	void setRotating(bool rotating, float speed = 100.f, glm::vec3 rotateAxis = glm::vec3(0.f, 0.f, 1.f));
 	//void checkResolveCollisions(GameObject* other, float deltaTime);
 	void Draw(glm::mat4 view, glm::mat4 perspective);
-	void Draw(Shader* shader);
+	void Draw(Shader* shader, Shader * animShader);
 	YAML::Node serialize();
 	void setVisible(bool visible);
 	void lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 lightColor);

@@ -38,9 +38,11 @@ void AnimateBody::UpdateAnimation(float deltaTime) {
     Animacje anim = searchActiveAnimation();
     animator->UpdateAnimation(deltaTime * anim.speedAnimation);
     model->GetShader()->use();
-    auto transforms = animator->GetFinalBoneMatrices();
+    this->bones = animator->GetFinalBoneMatrices();
+    /*auto transforms = animator->GetFinalBoneMatrices();
     for (int i = 0; i < transforms.size(); ++i)
-        model->GetShader()->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+        model->GetShader()->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);*/
+
 }
 
 void AnimateBody::setActiveAnimation(std::string name, bool playOnce) {

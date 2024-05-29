@@ -96,6 +96,10 @@ void GameObject::addModelComponent(std::shared_ptr<Model> model) {
     modelComponent = model;
 }
 
+void GameObject::addAnimateBody(AnimateBody* anim) {
+    this->anim = anim;
+}
+
 std::shared_ptr<Model> GameObject::getModelComponent() const {
     return modelComponent;
 }
@@ -234,8 +238,13 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
             modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
             modelComponent->GetShader()->setMat4("view", view);
             modelComponent->GetShader()->setMat4("projection", perspective);
+            if (this->modelComponent->isAnim) {
+                for (int i = 0; i < anim->bones.size(); ++i)
+                    modelComponent->GetShader()->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", anim->bones[i]);
+            }
             modelComponent->Draw();
         }
+        
         /*if (modelComponent->boundingBox != nullptr) {
             modelComponent->DrawBoundingBoxes(modelComponent->GetShader(), *modelComponent->getTransform());
         }
@@ -254,7 +263,7 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
     }
 }
 
-void GameObject::Draw(Shader* shader) {
+void GameObject::Draw(Shader* shader, Shader * animShader) {
     if (modelComponent != nullptr) {
         glm::mat4 M = glm::translate(glm::mat4(1.f), localTransform->localPosition);
         M = glm::rotate(M, glm::radians(localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
@@ -262,11 +271,18 @@ void GameObject::Draw(Shader* shader) {
         M = glm::rotate(M, glm::radians(localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
         M = glm::scale(M, localTransform->localScale);
         modelComponent->setTransform(M);
-        modelComponent->Draw(shader);
+        if (this->modelComponent->isAnim) {
+            for (int i = 0; i < anim->bones.size(); ++i)
+                animShader->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", anim->bones[i]);
+            modelComponent->Draw(animShader);
+        }
+        else {
+            modelComponent->Draw(shader);
+        }
     }
     for (auto ch : children) {
         if (ch->isVisible) {
-            ch->Draw(shader);
+            ch->Draw(shader, animShader);
         }
     }
 }

@@ -28,6 +28,8 @@ class AnimateBody : Component {
 	}
 
 public:
+	std::vector<glm::mat4> bones;
+
 	AnimateBody(Model* m);
 	~AnimateBody();
 

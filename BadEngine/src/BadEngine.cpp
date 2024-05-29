@@ -218,10 +218,20 @@ int main() {
 	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
 	pm->addAnimationPlayer(animPlayer);
 
+	AnimateBody* animPlayer2 = new AnimateBody(animodel.get());
+	animPlayer2->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
+	animPlayer2->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
+	animPlayer2->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
+	animPlayer2->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
+	animPlayer2->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
+	animPlayer2->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
+	//pm->addAnimationPlayer(animPlayer2);
+
 	Shader* shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
 	GameObject* anim = new GameObject("player");
 	animodel->SetShader(shaderAnimation);
 	anim->addModelComponent(animodel);
+	anim->addAnimateBody(animPlayer);
 	sm->getActiveScene()->addObject(anim);
 
 	Shader* fillingShader = new Shader("../../../../src/shaders/vs_filling.vert", "../../../../src/shaders/fs_filling.frag");
@@ -237,6 +247,7 @@ int main() {
 
 	//depth shader
 	Shader* depthShader = new Shader("../../../../src/shaders/depthShader.vert", "../../../../src/shaders/depthShader.frag");
+	Shader* depthAnimShader = new Shader("../../../../src/shaders/depthAnimationShader.vert", "../../../../src/shaders/depthAnimationShader.frag");
 
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
@@ -326,7 +337,7 @@ int main() {
 	glm::vec3* lightColor = new glm::vec3(1.f, 1.0f, 1.f);
 
 	//Depth map to generate shadows
-	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	const unsigned int SHADOW_WIDTH = 8192, SHADOW_HEIGHT = 8192;
 	unsigned int depthMapFBO;
 	glGenFramebuffers(1, &depthMapFBO);
 	//creating depth texture
@@ -602,7 +613,7 @@ int main() {
 
 		glm::mat4 lightProjection, lightView;
 		glm::mat4 lightSpaceMatrix;
-		float near_plane = 1.0f, far_plane = 500.f;
+		float near_plane = 1.0f, far_plane = 50.f;
 		lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
 		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 		lightSpaceMatrix = lightProjection * lightView;
@@ -610,13 +621,16 @@ int main() {
 		depthShader->use();
 		depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
+		depthAnimShader->use();
+		depthAnimShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		sm->getActiveScene()->Draw(depthShader);
+		sm->getActiveScene()->Draw(depthShader,depthAnimShader);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		planeSectormodel->AddTexture(depthMap, "depthMap");
-
+		glViewport(0, 0, Window::windowWidth, Window::windowHeight);
 
 		sm->getActiveScene()->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
 		sm->getActiveScene()->shadowSetting(lightSpaceMatrix);
@@ -792,6 +806,13 @@ int main() {
 			GameObject* anim = new GameObject("player");
 			animodel->SetShader(shaderAnimation);
 			anim->addModelComponent(animodel);
+			anim->addAnimateBody(animPlayer);
+
+			GameObject* anim2 = new GameObject("guest");
+			animodel->SetShader(shaderAnimation);
+			anim2->addModelComponent(animodel);
+			anim2->addAnimateBody(animPlayer);
+
 			//anim->addColider(2);
 			anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
 			pbd->objects.push_back(anim);
@@ -799,6 +820,8 @@ int main() {
 				sm->getActiveScene()->addObject(anim);
 				cm.addObject(anim);
 			}
+
+			sm->getActiveScene()->addObject(anim2);
 			sm->getActiveScene()->addObject(anim);
 			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
 			sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);

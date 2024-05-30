@@ -43,6 +43,10 @@ void AnimateBody::UpdateAnimation(float deltaTime) {
         model->GetShader()->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
 }
 
+std::string AnimateBody::getActiveAnimation() {
+    return searchActiveAnimation().name;
+}
+
 void AnimateBody::setActiveAnimation(std::string name, bool playOnce) {
     if (activeAnimation != name) {
         activeAnimation = name;

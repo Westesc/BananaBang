@@ -14,6 +14,8 @@ private:
     Camera* camera;
     TimeManager* tm;
     RigidBody* rb;
+    std::queue < std:: string > queueAnim;
+    int animCount = 0;
 
     float moveSpeed = 4.f;
     float deltaTime2 = 0.f;
@@ -40,27 +42,28 @@ private:
 
     bool wasSpacePressed = false;
 
-    void getRotate() {
-        float rotationSpeed = 500.f;
-        float angleDifference = currentTurn - rotateAngle;
-        float rotationAmount = rotationSpeed * tm->getFramePerSeconds();
+    void getRotate(bool isRotate) {
+        if (isRotate) {
+            float rotationSpeed = 500.f;
+            float angleDifference = currentTurn - rotateAngle;
+            float rotationAmount = rotationSpeed * tm->getFramePerSeconds();
 
-        while (angleDifference < -180.0f) angleDifference += 360.0f;
-        while (angleDifference > 180.0f) angleDifference -= 360.0f;
+            while (angleDifference < -180.0f) angleDifference += 360.0f;
+            while (angleDifference > 180.0f) angleDifference -= 360.0f;
 
-        if (fabs(angleDifference) <= rotationAmount) {
-            rotateAngle = currentTurn;
-        }
-        else {
-            int direction = (angleDifference > 0) ? 1 : -1;
-            rotateAngle += direction * rotationAmount;
+            if (fabs(angleDifference) <= rotationAmount) {
+                rotateAngle = currentTurn;
+            }
+            else {
+                int direction = (angleDifference > 0) ? 1 : -1;
+                rotateAngle += direction * rotationAmount;
+            }
+            float angle = atan2(camera->getFront().x, camera->getFront().z) * (180.0 / M_PI);
+            sm->getActiveScene()->findByName("player")->getTransform()->localRotation.y = angle + rotateAngle;
         }
     }
-    void move(float deltaTime) {
-        getRotate();
-        float angle = atan2(camera->getFront().x, camera->getFront().z) * (180.0 / M_PI);
-       // sm->getActiveScene()->findByName("player")->setRotating(false, angle + glm::radians(rotateAngle), glm::vec3(0.f, 1.f, 0.f));
-        sm->getActiveScene()->findByName("player")->getTransform()->localRotation.y = angle + rotateAngle;
+    void move(float deltaTime, bool isRotate = true) {
+        getRotate(isRotate);
 
         float rotate = sm->getActiveScene()->findByName("player")->getTransform()->getLocalRotation().y;
         float sinRotate = sin(glm::radians(rotate));
@@ -69,16 +72,13 @@ private:
         float dx = sm->getActiveScene()->findByName("player")->getTransform()->getLocalScale().x * sm->getActiveScene()->findByName("player")->getAnimateBody()->getPosition().z * sinRotate + sm->getActiveScene()->findByName("player")->getAnimateBody()->getPosition().x * cosRotate;
         float dz = sm->getActiveScene()->findByName("player")->getTransform()->getLocalScale().z * sm->getActiveScene()->findByName("player")->getAnimateBody()->getPosition().z * cosRotate - sm->getActiveScene()->findByName("player")->getAnimateBody()->getPosition().x * sinRotate;
 
-       // float dy = animateBody->getPosition().y;
-
        // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
         glm::vec3 vel = glm::vec3(dx, 0.f, dz)/ deltaTime;
         sm->getActiveScene()->findByName("player")->velocity = vel;
-       // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
     }
 
     void moveInAir(float speed) {
-        getRotate();
+        getRotate(true);
         float angle = atan2(camera->getFront().x, camera->getFront().z) * (180.0 / M_PI);
          sm->getActiveScene()->findByName("player")->getTransform()->localRotation.y = angle + rotateAngle;
         float distance = speed * tm->getFramePerSeconds();
@@ -153,28 +153,28 @@ private:
     }
 
     void checkState() {
+        if (queueAnim.size() == 0) {
+            animCount = 0;
+        }
         if (input->checkAnyKey()) {
-            if (input->checkKey(GLFW_KEY_1)) {
-                sm->getActiveScene()->findByName("player2")->getAnimateBody()->setActiveAnimation("walking", false);
-            }
-            if (input->checkKey(GLFW_KEY_2)) {
-                sm->getActiveScene()->findByName("player2")->getAnimateBody()->setActiveAnimation("jumping up", false);
-            }
-            if (input->checkKey(GLFW_KEY_3)) {
-                sm->getActiveScene()->findByName("player2")->getAnimateBody()->setActiveAnimation("attack1", false);
+            if (input->getPressKey() == GLFW_MOUSE_BUTTON_LEFT) {
+                if (queueAnim.size() < 3) {
+                    queueAnim.push("attack" + queueAnim.size() + 1);
+                }
+                state = attack1;
             }
             if (input->checkKey(GLFW_MOUSE_BUTTON_RIGHT))
             {
-                state = dodge;
+               state = dodge;
             }
             else if (input->checkKey(GLFW_KEY_SPACE) && state != air && state != jump_up && !wasSpacePressed) {
                 sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("jumping up", true);
                 state = jump_up;
                 initialPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
             } 
-            else if (input->checkKey(GLFW_MOUSE_BUTTON_LEFT)) {
-                state = attack1;
-            }
+            //else if (input->checkKey(GLFW_MOUSE_BUTTON_LEFT)) {
+            //    state = attack1;
+            //}
         }
         else if (state == walking) {
             sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("standing");
@@ -205,16 +205,34 @@ public:
             // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         }
         else if (state == attack1) {
-            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("attack1");
-            move(deltaTime);
+            if (animCount == 0 && queueAnim.size()!= 0) {
+                animCount++;
+                sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("attack1");
+            }
+            move(deltaTime, false);
             if (sm->getActiveScene()->findByName("player")->getAnimateBody()->isPlay() == false) {
-                state = walking;
+                if (queueAnim.size() > 1) {
+                    if (animCount == 1) {
+                        sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("attack2");
+                        animCount++;
+                    }
+                    else {
+                        animCount = 0;
+                        while (!queueAnim.empty()) {
+                            queueAnim.pop();
+                        }
+                        sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("attack3");
+                    }
+                }
+                else {
+                    state = walking;
+                }
             }
         }
         else if (state == dodge) {
             sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("dodge");
             //currentTurn = 180.f;
-            move(deltaTime);
+            move(deltaTime, false);
             if (sm->getActiveScene()->findByName("player")->getAnimateBody()->isPlay() == false) {
                 state = walking;
             }
@@ -225,6 +243,11 @@ public:
         else if (state == air) {
             MovePlayer(deltaTime);
             rb->useGravity();
+        }
+        if (state != attack1) {
+            while (!queueAnim.empty()) {
+                queueAnim.pop();
+            }
         }
     }
 

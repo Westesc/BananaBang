@@ -20,6 +20,7 @@ public:
 	glm::vec2 getPosMouse();
 	glm::vec2 getScroll();
 	void getMessage(int& key, int& action);
+	int getPressKey();
 	void executeFunctionPeriodically(int key);
 	void putAway(int key, int action);
 	bool checkSequence(int key1, int key2);

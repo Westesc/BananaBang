@@ -36,6 +36,7 @@ public:
 	void UpdateAnimation(float deltaTime);
 	void setActiveAnimation(std::string name, bool once = false);
 	glm::vec3 getPosition();
+	std::string getActiveAnimation();
 
 	void play();
 	bool isPlay();

@@ -13,6 +13,8 @@ struct InputMessageMouse {
 	glm::vec2 dpos = glm::vec2(0.f, 0.f);
 };
 
+std::queue<int> pressKey;
+
 std::queue<InputMessage> inputQueue;
 
 std::queue<InputMessageMouse> mouseQueue;
@@ -127,6 +129,16 @@ bool Input::checkAnyKey()
 	}
 	return false;
 }
+
+int Input::getPressKey() {
+	if (!pressKey.empty()){
+		int k = pressKey.front();
+		pressKey.pop();
+		return k;
+	}
+	return -1;
+}
+
 bool Input::checkKey(int key)
 {
 	if (pressedKeys.find(key) != pressedKeys.end()) {
@@ -150,6 +162,12 @@ bool Input::checkSequence(int key1, int key2)
 void Input::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
 	if (action == GLFW_PRESS) {
 		pressedKeys.insert(button);
+		if (button != GLFW_KEY_W && button != GLFW_KEY_A && button != GLFW_KEY_S && button != GLFW_KEY_D) {
+			pressKey.push(button);
+		}
+		if (pressKey.size() > 3) {
+			pressKey.pop();
+		}
 	}
 	else if (action == GLFW_RELEASE) {
 		pressedKeys.erase(button);

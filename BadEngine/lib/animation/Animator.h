@@ -312,7 +312,7 @@ private:
     float m_DeltaTime;
     float m_BlendFactor;
     bool m_Blending;
-    const float m_BlendSpeed = 2.f;
+    const float m_BlendSpeed = 2.5f;
     bool playOnce = false;
     glm::vec3 position;
     glm::vec3 lastPosition = glm::vec3(0.f, 0.f, 0.f);

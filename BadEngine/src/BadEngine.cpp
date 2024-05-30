@@ -807,6 +807,8 @@ int main() {
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching2.dae"), "attack2", 1.f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Standing Melee Punch.dae"), "attack3", 1.f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
 
 			anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
@@ -849,7 +851,7 @@ int main() {
 			input->getMessage(key, action);
 
 			if (gameMode.getMode() == GameMode::Debug) {
-
+				input->getPressKey();
 				if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
 					camera->ProcessKeyboard(FORWARD, time);
 				}

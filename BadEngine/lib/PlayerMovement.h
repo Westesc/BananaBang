@@ -157,24 +157,26 @@ private:
             animCount = 0;
         }
         if (input->checkAnyKey()) {
-            if (input->getPressKey() == GLFW_MOUSE_BUTTON_LEFT) {
-                if (queueAnim.size() < 3) {
-                    queueAnim.push("attack" + queueAnim.size() + 1);
+            if (state != air && state != jump_up) {
+                if (input->getPressKey() == GLFW_MOUSE_BUTTON_LEFT) {
+                    if (queueAnim.size() < 3) {
+                        queueAnim.push("attack" + queueAnim.size() + 1);
+                    }
+                    state = attack1;
                 }
-                state = attack1;
+                if (input->checkKey(GLFW_MOUSE_BUTTON_RIGHT))
+                {
+                    state = dodge;
+                }
+                else if (input->checkKey(GLFW_KEY_SPACE) && !wasSpacePressed) {
+                    sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("jumping up", true);
+                    state = jump_up;
+                    initialPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
+                }
             }
-            if (input->checkKey(GLFW_MOUSE_BUTTON_RIGHT))
-            {
-               state = dodge;
+            else {
+                input->getPressKey();
             }
-            else if (input->checkKey(GLFW_KEY_SPACE) && state != air && state != jump_up && !wasSpacePressed) {
-                sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("jumping up", true);
-                state = jump_up;
-                initialPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
-            } 
-            //else if (input->checkKey(GLFW_MOUSE_BUTTON_LEFT)) {
-            //    state = attack1;
-            //}
         }
         else if (state == walking) {
             sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("standing");
@@ -211,18 +213,16 @@ public:
             }
             move(deltaTime, false);
             if (sm->getActiveScene()->findByName("player")->getAnimateBody()->isPlay() == false) {
-                if (queueAnim.size() > 1) {
-                    if (animCount == 1) {
-                        sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("attack2");
-                        animCount++;
-                    }
-                    else {
+                if (queueAnim.size() > 1 && animCount == 1) {
+                    sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("attack2");
+                    animCount++;
+                }
+                else if (queueAnim.size() > 2 && animCount == 2) {
                         animCount = 0;
                         while (!queueAnim.empty()) {
                             queueAnim.pop();
                         }
                         sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("attack3");
-                    }
                 }
                 else {
                     state = walking;

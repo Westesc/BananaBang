@@ -49,12 +49,12 @@ void AnimateBody::setActiveAnimation(std::string name, bool playOnce) {
         Animacje anim = searchActiveAnimation();
         animator->PlayAnimation(anim.animation, playOnce);
         if (name == "jumping up" || name == "jumping down") {
-            animator->setIsAnimY(false);
+         //   animator->setIsAnimY(false);
         }
         else {
-            animator->setIsAnimY(true);
+           // animator->setIsAnimY(true);
         }
-        animator->changeAnimation();
+        //animator->changeAnimation();
     }
 }
 

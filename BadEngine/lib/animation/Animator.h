@@ -51,7 +51,7 @@ public:
                     m_BlendFactor = 1.0f;
                     m_Blending = false;
                 }
-                BlendBoneMatrices();
+                //BlendBoneMatrices();
             }
         }
     }
@@ -64,9 +64,11 @@ public:
     void PlayAnimation(Animation* pAnimation, bool once)
     {
         m_PreviousBoneMatrices = m_FinalBoneMatrices;
+        m_PreviousAnimation = m_CurrentAnimation;
         m_CurrentAnimation = pAnimation;
+        m_PrevTime = m_CurrentTime;
         m_CurrentTime = 0.0f;
-        m_BlendFactor = 0.7f;
+        m_BlendFactor = 0.1f;
         m_Blending = true;
         m_Playing = true;
         m_Finished = false;
@@ -116,11 +118,35 @@ public:
         std::string nodeName = node->name;
         glm::mat4 nodeTransform = node->transformation;
 
-        Bone* Bone = m_CurrentAnimation->FindBone(nodeName);
-        if (Bone)
+        Bone* bone = m_CurrentAnimation->FindBone(nodeName);
+        Bone* BonePrev;
+        if (m_PreviousAnimation != nullptr) {
+           BonePrev = m_PreviousAnimation->FindBone(nodeName);
+        }
+
+        if (bone)
         {
-            Bone->Update(m_CurrentTime);
-            nodeTransform = Bone->GetLocalTransform();
+            bone->Update(m_CurrentTime);
+            nodeTransform = bone->GetLocalTransform();
+
+            if (m_Blending) {
+                prev_keyPositions = BonePrev->GetPosition();
+                prev_keyRotations = BonePrev->GetRotation();
+                prev_keyScales = BonePrev->GetScale();
+
+                keyPositions = bone->GetPosition();
+                keyRotations = bone->GetRotation();
+                keyScales = bone->GetScale();
+                nodeTransform = BlendBonesMatrices(bone->GetPositionIndex(m_CurrentTime), BonePrev->GetPositionIndex(m_PrevTime), bone->GetRotationIndex(m_CurrentTime), BonePrev->GetRotationIndex(m_PrevTime), bone->GetScaleIndex(m_CurrentTime), BonePrev->GetScaleIndex(m_PrevTime));
+                
+                //nodeTransform = BlendBonesMatrices();
+            }
+            //else {
+            //    nodeTransform = ;
+            //    keyPositions = Bone->GetPosition();
+            //    keyRotations = Bone->GetRotation();
+            //    keyScales = Bone->GetScale();
+            //}
         }
 
         glm::mat4 globalTransformation = parentTransform * nodeTransform;
@@ -191,6 +217,31 @@ private:
     bool m_Finished = false;
     bool isAnimY = true;
 
+    std::vector<KeyPosition> prev_keyPositions;
+    std::vector<KeyScale> prev_keyScales;
+    std::vector<KeyRotation> prev_keyRotations;
+
+    std::vector<KeyPosition> keyPositions;
+    std::vector<KeyScale> keyScales;
+    std::vector<KeyRotation> keyRotations;
+
+    glm::mat4 BlendBonesMatrices(int posIndex, int prevPosIndex, int rotIndex,int prevRotIndex , int scaleIndex, int prevScaleIndex) {
+        glm::vec3 finalPosition = glm::mix(prev_keyPositions[prevPosIndex].position, keyPositions[posIndex].position
+            , m_BlendFactor);
+        glm::mat4 Position = glm::translate(glm::mat4(1.0f), finalPosition);
+
+        glm::quat finalRotation = glm::slerp(prev_keyRotations[prevRotIndex].orientation, keyRotations[rotIndex].orientation
+            , m_BlendFactor);
+        finalRotation = glm::normalize(finalRotation);
+        glm::mat4 Rotation = glm::toMat4(finalRotation);
+
+        glm::vec3 finalScale = glm::mix(prev_keyScales[prevScaleIndex].scale, keyScales[scaleIndex].scale
+            , m_BlendFactor);
+        glm::mat4 Scale =  glm::scale(glm::mat4(1.0f), finalScale);
+
+        return Position * Rotation * Scale;
+    }
+
     void BlendBoneMatrices()
     {
         for (int i = 0; i < m_FinalBoneMatrices.size(); ++i)
@@ -255,11 +306,13 @@ private:
     std::vector<glm::mat4> m_FinalBoneMatrices;
     std::vector<glm::mat4> m_PreviousBoneMatrices;
     Animation* m_CurrentAnimation;
+    Animation* m_PreviousAnimation = nullptr;
     float m_CurrentTime;
+    float m_PrevTime = 0.f;
     float m_DeltaTime;
     float m_BlendFactor;
     bool m_Blending;
-    const float m_BlendSpeed = 1.f;
+    const float m_BlendSpeed = 2.f;
     bool playOnce = false;
     glm::vec3 position;
     glm::vec3 lastPosition = glm::vec3(0.f, 0.f, 0.f);

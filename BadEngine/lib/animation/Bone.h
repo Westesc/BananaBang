@@ -113,6 +113,17 @@ public:
 		assert(0);
 	}
 
+	std::vector<KeyPosition> GetPosition() {
+		return m_Positions;
+	}
+
+	std::vector<KeyRotation> GetRotation() {
+		return m_Rotations;
+	}
+
+	std::vector<KeyScale> GetScale() {
+		return m_Scales;
+	}
 
 private:
 

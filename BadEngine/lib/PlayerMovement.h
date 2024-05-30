@@ -14,7 +14,6 @@ private:
     Camera* camera;
     TimeManager* tm;
     RigidBody* rb;
-    AnimateBody* animateBody;
 
     float moveSpeed = 4.f;
     float deltaTime2 = 0.f;
@@ -67,8 +66,8 @@ private:
         float sinRotate = sin(glm::radians(rotate));
         float cosRotate = cos(glm::radians(rotate));
 
-        float dx = sm->getActiveScene()->findByName("player")->getTransform()->getLocalScale().x * animateBody->getPosition().z * sinRotate + animateBody->getPosition().x * cosRotate;
-        float dz = sm->getActiveScene()->findByName("player")->getTransform()->getLocalScale().z *animateBody->getPosition().z * cosRotate - animateBody->getPosition().x * sinRotate;
+        float dx = sm->getActiveScene()->findByName("player")->getTransform()->getLocalScale().x * sm->getActiveScene()->findByName("player")->getAnimateBody()->getPosition().z * sinRotate + sm->getActiveScene()->findByName("player")->getAnimateBody()->getPosition().x * cosRotate;
+        float dz = sm->getActiveScene()->findByName("player")->getTransform()->getLocalScale().z * sm->getActiveScene()->findByName("player")->getAnimateBody()->getPosition().z * cosRotate - sm->getActiveScene()->findByName("player")->getAnimateBody()->getPosition().x * sinRotate;
 
        // float dy = animateBody->getPosition().y;
 
@@ -98,7 +97,7 @@ private:
             if (input->checkKey(GLFW_KEY_W)) {
                 speed = airSpeed;
                 if (state == walking) {
-                    animateBody->setActiveAnimation("walking");
+                    sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("walking");
                 }
                 currentTurn = 180.f;
                 if (input->checkKey(GLFW_KEY_A)) currentTurn = -135.f;
@@ -107,7 +106,7 @@ private:
             else if (input->checkKey(GLFW_KEY_S)) {
                 speed = airSpeed;
                 if (state == walking) {
-                    animateBody->setActiveAnimation("walking");
+                    sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("walking");
                 }
                 currentTurn = 0.f;
                 if (input->checkKey(GLFW_KEY_A)) currentTurn = -45.f;
@@ -116,14 +115,14 @@ private:
             else if (input->checkKey(GLFW_KEY_D)) {
                 speed = airSpeed;
                 if (state == walking) {
-                    animateBody->setActiveAnimation("walking");
+                    sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("walking");
                 }
                 currentTurn = 90;
             }
             else if (input->checkKey(GLFW_KEY_A)) {
                 speed = airSpeed;
                 if (state == walking) {
-                    animateBody->setActiveAnimation("walking");
+                    sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("walking");
                 }
                 currentTurn = -90;
             }
@@ -149,18 +148,27 @@ private:
         if (jumpDistance > limitJump) {
             state = air;
             rb->upwardsSpeed = 0.f;
-            animateBody->setActiveAnimation("jumping down", true);
+            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("jumping down", true);
         }
     }
 
     void checkState() {
         if (input->checkAnyKey()) {
+            if (input->checkKey(GLFW_KEY_1)) {
+                sm->getActiveScene()->findByName("player2")->getAnimateBody()->setActiveAnimation("walking", false);
+            }
+            if (input->checkKey(GLFW_KEY_2)) {
+                sm->getActiveScene()->findByName("player2")->getAnimateBody()->setActiveAnimation("jumping up", false);
+            }
+            if (input->checkKey(GLFW_KEY_3)) {
+                sm->getActiveScene()->findByName("player2")->getAnimateBody()->setActiveAnimation("attack1", false);
+            }
             if (input->checkKey(GLFW_MOUSE_BUTTON_RIGHT))
             {
                 state = dodge;
             }
             else if (input->checkKey(GLFW_KEY_SPACE) && state != air && state != jump_up && !wasSpacePressed) {
-                animateBody->setActiveAnimation("jumping up", true);
+                sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("jumping up", true);
                 state = jump_up;
                 initialPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
             } 
@@ -169,11 +177,11 @@ private:
             }
         }
         else if (state == walking) {
-            animateBody->setActiveAnimation("standing");
+            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("standing");
         }
         if (glm::distance(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y, initialPosition.y) < 0.5f && state == air) {
             state = walking;
-            animateBody->setActiveAnimation("standing");
+            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("standing");
             sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y = initialPosition.y;
         }
         wasSpacePressed = input->checkKey(GLFW_KEY_SPACE);
@@ -197,17 +205,17 @@ public:
             // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         }
         else if (state == attack1) {
-            animateBody->setActiveAnimation("attack1");
+            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("attack1");
             move(deltaTime);
-            if (animateBody->isPlay() == false) {
+            if (sm->getActiveScene()->findByName("player")->getAnimateBody()->isPlay() == false) {
                 state = walking;
             }
         }
         else if (state == dodge) {
-            animateBody->setActiveAnimation("dodge");
+            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("dodge");
             //currentTurn = 180.f;
             move(deltaTime);
-            if (animateBody->isPlay() == false) {
+            if (sm->getActiveScene()->findByName("player")->getAnimateBody()->isPlay() == false) {
                 state = walking;
             }
         }
@@ -218,10 +226,6 @@ public:
             MovePlayer(deltaTime);
             rb->useGravity();
         }
-    }
-
-    void addAnimationPlayer(AnimateBody* ab) {
-        animateBody = ab;
     }
 
     ~PlayerMovement();

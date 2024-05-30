@@ -209,19 +209,27 @@ int main() {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	auto animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
-	AnimateBody* animPlayer = new AnimateBody(animodel.get());
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
-	animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
-	pm->addAnimationPlayer(animPlayer);
+	//auto animodel2 = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"),true);
+
+	//AnimateBody* animPlayer = new AnimateBody(animodel.get());
+	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
+	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
+	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
+	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
+	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
+	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
+	//pm->addAnimationPlayer(animPlayer);
 
 	Shader* shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
 	GameObject* anim = new GameObject("player");
 	animodel->SetShader(shaderAnimation);
 	anim->addModelComponent(animodel);
+	anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
+	anim->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
+	anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
+	anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
+	anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
+	anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
 	sm->getActiveScene()->addObject(anim);
 
 	Shader* fillingShader = new Shader("../../../../src/shaders/vs_filling.vert", "../../../../src/shaders/fs_filling.frag");
@@ -412,7 +420,7 @@ int main() {
 			V = camera->getViewMatrix();
 		}
 		//animacje
-		animPlayer->UpdateAnimation(deltaTime);
+		//animPlayer->UpdateAnimation(deltaTime);
 		sm->getActiveScene()->findByName("skydome")->timeSetting(time / 7, glm::vec2(10, 10));
 
 		glm::mat4 P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(szer) / wys, 1.f, 5000.f);
@@ -594,7 +602,7 @@ int main() {
 		if (staticUpdateTime > 0.5f) {
 			staticUpdateTime = 0.f;
 		}
-		sm->getActiveScene()->Update(V, P, time);
+		sm->getActiveScene()->Update(V, P, deltaTime);
 
 
 		//generating shadows
@@ -643,6 +651,8 @@ int main() {
 			sm->getActiveScene()->findByName("skydome")->getTransform()->localPosition = camera->transform->localPosition;
 		}
 		sm->getActiveScene()->Draw(V, P);
+
+		//std::cout<<sm->getActiveScene()->findByName("player")->getVertex(1)->verticies.x;
 
 		mapsShader->use();
 		mapsShader->setVec3("viewPos", camera->transform->getLocalPosition());
@@ -789,9 +799,15 @@ int main() {
 			}
 			
 			GameObject* anim = new GameObject("player");
-			animodel->SetShader(shaderAnimation);
+			//animodel->SetShader(shaderAnimation);
 			anim->addModelComponent(animodel);
-			//anim->addColider(2);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
+
 			anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
 			pbd->objects.push_back(anim);
 			if (sm->getActiveScene()->findByName("player") == nullptr) {
@@ -801,6 +817,25 @@ int main() {
 			sm->getActiveScene()->addObject(anim);
 			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
 			sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
+
+			GameObject* anim2 = new GameObject("player2");
+			anim2->addModelComponent(animodel);
+			anim2->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
+			anim2->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
+			anim2->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
+			anim2->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
+			anim2->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
+			anim2->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
+
+			anim2->capsuleCollider = new CapsuleCollider(anim2->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
+			pbd->objects.push_back(anim2);
+			if (sm->getActiveScene()->findByName("player2") == nullptr) {
+				sm->getActiveScene()->addObject(anim2);
+				cm.addObject(anim2);
+			}
+			sm->getActiveScene()->addObject(anim2);
+			sm->getActiveScene()->findByName("player2")->Move(glm::vec3(0.f, 2.f, 0.f));
+			sm->getActiveScene()->findByName("player2")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
 
 			GameObject* skydome = new GameObject("skydome");
 			skydome->addModelComponent(skydomeModel);

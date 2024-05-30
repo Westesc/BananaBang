@@ -94,6 +94,13 @@ Component* GameObject::getComponentInParent()
 
 void GameObject::addModelComponent(std::shared_ptr<Model> model) {
     modelComponent = model;
+    if (modelComponent->checkAnim()) {
+        animPlayer = new AnimateBody(modelComponent.get());
+    }
+}
+
+void GameObject::addAnimation(char* path,std::string name , float speed) {
+    animPlayer->addAnimation(path,name, speed);
 }
 
 std::shared_ptr<Model> GameObject::getModelComponent() const {
@@ -124,11 +131,13 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
             localTransform->localRotation.y += rotateAxis.y * rotateSpeed * glm::radians(time);
             localTransform->localRotation.z += rotateAxis.z * rotateSpeed * glm::radians(time);
         }
-
+        
         //modelComponent->updateBoundingBox(M);
         //std::cout << name << "M1:" << glm::to_string(M) << std::endl;
         //std::cout << "M2:" << glm::to_string(*modelComponent->getTransform()) << std::endl;
     }
+    deltaTime = time;
+
     for (auto ch : children) {
         ch->Update(view, perspective,time);
     }
@@ -228,13 +237,24 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
             glStencilFunc(GL_ALWAYS, 0, 0xFF);
             glEnable(GL_DEPTH_TEST);
         }
-        else {
+        else if(!modelComponent->isAnim){
 
             modelComponent->GetShader()->use();
             modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
             modelComponent->GetShader()->setMat4("view", view);
             modelComponent->GetShader()->setMat4("projection", perspective);
             modelComponent->Draw();
+        }
+        if (modelComponent != nullptr) {
+            if (modelComponent->isAnim) {
+                animPlayer->UpdateAnimation(deltaTime);
+
+                modelComponent->GetShader()->use();
+                modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
+                modelComponent->GetShader()->setMat4("view", view);
+                modelComponent->GetShader()->setMat4("projection", perspective);
+                modelComponent->Draw();
+            }
         }
         /*if (modelComponent->boundingBox != nullptr) {
             modelComponent->DrawBoundingBoxes(modelComponent->GetShader(), *modelComponent->getTransform());
@@ -253,6 +273,7 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
         }
     }
 }
+
 
 void GameObject::Draw(Shader* shader) {
     if (modelComponent != nullptr) {

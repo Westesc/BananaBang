@@ -318,7 +318,11 @@ private:
 public:
     bool rotating;
     bool isBlue, iswhite;
-    bool isAnim= false;
+    bool isAnim = false;
+
+    bool checkAnim() {
+        return isAnim;
+    }
 
     auto& GetBoneInfoMap() { return m_BoneInfoMap; }
     int& GetBoneCount() { return m_BoneCounter; }
@@ -479,6 +483,7 @@ public:
             meshes[i]->Draw(shader, textures_loaded, Transform, isFromFile, rotating, isBlue);
         }
     }
+
 
     void DrawBoundingBox(const BoundingBox& bbox) {
         glm::vec3 vertices[] = {

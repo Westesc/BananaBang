@@ -29,12 +29,15 @@ private:
     float jumpPower = 5.f;
     glm::vec3 initialPosition;
     float airSpeed = 4.f;
+    bool firstSequence = true;
 
     enum State {
         walking,
         jump_up,
         air,
         attack1,
+        attack2,
+        attack3,
         dodge,
         climbing
     };
@@ -153,14 +156,23 @@ private:
     }
 
     void checkState() {
-        if (queueAnim.size() == 0) {
-            animCount = 0;
-        }
         if (input->checkAnyKey()) {
             if (state != air && state != jump_up) {
-                if (input->getPressKey() == GLFW_MOUSE_BUTTON_LEFT) {
-                    if (queueAnim.size() < 3) {
-                        queueAnim.push("attack" + queueAnim.size() + 1);
+                int key = input->getPressKey();
+                if (key == GLFW_MOUSE_BUTTON_LEFT) {
+                    if (queueAnim.size() < 3 && firstSequence == true) {
+                        if (queueAnim.size() > 0 && queueAnim.front() != "attack1") {
+                            if (queueAnim.front() == "attack2") {
+                                queueAnim.push("attack" + std::to_string(queueAnim.size() + 2));
+                            }
+                            else {
+                                queueAnim.push("attack" + std::to_string(queueAnim.size()));
+                            }
+                        }
+                        else
+                        {
+                            queueAnim.push("attack" + std::to_string(queueAnim.size() + 1));
+                        }
                     }
                     state = attack1;
                 }
@@ -207,7 +219,30 @@ public:
             // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         }
         else if (state == attack1) {
-            if (animCount == 0 && queueAnim.size()!= 0) {
+            std::cout << queueAnim.size()<<std::endl;
+            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation(queueAnim.front());
+            if (queueAnim.front() == "attack3") {
+                firstSequence = true;
+            }
+            else if (queueAnim.size() == 2 && queueAnim.front() == "attack2") {
+                firstSequence = false;
+            }
+            if (sm->getActiveScene()->findByName("player")->getAnimateBody()->isPlay() == false) {
+                if (queueAnim.size() == 3) {
+                    firstSequence = false;
+                }
+                queueAnim.pop();
+                if (queueAnim.size() > 1)
+                {
+                    //state = attack2;
+                }
+                if (queueAnim.size() == 0) {
+                    firstSequence = true;
+                    state = walking;
+                }
+            }
+
+          /*  if (animCount == 0 && queueAnim.size()!= 0) {
                 animCount++;
                 sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("attack1");
             }
@@ -227,8 +262,38 @@ public:
                 else {
                     state = walking;
                 }
-            }
+            }*/
         }
+        //else if (state == attack2) {
+        //        sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("attack2");
+        //        if (sm->getActiveScene()->findByName("player")->getAnimateBody()->isPlay() == false) {
+        //            if (queueAnim.size() > 2)
+        //            {
+        //                state = attack3;
+
+        //                while (!queueAnim.empty()) {
+        //                    queueAnim.pop();
+        //                }
+        //            }
+        //            else {
+        //                state = walking;
+        //            }
+        //        }
+        //}
+        //else if (state == attack3) {
+        //    std::cout << "attack3";
+        //    sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("attack3");
+        //    if (sm->getActiveScene()->findByName("player")->getAnimateBody()->isPlay() == false) {
+        //        if (queueAnim.size() > 1)
+        //        {
+        //            state = attack1;
+        //        }
+        //        else {
+        //            state = walking;
+        //        }
+        //    }
+
+        //}
         else if (state == dodge) {
             sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("dodge");
             //currentTurn = 180.f;

@@ -109,6 +109,14 @@ void Input::mouse_callback(GLFWwindow* _window, double xpos, double ypos)
 
 
 void Input::key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+
+	if (key != GLFW_KEY_W && key != GLFW_KEY_A && key != GLFW_KEY_S && key != GLFW_KEY_D) {
+		pressKey.push(key);
+	}
+	if (pressKey.size() > 3) {
+		pressKey.pop();
+	}
+
 	if (action == GLFW_PRESS) {
 		pressedKeys.insert(key);
 	}
@@ -162,9 +170,8 @@ bool Input::checkSequence(int key1, int key2)
 void Input::mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
 	if (action == GLFW_PRESS) {
 		pressedKeys.insert(button);
-		if (button != GLFW_KEY_W && button != GLFW_KEY_A && button != GLFW_KEY_S && button != GLFW_KEY_D) {
-			pressKey.push(button);
-		}
+		
+		pressKey.push(button);
 		if (pressKey.size() > 3) {
 			pressKey.pop();
 		}

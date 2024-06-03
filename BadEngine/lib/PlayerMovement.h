@@ -77,14 +77,14 @@ private:
         sm->getActiveScene()->findByName("player")->velocity = vel;
     }
 
-    void moveInAir(float speed) {
+    void moveInAir(float speed, float deltaTime) {
         getRotate(true);
         float angle = atan2(camera->getFront().x, camera->getFront().z) * (180.0 / M_PI);
          sm->getActiveScene()->findByName("player")->getTransform()->localRotation.y = angle + rotateAngle;
         float distance = speed * tm->getFramePerSeconds();
         float dx = distance * sin(glm::radians(sm->getActiveScene()->findByName("player")->getTransform()->getLocalRotation().y));
         float dz = distance * cos(glm::radians(sm->getActiveScene()->findByName("player")->getTransform()->getLocalRotation().y));
-        sm->getActiveScene()->findByName("player")->Move(glm::vec3(dx, 0.f, dz));
+        sm->getActiveScene()->findByName("player")->velocity = (glm::vec3(dx, 0.f, dz)/deltaTime);
     }
 
     void MovePlayer(float deltaTime) {
@@ -129,7 +129,7 @@ private:
         }
         if (input->checkAnyKey()) {
             if (state == air || state == jump_up) {
-                moveInAir(speed);
+                moveInAir(speed, deltaTime);
             }
             else
             {

@@ -87,7 +87,7 @@ void Start() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(Window::windowWidth, Window::windowHeight, "Monke", nullptr, nullptr);
+	window = glfwCreateWindow(1540, 960, "Monke", nullptr, nullptr);
 	if (!window) exit(1);
 
 	glfwMakeContextCurrent(window);
@@ -424,8 +424,8 @@ int main() {
 		//animPlayer->UpdateAnimation(deltaTime);
 		sm->getActiveScene()->findByName("skydome")->timeSetting(time / 7, glm::vec2(10, 10));
 
-		glm::mat4 P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(szer) / wys, 1.f, 5000.f);
-		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(szer) / wys, 1.f, 500.f) * camera->getViewMatrix());
+		glm::mat4 P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 5000.f);
+		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 500.f) * camera->getViewMatrix());
 
 		/*if (skydome->getModelComponent() != nullptr) {
 			glm::mat4 Mm = glm::translate(glm::mat4(1.f), glm::vec3(20.f, 0.f, 18.f));

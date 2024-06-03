@@ -237,7 +237,10 @@ public:
 	}
 
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
-		if (first->name == "player" && !second->name.starts_with("tree")) {
+		if (first->name == "player" && !(second->name.starts_with("tree") || second->name.starts_with("branch"))) {
+			first->localTransform->predictedPosition = first->localTransform->localPosition;
+		}
+		else if (first->name == "player" && first->velocity.y == 0 && second->name.starts_with("tree")) {
 			first->localTransform->predictedPosition = first->localTransform->localPosition;
 		}
 		else {
@@ -402,7 +405,7 @@ public:
 			for (int i = 0; i < section->objects.size(); i++) {
 				for (int j = 0; j < section->staticObjects.size(); j++) {
 					if (checkCollisionPBDStatic(section->objects.at(i), section->staticObjects.at(j))) {
-						separateStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
+						//separateStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
 						resolveCollisionStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
 					}
 				}

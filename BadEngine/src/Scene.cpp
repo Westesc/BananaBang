@@ -51,10 +51,10 @@ void Scene::Draw(glm::mat4 view, glm::mat4 perspective) {
 		}
 	}
 }
-void Scene::Draw(Shader* shader) {
+void Scene::Draw(Shader* shader, Shader* animationShader) {
 	for (auto go : gameObjects) {
 		if (go->isVisible) {
-			go->Draw(shader);
+			go->Draw(shader, animationShader);
 		}
 	}
 }

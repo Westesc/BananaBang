@@ -245,6 +245,7 @@ int main() {
 
 	//depth shader
 	Shader* depthShader = new Shader("../../../../src/shaders/depthShader.vert", "../../../../src/shaders/depthShader.frag");
+	Shader* depthAnimationShader = new Shader("../../../../src/shaders/depthAnimationShader.vert", "../../../../src/shaders/depthAnimationShader.frag");
 
 	GameObject* box = new GameObject("box");
 	GameObject* plane = new GameObject("plane");
@@ -334,7 +335,7 @@ int main() {
 	glm::vec3* lightColor = new glm::vec3(1.f, 1.0f, 1.f);
 
 	//Depth map to generate shadows
-	const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
+	const unsigned int SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
 	unsigned int depthMapFBO;
 	glGenFramebuffers(1, &depthMapFBO);
 	//creating depth texture
@@ -611,18 +612,22 @@ int main() {
 		glm::mat4 lightProjection, lightView;
 		glm::mat4 lightSpaceMatrix;
 		float near_plane = 1.0f, far_plane = 500.f;
-		lightProjection = glm::ortho(-100.0f, 100.0f, -100.0f, 100.0f, near_plane, far_plane);
+		lightProjection = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, near_plane, far_plane);
 		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 		lightSpaceMatrix = lightProjection * lightView;
 		// render scene from light's point of view
 		depthShader->use();
 		depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+		depthAnimationShader->use();
+		depthAnimationShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+
 
 		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 		glClear(GL_DEPTH_BUFFER_BIT);
-		sm->getActiveScene()->Draw(depthShader);
+		sm->getActiveScene()->Draw(depthShader, depthAnimationShader);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, Window::windowWidth, Window::windowHeight);
 		planeSectormodel->AddTexture(depthMap, "depthMap");
 
 

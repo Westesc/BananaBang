@@ -55,7 +55,7 @@ public:
 	//void checkResolveCollisions(GameObject* other, float deltaTime);
 
 	void Draw(glm::mat4 view, glm::mat4 perspective);
-	void Draw(Shader* shader);
+	void Draw(Shader* shader, Shader* animationShader);
 	YAML::Node serialize();
 	void setVisible(bool visible);
 	void lightSetting(glm::vec3 viewPos, glm::vec3 lightPos, glm::vec3 lightColor);

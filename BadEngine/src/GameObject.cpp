@@ -275,7 +275,7 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
 }
 
 
-void GameObject::Draw(Shader* shader) {
+void GameObject::Draw(Shader* shader,Shader* animationShader) {
     if (modelComponent != nullptr) {
         glm::mat4 M = glm::translate(glm::mat4(1.f), localTransform->localPosition);
         M = glm::rotate(M, glm::radians(localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));
@@ -283,11 +283,17 @@ void GameObject::Draw(Shader* shader) {
         M = glm::rotate(M, glm::radians(localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
         M = glm::scale(M, localTransform->localScale);
         modelComponent->setTransform(M);
-        modelComponent->Draw(shader);
+        if (!modelComponent->isAnim) {
+            modelComponent->Draw(shader);
+        }
+        else {
+            animPlayer->UpdateAnimation(deltaTime, animationShader);
+            modelComponent->Draw(animationShader);
+        }
     }
     for (auto ch : children) {
         if (ch->isVisible) {
-            ch->Draw(shader);
+            ch->Draw(shader, animationShader);
         }
     }
 }

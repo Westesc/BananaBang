@@ -84,7 +84,8 @@ private:
         float distance = speed * tm->getFramePerSeconds();
         float dx = distance * sin(glm::radians(sm->getActiveScene()->findByName("player")->getTransform()->getLocalRotation().y));
         float dz = distance * cos(glm::radians(sm->getActiveScene()->findByName("player")->getTransform()->getLocalRotation().y));
-        sm->getActiveScene()->findByName("player")->velocity = (glm::vec3(dx, 0.f, dz)/deltaTime);
+        sm->getActiveScene()->findByName("player")->velocity.x = dx / deltaTime;
+        sm->getActiveScene()->findByName("player")->velocity.z = dz / deltaTime;
     }
 
     void MovePlayer(float deltaTime) {

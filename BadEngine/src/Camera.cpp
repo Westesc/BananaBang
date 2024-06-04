@@ -16,10 +16,12 @@ glm::mat4 Camera::getViewMatrix() {
 
 glm::mat4 Camera::getViewMatrixPlayer() {
 	glm::vec3 playerPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
-
-	transform->localPosition.x = playerPosition.x + 10.f * cos(glm::radians(Yaw));
+	float r = 10.f * cos(glm::radians(Pitch));
+	transform->localPosition.x = playerPosition.x + r * cos(glm::radians(Yaw));
 	transform->localPosition.y = playerPosition.y + 10.f * sin(glm::radians(Pitch));
-	transform->localPosition.z = playerPosition.z + 10.f * sin(glm::radians(Yaw));
+	if (transform->localPosition.y < 1.0f)
+		transform->localPosition.y = 1.0f;
+	transform->localPosition.z = playerPosition.z + r * sin(glm::radians(Yaw));
 
 	return glm::lookAt(transform->localPosition, playerPosition, glm::vec3(0.0f, 1.0f, 0.0f));
 }
@@ -39,8 +41,8 @@ void Camera::updateCamera(glm::vec2 vector) {
 	Pitch += vector.y * sensitivity;
 	if (Pitch > 89.0f)
 		Pitch = 89.0f;
-	if (Pitch < 0.0f)
-		Pitch = 0.0f;
+	if (Pitch < -70.0f)
+		Pitch = -70.0f;
 	glm::vec3 Front;
 	transform->localRotation += glm::vec3(vector.x / 300, -vector.y / 300, 0);
 	if (transform->localRotation.y > 1.56)

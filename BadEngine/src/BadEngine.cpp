@@ -87,7 +87,7 @@ void Start() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(1540, 960, "Monke", nullptr, nullptr);
+	window = glfwCreateWindow(Window::windowWidth, Window::windowHeight, "Monke", nullptr, nullptr);
 	if (!window) exit(1);
 
 	glfwMakeContextCurrent(window);
@@ -739,8 +739,8 @@ int main() {
 							branch->addColider(1);
 							glm::vec3 bpos = branch->localTransform->localPosition;
 							glm::vec3 bscale = branch->localTransform->localScale;
-							branch->boundingBox = new BoundingBox(glm::vec3(bpos.x * bscale.x * 1.1f, bpos.y * bscale.y,bpos.z * bscale.z * 1.1f),
-								glm::vec3(bpos.x * bscale.x * 1.1f, bpos.y * bscale.y, (bpos.z +4.5f) * bscale.z * 1.1f), 0.0f, true);
+							branch->boundingBox = new BoundingBox(glm::vec3(bpos.x * 1.1f, bpos.y ,bpos.z * 1.1f),
+								glm::vec3(bpos.x * 1.1f, bpos.y, (bpos.z +4.5f) * 1.1f), 0.0f, true);
 							//std::cout << branch->localTransform->localRotation.x << std::endl;
 							log->addChild(branch);
 						}
@@ -826,7 +826,7 @@ int main() {
 			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
 			sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
 
-			GameObject* anim2 = new GameObject("player2");
+			/*GameObject* anim2 = new GameObject("player2");
 			anim2->addModelComponent(animodel);
 			anim2->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
 			anim2->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
@@ -843,7 +843,7 @@ int main() {
 			}
 			sm->getActiveScene()->addObject(anim2);
 			sm->getActiveScene()->findByName("player2")->Move(glm::vec3(0.f, 2.f, 0.f));
-			sm->getActiveScene()->findByName("player2")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
+			sm->getActiveScene()->findByName("player2")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);*/
 
 			GameObject* skydome = new GameObject("skydome");
 			skydome->addModelComponent(skydomeModel);
@@ -935,7 +935,7 @@ int main() {
 		}*/
 		if (spawnerTime > 8.f && loaded && spawnedEnemies <= maxEnemies) {
 			spawnerTime = 0;
-			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(0.f,5.f,0.f), glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 14.f));
+			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(5.f,5.f,0.f), glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 14.f));
 			enemy->addModelComponent(enemyModel);
 			pbd->objects.push_back(enemy);
 			enemy->addColider(2);

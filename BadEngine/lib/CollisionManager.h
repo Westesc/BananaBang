@@ -243,6 +243,9 @@ public:
 		else if (first->name == "player" && first->velocity.y == 0 && second->name.starts_with("tree")) {
 			first->localTransform->predictedPosition = first->localTransform->localPosition;
 		}
+		else if (second->name.starts_with("branch")) {
+			first->localTransform->predictedPosition.y = first->localTransform->localPosition.y;
+		}
 		else {
 			glm::vec3 displacement = calculateCollisionResponseStatic(first, second);
 			glm::vec3 otherDisplacement = -displacement;

@@ -247,7 +247,7 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
         }
         if (modelComponent != nullptr) {
             if (modelComponent->isAnim) {
-                animPlayer->UpdateAnimation(deltaTime);
+                animPlayer->UpdateAnimation(deltaTime/2);
 
                 modelComponent->GetShader()->use();
                 modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
@@ -287,7 +287,7 @@ void GameObject::Draw(Shader* shader,Shader* animationShader) {
             modelComponent->Draw(shader);
         }
         else {
-            animPlayer->UpdateAnimation(deltaTime, animationShader);
+            animPlayer->UpdateAnimation(deltaTime/2, animationShader);
             modelComponent->Draw(animationShader);
         }
     }

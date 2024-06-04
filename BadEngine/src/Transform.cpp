@@ -17,7 +17,12 @@ Transform::Transform(YAML::Node node) {
 	this->localScale = nodeToVec3(node["scale"]);
 }
 
-
+Transform::Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale)
+{
+	localPosition = position;
+	localRotation = rotation;
+	localScale = scale;
+}
 
 Transform::~Transform()
 {

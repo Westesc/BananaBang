@@ -563,7 +563,7 @@ int main() {
 						//enemy->velocity = glm::vec3(0.0f);
 						break;
 					case EnemyState::Walking:
-						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
+						if (glm::distance(enemy->getTransform()->localPosition, enemy->chosenTreePos) > 5.f) {
 							enemy->state = EnemyState::Walking;
 							enemy->timeSinceDirChange += deltaTime;
 							glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->localTransform->getLocalPosition(), enemy->sector);
@@ -587,7 +587,8 @@ int main() {
 						}
 						else if (enemy->state == EnemyState::Walking) {
 							enemy->state = EnemyState::Chopping;
-							enemy->setVel(glm::vec3(0.0f));
+							//enemy->setVel(glm::vec3(0.0f));
+							enemy->velocity = glm::vec3(0.0f);
 							enemy->timeSpentWalking = 0.f;
 						}
 						break;

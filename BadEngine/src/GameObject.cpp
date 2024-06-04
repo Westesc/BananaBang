@@ -109,13 +109,13 @@ std::shared_ptr<Model> GameObject::getModelComponent() const {
 
 Transform* GameObject::getGlobalTransform() {
     if (parent == nullptr) return localTransform;
-    Transform* globalTransform = new Transform(*localTransform);
+    Transform* globalTransform = new Transform(localTransform->localPosition, localTransform->localRotation, localTransform->localScale);
     Transform* parentGlobalTransform = parent->getGlobalTransform();
     globalTransform->localPosition += parentGlobalTransform->localPosition;
     globalTransform->localRotation += parentGlobalTransform->localRotation;
     globalTransform->localScale += parentGlobalTransform->localScale;
 
-    delete parentGlobalTransform;
+    //delete parentGlobalTransform;
 
     return globalTransform;
 }

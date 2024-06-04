@@ -270,25 +270,30 @@ public:
 	}
 
 	void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
-		glm::vec3 displacement = calculateCollisionResponse(first, second);
-		displacement.y = 0.0f;
-		glm::vec3 otherDisplacement = -displacement;
-		//float scalar = glm::length(glm::normalize(displacement));
-		displacement *= deltaTime;
-		otherDisplacement *= deltaTime;
-		if (first->boundingBox != nullptr) {
-			displacement *= 0.1f;
-		}
-		if (second->boundingBox != nullptr) {
-			otherDisplacement *= 0.1f;
-		}
-		if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
-			first->localTransform->predictedPosition += displacement;
-			second->localTransform->predictedPosition += otherDisplacement;
+		if (first->name == "player" && second->name.starts_with("enemy")) {
+			first->localTransform->predictedPosition = first->localTransform->localPosition;
 		}
 		else {
-			first->localTransform->predictedPosition = first->localTransform->localPosition;
-			second->localTransform->predictedPosition = second->localTransform->localPosition;
+			glm::vec3 displacement = calculateCollisionResponse(first, second);
+			displacement.y = 0.0f;
+			glm::vec3 otherDisplacement = -displacement;
+			//float scalar = glm::length(glm::normalize(displacement));
+			displacement *= deltaTime;
+			otherDisplacement *= deltaTime;
+			if (first->boundingBox != nullptr) {
+				displacement *= 0.1f;
+			}
+			if (second->boundingBox != nullptr) {
+				otherDisplacement *= 0.1f;
+			}
+			if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
+				first->localTransform->predictedPosition += displacement;
+				second->localTransform->predictedPosition += otherDisplacement;
+			}
+			else {
+				first->localTransform->predictedPosition = first->localTransform->localPosition;
+				second->localTransform->predictedPosition = second->localTransform->localPosition;
+			}
 		}
 	}
 
@@ -419,7 +424,10 @@ public:
 						if (glm::distance(section->objects.at(i)->getTransform()->predictedPosition, section->objects.at(j)->getTransform()->predictedPosition) 
 							< section->objects.at(j)->capsuleCollider->radius * section->objects.at(j)->getTransform()->localScale.x * 2.0f) {
 							auto object = section->objects.at(i);
-							object->getTransform()->predictedPosition += glm::vec3(object->velocity.z,object->velocity.y, -object->velocity.x) * deltaTime * 5.f;
+							auto object2 = section->objects.at(j);
+							if (object->name.starts_with("enemy") && object2->name.starts_with("enemy")) {
+								object->getTransform()->predictedPosition += glm::vec3(object->velocity.z, object->velocity.y, -object->velocity.x) * deltaTime * 5.f;
+							}
 						}
 						
 					}
@@ -589,8 +597,13 @@ public:
 		glm::vec3 separation = normal * penetration;
 		separation.y = 0.0f;
 		if (!(glm::any(glm::isnan(separation)) || glm::any(glm::isinf(separation)))) {
-			first->localTransform->predictedPosition += separation;
-			second->localTransform->predictedPosition -= separation;
+			if (first->name == "player") {
+				first->localTransform->predictedPosition += separation * 0.5f;
+			}
+			else {
+				first->localTransform->predictedPosition += separation * 0.5f;
+				second->localTransform->predictedPosition -= separation * 0.5f;
+			}
 		}
 		//std::cout <<"separation: " << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
 	}

@@ -239,40 +239,60 @@ public:
 	}
 
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
-		if (!(/*second->name.starts_with("tree") ||*/ second->name.starts_with("branch"))) {
-			if (first->name.starts_with("player")) {
+		bool resolved = false;
+		if (second->name.starts_with("branch")) {
+			first->localTransform->predictedPosition.y = first->localTransform->localPosition.y;
+			resolved = true;
+		}
+		/*else if (first->velocity.y > 0 && second->name.starts_with("tree")) {
+			first->localTransform->predictedPosition = first->localTransform->localPosition;
+			resolved = true;
+		}*/
+		else /*if (!(/*second->name.starts_with("tree") || second->name.starts_with("branch")))*/ {
+			if (first->name.starts_with("player") && pm->getInput()->checkKey(GLFW_KEY_R)) {
 				if (second->name.starts_with("tree") || second->name.starts_with("log")) {
 					pm->changeState(PlayerState::climbing);
+					resolved = true;
 				}
 			}
-			first->localTransform->predictedPosition.x = first->localTransform->localPosition.x;
-			first->localTransform->predictedPosition.z = first->localTransform->localPosition.z;
+			else if (first->name == "player" && !(pm->getState() == PlayerState::air) || pm->getState() == PlayerState::jump_up) {
+				glm::vec2 toObstacle = glm::vec2(first->getTransform()->localPosition.x, first->getTransform()->localPosition.z) - glm::vec2(second->getTransform()->localPosition.x, second->getTransform()->localPosition.z);
+				if (glm::dot(glm::normalize(glm::vec2(first->velocity.x, first->velocity.z)), glm::normalize(-toObstacle)) > 0.0f) {
+					first->localTransform->predictedPosition.x = first->localTransform->localPosition.x;
+					first->localTransform->predictedPosition.z = first->localTransform->localPosition.z;
+					resolved = true;
+				}
+			}
+			else if (first->name.starts_with("enemy")) {
+				first->localTransform->predictedPosition.x = first->localTransform->localPosition.x;
+				first->localTransform->predictedPosition.z = first->localTransform->localPosition.z;
+				resolved = true;
+			}
 		}
-		else if (first->velocity.y > 0 && second->name.starts_with("tree")) {
-			first->localTransform->predictedPosition = first->localTransform->localPosition;
-		}
-		else if (second->name.starts_with("branch")) {
-			first->localTransform->predictedPosition.y = first->localTransform->localPosition.y;
-		}
-		else {
-			glm::vec3 displacement = calculateCollisionResponseStatic(first, second);
-			glm::vec3 otherDisplacement = -displacement;
-			//float scalar = glm::length(glm::normalize(displacement));
-			displacement *= deltaTime;
-			if (second->name.starts_with("branch") || second->name.starts_with("log")) {
-				displacement *= 0.1f;
-			}
-			if (second->name.starts_with("tree") || second->name.starts_with("log")) {
-				displacement.y = 0.0f;
-			}
-			if (first->boundingBox != nullptr) {
-				displacement *= 0.1f;
-			}
-			if (second->boundingBox != nullptr) {
-				otherDisplacement *= 0.1f;
-			}
-			if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
-				first->localTransform->predictedPosition += displacement;
+		if (first->name != "player" || pm->getState() != PlayerState::climbing) {
+			if (!resolved) {
+				glm::vec3 displacement = calculateCollisionResponseStatic(first, second);
+				while (abs(displacement.x) > 0.3f || abs(displacement.z) > 0.3f) {
+					displacement *= 0.1f;
+				}
+				glm::vec3 otherDisplacement = -displacement;
+				//float scalar = glm::length(glm::normalize(displacement));
+				displacement *= deltaTime;
+				if (second->name.starts_with("branch") || second->name.starts_with("log")) {
+					displacement *= 0.1f;
+				}
+				if (second->name.starts_with("tree") || second->name.starts_with("log")) {
+					displacement.y = 0.0f;
+				}
+				if (first->boundingBox != nullptr) {
+					displacement *= 0.1f;
+				}
+				if (second->boundingBox != nullptr) {
+					otherDisplacement *= 0.1f;
+				}
+				if (!(glm::any(glm::isnan(displacement)) || glm::any(glm::isinf(displacement)))) {
+					first->localTransform->predictedPosition += displacement;
+				}
 			}
 		}
 	}

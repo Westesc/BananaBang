@@ -158,6 +158,11 @@ private:
 
         glm::vec3 finalPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
         float jumpDistance = glm::length(finalPosition.y - initialPosition.y);
+        /*if (jumpDistance == 0.0f) {
+            state = PlayerState::walking;
+            rb->upwardsSpeed = 0.f;
+            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("walking");
+        }*/
         if (jumpDistance > limitJump) {
             state = PlayerState::air;
             rb->upwardsSpeed = 0.f;
@@ -171,6 +176,7 @@ private:
         }
         if (input->checkAnyKey()) {
              if (state == PlayerState::climbing) {
+                 initialPosition.y = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y;
                  if (input->checkKey(GLFW_KEY_W)) {
                      currentClimbingSpeed = climbingSpeed;
                  }
@@ -234,6 +240,7 @@ public:
     void ManagePlayer(float& deltaTime2, float deltaTime) {
         //std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         this->deltaTime2 = deltaTime2;
+        PlayerState prevState = state;
         checkState();
         if (state == PlayerState::walking) {
             MovePlayer(deltaTime);
@@ -309,6 +316,10 @@ public:
     PlayerState getState() {
         return state;
     }
+
+    Input* getInput() {
+		return input;
+	}
 
     ~PlayerMovement();
 };

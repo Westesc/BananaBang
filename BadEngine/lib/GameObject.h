@@ -11,7 +11,7 @@ class GameObject {
 public:
 	GameObject(std::string Name, std::string Tag = "none", int Layer = 0);
 	GameObject(YAML::Node node);
-	~GameObject();
+	virtual ~GameObject();
 
 	AnimateBody* animPlayer;
 	std::string name;
@@ -67,6 +67,10 @@ public:
 	void shadowSetting(glm::mat4 LSMatrix);
 	void timeSetting(float time, glm::vec2 iResolution);
 	void addColider();
+	template <typename T>
+	T* getAsActualType() {
+		return dynamic_cast<T*>(this);
+	}
 };
 
 #endif

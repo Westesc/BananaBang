@@ -15,7 +15,7 @@ YAML::Node vec3ToNode(glm::vec3 vector)
 
 GameObject::GameObject(std::string Name, std::string Tag, int Layer)
     : name(Name), tag(Tag), layer(Layer), active(true), parent(nullptr), modelComponent(nullptr), isRotating(false) {
-    localTransform = new Transform();
+    localTransform = new Transform(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f));
 }
 GameObject::GameObject(YAML::Node node) {
     this->name = node["name"].as<std::string>();

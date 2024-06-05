@@ -2,16 +2,18 @@
 #define Pathfinder_H
 
 #include <vector>
+#include "Tree.h"
 
 class Pathfinder {
 public:
-	std::vector<std::pair<int,glm::vec2>> trees;
+	std::vector<std::pair<int,Tree*>> trees;
 	void sortTrees() {
 		ZoneScopedN("sortTrees");
 		for (int i = 0; i< trees.size(); i++) {
 			for (int j = 0; j < trees.size(); j++) {
-				if (glm::min(trees[i].second,trees[j].second) == trees[j].second) {
-					std::pair<int, glm::vec2> temp = trees[i];
+				if (glm::min(glm::vec2(trees[i].second->getTransform()->localPosition.x, trees[i].second->getTransform()->localPosition.z), 
+					glm::vec2(trees[j].second->getTransform()->localPosition.x, trees[j].second->getTransform()->localPosition.z)) == glm::vec2(trees[j].second->getTransform()->localPosition.x, trees[j].second->getTransform()->localPosition.z)) {
+					std::pair<int, Tree*> temp = trees[i];
 					trees[i] = trees[j];
 					trees[j] = temp;
 				}
@@ -19,19 +21,20 @@ public:
 		}
 	}
 
-	glm::vec3 decideInitalDestination(int sector) {
-		std::vector<glm::vec2> treePositions;
+	std::pair<glm::vec3, Tree*> decideInitalDestination(int sector) {
+		std::vector<Tree*> treesInSector;
 		for (auto tree : trees) {
 			if (tree.first == sector) {
-				treePositions.push_back(tree.second);
+				treesInSector.push_back(tree.second);
 			}
 		}
-		if (treePositions.size() == 0) {
-			return glm::vec3(0, 0, 0);
+		if (treesInSector.size() == 0) {
+			return std::make_pair<glm::vec3, Tree*>(glm::vec3(0, 0, 0), nullptr);
 		}
-		int treeIndex = rand() % treePositions.size();
-		glm::vec2 treePosition = treePositions[treeIndex];
-		return glm::vec3(treePosition.x, 0, treePosition.y);
+		int treeIndex = rand() % treesInSector.size();
+		//glm::vec3 treePosition = glm::vec3(treesInSector[treeIndex]->getTransform()->localPosition.x, 0 ,treesInSector[treeIndex]->getTransform()->localPosition.z);
+		Tree* tree = treesInSector[treeIndex];
+		return std::make_pair(glm::vec3(tree->getTransform()->localPosition.x, 0, tree->getTransform()->localPosition.z), tree);
 	
 	}
 
@@ -40,7 +43,7 @@ public:
 		std::vector<glm::vec2> treePositions;
 		for (auto tree : trees) {
 			if (tree.first == sector) {
-				treePositions.push_back(tree.second);
+				treePositions.push_back(glm::vec2(tree.second->getTransform()->localPosition.x, tree.second->getTransform()->localPosition.z));
 			}
 		}
 		if (trees.size() < 3) {

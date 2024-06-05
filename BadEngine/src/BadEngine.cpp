@@ -36,6 +36,7 @@
 #include "../lib/TimeManager.h"
 #include "../lib/animation/Animator.h"
 #include "../lib/Globals.h"
+#include "../lib/EnemyStateManager.h"
 
 
 bool test = false;
@@ -79,6 +80,7 @@ bool buttonPressed;
 unsigned int maxEnemies = 5;
 unsigned int spawnedEnemies = 0;
 bool loaded = false;
+bool playerAtention = false;
 
 void Start() {
 	glfwInit();
@@ -394,6 +396,7 @@ int main() {
 
 	Pathfinder* pathfinder = new Pathfinder();
 	PBDManager* pbd = new PBDManager(10);
+	EnemyStateManager* enemyManager = new EnemyStateManager(pathfinder, &cm);
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -510,6 +513,11 @@ int main() {
 				//sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.0f, -boxSpeed * deltaTime, 0.0f));
 				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, -boxSpeed, 0.0f);
 			}
+
+			if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+				staticUpdateTime = 0;
+				playerAtention = true;
+			}
 		}
 
 		if (sm->getActiveScene()->findByName("rampBox")) {
@@ -555,14 +563,21 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			frustumTest = !frustumTest;
 		}
-		for (auto object : sm->getActiveScene()->gameObjects) {
+		/*for (auto object : sm->getActiveScene()->gameObjects) {
 			if (object->name.starts_with("enemy")) {
 				Enemy* enemy = static_cast<Enemy*>(object);
 				switch (enemy->state) {
-					case EnemyState::Idle:
-						//enemy->velocity = glm::vec3(0.0f);
-						break;
-					case EnemyState::Walking:
+				case EnemyState::Idle: {
+					enemy->velocity = glm::vec3(0.0f);
+					std::pair<glm::vec3, Tree*> tree = pathfinder->decideInitalDestination(enemy->sector);
+					if (tree.second != nullptr) {
+						enemy->chosenTreePos = tree.first;
+						enemy->chosenTree = tree.second;
+						enemy->state = EnemyState::Walking;
+					}
+					break;
+				}
+					case EnemyState::Walking: {
 						if (glm::distance(enemy->getTransform()->localPosition, enemy->chosenTreePos) > 5.f) {
 							enemy->state = EnemyState::Walking;
 							enemy->timeSinceDirChange += deltaTime;
@@ -581,8 +596,15 @@ int main() {
 							cm.addObject(enemy);
 							enemy->timeSpentWalking += deltaTime;
 							if (enemy->timeSpentWalking > 15.f) {
-								enemy->chosenTreePos = pathfinder->decideInitalDestination(enemy->sector);
-								enemy->timeSpentWalking = 0.f;
+								std::pair<glm::vec3, Tree*> tree = pathfinder->decideInitalDestination(enemy->sector);
+								if (tree.second == nullptr) {
+									enemy->state = EnemyState::Idle;
+								}
+								else {
+									enemy->chosenTreePos = tree.first;
+									enemy->chosenTree = tree.second;
+									enemy->timeSpentWalking = 0.f;
+								}
 							}
 						}
 						else if (enemy->state == EnemyState::Walking) {
@@ -592,18 +614,42 @@ int main() {
 							enemy->timeSpentWalking = 0.f;
 						}
 						break;
+					}
 					case EnemyState::Chopping:
 						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
 							enemy->state = EnemyState::Walking;
+							if (enemy->chosenTree != nullptr) {
+								enemy->chosenTree->getAsActualType<Tree>()->removeChopper(enemy);
+							}
+						}
+						else {
+							if (std::find(enemy->chosenTree->getAsActualType<Tree>()->choppers.begin(), enemy->chosenTree->getAsActualType<Tree>()->choppers.end(), enemy) == enemy->chosenTree->getAsActualType<Tree>()->choppers.end()) {
+								enemy->chosenTree->getAsActualType<Tree>()->addChopper(enemy);
+							}
 						}
 						break;
 					case EnemyState::Attacking:
 						break;
 				}
 			}
-		}
-		if (staticUpdateTime > 0.5f) {
+		}*/
+	
+		if (staticUpdateTime > 1.5f) {
 			staticUpdateTime = 0.f;
+			playerAtention = false;
+		}
+		enemyManager->update(deltaTime, playerAtention);
+		for (auto object : sm->getActiveScene()->gameObjects) {
+			if (object->name.starts_with("sector")) {
+				for (auto tree : object->children) {
+					Tree* treeActual = tree->getAsActualType<Tree>();
+					//treeActual->updateHealth(deltaTime);
+					if (treeActual->health <= 0) {
+						object->children.erase(std::remove(object->children.begin(), object->children.end(), tree), object->children.end());
+						delete treeActual;
+					}
+				}
+			}
 		}
 		sm->getActiveScene()->Update(V, P, deltaTime);
 
@@ -710,7 +756,7 @@ int main() {
 									treeX = losujLiczbe2() * planeSector->localTransform->localScale.x; treeZ = losujLiczbe2() * planeSector->localTransform->localScale.z;
 								}
 							}*/
-						GameObject* tree = new GameObject("tree_"+std::to_string(k));
+						Tree* tree = new Tree("tree_"+std::to_string(k), 100.0f);
 						tree->addModelComponent(treetrunk);
 						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
 						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
@@ -750,7 +796,7 @@ int main() {
 					sm->activeScene->addObject(planeSector);
 					for(auto ch : planeSector->children)
 					{
-						pathfinder->trees.push_back(std::make_pair((i+1)*j, glm::vec2(ch->getTransform()->localPosition.x, ch->getTransform()->getLocalPosition().z)));
+						pathfinder->trees.push_back(std::make_pair((i + 1)* j, ch->getAsActualType<Tree>()));
 					}
 					pathfinder->sortTrees();
 				}
@@ -826,6 +872,7 @@ int main() {
 			sm->getActiveScene()->addObject(anim);
 			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
 			sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
+			enemyManager->player = anim;
 
 			/*GameObject* anim2 = new GameObject("player2");
 			anim2->addModelComponent(animodel);
@@ -944,9 +991,12 @@ int main() {
 			sm->getActiveScene()->addObject(enemy);
 			cm.addObject(enemy);
 			spawnedEnemies++;
-			enemy->chosenTreePos = pathfinder->decideInitalDestination(0);
+			std::pair<glm::vec3, Tree*> tree = pathfinder->decideInitalDestination(enemy->sector);
+			enemy->chosenTreePos = tree.first;
+			enemy->chosenTree = tree.second;
 			enemy->velocity = enemy->chosenTreePos - enemy->localTransform->localPosition;
 			enemy->state = EnemyState::Walking;
+			enemyManager->addEnemy(enemy);
 		}
 		renderImGui();
 		glfwSwapBuffers(window);

@@ -237,10 +237,10 @@ public:
 	}
 
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
-		if (first->name == "player" && !(/*second->name.starts_with("tree") ||*/ second->name.starts_with("branch"))) {
+		if (!(/*second->name.starts_with("tree") ||*/ second->name.starts_with("branch"))) {
 			first->localTransform->predictedPosition = first->localTransform->localPosition;
 		}
-		else if (first->name == "player" && first->velocity.y > 0 && second->name.starts_with("tree")) {
+		else if (first->velocity.y > 0 && second->name.starts_with("tree")) {
 			first->localTransform->predictedPosition = first->localTransform->localPosition;
 		}
 		else if (second->name.starts_with("branch")) {

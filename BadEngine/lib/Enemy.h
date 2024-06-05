@@ -13,6 +13,7 @@ enum class EnemyState {
 class Enemy : public GameObject {
 public:
 	glm::vec3 chosenTreePos = glm::vec3(0.f);
+	GameObject* chosenTree = nullptr;
 	float timeSpentWalking = 0.f;
 	int sector = 0;
 	EnemyState state = EnemyState::Idle;

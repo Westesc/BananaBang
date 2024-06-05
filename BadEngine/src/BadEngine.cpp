@@ -383,6 +383,7 @@ int main() {
 
 
 	CollisionManager cm = CollisionManager(1000, 100);
+	cm.pm = pm;
 	sm->getActiveScene()->findByName("rampBox")->getModelComponent()->GetShader()->use();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, sm->getActiveScene()->findByName("rampBox")->getModelComponent()->TextureFromFile("../../../../res/gradient.png"));

@@ -13,7 +13,8 @@ enum class PlayerState {
     air,
     attack1,
     dodge,
-    climbing
+    climbing,
+    treeAttack
 };
 
 class PlayerMovement {
@@ -176,8 +177,13 @@ private:
                  else if (input->checkKey(GLFW_KEY_S)) {
                      currentClimbingSpeed = -climbingSpeed;
                  }
-                 else {
-                     currentClimbingSpeed = 0.f;
+                 else if (input->checkKey(GLFW_KEY_E))
+                 {
+                     state = PlayerState::treeAttack;
+                 }
+                 else if (input->checkKey(GLFW_KEY_SPACE))
+                 {
+                     state = PlayerState::jump_up;
                  }
             }
             else if (state != PlayerState::air && state != PlayerState::jump_up && state != PlayerState::climbing) {
@@ -203,6 +209,9 @@ private:
         }
         else if (state == PlayerState::walking) {
             sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("standing");
+        }
+        else {
+            currentClimbingSpeed = 0.1f;
         }
         if (glm::distance(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y, initialPosition.y) < 0.5f && state == PlayerState::air) {
             state = PlayerState::walking;
@@ -265,12 +274,18 @@ public:
         {
             if(currentClimbingSpeed > 0) {
                 sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimationWithY("climbing up");
+                if (currentClimbingSpeed == 0.1f) {
+                    sm->getActiveScene()->findByName("player")->getAnimateBody()->changeAnimationSpeed("climbing up", 0.8f);
+                }
+                else {
+                    sm->getActiveScene()->findByName("player")->getAnimateBody()->changeAnimationSpeed("climbing up", 1.3f);
+                }
             }
             else if (currentClimbingSpeed < 0) {
                 sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimationWithY("climbing down");
             }
 
-            float climbingY = climbingSpeed * sm->getActiveScene()->findByName("player")->getTransform()->getLocalScale().y * sm->getActiveScene()->findByName("player")->getAnimateBody()->getPosition().y;
+            float climbingY = abs(currentClimbingSpeed) * sm->getActiveScene()->findByName("player")->getTransform()->getLocalScale().y * sm->getActiveScene()->findByName("player")->getAnimateBody()->getPosition().y;
             sm->getActiveScene()->findByName("player")->velocity = glm::vec3(0.f, climbingY, 0.f) / deltaTime;
         }
         else if (state == PlayerState::jump_up) {

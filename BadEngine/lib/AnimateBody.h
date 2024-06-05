@@ -39,6 +39,7 @@ public:
 	glm::vec3 getPosition();
 	std::string getActiveAnimation();
 	void setActiveAnimationWithY(std::string name, bool playOnce = false);
+	void changeAnimationSpeed(const std::string& nameAnim, float newSpeed);
 
 	void play();
 	bool isPlay();

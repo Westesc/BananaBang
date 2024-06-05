@@ -30,6 +30,15 @@ void AnimateBody::addAnimation(char* path, std::string nameAnim, float time)
     }
 }
 
+void AnimateBody::changeAnimationSpeed(const std::string& nameAnim, float newSpeed) {
+    for (auto& anim : allAnimation) {
+        if (anim.name == nameAnim) {
+            anim.speedAnimation = newSpeed;
+        }
+    }
+}
+
+
 glm::vec3 AnimateBody::getPosition() {
     return animator->getposition();
 }

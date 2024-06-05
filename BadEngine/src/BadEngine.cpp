@@ -211,16 +211,6 @@ int main() {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	auto animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
-	//auto animodel2 = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"),true);
-
-	//AnimateBody* animPlayer = new AnimateBody(animodel.get());
-	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
-	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
-	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
-	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
-	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
-	//animPlayer->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
-	//pm->addAnimationPlayer(animPlayer);
 
 	Shader* shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
 	GameObject* anim = new GameObject("player");
@@ -244,6 +234,21 @@ int main() {
 	Shader* enemyShader = new Shader("../../../../src/shaders/enemy.vert", "../../../../src/shaders/enemy.frag");
 	auto enemyModel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"), false);
 	enemyModel->SetShader(enemyShader);
+	
+
+	GameObject* outlineObj = new GameObject("outline");
+	auto outlinemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/Lumberjack.obj"), false);
+
+	outlinemodel->SetShader(shaderTree);
+	outlinemodel->SetOutlineShader(outlineShader);
+	outlinemodel->SetFillingShader(fillingShader);
+
+	outlineObj->addModelComponent(outlinemodel);
+	sm->getActiveScene()->addObject(outlineObj);
+
+	sm->getActiveScene()->findByName("outline")->getTransform()->localPosition = glm::vec3(0.f, 0.f, 0.f);
+	sm->getActiveScene()->findByName("outline")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
+	sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);
 
 	//depth shader
 	Shader* depthShader = new Shader("../../../../src/shaders/depthShader.vert", "../../../../src/shaders/depthShader.frag");
@@ -405,7 +410,7 @@ int main() {
 		}
 		glClearColor(0.2f, 0.3f, 0.7f, 1.f);
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
 		deltaTime = time - lastTime;
 		deltaTime2 += time - lastTime;
@@ -485,6 +490,13 @@ int main() {
 
 		if (gameMode.getMode() == GameMode::Game) {
 			pm->ManagePlayer(deltaTime2, deltaTime);
+		}
+
+		if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+			sm->getActiveScene()->findByName("outline")->getModelComponent()->SetOutlineShader(nullptr);
+		}
+		if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+			sm->getActiveScene()->findByName("outline")->getModelComponent()->SetOutlineShader(outlineShader);
 		}
 
 		if (sm->getActiveScene()->findByName("player")) {
@@ -905,6 +917,21 @@ int main() {
 			sm->getActiveScene()->addObject(skydome);
 			sm->getActiveScene()->addObject(HPcount);
 			sm->getActiveScene()->findByName("skydome")->timeSetting(time / 7, glm::vec2(10, 10));
+
+			GameObject* outlineObj = new GameObject("outline");
+			auto outlinemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/Lumberjack.obj"), false);
+
+			outlinemodel->SetShader(shaderTree);
+			outlinemodel->SetOutlineShader(outlineShader);
+			outlinemodel->SetFillingShader(fillingShader);
+
+			outlineObj->addModelComponent(outlinemodel);
+			sm->getActiveScene()->addObject(outlineObj);
+
+			sm->getActiveScene()->findByName("outline")->getTransform()->localPosition = glm::vec3(0.f, 0.f, 0.f);
+			sm->getActiveScene()->findByName("outline")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
+			sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);
+
 		}
 		while (input->IsKeobarodAction(window)) {
 			input->getMessage(key, action);

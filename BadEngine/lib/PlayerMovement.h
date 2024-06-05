@@ -241,6 +241,10 @@ public:
                 state = PlayerState::walking;
             }
         }
+        else if(state == PlayerState::climbing)
+        {
+            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("climbing up");
+        }
         else if (state == PlayerState::jump_up) {
             jump(deltaTime);
         }
@@ -256,7 +260,7 @@ public:
     }
 
     void changeState(PlayerState state) {
-        state = state;
+        this->state = state;
     }
 
     ~PlayerMovement();

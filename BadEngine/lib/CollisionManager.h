@@ -240,8 +240,10 @@ public:
 
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
 		if (!(/*second->name.starts_with("tree") ||*/ second->name.starts_with("branch"))) {
-			if (second->name.starts_with("tree") || second->name.starts_with("log")) {
-				pm->changeState(PlayerState::climbing);
+			if (first->name.starts_with("player")) {
+				if (second->name.starts_with("tree") || second->name.starts_with("log")) {
+					pm->changeState(PlayerState::climbing);
+				}
 			}
 			first->localTransform->predictedPosition.x = first->localTransform->localPosition.x;
 			first->localTransform->predictedPosition.z = first->localTransform->localPosition.z;

@@ -6,12 +6,12 @@ in vec2 TexCoords;
 uniform float iTime;
 uniform vec2 iResolution;
 
-const float cloudscale = 1.1;
-const float speed = 0.03;
+const float cloudscale = 3;
+const float speed = 0.02;
 const float clouddark = 0.5;
 const float cloudlight = 0.3;
-const float cloudcover = 0.2;
-const float cloudalpha = 8.0;
+const float cloudcover = -0.2;
+const float cloudalpha = 0.5;
 const float skytint = 0.5;
 const vec3 skycolour1 = vec3(0.2, 0.4, 0.6);
 const vec3 skycolour2 = vec3(0.4, 0.7, 1.0);
@@ -106,7 +106,11 @@ void main() {
    
     f = cloudcover + cloudalpha * f * r;
     
+    float distanceToCenter = length(p - vec2(0.5, 0.5));
+    float edgeFade = smoothstep(0.4, 0.5, distanceToCenter);
+    
     vec3 result = mix(skycolour, clamp(skytint * skycolour + cloudcolour, 0.0, 1.0), clamp(f + c, 0.0, 1.0));
+    result = mix(result, skycolour, edgeFade);
     
     FragColor = vec4(result, 1.0);
 }

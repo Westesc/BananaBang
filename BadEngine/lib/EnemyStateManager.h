@@ -111,6 +111,7 @@ private:
             if (glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) > 3.0f) {
                 glm::vec3 direction = glm::normalize(player->getTransform()->localPosition - enemy->getTransform()->localPosition);
                 enemy->velocity = direction * (enemy->velLimits.second - enemy->velLimits.first);
+                enemy->velocity.y = 0;
                 glm::vec3 tmpMove = glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z);
                 enemy->Move(tmpMove * deltaTime);
                 cm->addObjectPredict(enemy);

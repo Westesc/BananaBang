@@ -739,6 +739,9 @@ int main() {
 			}
 			pbd->objects.clear();
 			sm->getActiveScene()->gameObjects.clear();
+			enemyManager->enemies.clear();
+			pathfinder->trees.clear();
+			spawnedEnemies = 0;
 
 			for (int i = 0; i < sectorsPom; i++) {
 				for (int j = 0; j < sectorsPom; j++) {

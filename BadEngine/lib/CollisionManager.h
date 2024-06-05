@@ -238,7 +238,8 @@ public:
 
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
 		if (!(/*second->name.starts_with("tree") ||*/ second->name.starts_with("branch"))) {
-			first->localTransform->predictedPosition = first->localTransform->localPosition;
+			first->localTransform->predictedPosition.x = first->localTransform->localPosition.x;
+			first->localTransform->predictedPosition.z = first->localTransform->localPosition.z;
 		}
 		else if (first->velocity.y > 0 && second->name.starts_with("tree")) {
 			first->localTransform->predictedPosition = first->localTransform->localPosition;
@@ -271,7 +272,13 @@ public:
 
 	void resolveCollision(GameObject* first, GameObject* second, float deltaTime) {
 		if (first->name == "player" && second->name.starts_with("enemy")) {
-			first->localTransform->predictedPosition = first->localTransform->localPosition;
+			if ((second->getTransform()->localPosition - first->getTransform()->localPosition).y < 0.0f) {
+				first->getTransform()->predictedPosition.x += 10.0f * deltaTime;
+				first->getTransform()->predictedPosition.z += 10.0f * deltaTime;
+			}
+			else {
+				first->localTransform->predictedPosition = first->localTransform->localPosition;
+			}
 		}
 		else {
 			glm::vec3 displacement = calculateCollisionResponse(first, second);
@@ -420,13 +427,15 @@ public:
 				for (int j = i + 1; j < section->objects.size(); j++) {
 					if (checkCollisionPBD(section->objects.at(i), section->objects.at(j))) {
 						separate(section->objects.at(i), section->objects.at(j));
-						resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
-						if (glm::distance(section->objects.at(i)->getTransform()->predictedPosition, section->objects.at(j)->getTransform()->predictedPosition) 
-							< section->objects.at(j)->capsuleCollider->radius * section->objects.at(j)->getTransform()->localScale.x * 2.0f) {
-							auto object = section->objects.at(i);
-							auto object2 = section->objects.at(j);
-							if (object->name.starts_with("enemy") && object2->name.starts_with("enemy")) {
-								object->getTransform()->predictedPosition += glm::vec3(object->velocity.z, object->velocity.y, -object->velocity.x) * deltaTime * 5.f;
+						if (checkCollisionPBD(section->objects.at(i), section->objects.at(j))) {
+							resolveCollision(section->objects.at(i), section->objects.at(j), deltaTime);
+							if (glm::distance(section->objects.at(i)->getTransform()->predictedPosition, section->objects.at(j)->getTransform()->predictedPosition)
+								< section->objects.at(j)->capsuleCollider->radius * section->objects.at(j)->getTransform()->localScale.x * 2.0f) {
+								auto object = section->objects.at(i);
+								auto object2 = section->objects.at(j);
+								if (object->name.starts_with("enemy") && object2->name.starts_with("enemy")) {
+									object->getTransform()->predictedPosition += glm::vec3(object->velocity.z, object->velocity.y, -object->velocity.x) * deltaTime * 5.f;
+								}
 							}
 						}
 						

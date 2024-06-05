@@ -854,7 +854,7 @@ int main() {
 			GameObject* anim = new GameObject("player");
 			//animodel->SetShader(shaderAnimation);
 			anim->addModelComponent(animodel);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.2f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);

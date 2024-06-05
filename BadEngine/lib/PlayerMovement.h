@@ -74,7 +74,7 @@ private:
 
        // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
         glm::vec3 vel = glm::vec3(dx, 0.f, dz)/ deltaTime;
-        sm->getActiveScene()->findByName("player")->velocity = vel;
+        sm->getActiveScene()->findByName("player")->velocity = vel * 4.0f;
     }
 
     void moveInAir(float speed, float deltaTime) {

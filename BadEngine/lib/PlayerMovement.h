@@ -18,14 +18,18 @@ enum class PlayerState {
 
 class PlayerMovement {
 private:
+    //references
     SceneManager* sm;
     Input* input;
     Camera* camera;
     TimeManager* tm;
     RigidBody* rb;
+
+    //animation
     std::queue < std:: string > queueAnim;
     int animCount = 0;
 
+    //walking
     float moveSpeed = 4.f;
     float deltaTime2 = 0.f;
     float runSpeed = 10.f;
@@ -33,11 +37,16 @@ private:
 
     float currentTurn = 0.f;
     float rotateAngle = 0.f;
-
+    
+    //jumping
     float limitJump = 7.f;
     float jumpPower = 5.f;
     glm::vec3 initialPosition;
     float airSpeed = 4.f;
+
+    //climbing
+    float climbingSpeed = 3.f;
+    float currentClimbingSpeed = 3.f;
 
     
     PlayerState state = PlayerState::walking;
@@ -151,7 +160,7 @@ private:
         if (jumpDistance > limitJump) {
             state = PlayerState::air;
             rb->upwardsSpeed = 0.f;
-            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("jumping down", true);
+            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimationWithY("jumping down", true);
         }
     }
 
@@ -160,7 +169,18 @@ private:
             animCount = 0;
         }
         if (input->checkAnyKey()) {
-            if (state != PlayerState::air && state != PlayerState::jump_up) {
+             if (state == PlayerState::climbing) {
+                 if (input->checkKey(GLFW_KEY_W)) {
+                     currentClimbingSpeed = climbingSpeed;
+                 }
+                 else if (input->checkKey(GLFW_KEY_S)) {
+                     currentClimbingSpeed = -climbingSpeed;
+                 }
+                 else {
+                     currentClimbingSpeed = 0.f;
+                 }
+            }
+            else if (state != PlayerState::air && state != PlayerState::jump_up && state != PlayerState::climbing) {
                 if (input->getPressKey() == GLFW_MOUSE_BUTTON_LEFT) {
                     if (queueAnim.size() < 3) {
                         queueAnim.push("attack" + queueAnim.size() + 1);
@@ -172,7 +192,7 @@ private:
                     state = PlayerState::dodge;
                 }
                 else if (input->checkKey(GLFW_KEY_SPACE) && !wasSpacePressed) {
-                    sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("jumping up", true);
+                    sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimationWithY("jumping up", true);
                     state = PlayerState::jump_up;
                     initialPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
                 }
@@ -243,7 +263,15 @@ public:
         }
         else if(state == PlayerState::climbing)
         {
-            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("climbing up");
+            if(currentClimbingSpeed > 0) {
+                sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimationWithY("climbing up");
+            }
+            else if (currentClimbingSpeed < 0) {
+                sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimationWithY("climbing down");
+            }
+
+            float climbingY = climbingSpeed * sm->getActiveScene()->findByName("player")->getTransform()->getLocalScale().y * sm->getActiveScene()->findByName("player")->getAnimateBody()->getPosition().y;
+            sm->getActiveScene()->findByName("player")->velocity = glm::vec3(0.f, climbingY, 0.f) / deltaTime;
         }
         else if (state == PlayerState::jump_up) {
             jump(deltaTime);
@@ -261,6 +289,10 @@ public:
 
     void changeState(PlayerState state) {
         this->state = state;
+    }
+
+    PlayerState getState() {
+        return state;
     }
 
     ~PlayerMovement();

@@ -866,7 +866,8 @@ int main() {
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching2.dae"), "attack2", 1.5f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Standing Melee Punch.dae"), "attack3", 1.5f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Up Wall.dae"), "climbing up", 1.f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Up Wall.dae"), "climbing up", 1.3f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Down Wall.dae"), "climbing down", 1.3f);
 
 			anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
 			pbd->objects.push_back(anim);

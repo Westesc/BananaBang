@@ -38,6 +38,7 @@ public:
 	void setActiveAnimation(std::string name, bool once = false);
 	glm::vec3 getPosition();
 	std::string getActiveAnimation();
+	void setActiveAnimationWithY(std::string name, bool playOnce = false);
 
 	void play();
 	bool isPlay();

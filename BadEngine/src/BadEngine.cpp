@@ -242,6 +242,9 @@ int main() {
 	Shader* shaderTree = new Shader("../../../../src/shaders/vsTree.vert", "../../../../src/shaders/fsTree.frag");
 	Shader* rampShader = new Shader("../../../../src/shaders/ramp.vert", "../../../../src/shaders/ramp.frag");
 	Shader* enemyShader = new Shader("../../../../src/shaders/enemy.vert", "../../../../src/shaders/enemy.frag");
+	Shader* gruondShader = new Shader("../../../../src/shaders/ground.vert", "../../../../src/shaders/ground.frag");
+
+
 	auto enemyModel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"), false);
 	enemyModel->SetShader(enemyShader);
 
@@ -285,10 +288,11 @@ int main() {
     treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	treebranch1->SetShader(phongShader);
 	auto planeSectormodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"), false);
-	planeSectormodel->AddTexture("../../../../res/drewno.png", "diffuseMap");
+	planeSectormodel->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	planeSectormodel->AddTexture("../../../../res/floor_texture.jpg", "diffuseMap2");
 	treetrunk->SetShader(phongShader);
 	treelog->SetShader(phongShader);
-	planeSectormodel->SetShader(phongShader);
+	planeSectormodel->SetShader(gruondShader);
 
 	boxmodel->SetShader(mapsShader);
 	planemodel->SetShader(shaders);

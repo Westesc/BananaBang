@@ -26,7 +26,7 @@ public:
             chopDown();
         }
         else {
-            adjustPosToHealth();
+            adjustPosToHealth(damage);
         }
     }
 
@@ -45,13 +45,12 @@ public:
         choppers.erase(std::remove(choppers.begin(), choppers.end(), enemy), choppers.end());
     }
 
-    void adjustPosToHealth() {
-        float healthRatio = health / maxHealth;
-        getTransform()->localPosition.y = healthRatio * initialY;
-        float Ydiff = initialY - getTransform()->localPosition.y;
-        children[0]->getTransform()->localPosition.y -= Ydiff;
+    void adjustPosToHealth(float damage) {
+        float moveDown = damage / maxHealth * 10;
+        getTransform()->localPosition.y -= moveDown;
+        children[0]->getTransform()->localPosition.y -= moveDown;
         for (auto branch : children[0]->children) {
-            branch->getTransform()->localPosition.y -= Ydiff;
+            branch->getTransform()->localPosition.y -= moveDown;
         }
     }
 };

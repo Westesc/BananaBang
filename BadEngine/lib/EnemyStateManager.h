@@ -104,6 +104,9 @@ private:
                     enemy->chosenTree->getAsActualType<Tree>()->addChopper(enemy);
                 }
             }
+            else {
+				enemy->state = EnemyState::Idle;
+            }
         }
     }
     void updateAttackingState(Enemy* enemy, float deltaTime) {

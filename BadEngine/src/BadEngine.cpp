@@ -594,9 +594,23 @@ int main() {
 			if (object->name.starts_with("sector")) {
 				for (auto tree : object->children) {
 					Tree* treeActual = tree->getAsActualType<Tree>();
-					//treeActual->updateHealth(deltaTime);
+					treeActual->updateHealth(deltaTime);
 					if (treeActual->health <= 0) {
 						object->children.erase(std::remove(object->children.begin(), object->children.end(), tree), object->children.end());
+						for (auto sect : cm.sections) {
+							sect->staticObjects.erase(std::remove(sect->staticObjects.begin(), sect->staticObjects.end(), tree), sect->staticObjects.end());
+							sect->staticObjects.erase(std::remove(sect->staticObjects.begin(), sect->staticObjects.end(), tree->children.at(0)), sect->staticObjects.end());
+							for (auto ch : tree->children.at(0)->children)
+							{
+								sect->staticObjects.erase(std::remove(sect->staticObjects.begin(), sect->staticObjects.end(), ch), sect->staticObjects.end());
+							}
+						}
+						pathfinder->trees.erase(std::remove_if(pathfinder->trees.begin(), pathfinder->trees.end(), [treeActual](std::pair<int, Tree*> pair) {return pair.second == treeActual; }), pathfinder->trees.end());
+						for (auto enemy : enemyManager->enemies) {
+							if (enemy->chosenTree == treeActual) {
+								enemy->chosenTree = nullptr;
+							}
+						}
 						delete treeActual;
 					}
 				}

@@ -41,13 +41,14 @@ private:
     
     //jumping
     float limitJump = 7.f;
-    float jumpPower = 5.f;
+    float jumpPower = 7.f;
     glm::vec3 initialPosition;
     float airSpeed = 4.f;
 
     //climbing
     float climbingSpeed = 3.f;
     float currentClimbingSpeed = 3.f;
+    float groundPosition;
 
     
     PlayerState state = PlayerState::walking;
@@ -96,6 +97,7 @@ private:
         float distance = speed * tm->getFramePerSeconds();
         float dx = distance * sin(glm::radians(sm->getActiveScene()->findByName("player")->getTransform()->getLocalRotation().y));
         float dz = distance * cos(glm::radians(sm->getActiveScene()->findByName("player")->getTransform()->getLocalRotation().y));
+        std::cout<< "dx: " << dx / deltaTime << "dz: " << dz / deltaTime << std::endl;
         sm->getActiveScene()->findByName("player")->velocity.x = dx / deltaTime;
         sm->getActiveScene()->findByName("player")->velocity.z = dz / deltaTime;
     }
@@ -189,7 +191,7 @@ private:
                  }
                  else if (input->checkKey(GLFW_KEY_SPACE))
                  {
-                     state = PlayerState::jump_up;
+                     state = PlayerState::air;
                  }
             }
             else if (state != PlayerState::air && state != PlayerState::jump_up && state != PlayerState::climbing) {
@@ -221,7 +223,7 @@ private:
         else {
             currentClimbingSpeed = 0.1f;
         }
-        if (glm::distance(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y, initialPosition.y) < 0.5f && state == PlayerState::air) {
+        if (glm::distance(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y, groundPosition) < 0.5f && state == PlayerState::air) {
             state = PlayerState::walking;
             sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("standing");
             sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y = initialPosition.y;
@@ -295,16 +297,27 @@ public:
             }
             else if (currentClimbingSpeed < 0) {
                 sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimationWithY("climbing down");
+                if (groundPosition + 0.05 > sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y) {
+                    state = PlayerState::walking;
+                }
             }
 
             float climbingY = abs(currentClimbingSpeed) * sm->getActiveScene()->findByName("player")->getTransform()->getLocalScale().y * sm->getActiveScene()->findByName("player")->getAnimateBody()->getPosition().y;
             sm->getActiveScene()->findByName("player")->velocity = glm::vec3(0.f, climbingY, 0.f) / deltaTime;
+        }
+        else if (state == PlayerState::treeAttack) {
+            //zaatakuj tego który jest najblizej
+            sm->getActiveScene()->findByName("player")->velocity = glm::vec3(0.f, -1.f, 0.f) / deltaTime;
+            if (groundPosition + 0.05 > sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y) {
+                state = PlayerState::walking;
+            }
         }
         else if (state == PlayerState::jump_up) {
             jump(deltaTime);
         }
         else if (state == PlayerState::air) {
             MovePlayer(deltaTime);
+            rb->upwardsSpeed = -7.f;
             rb->useGravity();
         }
         if (state != PlayerState::attack1) {
@@ -316,6 +329,10 @@ public:
 
     void changeState(PlayerState state) {
         this->state = state;
+    }
+
+    void setGroundPosition(float newGround) {
+        groundPosition = newGround;
     }
 
     PlayerState getState() {

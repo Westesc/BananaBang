@@ -14,7 +14,7 @@ RigidBody::~RigidBody()
 
 void RigidBody::useGravity()
 {
-	upwardsSpeed += gravity * tm->getFramePerSeconds() / 4;
+	upwardsSpeed += gravity * tm->getFramePerSeconds();
 	sm->getActiveScene()->findByName(tag)->velocity = glm::vec3(0.0f, upwardsSpeed * tm->getFramePerSeconds(), 0.0f)/tm->getFramePerSeconds();
 }
 

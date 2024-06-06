@@ -855,6 +855,7 @@ int main() {
 			sm->getActiveScene()->addObject(anim);
 			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
 			sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
+			pm->setGroundPosition(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y);
 			enemyManager->player = anim;
 			anim->hp = 5;
 			GameObject* fist = new GameObject("fist");

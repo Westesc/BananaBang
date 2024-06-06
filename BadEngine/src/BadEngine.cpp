@@ -767,8 +767,8 @@ int main() {
 							branch->addColider(1);
 							glm::vec3 bpos = branch->localTransform->localPosition;
 							glm::vec3 bscale = branch->localTransform->localScale;
-							branch->boundingBox = new BoundingBox(glm::vec3(bpos.x * 1.1f, bpos.y ,bpos.z * 1.1f),
-								glm::vec3(bpos.x * 1.1f, bpos.y, (bpos.z +4.5f) * 1.1f), 0.0f, true);
+							branch->boundingBox = new BoundingBox(glm::vec3(1.1f, 0.0f ,1.1f),
+								glm::vec3(3.0f, 0.0f, 3.0f), 0.0f, true);
 							//std::cout << branch->localTransform->localRotation.x << std::endl;
 							log->addChild(branch);
 						}

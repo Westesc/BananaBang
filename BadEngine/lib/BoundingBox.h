@@ -33,6 +33,7 @@ public:
 			particles.push_back(new Particle(vertex, mass, 1.0f));
 		}
         addConstraints();
+        type = ColliderType::BOX;
     }
 
     void addConstraints() {
@@ -64,6 +65,7 @@ public:
         for (auto& vertex : vertices) {
             particles.push_back(new Particle(vertex, node["mass"].as<float>(), node["dampingFactor"].as<float>()));
         }
+        type = ColliderType::BOX;
     }
 
     glm::vec3 center() const {

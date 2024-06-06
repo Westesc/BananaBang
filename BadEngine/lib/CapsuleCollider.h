@@ -17,6 +17,7 @@ public:
     CapsuleCollider(const glm::vec3& center, float radius, float height, float mass, bool custom = false)
         : center(center), radius(radius), height(height), customSize(custom), top(new Particle(center + glm::vec3(0.0f, height * 0.5f, 0.0f), mass, 1.0f)), bottom(new Particle(center - glm::vec3(0.0f, height * 0.5f, 0.0f), mass, 1.0f)) {
     	constraints.push_back(new CapsuleConstraint(height));
+        type = ColliderType::CAPSULE;
     }
 
     glm::vec3 nodeToVec3(YAML::Node node) {
@@ -31,6 +32,7 @@ public:
         height = node["height"].as<float>();
         top = new Particle(nodeToVec3(node["top"]["position"]), node["top"]["mass"].as<float>(), node["dampingFactor"].as<float>());
         bottom = new Particle(nodeToVec3(node["bottom"]["position"]), node["bottom"]["mass"].as<float>(), node["dampingFactor"].as<float>());
+        type = ColliderType::CAPSULE;
     }
 
     glm::vec3 getCenter() const { return center; }

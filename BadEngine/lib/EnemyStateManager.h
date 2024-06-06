@@ -18,10 +18,10 @@ public:
 
     void update(float deltaTime, bool playerAtention) {
         for (auto& enemy : enemies) {
-            if (playerAtention && glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) < 20.0f) {
+            if (playerAtention && glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) < 15.0f) {
                 enemy->state = EnemyState::Attacking;
             }
-            else if (enemy->state == EnemyState::Attacking && glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) > 30.0f) {
+            else if (enemy->state == EnemyState::Attacking && glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) > 20.0f) {
                 enemy->state = EnemyState::Idle;
             }
             switch (enemy->state) {
@@ -109,6 +109,8 @@ private:
     void updateAttackingState(Enemy* enemy, float deltaTime) {
         if (player) {
             if (glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) > 3.0f) {
+                enemy->children.at(0)->active = false;
+                enemy->children.at(0)->getTransform()->localRotation = glm::vec3(0.0f);
                 glm::vec3 direction = glm::normalize(player->getTransform()->localPosition - enemy->getTransform()->localPosition);
                 enemy->velocity = direction * (enemy->velLimits.second - enemy->velLimits.first);
                 enemy->velocity.y = 0;
@@ -125,6 +127,29 @@ private:
             }
             else {
                 enemy->velocity = glm::vec3(0.0f);
+                GameObject* weapon = enemy->children.at(0);
+                weapon->active = true;
+                weapon->getTransform()->localPosition = enemy->getTransform()->localPosition + glm::vec3(0.0f, 0.0f, 0.0f) + glm::normalize(player->getTransform()->localPosition - enemy->getTransform()->localPosition);
+                enemy->attackTime += deltaTime;
+                if (enemy->attackTime > 2.0f) {
+                    weapon->active = false;
+                    enemy->attackTime = 0.0f;
+                    weapon->getTransform()->localRotation = glm::vec3(0.0f);
+                }
+                if (enemy->attackTime > 1.0f) {
+                    glm::vec3 directionToPlayer = glm::normalize(player->getTransform()->localPosition - enemy->getTransform()->localPosition);
+                    float angleToPlayer = glm::atan(directionToPlayer.z, directionToPlayer.x);
+                    weapon->getTransform()->localRotation.x = 90.0f;
+                    weapon->getTransform()->localRotation.y = angleToPlayer;
+                    if (cm->checkCollision(weapon, player)) {
+                        weapon->active = false;
+                        enemy->attackTime = 0.0f;
+                        weapon->getTransform()->localRotation = glm::vec3(0.0f);
+                        if (player->hp > 0) {
+                            player->hp -= 1;
+                        }
+                    }
+				}
             }
         }
     }

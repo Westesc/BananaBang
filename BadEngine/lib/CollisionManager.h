@@ -468,6 +468,11 @@ public:
 						
 					}
 				}
+				if (section->objects.at(i)->name == "player") {
+					if (section->objects.at(i)->children.at(0)->active) {
+						resolveTriggers(section->objects.at(i)->children.at(0), section);
+					}
+				}
 			}
 		}
 	}
@@ -677,6 +682,22 @@ public:
 		}
 		first->localTransform->predictedPosition += separation * deltaTime;
 		std::cout << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
+	}
+
+	void resolveTriggers(GameObject* trigger, Section* section) {
+		bool hit = false;
+		for (int i = 0; i < section->objects.size(); i++) {
+			if (section->objects.at(i)->name.starts_with("enemy")) {
+				if (checkCollision(trigger, section->objects.at(i))) {
+					section->objects.at(i)->hp -= 10;
+					hit = true;
+					std::cout << "hit" << std::endl;
+				}
+			}
+		}
+		if (hit) {
+			trigger->active = false;
+		}
 	}
 };
 

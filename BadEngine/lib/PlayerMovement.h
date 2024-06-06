@@ -198,6 +198,8 @@ private:
                         queueAnim.push("attack" + queueAnim.size() + 1);
                     }
                     state = PlayerState::attack1;
+                    sm->getActiveScene()->findByName("player")->children.at(0)->active = true;
+                    sm->getActiveScene()->findByName("player")->children.at(0)->getTransform()->localPosition = sm->getActiveScene()->findByName("player")->getTransform()->localPosition;
                 }
                 if (input->checkKey(GLFW_MOUSE_BUTTON_RIGHT))
                 {
@@ -225,6 +227,9 @@ private:
             sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y = initialPosition.y;
         }
         wasSpacePressed = input->checkKey(GLFW_KEY_SPACE);
+        if (state != PlayerState::attack1) {
+			sm->getActiveScene()->findByName("player")->children.at(0)->active = false;
+        }
     }
 
 public:

@@ -19,6 +19,7 @@ public:
 	EnemyState state = EnemyState::Idle;
 	std::pair <float, float> velLimits;
 	float timeSinceDirChange = 0.f;
+	float attackTime = 0.f;
 	Enemy(std::string name, glm::vec3 pos, glm::vec3 scale, glm::vec3 rot, std::pair<float,float> velLimits) : GameObject(name) {
 		this->localTransform->localPosition = pos;
 		this->localTransform->localScale = scale;

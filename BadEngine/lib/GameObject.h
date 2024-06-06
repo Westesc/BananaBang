@@ -31,11 +31,13 @@ public:
 	bool isVisible = true;
 	BoundingBox* boundingBox = nullptr;
 	CapsuleCollider* capsuleCollider = nullptr;
+	std::vector<Collider*> colliders;
 	glm::vec3 velocity = glm::vec3(0.f);
 	float inverseMass = 1.f;
 	float dampingFactor = 1.f;
 	glm::vec3 colliderOffset = glm::vec3(0.f);
 	bool friction = true;
+	int hp = 0;
 
 	void setParent(GameObject* Parent);
 	void addChild(GameObject* Child);

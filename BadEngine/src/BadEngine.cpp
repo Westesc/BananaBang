@@ -633,7 +633,20 @@ int main() {
 		sm->getActiveScene()->shadowSetting(lightSpaceMatrix);
 
 		if (sm->getActiveScene()->findByName("player")) {
-			//cm.addObject(sm->getActiveScene()->findByName("player"));
+			if (sm->getActiveScene()->findByName("HPcount")) {
+				sm->getActiveScene()->findByName("HPcount")->uiComponent->setText("HP: " + std::to_string(sm->getActiveScene()->findByName("player")->hp));
+			}
+		}
+		for (Enemy* enemy : enemyManager->enemies) {
+			if (enemy->hp <= 0) {
+				pbd->objects.erase(std::remove(pbd->objects.begin(), pbd->objects.end(), enemy), pbd->objects.end());
+				for (auto sect : cm.sections) {
+					sect->objects.erase(std::remove(sect->objects.begin(), sect->objects.end(), enemy), sect->objects.end());
+				}
+				sm->getActiveScene()->gameObjects.erase(std::remove(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), enemy), sm->getActiveScene()->gameObjects.end());
+				enemyManager->enemies.erase(std::remove(enemyManager->enemies.begin(), enemyManager->enemies.end(), enemy), enemyManager->enemies.end());
+				delete enemy;
+			}
 		}
 		pbd->simulateB4Collisions(deltaTime);
 		cm.simulate(deltaTime);
@@ -829,6 +842,12 @@ int main() {
 			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
 			sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
 			enemyManager->player = anim;
+			anim->hp = 5;
+			GameObject* fist = new GameObject("fist");
+			anim->addChild(fist);
+			fist->capsuleCollider = new CapsuleCollider(fist->localTransform->localPosition, 3.0f, 3.0f, 1.0f, true);
+			fist->capsuleCollider->isTriggerOnly = true;
+			fist->active = false;
 
 			/*GameObject* anim2 = new GameObject("player2");
 			anim2->addModelComponent(animodel);
@@ -914,25 +933,27 @@ int main() {
 			}
 		}
 		for (auto object : sm->getActiveScene()->gameObjects) {
-			for (auto ch : object->children) {
-				if (glm::distance(ch->getTransform()->localPosition, camera->transform->localPosition) > 100.f) {
-					if (ch->modelComponent != box2model) {
-						ch->modelComponent = box2model;
-						ch->children.at(0)->modelComponent = nullptr;
-						for (auto branch : ch->children.at(0)->children)
-						{
-							branch->modelComponent = nullptr;
+			if (object->name.starts_with("sector")) {
+				for (auto ch : object->children) {
+					if (glm::distance(ch->getTransform()->localPosition, camera->transform->localPosition) > 100.f) {
+						if (ch->modelComponent != box2model) {
+							ch->modelComponent = box2model;
+							ch->children.at(0)->modelComponent = nullptr;
+							for (auto branch : ch->children.at(0)->children)
+							{
+								branch->modelComponent = nullptr;
+							}
 						}
 					}
-				}
-				else {
-					if (ch->modelComponent != treetrunk)
-					{
-						ch->modelComponent = treetrunk;
-						ch->children.at(0)->modelComponent = treelog;
-						for (auto branch : ch->children.at(0)->children)
+					else {
+						if (ch->modelComponent != treetrunk)
 						{
-							branch->modelComponent = treebranch1;
+							ch->modelComponent = treetrunk;
+							ch->children.at(0)->modelComponent = treelog;
+							for (auto branch : ch->children.at(0)->children)
+							{
+								branch->modelComponent = treebranch1;
+							}
 						}
 					}
 				}
@@ -954,7 +975,7 @@ int main() {
 		}*/
 		if (spawnerTime > 8.f && loaded && spawnedEnemies <= maxEnemies) {
 			spawnerTime = 0;
-			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(5.f,5.f,0.f), glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 14.f));
+			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(5.f,5.f,0.f), glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
 			enemy->addModelComponent(enemyModel);
 			pbd->objects.push_back(enemy);
 			enemy->addColider(2);
@@ -968,6 +989,16 @@ int main() {
 			enemy->velocity = enemy->chosenTreePos - enemy->localTransform->localPosition;
 			enemy->state = EnemyState::Walking;
 			enemyManager->addEnemy(enemy);
+			enemy->hp = 30;
+			GameObject* enemyWeapon = new GameObject("enemyWeapon" + std::to_string(spawnedEnemies));
+			enemyWeapon->addModelComponent(box2model);
+			enemyWeapon->getTransform()->localScale = glm::vec3(0.1f);
+			enemyWeapon->active = false;
+			enemy->addChild(enemyWeapon);
+			enemyWeapon->addColider(1);
+			enemyWeapon->boundingBox->isTriggerOnly = true;
+			enemyWeapon->colliders.push_back(enemyWeapon->boundingBox);
+			enemyWeapon = nullptr;
 		}
 		renderImGui();
 		glfwSwapBuffers(window);

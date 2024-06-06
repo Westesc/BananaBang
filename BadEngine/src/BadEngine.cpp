@@ -118,18 +118,27 @@ void Start() {
 std::array<glm::vec4, 6> calculateFrustumPlanes(const glm::mat4& viewProjectionMatrix) {
 	std::array<glm::vec4, 6> planes;
 
+	glm::vec4 rowX = viewProjectionMatrix[0];
+	glm::vec4 rowY = viewProjectionMatrix[1];
+	glm::vec4 rowZ = viewProjectionMatrix[2];
+	glm::vec4 rowW = viewProjectionMatrix[3];
+
 	// Left plane
-	planes[0] = glm::row(viewProjectionMatrix, 3) + glm::row(viewProjectionMatrix, 0);
+	planes[0] = rowW + rowX;
 	// Right plane
-	planes[1] = glm::row(viewProjectionMatrix, 3) - glm::row(viewProjectionMatrix, 0);
+	planes[1] = rowW - rowX;
 	// Top plane
-	planes[2] = glm::row(viewProjectionMatrix, 3) - glm::row(viewProjectionMatrix, 1);
+	planes[2] = rowW - rowY;
 	// Bottom plane
-	planes[3] = glm::row(viewProjectionMatrix, 3) + glm::row(viewProjectionMatrix, 1);
+	planes[3] = rowW + rowY;
 	// Near plane
-	planes[4] = glm::row(viewProjectionMatrix, 3) + glm::row(viewProjectionMatrix, 2);
+	planes[4] = rowW + rowZ;
 	// Far plane
-	planes[5] = glm::row(viewProjectionMatrix, 3) - glm::row(viewProjectionMatrix, 2);
+	planes[5] = rowW - rowZ;
+	for (auto& plane : planes) {
+		float length = glm::length(glm::vec3(plane));
+		plane /= length;
+	}
 
 	return planes;
 }
@@ -146,12 +155,15 @@ bool isBoxInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, BoundingBox& 
 			glm::vec3(transform * glm::vec4(box.vertices.at(7), 1.0f))
 	};
 	for (const auto& plane : frustumPlanes) {
-		glm::vec4 normalizedPlane = plane / glm::length(glm::vec3(plane));
+		bool allOutside = true;
 		for (const auto& vertex : vertices) {
-			float distance = glm::dot(glm::vec3(normalizedPlane), vertex) + normalizedPlane.w;
-			if (distance < 0.0f) {
-				return false;
+			if (glm::dot(glm::vec3(plane), vertex) + plane.w > 0) {
+				allOutside = false;
+				break;
 			}
+		}
+		if (allOutside) {
+			return false;
 		}
 	}
 	return true;
@@ -159,7 +171,8 @@ bool isBoxInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, BoundingBox& 
 
 bool isCapsuleInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, CapsuleCollider& capsule, glm::mat4 transform) {
 	for (const auto& plane : frustumPlanes) {
-		float distance = glm::dot(glm::vec3(plane), glm::vec3(transform * glm::vec4(capsule.center, 1.0f))) + plane.w;
+		glm::vec4 normalizedPlane = plane / glm::length(glm::vec3(plane));
+		float distance = glm::dot(glm::vec3(normalizedPlane), glm::vec3(transform * glm::vec4(capsule.center, 1.0f))) + normalizedPlane.w;
 		if (distance <= -capsule.radius) {
 			return false;
 		}
@@ -182,12 +195,7 @@ void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const 
 			isVisible = isCapsuleInFrustum(frustumPlanes, *object->capsuleCollider, object->getTransform()->getMatrix());
 			object->setVisible(isVisible);
 		}
-		for (auto child : object->children) {
-			child->setVisible(isVisible);
-			for (auto grandchild : child->children) {
-				grandchild->setVisible(isVisible);
-			}
-		}
+		performFrustumCulling(frustumPlanes, object->children);
 	}
 }
 
@@ -434,7 +442,7 @@ int main() {
 		sm->getActiveScene()->findByName("skydome")->timeSetting(time / 7, glm::vec2(10, 10));
 
 		glm::mat4 P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 5000.f);
-		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(60.f), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 500.f) * camera->getViewMatrix());
+		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(120.f), static_cast<float>(Window::windowWidth) / Window::windowHeight, 0.1f, 500.f) * V);
 
 		/*if (skydome->getModelComponent() != nullptr) {
 			glm::mat4 Mm = glm::translate(glm::mat4(1.f), glm::vec3(20.f, 0.f, 18.f));
@@ -576,76 +584,6 @@ int main() {
 		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
 			frustumTest = !frustumTest;
 		}
-		/*for (auto object : sm->getActiveScene()->gameObjects) {
-			if (object->name.starts_with("enemy")) {
-				Enemy* enemy = static_cast<Enemy*>(object);
-				switch (enemy->state) {
-				case EnemyState::Idle: {
-					enemy->velocity = glm::vec3(0.0f);
-					std::pair<glm::vec3, Tree*> tree = pathfinder->decideInitalDestination(enemy->sector);
-					if (tree.second != nullptr) {
-						enemy->chosenTreePos = tree.first;
-						enemy->chosenTree = tree.second;
-						enemy->state = EnemyState::Walking;
-					}
-					break;
-				}
-					case EnemyState::Walking: {
-						if (glm::distance(enemy->getTransform()->localPosition, enemy->chosenTreePos) > 5.f) {
-							enemy->state = EnemyState::Walking;
-							enemy->timeSinceDirChange += deltaTime;
-							glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->localTransform->getLocalPosition(), enemy->sector);
-							glm::vec3 direction = glm::normalize(destination - enemy->localTransform->getLocalPosition());
-							enemy->setVel(direction);
-							glm::vec3 tmpMove = glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z);
-							enemy->Move(tmpMove * deltaTime);
-							cm.addObjectPredict(enemy);
-							std::vector<GameObject*> collisions = cm.checkPrediction();
-							enemy->Move(-tmpMove * deltaTime);
-							enemy->setVel2(collisions);
-							if ((glm::any(glm::isnan(enemy->localTransform->localPosition)) || glm::any(glm::isinf(enemy->localTransform->localPosition)))) {
-								enemy->localTransform->localPosition = glm::vec3(5.0f);
-							}
-							cm.addObject(enemy);
-							enemy->timeSpentWalking += deltaTime;
-							if (enemy->timeSpentWalking > 15.f) {
-								std::pair<glm::vec3, Tree*> tree = pathfinder->decideInitalDestination(enemy->sector);
-								if (tree.second == nullptr) {
-									enemy->state = EnemyState::Idle;
-								}
-								else {
-									enemy->chosenTreePos = tree.first;
-									enemy->chosenTree = tree.second;
-									enemy->timeSpentWalking = 0.f;
-								}
-							}
-						}
-						else if (enemy->state == EnemyState::Walking) {
-							enemy->state = EnemyState::Chopping;
-							//enemy->setVel(glm::vec3(0.0f));
-							enemy->velocity = glm::vec3(0.0f);
-							enemy->timeSpentWalking = 0.f;
-						}
-						break;
-					}
-					case EnemyState::Chopping:
-						if (glm::distance(enemy->localTransform->localPosition, enemy->chosenTreePos) > 5.f) {
-							enemy->state = EnemyState::Walking;
-							if (enemy->chosenTree != nullptr) {
-								enemy->chosenTree->getAsActualType<Tree>()->removeChopper(enemy);
-							}
-						}
-						else {
-							if (std::find(enemy->chosenTree->getAsActualType<Tree>()->choppers.begin(), enemy->chosenTree->getAsActualType<Tree>()->choppers.end(), enemy) == enemy->chosenTree->getAsActualType<Tree>()->choppers.end()) {
-								enemy->chosenTree->getAsActualType<Tree>()->addChopper(enemy);
-							}
-						}
-						break;
-					case EnemyState::Attacking:
-						break;
-				}
-			}
-		}*/
 	
 		if (staticUpdateTime > 1.5f) {
 			staticUpdateTime = 0.f;

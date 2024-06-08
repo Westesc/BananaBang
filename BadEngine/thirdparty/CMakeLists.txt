@@ -18,8 +18,8 @@ target_include_directories(stb_image PRIVATE ${STB_IMAGE_DIR})
 
 #irrklang
 set(IRRKLANG_DIR ${CMAKE_CURRENT_LIST_DIR}/irrKlang)
-set(irrKlang_SOURCE_DIR ${IRRKLANG_DIR}/include CACHE INTERNAL "")
-set(irrKlang_LIBRARY ${IRRKLANG_DIR}/lib/Winx64-visualStudio/irrKlang.lib CACHE INTERNAL "")
+set(irrKlang_SOURCE_DIR ${IRRKLANG_DIR}/include)
+set(irrKlang_LIBRARY ${IRRKLANG_DIR}/lib/Winx64-visualStudio/irrKlang.lib)
 
 # other
 CPMAddPackage("gh:assimp/assimp@5.2.5")

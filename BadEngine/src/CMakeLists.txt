@@ -51,19 +51,13 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 add_custom_command(
     TARGET ${PROJECT_NAME} 
     POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-    "${IRRKLANG_DIR}/bin/win/irrKlang.dll" 
-    "$<TARGET_FILE_DIR:${PROJECT_NAME}>/irrKlang.dll"
-)
-add_custom_command(
-    TARGET ${PROJECT_NAME} 
-    POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-    "${IRRKLANG_DIR}/bin/win/ikpFlac.dll" 
+    "${IRRKLANG_DIR}/bin/winx64-visualStudio/ikpFlac.dll" 
     "$<TARGET_FILE_DIR:${PROJECT_NAME}>/ikpFlac.dll"
 )
 add_custom_command(
     TARGET ${PROJECT_NAME} 
     POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-    "${IRRKLANG_DIR}/bin/win/ikpMP3.dll" 
+    "${IRRKLANG_DIR}/bin/winx64-visualStudio/ikpMP3.dll" 
     "$<TARGET_FILE_DIR:${PROJECT_NAME}>/ikpMP3.dll"
 )
 

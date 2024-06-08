@@ -12,6 +12,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <irrKlang.h>
 #include "../thirdparty/tracy/public/tracy/Tracy.hpp"
 #include "../lib/GraphNode.h"
 #include "../lib/Shader.h"
@@ -37,8 +38,8 @@
 #include "../lib/animation/Animator.h"
 #include "../lib/Globals.h"
 #include "../lib/EnemyStateManager.h"
-
-
+//#pragma comment(lib, "../../../../thirdparty/irrKlang/lib/Winx64-visualStudio/irrKlang.lib") 
+#pragma comment(lib, "../thirdparty/irrKlang/lib/Winx64-visualStudio/irrKlang.lib") 
 bool test = false;
 bool frustumTest = false;
 int losujLiczbe(int a, int b);
@@ -195,6 +196,16 @@ void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const 
 int main() {
 	Start();
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
+	std::cout << "wyświetla cos?" << std::endl;
+	//sound
+	irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
+	if (!engine)
+		std::cout << "error irrklang engine" << std::endl;
+	if (engine)
+		std::cout << "dziala" << std::endl;
+	std::cout << engine << std::endl;
+	std::cout << "wyświetla cos?" << std::endl;
+	engine->play2D("../../../../res/media/ophelia.mp3", true);
 
 	auto animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Walking.dae"), true); 
 

@@ -54,6 +54,9 @@ private:
     //attack
     bool isMove = false;
 
+    //treeAttack
+    glm::vec3 attackDestination;
+
     PlayerState state = PlayerState::walking;
 
     bool wasSpacePressed = false;
@@ -332,8 +335,17 @@ public:
             player->velocity = glm::vec3(0.f, climbingY, 0.f) / deltaTime;
         }
         else if (state == PlayerState::treeAttack) {
-            //zaatakuj tego który jest najblizej
-            player->velocity = glm::vec3(0.f, -1.f, 0.f) / deltaTime;
+
+            player->getAnimateBody()->setActiveAnimation("tree attack");
+
+            glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
+            glm::vec3 direction = glm::normalize(attackDestination - currentPosition);
+
+            float speed = 1.5f; 
+            glm::vec3 velocity = direction * speed;
+
+            player->velocity = velocity / deltaTime;
+
             if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
                 state = PlayerState::walking;
             }
@@ -351,6 +363,10 @@ public:
                 queueAnim.pop();
             }
         }
+    }
+
+    void setAttackDestination(glm::vec3 newDestiny) {
+        attackDestination = newDestiny;
     }
 
     void changeState(PlayerState state) {

@@ -340,7 +340,7 @@ int main() {
 
 	Pathfinder* pathfinder = new Pathfinder();
 	PBDManager* pbd = new PBDManager(10);
-	EnemyStateManager* enemyManager = new EnemyStateManager(pathfinder, &cm);
+	EnemyStateManager* enemyManager = new EnemyStateManager(pathfinder, &cm, pm);
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -440,7 +440,7 @@ int main() {
 			staticUpdateTime = 0.f;
 			playerAtention = false;
 		}
-		//enemyManager->update(deltaTime, playerAtention);
+		enemyManager->update(deltaTime, playerAtention);
 		for (auto object : sm->getActiveScene()->gameObjects) {
 			if (object->name.starts_with("sector")) {
 				for (auto tree : object->children) {
@@ -520,9 +520,9 @@ int main() {
 		if (frustumTest) {
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 				if (sm->getActiveScene()->gameObjects.at(i)->isVisible) {
-					std::cout << sm->getActiveScene()->gameObjects.at(i)->name << " " << std::endl;
+					//std::cout << sm->getActiveScene()->gameObjects.at(i)->name << " " << std::endl;
 					for (int j = 0; j < sm->getActiveScene()->gameObjects.at(i)->children.size(); j++) {
-						std::cout << sm->getActiveScene()->gameObjects.at(i)->children.at(j)->name << " " << std::endl;
+						//std::cout << sm->getActiveScene()->gameObjects.at(i)->children.at(j)->name << " " << std::endl;
 					}
 				}
 			}
@@ -673,6 +673,7 @@ int main() {
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Up Wall.dae"), "climbing up", 1.3f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Down Wall.dae"), "climbing down", 1.3f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jump Attack.dae"), "tree attack", 0.7f);
 
 			anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
 			pbd->objects.push_back(anim);
@@ -735,25 +736,9 @@ int main() {
 				else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 				}
-				else if (key == GLFW_KEY_X && action == GLFW_PRESS) {
-					std::cout << "KLAWISZ X " << key << std::endl;
-				}
-				else if (key == GLFW_KEY_Z && action == GLFW_REPEAT) {
-					std::cout << "KLAWISZ Z " << key << std::endl;
-				}
 				//jednorazowe
 				else if (key == GLFW_MOUSE_BUTTON_RIGHT) {
 					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-					std::cout << "LEFT MOUSE " << key << std::endl;
-				}
-				else if (key == GLFW_KEY_S && action == GLFW_RELEASE) {
-					std::cout << "Wyłączono klawisz S " << key << std::endl;
-				}
-				else if (action == GLFW_REPEAT) {
-					std::cout << "Nacisnieto klawisz " << key << std::endl;
-				}
-				else if (action == GLFW_RELEASE) {
-					std::cout << "Puszczono klawisz " << key << std::endl;
 				}
 			}
 		}

@@ -403,7 +403,7 @@ public:
 				displacement += direction * magnitude;
 			}
 		}
-		std::cout << first->name << ", " << second->name << glm::to_string(displacement) << std::endl;
+		//std::cout << first->name << ", " << second->name << glm::to_string(displacement) << std::endl;
 		return displacement;
 	}
 
@@ -681,7 +681,7 @@ public:
 			separation.y = 0.0f;
 		}
 		first->localTransform->predictedPosition += separation * deltaTime;
-		std::cout << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
+		//std::cout << first->name << ", " << second->name << glm::to_string(separation) << std::endl;
 	}
 
 	void resolveTriggers(GameObject* trigger, Section* section) {
@@ -691,7 +691,7 @@ public:
 				if (checkCollision(trigger, section->objects.at(i))) {
 					section->objects.at(i)->hp -= 10;
 					hit = true;
-					std::cout << "hit" << std::endl;
+					//std::cout << "hit" << std::endl;
 				}
 			}
 		}

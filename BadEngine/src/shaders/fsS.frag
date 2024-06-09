@@ -7,7 +7,7 @@ uniform float iTime;
 uniform vec2 iResolution;
 
 const float cloudscale = 3;
-const float speed = 0.02;
+const float speed = 0.03;
 const float clouddark = 0.5;
 const float cloudlight = 0.3;
 const float cloudcover = -0.2;

@@ -44,12 +44,14 @@ private:
     float limitJump = 7.f;
     float jumpPower = 7.f;
     glm::vec3 initialPosition;
-    float airSpeed = 4.f;
+    float airSpeed = 6.f;
 
     //climbing
     float climbingSpeed = 3.f;
-    float currentClimbingSpeed = 3.f;
+    float currentClimbingSpeed = 4.f;
     float groundPosition;
+    glm::vec3 treePosition;
+    float direction = 0.0f;
 
     //attack
     bool isMove = false;
@@ -106,6 +108,26 @@ private:
         std::cout<< "dx: " << dx / deltaTime << "dz: " << dz / deltaTime << std::endl;
         player->velocity.x = dx / deltaTime;
         player->velocity.z = dz / deltaTime;
+    }
+
+    void climbMove(float deltaTime) {
+        static float radius = glm::distance(glm::vec2(player->getTransform()->getLocalPosition().x, player->getTransform()->getLocalPosition().z),
+            glm::vec2(treePosition.x, treePosition.z)) - 0.4f;
+        static float angle = std::atan2(player->getTransform()->getLocalPosition().z - treePosition.z, player->getTransform()->getLocalPosition().x - treePosition.x);
+
+        float speed = direction * glm::pi<float>() / 2.0f; 
+        angle += speed * deltaTime;
+
+        if (angle > 2 * glm::pi<float>()) {
+            angle -= 2 * glm::pi<float>();
+        }
+        player->getTransform()->localRotation = glm::vec3(0, angle, 0);
+
+        float x = treePosition.x + radius * std::cos(angle);
+        float z = treePosition.z + radius * std::sin(angle);
+
+        glm::vec3 newPosition = glm::vec3(x, player->getTransform()->getLocalPosition().y, z);
+        player->getTransform()->localPosition = newPosition;
     }
 
     void MovePlayer(float deltaTime) {
@@ -194,6 +216,18 @@ private:
             }
              if (state == PlayerState::climbing) {
                  player->getTransform()->getLocalPosition().y;
+                 if (input->checkKey(GLFW_KEY_A)) {
+                     direction = 0.3f;
+                     currentClimbingSpeed = 1.2f;
+                 } 
+                 else if (input->checkKey(GLFW_KEY_D)) {
+                     direction = -0.3f;
+                     currentClimbingSpeed = 1.2f;
+                 }
+                 else {
+                     direction = 0.f;
+                 }
+
                  if (input->checkKey(GLFW_KEY_W)) {
                      currentClimbingSpeed = climbingSpeed;
                  }
@@ -237,6 +271,7 @@ private:
             player->getAnimateBody()->setActiveAnimation("standing");
         }
         else {
+            direction = 0.f;
             currentClimbingSpeed = 0.1f;
             isMove = false;
         }
@@ -315,6 +350,7 @@ public:
         }
         else if(state == PlayerState::climbing)
         {
+            climbMove(deltaTime);
             if(currentClimbingSpeed > 0) {
                 player->getAnimateBody()->setActiveAnimationWithY("climbing up");
                 if (currentClimbingSpeed == 0.1f) {
@@ -332,7 +368,7 @@ public:
             }
 
             float climbingY = abs(currentClimbingSpeed) * player->getTransform()->getLocalScale().y * player->getAnimateBody()->getPosition().y;
-            player->velocity = glm::vec3(0.f, climbingY, 0.f) / deltaTime;
+            player->velocity.y =  climbingY / deltaTime;
         }
         else if (state == PlayerState::treeAttack) {
 
@@ -363,6 +399,10 @@ public:
                 queueAnim.pop();
             }
         }
+    }
+
+    void setTreePosition(glm::vec3 treePos) {
+        treePosition = treePos;
     }
 
     void setAttackDestination(glm::vec3 newDestiny) {

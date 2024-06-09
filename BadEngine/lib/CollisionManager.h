@@ -252,6 +252,7 @@ public:
 			if (first->name.starts_with("player") && pm->getInput()->checkKey(GLFW_KEY_R)) {
 				if (second->name.starts_with("tree") || second->name.starts_with("log")) {
 					pm->changeState(PlayerState::climbing);
+					pm->setTreePosition(second->getTransform()->getLocalPosition());
 					resolved = true;
 				}
 			}

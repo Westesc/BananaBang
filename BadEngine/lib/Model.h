@@ -824,6 +824,9 @@ public:
         return node;
     }
     
+    Mesh* getFirstMesh() {
+		return meshes[0];
+	}
 };
 
 #endif

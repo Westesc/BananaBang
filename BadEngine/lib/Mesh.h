@@ -10,10 +10,12 @@
 #include <iostream>
 #include <vector>
 #include <yaml-cpp/yaml.h>
+#include "../thirdparty/tracy/public/tracy/Tracy.hpp"
 
 #include "Shader.h"
 #include "BoundingBox.h"
 #include "CapsuleCollider.h"
+#include "Transform.h"
 
 #define MAX_BONE_INFLUENCE 4
 
@@ -372,7 +374,40 @@ public:
 
         return node;
     }
+    std::vector<glm::mat4> instanceMatrices;
+    unsigned int instanceVBO;
+    void initInstances(std::vector<Transform*> transforms) {
+        instanceMatrices.clear();
+        for (Transform* transform : transforms) {
+            instanceMatrices.push_back(transform->getMatrix());
+        }
+        glGenBuffers(1, &instanceVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+        glBufferData(GL_ARRAY_BUFFER, instanceMatrices.size() * sizeof(glm::mat4), &instanceMatrices[0], GL_STATIC_DRAW);
+        glBindVertexArray(VAO);
+        std::size_t vec4Size = sizeof(glm::vec4);
+        glEnableVertexAttribArray(3);
+        glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)0);
+        glEnableVertexAttribArray(4);
+        glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(1 * vec4Size));
+        glEnableVertexAttribArray(5);
+        glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(2 * vec4Size));
+        glEnableVertexAttribArray(6);
+        glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, (void*)(3 * vec4Size));
 
+        glVertexAttribDivisor(3, 1);
+        glVertexAttribDivisor(4, 1);
+        glVertexAttribDivisor(5, 1);
+        glVertexAttribDivisor(6, 1);
+        //glBindVertexArray(0);
+    }
+
+    void drawInstances() {
+        ZoneTransientN(zoneName, "drawInstances", true);
+        glBindVertexArray(VAO);
+        glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, instanceMatrices.size());
+        glBindVertexArray(0);
+    }
 private:
     unsigned int VBO, EBO;
 

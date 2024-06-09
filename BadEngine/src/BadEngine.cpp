@@ -291,13 +291,14 @@ int main() {
 	auto treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"), false);
     treetrunk->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	Shader* phongShader = new Shader("../../../../src/shaders/phong.vert", "../../../../src/shaders/phong.frag");
+	Shader* phongInstancedShader = new Shader("../../../../src/shaders/phonginstanced.vert", "../../../../src/shaders/phong.frag");
 	auto treebranch1= std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_branch_1.obj"), false);
     treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	treebranch1->SetShader(phongShader);
+	treebranch1->SetShader(phongInstancedShader);
 	auto planeSectormodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"), false);
 	planeSectormodel->AddTexture("../../../../res/drewno.png", "diffuseMap");
-	treetrunk->SetShader(phongShader);
-	treelog->SetShader(phongShader);
+	treetrunk->SetShader(phongInstancedShader);
+	treelog->SetShader(phongInstancedShader);
 	planeSectormodel->SetShader(phongShader);
 
 	box2model->SetShader(shaderTree);
@@ -489,6 +490,30 @@ int main() {
 								enemy->chosenTree = nullptr;
 							}
 						}
+						std::vector<Transform*> transformsTree;
+						std::vector<Transform*> transformsLog;
+						std::vector<Transform*> transformsBranch;
+						for (auto tree : object->children) {
+							if (tree->name.starts_with("tree")) {
+								transformsTree.push_back(tree->getTransform());
+								transformsLog.push_back(tree->children.at(0)->getTransform());
+								for (auto ch : tree->children.at(0)->children)
+								{
+									transformsBranch.push_back(ch->getTransform());
+								}
+							}
+						}
+						if (object->children.size() > 0) {
+							for (int i = 0; i < object->children.size(); i++) {
+								if (object->children.at(i)->name.starts_with("tree")) {
+									object->children.at(i)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
+									object->children.at(i)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
+									object->children.at(i)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
+									break;
+								}
+							}
+						}
+						
 						delete treeActual;
 					}
 				}
@@ -537,6 +562,7 @@ int main() {
 				}
 				sm->getActiveScene()->gameObjects.erase(std::remove(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), enemy), sm->getActiveScene()->gameObjects.end());
 				enemyManager->enemies.erase(std::remove(enemyManager->enemies.begin(), enemyManager->enemies.end(), enemy), enemyManager->enemies.end());
+				enemy->chosenTree->getAsActualType<Tree>()->removeChopper(enemy);
 				delete enemy;
 			}
 		}
@@ -559,6 +585,33 @@ int main() {
 			sm->getActiveScene()->findByName("skydome")->getTransform()->localPosition = camera->transform->localPosition;
 		}
 		sm->getActiveScene()->Draw(V, P);
+		for (auto sector : sm->getActiveScene()->gameObjects) {
+			if (sector->name.starts_with("sector")) {
+				for (auto tree : sector->children) {
+					tree->getModelComponent().get()->GetShader()->use();
+					tree->getModelComponent().get()->GetShader()->setMat4("model", *tree->getModelComponent().get()->getTransform());
+					tree->getModelComponent().get()->GetShader()->setMat4("view", V);
+					tree->getModelComponent().get()->GetShader()->setMat4("projection", P);
+				}
+				if (sector->children.size() > 0) {
+					sector->children.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
+					for (auto log : sector->children.at(0)->children) {
+						log->getModelComponent().get()->GetShader()->use();
+						log->getModelComponent().get()->GetShader()->setMat4("model", *log->getModelComponent().get()->getTransform());
+						log->getModelComponent().get()->GetShader()->setMat4("view", V);
+						log->getModelComponent().get()->GetShader()->setMat4("projection", P);
+						for (auto branch : log->children) {
+							branch->getModelComponent().get()->GetShader()->use();
+							branch->getModelComponent().get()->GetShader()->setMat4("model", *branch->getModelComponent().get()->getTransform());
+							branch->getModelComponent().get()->GetShader()->setMat4("view", V);
+							branch->getModelComponent().get()->GetShader()->setMat4("projection", P);
+						}
+					}
+					sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
+					sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
+				}
+			}
+		}
 
 		shaderTree->use();
 		shaderTree->setMat4("view", V);
@@ -642,7 +695,22 @@ int main() {
 					{
 						pathfinder->trees.push_back(std::make_pair((i + 1)* j, ch->getAsActualType<Tree>()));
 					}
+					std::vector<Transform*> transformsTree;
+					std::vector<Transform*> transformsLog;
+					std::vector<Transform*> transformsBranch;
+					for (auto tree : pathfinder->trees) {
+						transformsTree.push_back(tree.second->getTransform());
+						transformsLog.push_back(tree.second->children.at(0)->getTransform());
+						for (auto ch : tree.second->children.at(0)->children)
+						{
+							transformsBranch.push_back(ch->getTransform());
+						}
+					}
+					pathfinder->trees.at(0).second->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
+					pathfinder->trees.at(0).second->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
+					pathfinder->trees.at(0).second->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
 					pathfinder->sortTrees();
+
 				}
 				loaded = true;
 				spawnerTime = 0;

@@ -12,7 +12,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <irrKlang.h>
+#include <AL/al.h>
+#include <AL/alc.h>
 #include "../thirdparty/tracy/public/tracy/Tracy.hpp"
 #include "../lib/GraphNode.h"
 #include "../lib/Shader.h"
@@ -38,8 +39,7 @@
 #include "../lib/animation/Animator.h"
 #include "../lib/Globals.h"
 #include "../lib/EnemyStateManager.h"
-//#pragma comment(lib, "../../../../thirdparty/irrKlang/lib/Winx64-visualStudio/irrKlang.lib") 
-#pragma comment(lib, "../thirdparty/irrKlang/lib/Winx64-visualStudio/irrKlang.lib") 
+
 bool test = false;
 bool frustumTest = false;
 int losujLiczbe(int a, int b);
@@ -196,16 +196,35 @@ void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const 
 int main() {
 	Start();
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
-	std::cout << "wyświetla cos?" << std::endl;
-	//sound
-	irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
-	if (!engine)
-		std::cout << "error irrklang engine" << std::endl;
-	if (engine)
-		std::cout << "dziala" << std::endl;
-	std::cout << engine << std::endl;
-	std::cout << "wyświetla cos?" << std::endl;
-	engine->play2D("../../../../res/media/ophelia.mp3", true);
+
+	//sound test
+	std::cout << "starting...\n";
+
+	ALCdevice* p_ALCDevice = alcOpenDevice(nullptr); // nullptr = get default device
+	if (!p_ALCDevice)
+		throw("failed to get sound device");
+
+	ALCcontext* p_ALCContext = alcCreateContext(p_ALCDevice, nullptr);  // create context
+	if (!p_ALCContext)
+		throw("Failed to set sound context");
+
+	if (!alcMakeContextCurrent(p_ALCContext))   // make context current
+		throw("failed to make context current");
+
+	const ALCchar* name = nullptr;
+	if (alcIsExtensionPresent(p_ALCDevice, "ALC_ENUMERATE_ALL_EXT"))
+		name = alcGetString(p_ALCDevice, ALC_ALL_DEVICES_SPECIFIER);
+	if (!name || alcGetError(p_ALCDevice) != AL_NO_ERROR)
+		name = alcGetString(p_ALCDevice, ALC_DEVICE_SPECIFIER);
+	printf("Opened \"%s\"\n", name);
+
+	//uint32_t /*ALuint*/ sound1 = SoundBuffer::get()->addSoundEffect("../../../../res/media/spell.ogg");
+	//uint32_t /*ALuint*/ sound2 = SoundBuffer::get()->addSoundEffect("../../../../res/media/magicfail.ogg");
+
+	//SoundSource mySpeaker;
+
+	//mySpeaker.Play(sound1);
+	//mySpeaker.Play(sound2);
 
 	auto animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Walking.dae"), true); 
 
@@ -294,8 +313,6 @@ int main() {
 
 	const TimePoint tpStart = Clock::now();
 
-	std::string name = "src";
-
 	setupImGui(window);
 
 	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/bialy.png", "diffuseMap");
@@ -328,7 +345,6 @@ int main() {
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	sm->getActiveScene()->findByName("box")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box")->getTransform()->localPosition,1.0f);
 	sm->getActiveScene()->findByName("skydome")->setRotating(true, 1.f, glm::vec3(0.f, 1.f, 0.f));
 
 	float deltaTime = 0;

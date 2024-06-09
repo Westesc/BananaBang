@@ -28,7 +28,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 												  ${glad_SOURCE_DIR}
 												  ${stb_image_SOURCE_DIR}
 												  ${imgui_SOURCE_DIR}
-												  ${irrKlang_SOURCE_DIR}
 												  ${freetype_SOURCE_DIR})
 
 target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES})
@@ -41,26 +40,17 @@ target_link_libraries(${PROJECT_NAME} spdlog)
 target_link_libraries(${PROJECT_NAME} glm::glm)
 target_link_libraries(${PROJECT_NAME} freetype)
 target_link_libraries(${PROJECT_NAME} yaml-cpp)
-target_link_libraries(${PROJECT_NAME} ${irrKlang_LIBRARY})
+target_link_libraries(${PROJECT_NAME} OpenAL::OpenAL)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD 
 				   COMMAND ${CMAKE_COMMAND} -E create_symlink 
 				   ${CMAKE_SOURCE_DIR}/res 
 				   ${CMAKE_CURRENT_BINARY_DIR}/res)
 
-add_custom_command(
-    TARGET ${PROJECT_NAME} 
-    POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-    "${IRRKLANG_DIR}/bin/winx64-visualStudio/ikpFlac.dll" 
-    "$<TARGET_FILE_DIR:${PROJECT_NAME}>/ikpFlac.dll"
+add_custom_command ( TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    $<TARGET_FILE:OpenAL::OpenAL> $<TARGET_FILE_DIR:${PROJECT_NAME}>
 )
-add_custom_command(
-    TARGET ${PROJECT_NAME} 
-    POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy_if_different 
-    "${IRRKLANG_DIR}/bin/winx64-visualStudio/ikpMP3.dll" 
-    "$<TARGET_FILE_DIR:${PROJECT_NAME}>/ikpMP3.dll"
-)
-
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC NOMINMAX)
 endif()

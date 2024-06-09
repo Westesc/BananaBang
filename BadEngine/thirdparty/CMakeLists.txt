@@ -16,10 +16,6 @@ set(stb_image_SOURCE_DIR ${STB_IMAGE_DIR} CACHE INTERNAL "")
 add_library(stb_image STATIC ${STB_IMAGE_DIR}/stb_image.cpp)
 target_include_directories(stb_image PRIVATE ${STB_IMAGE_DIR})
 
-#irrklang
-set(IRRKLANG_DIR ${CMAKE_CURRENT_LIST_DIR}/irrKlang)
-set(irrKlang_SOURCE_DIR ${IRRKLANG_DIR}/include)
-set(irrKlang_LIBRARY ${IRRKLANG_DIR}/lib/Winx64-visualStudio/irrKlang.lib)
 
 # other
 CPMAddPackage("gh:assimp/assimp@5.2.5")
@@ -29,6 +25,7 @@ CPMAddPackage("gh:ocornut/imgui@1.88")
 CPMAddPackage("gh:gabime/spdlog@1.10.0")
 CPMAddPackage("gh:freetype/freetype#VER-2-13-2")
 CPMAddPackage("gh:jbeder/yaml-cpp#0.8.0")
+CPMAddPackage("gh:kcat/openal-soft#1.23.1")
 
 
 set(imgui_SOURCE_DIR ${imgui_SOURCE_DIR} CACHE INTERNAL "")
@@ -46,7 +43,9 @@ set_target_properties(glad
                       imgui 
                       freetype
                       yaml-cpp
+                      OpenAL
                       spdlog PROPERTIES FOLDER "thirdparty")
+
 
 if (TARGET zlibstatic)
     set_target_properties(zlibstatic PROPERTIES FOLDER "thirdparty")

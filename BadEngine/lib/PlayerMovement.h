@@ -51,7 +51,9 @@ private:
     float currentClimbingSpeed = 3.f;
     float groundPosition;
 
-    
+    //attack
+    bool isMove = false;
+
     PlayerState state = PlayerState::walking;
 
     bool wasSpacePressed = false;
@@ -178,6 +180,15 @@ private:
             animCount = 0;
         }
         if (input->checkAnyKey()) {
+            if (state == PlayerState::attack1) {
+                if (input->checkKey(GLFW_KEY_W) || input->checkKey(GLFW_KEY_A) || input->checkKey(GLFW_KEY_S) || input->checkKey(GLFW_KEY_D))
+                {
+                    isMove = true;
+                }
+            }
+            else {
+                isMove = false;
+            }
              if (state == PlayerState::climbing) {
                  player->getTransform()->getLocalPosition().y;
                  if (input->checkKey(GLFW_KEY_W)) {
@@ -216,6 +227,7 @@ private:
             }
             else {
                 input->getPressKey();
+                isMove = false;
             }
         }
         else if (state == PlayerState::walking) {
@@ -223,11 +235,16 @@ private:
         }
         else {
             currentClimbingSpeed = 0.1f;
+            isMove = false;
         }
         if (glm::distance(player->getTransform()->getLocalPosition().y, groundPosition) < 0.5f && state == PlayerState::air) {
             state = PlayerState::walking;
             player->getAnimateBody()->setActiveAnimation("standing");
             player->getTransform()->localPosition.y = initialPosition.y;
+        }
+        else if (state != PlayerState::attack1)
+        {
+            player->getAnimateBody()->removeLegAnimation("walking");
         }
         wasSpacePressed = input->checkKey(GLFW_KEY_SPACE);
         if (state != PlayerState::attack1) {
@@ -257,11 +274,17 @@ public:
             // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         }
         else if (state == PlayerState::attack1) {
+            if (isMove) {
+                player->getAnimateBody()->addLegAnimation("walking");
+            }
+            else {
+                player->getAnimateBody()->removeLegAnimation("walking");
+            }
             if (animCount == 0 && queueAnim.size()!= 0) {
                 animCount++;
                 player->getAnimateBody()->setActiveAnimation("attack1");
             }
-            move(deltaTime, false);
+            MovePlayer(deltaTime);
             if (player->getAnimateBody()->isPlay() == false) {
                 if (queueAnim.size() > 1 && animCount == 1) {
                     player->getAnimateBody()->setActiveAnimation("attack2");

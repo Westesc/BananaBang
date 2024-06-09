@@ -18,6 +18,7 @@ class AnimateBody : Component {
 	Animator* animator;
 	std::vector<Animacje> allAnimation;
 	std::string activeAnimation;
+	std::string activeLegAnimation;
 
 	Animacje searchActiveAnimation() {
 		for (auto& anim : allAnimation) {
@@ -25,6 +26,16 @@ class AnimateBody : Component {
 				return anim;
 			}
 		}
+	}
+
+
+	Animacje* findAnimationByName(const std::string& name) {
+		for (auto& anim : allAnimation) {
+			if (anim.name == name) {
+				return &anim;
+			}
+		}
+		return nullptr; // Zwraca nullptr, jeœli nie znaleziono animacji
 	}
 
 public:
@@ -38,7 +49,10 @@ public:
 	void setActiveAnimation(std::string name, bool once = false);
 	glm::vec3 getPosition();
 	std::string getActiveAnimation();
+	void addLegAnimation(std::string name);
+	void removeLegAnimation(std::string name);
 	void setActiveAnimationWithY(std::string name, bool playOnce = false);
+	void setActiveAnimation(std::string name, std::string name2, bool playOnce);
 	void changeAnimationSpeed(const std::string& nameAnim, float newSpeed);
 
 	void play();

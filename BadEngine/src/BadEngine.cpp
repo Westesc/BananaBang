@@ -317,7 +317,7 @@ int main() {
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	sm->getActiveScene()->findByName("box")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box")->getTransform()->localPosition,1.0f);
+	//sm->getActiveScene()->findByName("box")->getModelComponent()->addCollider(1, sm->getActiveScene()->findByName("box")->getTransform()->localPosition,1.0f);
 	sm->getActiveScene()->findByName("skydome")->setRotating(true, 1.f, glm::vec3(0.f, 1.f, 0.f));
 
 	float deltaTime = 0;
@@ -440,7 +440,7 @@ int main() {
 			staticUpdateTime = 0.f;
 			playerAtention = false;
 		}
-		enemyManager->update(deltaTime, playerAtention);
+		//enemyManager->update(deltaTime, playerAtention);
 		for (auto object : sm->getActiveScene()->gameObjects) {
 			if (object->name.starts_with("sector")) {
 				for (auto tree : object->children) {

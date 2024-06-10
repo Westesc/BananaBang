@@ -1,6 +1,7 @@
 #version 450 core
 layout (location = 0) in vec3 inPos;
 layout (location = 1) in vec3 inColor;
+layout (location = 3) in mat4 instanceMatrix;
 
 
 out gl_PerVertex

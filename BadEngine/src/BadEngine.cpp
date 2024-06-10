@@ -553,6 +553,7 @@ int main() {
 			if (sm->getActiveScene()->findByName("HPcount")) {
 				sm->getActiveScene()->findByName("HPcount")->uiComponent->setText("HP: " + std::to_string(sm->getActiveScene()->findByName("player")->hp));
 			}
+			cm.addObject(sm->getActiveScene()->findByName("player"));
 		}
 		for (Enemy* enemy : enemyManager->enemies) {
 			if (enemy->hp <= 0) {
@@ -563,7 +564,17 @@ int main() {
 				sm->getActiveScene()->gameObjects.erase(std::remove(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), enemy), sm->getActiveScene()->gameObjects.end());
 				enemyManager->enemies.erase(std::remove(enemyManager->enemies.begin(), enemyManager->enemies.end(), enemy), enemyManager->enemies.end());
 				enemy->chosenTree->getAsActualType<Tree>()->removeChopper(enemy);
+				if (enemyManager->enemies.size() > 0) {
+					std::vector<Transform*> transformsEnemy;
+					for (auto enemy : enemyManager->enemies) {
+						transformsEnemy.push_back(enemy->getTransform());
+					}
+					enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
+				}
 				delete enemy;
+			}
+			else {
+				cm.addObject(enemy);
 			}
 		}
 		pbd->simulateB4Collisions(deltaTime);
@@ -612,6 +623,15 @@ int main() {
 				}
 			}
 		}
+		/*if (enemyManager->enemies.size() > 0) {
+			for (auto enemy : enemyManager->enemies) {
+				enemy->getModelComponent().get()->GetShader()->use();
+				enemy->getModelComponent().get()->GetShader()->setMat4("M", *enemy->getModelComponent().get()->getTransform());
+				enemy->getModelComponent().get()->GetShader()->setMat4("view", V);
+				enemy->getModelComponent().get()->GetShader()->setMat4("projection", P);
+			}
+			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
+		}*/
 
 		shaderTree->use();
 		shaderTree->setMat4("view", V);
@@ -906,6 +926,11 @@ int main() {
 			enemyWeapon->boundingBox->isTriggerOnly = true;
 			enemyWeapon->colliders.push_back(enemyWeapon->boundingBox);
 			enemyWeapon = nullptr;
+			std::vector<Transform*> transformsEnemy;
+			for (auto enemy : enemyManager->enemies) {
+				transformsEnemy.push_back(enemy->getTransform());
+			}
+			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
 		}
 		renderImGui();
 		glfwSwapBuffers(window);

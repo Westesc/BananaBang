@@ -68,6 +68,44 @@ public:
         }
         return false;
     }
+
+    std::vector<Section*> getNeighborSections(std::vector<Section*> allSections) {
+        std::vector<Section*> neighbors;
+        if (getSectionByID(ID - 1)) {
+			neighbors.push_back(getSectionByID(ID - 1));
+		}
+        if (getSectionByID(ID + 1)) {
+            neighbors.push_back(getSectionByID(ID + 1));
+        }
+        if (getSectionByID(ID - 10)) {
+			neighbors.push_back(getSectionByID(ID - 10));
+		}
+        if (getSectionByID(ID + 10)) {
+            neighbors.push_back(getSectionByID(ID + 10));
+        }
+        if (getSectionByID(ID - 100)) {
+            neighbors.push_back(getSectionByID(ID - 100));
+        }
+        if (getSectionByID(ID + 100)) {
+			neighbors.push_back(getSectionByID(ID + 100));
+		}
+        return neighbors;
+    }
+
+    bool isNeighbor(Section* other) {
+        float size = bounds->max.x - bounds->min.x;
+        return std::abs(this->bounds->min.x - other->bounds->min.x) <= size &&
+            std::abs(this->bounds->min.y - other->bounds->min.y) <= size &&
+            std::abs(this->bounds->min.z - other->bounds->min.z) <= size;
+    }
+
+    Section* getSectionByID(int id) {
+        if (ID == id) {
+			return this;
+		}
+        return nullptr;
+    }
+
 };
 
 #endif

@@ -178,7 +178,7 @@ void GameObject::setRotating(bool rotating,float speed,glm::vec3 rotateAxis) {
 }*/
 
 void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
-    if (active  && !(name.starts_with("log") || name.starts_with("tree") || name.starts_with("branch"))) {
+    if (active  && !(name.starts_with("log") || name.starts_with("tree") || name.starts_with("branch")/* || name.starts_with("enemy")*/)) {
         if (modelComponent != nullptr) {
             glm::mat4 M = glm::translate(glm::mat4(1.f), localTransform->localPosition);
             M = glm::rotate(M, glm::radians(localTransform->localRotation.y), glm::vec3(0.f, 1.f, 0.f));

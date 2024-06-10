@@ -17,9 +17,9 @@ public:
 	CollisionManager(float worldSize, float sectionSize) : sectionSize(sectionSize) {
 		int numSections = worldSize / sectionSize;
 		int IDcounter = 0;
-		for (int i = -numSections*0.5f; i < numSections*0.5f; i++) {
-			for (int j = -numSections * 0.5f; j < numSections * 0.5f; j++) { //TODO: ograniczy� wysoko�� do realnych potrzeb
-				for (int k = -numSections * 0.5f; k < numSections * 0.5f; k++) {
+		for (int i = -1; i < numSections*0.5f; i++) {
+			for (int j = -1; j < glm::clamp(numSections * 0.5f, 0.0f, 2.0f); j++) {
+				for (int k = -1; k < numSections * 0.5f; k++) {
 					sections.push_back(new Section(i * sectionSize, j * sectionSize, k * sectionSize, sectionSize, IDcounter));
 					IDcounter++;
 				}
@@ -32,17 +32,26 @@ public:
 		}
 	}
 
-	void addObject(GameObject* go) { //TODO: dla obiekt�w, kt�re zostan� dodane do sektora, sprawdzi� tylko przylegaj�ce sektory
+	void addObject(GameObject* go) {
 		ZoneScopedN("AddObject");
 		for (auto section : sections) {
-			if (go->name != "player") {
-				auto it = std::find(section->objects.begin(), section->objects.end(), go);
-				if (it != section->objects.end()) {
-					section->objects.erase(it);
-				}
-			}
 			if (section->checkCollision(go)) {
-				section->objects.push_back(go);
+				addObjectToSectionAndNeighbors(go, section);
+				break;
+			}
+		}
+	}
+
+	void addObjectToSectionAndNeighbors(GameObject* go, Section* section) {
+		auto it = std::find(section->objects.begin(), section->objects.end(), go);
+		if (it == section->objects.end()) {
+			section->objects.push_back(go);
+		}
+
+		std::vector<Section*> neighbors = section->getNeighborSections(sections);
+		for (Section* neighbor : neighbors) {
+			if (neighbor->checkCollision(go)) {
+				addObjectToSectionAndNeighbors(go, neighbor);
 			}
 		}
 	}

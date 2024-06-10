@@ -26,6 +26,7 @@ float Zoom = 50.0f;
 
 Input::Input(GLFWwindow* _window)
 {
+	this->window = _window;
 	glfwSetKeyCallback(_window, key_callback);
 	glfwSetMouseButtonCallback(_window, mouse_button_callback);
 	glfwSetCursorPosCallback(_window, mouse_callback);
@@ -77,6 +78,12 @@ glm::vec2 Input::getPosMouse()
 		return pos;
 	}
 	return glm::vec2(0.f, 0.f);
+}
+
+glm::vec2 Input::getMousePositionOnScreen() {
+	double x, y;
+	glfwGetCursorPos(this->window, &x, &y);
+	return glm::vec2(x, y);
 }
 
 float Input::GetZoom()

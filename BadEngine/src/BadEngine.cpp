@@ -198,25 +198,25 @@ int main() {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 	//sound test
-	std::cout << "starting...\n";
+	//std::cout << "starting...\n";
 
-	ALCdevice* p_ALCDevice = alcOpenDevice(nullptr); // nullptr = get default device
-	if (!p_ALCDevice)
-		throw("failed to get sound device");
+	//ALCdevice* p_ALCDevice = alcOpenDevice(nullptr); // nullptr = get default device
+	//if (!p_ALCDevice)
+	//	throw("failed to get sound device");
 
-	ALCcontext* p_ALCContext = alcCreateContext(p_ALCDevice, nullptr);  // create context
-	if (!p_ALCContext)
-		throw("Failed to set sound context");
+	//ALCcontext* p_ALCContext = alcCreateContext(p_ALCDevice, nullptr);  // create context
+	//if (!p_ALCContext)
+	//	throw("Failed to set sound context");
 
-	if (!alcMakeContextCurrent(p_ALCContext))   // make context current
-		throw("failed to make context current");
+	//if (!alcMakeContextCurrent(p_ALCContext))   // make context current
+	//	throw("failed to make context current");
 
-	const ALCchar* name = nullptr;
-	if (alcIsExtensionPresent(p_ALCDevice, "ALC_ENUMERATE_ALL_EXT"))
-		name = alcGetString(p_ALCDevice, ALC_ALL_DEVICES_SPECIFIER);
-	if (!name || alcGetError(p_ALCDevice) != AL_NO_ERROR)
-		name = alcGetString(p_ALCDevice, ALC_DEVICE_SPECIFIER);
-	printf("Opened \"%s\"\n", name);
+	//const ALCchar* name = nullptr;
+	//if (alcIsExtensionPresent(p_ALCDevice, "ALC_ENUMERATE_ALL_EXT"))
+	//	name = alcGetString(p_ALCDevice, ALC_ALL_DEVICES_SPECIFIER);
+	//if (!name || alcGetError(p_ALCDevice) != AL_NO_ERROR)
+	//	name = alcGetString(p_ALCDevice, ALC_DEVICE_SPECIFIER);
+	//printf("Opened \"%s\"\n", name);
 
 	//uint32_t /*ALuint*/ sound1 = SoundBuffer::get()->addSoundEffect("../../../../res/media/spell.ogg");
 	//uint32_t /*ALuint*/ sound2 = SoundBuffer::get()->addSoundEffect("../../../../res/media/magicfail.ogg");
@@ -281,9 +281,6 @@ int main() {
 	Mesh* meshFruit = new Mesh();
 	meshFruit->createSphere(20, 20, 50);
 	auto FruitModel = std::make_shared<Model>(meshFruit);
-
-
-	Shader* hudShader = new Shader("../../../../src/shaders/hud.vert", "../../../../src/shaders/hud.frag");
 
 	//drzewa
 	auto treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"), false);
@@ -726,11 +723,12 @@ int main() {
 							transformsBranch.push_back(ch->getTransform());
 						}
 					}
-					pathfinder->trees.at(0).second->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
-					pathfinder->trees.at(0).second->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
-					pathfinder->trees.at(0).second->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
-					pathfinder->sortTrees();
-
+					if (pathfinder->trees.size() > 0) {
+						pathfinder->trees.at(0).second->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
+						pathfinder->trees.at(0).second->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
+						pathfinder->trees.at(0).second->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
+						pathfinder->sortTrees();
+					}
 				}
 				loaded = true;
 				spawnerTime = 0;
@@ -754,10 +752,13 @@ int main() {
 			
 			buttonPressed = false;
 			GameObject* HPcount = new GameObject("HPcount");
-			UI* ui = new UI(writing);
+			UI* ui = new UI(button);
 			Shader* UIShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
 			ui->addShader(UIShader);
+			ui->setTexture("../../../../res/chmury.png");
 			HPcount->localTransform->localPosition = glm::vec3(25.f);
+			ui->input = input;
+			//ui->onClick = std::bind(&typKlasy::nazwafunkcji,&stworzonaKalsa);
 			ui->setText("Ala ma kota");
 			HPcount->uiComponent = ui;
 
@@ -812,7 +813,6 @@ int main() {
 			skydome->addModelComponent(skydomeModel);
 			skydome->getTransform()->localScale = glm::vec3(100.f);
 			sm->getActiveScene()->addObject(skydome);
-			sm->getActiveScene()->addObject(HPcount);
 			sm->getActiveScene()->findByName("skydome")->timeSetting(time / 7, glm::vec2(10, 10));
 
 			GameObject* outlineObj = new GameObject("outline");
@@ -828,6 +828,8 @@ int main() {
 			sm->getActiveScene()->findByName("outline")->getTransform()->localPosition = glm::vec3(0.f, 0.f, 0.f);
 			sm->getActiveScene()->findByName("outline")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
 			sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);
+
+			sm->getActiveScene()->addObject(HPcount);
 
 		}
 		while (input->IsKeobarodAction(window)) {

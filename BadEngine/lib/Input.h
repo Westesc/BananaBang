@@ -19,6 +19,7 @@ public:
 	bool IsMove();
 	glm::vec2 getPosMouse();
 	glm::vec2 getScroll();
+	glm::vec2 getMousePositionOnScreen();
 	void getMessage(int& key, int& action);
 	int getPressKey();
 	void executeFunctionPeriodically(int key);
@@ -28,6 +29,7 @@ public:
 	bool checkAnyKey();
 	float GetZoom();
 private:
+	GLFWwindow* window;
 	static void mouse_callback(GLFWwindow* _window, double xpos, double ypos);
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 	static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);

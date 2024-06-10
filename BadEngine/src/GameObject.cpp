@@ -138,6 +138,9 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
             //std::cout << "M2:" << glm::to_string(*modelComponent->getTransform()) << std::endl;
         }
         deltaTime = time;
+        if (uiComponent != nullptr) {
+            uiComponent->update(this->localTransform);
+        }
 
         for (auto ch : children) {
             ch->Update(view, perspective, time);

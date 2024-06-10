@@ -23,11 +23,12 @@ UI::UI(typeUI type, glm::vec3 color)
 {
 	this->type = type;
 	this->color = color;
-	if (type == writing) {
+	size = glm::vec2(100.f);
+	if (type == writing || type == button) {
 		loadFreetype();
 	}
-	if (type == plane) {
-
+	else if (type == plane) {
+		loadPlane();
 	}
 
 }
@@ -130,6 +131,19 @@ bool UI::loadFreetype() {
 	return true;
 }
 
+void UI::loadPlane()
+{
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
 void UI::addShader(Shader* shader) {
 	this->shader = shader;
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Window::windowWidth), 0.0f, static_cast<float>(Window::windowHeight), -1.0f, 1.0f);
@@ -138,24 +152,34 @@ void UI::addShader(Shader* shader) {
 }
 void UI::Draw(Transform* transform) {
 	glDisable(GL_DEPTH_TEST);
-	if (type == plane) {
+	if (type == plane || type == button) {
 		shader->use();
+		shader->setBool("isText", false);
 		glUniform3f(glGetUniformLocation(shader->ID, "color"), color.x, color.y, color.z);
 		glActiveTexture(GL_TEXTURE0);
 		glBindVertexArray(VAO);
 		float vertices[6][4] = {
-				{ transform->localPosition.x,								 transform->localPosition.y + 100 * transform->localScale.y,    0.0f, 0.0f },
+				{ transform->localPosition.x,								 transform->localPosition.y + size.y * transform->localScale.y,    0.0f, 0.0f },
 				{ transform->localPosition.x,								 transform->localPosition.y,									0.0f, 1.0f },
-				{ transform->localPosition.x + 100* transform->localScale.x, transform->localPosition.y,									1.0f, 1.0f },
+				{ transform->localPosition.x + size.x* transform->localScale.x, transform->localPosition.y,									1.0f, 1.0f },
 
-				{ transform->localPosition.x,								  transform->localPosition.y + 100 * transform->localScale.y,   0.0f, 0.0f },
-				{ transform->localPosition.x + 100 * transform->localScale.x, transform->localPosition.y,									1.0f, 1.0f },
-				{ transform->localPosition.x + 100 * transform->localScale.x, transform->localPosition.y + 100 * transform->localScale.y,   1.0f, 0.0f }
+				{ transform->localPosition.x,								  transform->localPosition.y + size.y * transform->localScale.y,   0.0f, 0.0f },
+				{ transform->localPosition.x + size.x * transform->localScale.x, transform->localPosition.y,									1.0f, 1.0f },
+				{ transform->localPosition.x + size.x * transform->localScale.x, transform->localPosition.y + size.y * transform->localScale.y,   1.0f, 0.0f }
 		};
+		glBindTexture(GL_TEXTURE_2D, planeTexture);
+		// update content of VBO memory
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices); // be sure to use glBufferSubData and not glBufferData
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		// render quad
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
-	if (type == writing) {
+	if (type == writing || type == button) {
 		shader->use();
-		glUniform3f(glGetUniformLocation(shader->ID, "textColor"), color.x, color.y, color.z);
+		shader->setBool("isText", true);
+		glUniform3f(glGetUniformLocation(shader->ID, "color"), color.x, color.y, color.z);
 		glActiveTexture(GL_TEXTURE0);
 		glBindVertexArray(VAO);
 		float x = transform->localPosition.x;
@@ -198,3 +222,53 @@ void UI::Draw(Transform* transform) {
 	glEnable(GL_DEPTH_TEST);
 }
 
+void UI::setTexture(std::string path)
+{
+
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(path.c_str(), &width, &height, &nrComponents, 0);
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
+	}
+	else
+	{
+		std::cout << "Texture failed to load at path: " << path << std::endl;
+		stbi_image_free(data);
+	}
+
+	planeTexture = textureID;
+}
+void UI::update(Transform* transform) {
+	if (input != nullptr) {
+		glm::vec2 mousePosition = input->getMousePositionOnScreen();
+		mousePosition.y = Window::windowHeight - mousePosition.y;
+		//printf("x: %.f	y: %.f", mousePosition.x, mousePosition.y);
+		if(input->getPressKey()!=-1)
+		if(mousePosition.x>transform->getLocalPosition().x && mousePosition.x < transform->getLocalPosition().x + size.x * transform->getLocalScale().x)
+			if (mousePosition.y > transform->getLocalPosition().y && mousePosition.y < transform->getLocalPosition().y + size.y * transform->getLocalScale().y) {
+				printf("przycisk dzia³a\n");
+				//onClick();
+			}
+	}
+}

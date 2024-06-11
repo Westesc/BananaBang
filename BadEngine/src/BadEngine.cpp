@@ -601,6 +601,7 @@ int main() {
 	std::vector<Transform*> transformsBranch;
 	SectorSelector sectorSelector = SectorSelector(&sectorsPom);
 	bool regenInstances = false;
+	bool ssaoEnabled = true;
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -656,11 +657,12 @@ int main() {
 			else if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_5))
 			{
 				gameMode.setMode(GameMode::ssaoTest);
+				camera->transform->localPosition = glm::vec3(0.0f);
 			}
 		}
 
 		if (gameMode.getMode() == GameMode::ssaoTest) {
-			camera->transform->localPosition = glm::vec3(0.0f);
+			
 			glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -669,7 +671,7 @@ int main() {
 			glm::mat4 model = glm::mat4(1.0f);
 			shaderGeometryPass.use();
 			shaderGeometryPass.setMat4("projection", projection);
-			shaderGeometryPass.setMat4("view", V);
+			shaderGeometryPass.setMat4("view", view);
 			// room cube
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0, 7.0f, 0.0f));
@@ -684,32 +686,34 @@ int main() {
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
 			model = glm::scale(model, glm::vec3(1.0f));
 			shaderGeometryPass.setMat4("model", model);
+			backpackModel.setTransform(model);
 			backpackModel.Draw(&shaderGeometryPass);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			if (ssaoEnabled) {
+				glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
+				glClear(GL_COLOR_BUFFER_BIT);
+				shaderSSAO.use();
+				// Send kernel + rotation 
+				for (unsigned int i = 0; i < 64; ++i)
+					shaderSSAO.setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
+				shaderSSAO.setMat4("projection", projection);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, gPosition);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, gNormal);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, noiseTexture);
+				renderQuad();
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-			glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
-			glClear(GL_COLOR_BUFFER_BIT);
-			shaderSSAO.use();
-			// Send kernel + rotation 
-			for (unsigned int i = 0; i < 64; ++i)
-				shaderSSAO.setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
-			shaderSSAO.setMat4("projection", P);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, gPosition);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, gNormal);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, noiseTexture);
-			renderQuad();
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-			glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
-			glClear(GL_COLOR_BUFFER_BIT);
-			shaderSSAOBlur.use();
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
-			renderQuad();
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+				glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
+				glClear(GL_COLOR_BUFFER_BIT);
+				shaderSSAOBlur.use();
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+				renderQuad();
+				glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			}
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			shaderLightingPass.use();
@@ -728,8 +732,14 @@ int main() {
 			glBindTexture(GL_TEXTURE_2D, gNormal);
 			glActiveTexture(GL_TEXTURE2);
 			glBindTexture(GL_TEXTURE_2D, gAlbedo);
-			glActiveTexture(GL_TEXTURE3); // add extra SSAO texture to lighting pass
-			glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
+			if (ssaoEnabled) {
+				glActiveTexture(GL_TEXTURE3); // add extra SSAO texture to lighting pass
+				glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
+			}
+			else {
+				glActiveTexture(GL_TEXTURE3);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
 			renderQuad();
 
 			while (input->IsMove()) {
@@ -741,29 +751,38 @@ int main() {
 
 			while (input->IsKeobarodAction(window)) {
 				input->getMessage(key, action);
-
-				if (gameMode.getMode() == GameMode::Debug) {
-					input->getPressKey();
-					if (key == GLFW_KEY_W && action == GLFW_REPEAT) {
+				input->getPressKey();
+				if (key == GLFW_KEY_I && action == GLFW_PRESS) {
+					ssaoEnabled = !ssaoEnabled;
+				}
+				if ((key == GLFW_KEY_W && (action == GLFW_PRESS || action == GLFW_REPEAT)) ||
+					(key == GLFW_KEY_S && (action == GLFW_PRESS || action == GLFW_REPEAT)) ||
+					(key == GLFW_KEY_D && (action == GLFW_PRESS || action == GLFW_REPEAT)) ||
+					(key == GLFW_KEY_A && (action == GLFW_PRESS || action == GLFW_REPEAT))) {
+					switch (key) {
+					case GLFW_KEY_W:
 						camera->ProcessKeyboard(FORWARD, time);
-					}
-					else if (key == GLFW_KEY_S && action == GLFW_REPEAT) {
+						break;
+					case GLFW_KEY_S:
 						camera->ProcessKeyboard(BACKWARD, time);
-					}
-					else if (key == GLFW_KEY_D && action == GLFW_REPEAT) {
+						break;
+					case GLFW_KEY_D:
 						camera->ProcessKeyboard(RIGHT, time);
-					}
-					else if (key == GLFW_KEY_A && action == GLFW_REPEAT) {
+						break;
+					case GLFW_KEY_A:
 						camera->ProcessKeyboard(LEFT, time);
+						break;
 					}
-					else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-						glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-					}
-					//jednorazowe
-					else if (key == GLFW_MOUSE_BUTTON_RIGHT) {
-						glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-						std::cout << "LEFT MOUSE " << key << std::endl;
-					}
+					// Debug output for camera position
+					std::cout << "Camera Position: " << glm::to_string(camera->transform->localPosition) << std::endl;
+				}
+				else if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				}
+				//jednorazowe
+				else if (key == GLFW_MOUSE_BUTTON_RIGHT) {
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+					std::cout << "LEFT MOUSE " << key << std::endl;
 				}
 			}
 		}

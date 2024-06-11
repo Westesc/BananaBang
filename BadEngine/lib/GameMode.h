@@ -5,7 +5,8 @@ public:
         Debug,
         Start,
         Game,
-        Menu
+        Menu,
+        ssaoTest
     };
     GameMode() : currentMode(GameStruct::Debug) {}
 

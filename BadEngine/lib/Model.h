@@ -400,11 +400,13 @@ public:
         //std::string filename = std::string(path);
         //filename = directory + '/' + filename;
 
+        //change filename to relative path (likely ../../../..)
+        std::string filenameRel = "../../../../res/objects/backpack/" + filename;
         unsigned int textureID;
         glGenTextures(1, &textureID);
 
         int width, height, nrComponents;
-        unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+        unsigned char* data = stbi_load(filenameRel.c_str(), &width, &height, &nrComponents, 0);
         if (data)
         {
             GLenum format;

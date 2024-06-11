@@ -372,6 +372,7 @@ int main() {
 	std::vector<Transform*> transformsLog;
 	std::vector<Transform*> transformsBranch;
 	SectorSelector sectorSelector = SectorSelector(&sectorsPom);
+	bool regenInstances = false;
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -494,7 +495,7 @@ int main() {
 								enemy->chosenTree = nullptr;
 							}
 						}
-						//TODO: napraw znikające drzewa
+						/*
 						transformsBranch.clear();
 						transformsLog.clear();
 						transformsTree.clear();
@@ -518,7 +519,8 @@ int main() {
 								}
 							}
 						}
-						
+						*/
+						regenInstances = true;
 						delete treeActual;
 						if (object->name.ends_with(std::to_string(sectorSelector.selectedSector)) && object->children.size() == 0 && sectorSelectorTime > 30.0f) {
 							sectorSelector.selectSector(1);
@@ -530,6 +532,35 @@ int main() {
 					}
 				}
 			}
+		}
+		if (regenInstances) {
+			transformsBranch.clear();
+			transformsLog.clear();
+			transformsTree.clear();
+			for (auto object : sm->getActiveScene()->gameObjects) {
+				if (object->name.starts_with("sector")) {
+					for (auto tree : object->children) {
+						if (tree->name.starts_with("tree")) {
+							transformsTree.push_back(tree->getTransform());
+							transformsLog.push_back(tree->children.at(0)->getTransform());
+							for (auto ch : tree->children.at(0)->children)
+							{
+								transformsBranch.push_back(ch->getTransform());
+							}
+						}
+					}
+				}
+			}
+			for (int i = 0; i < sectorsPom * sectorsPom; i++) {
+				if (sm->getActiveScene()->findByName("sector" + std::to_string(i + 1))->children.size() > 0) {
+					GameObject* sector = sm->getActiveScene()->findByName("sector" + std::to_string(i + 1));
+					sector->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
+					sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
+					sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
+					break;
+				}
+			}
+			regenInstances = false;
 		}
 		sm->getActiveScene()->Update(V, P, deltaTime);
 

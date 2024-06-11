@@ -46,7 +46,7 @@ public:
 				treePositions.push_back(glm::vec2(tree.second->getTransform()->localPosition.x, tree.second->getTransform()->localPosition.z));
 			}
 		}
-		if (trees.size() < 3) {
+		if (treePositions.size() < 3) {
 			return chosenTreePos;
 		}
 		glm::vec2 closestTree;

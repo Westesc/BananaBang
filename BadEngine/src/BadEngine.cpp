@@ -39,6 +39,7 @@
 #include "../lib/animation/Animator.h"
 #include "../lib/Globals.h"
 #include "../lib/EnemyStateManager.h"
+#include "../lib/SectorSelector.h"
 
 bool test = false;
 bool frustumTest = false;
@@ -350,6 +351,7 @@ int main() {
 	float lastTime = 0;
 	float spawnerTime = 0;
 	float staticUpdateTime = 0;
+	float sectorSelectorTime = 0;
 	GameMode gameMode;
 	bool isFromFile = false;
 	bool rotating = true;
@@ -369,6 +371,7 @@ int main() {
 	std::vector<Transform*> transformsTree;
 	std::vector<Transform*> transformsLog;
 	std::vector<Transform*> transformsBranch;
+	SectorSelector sectorSelector = SectorSelector(&sectorsPom);
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -383,6 +386,7 @@ int main() {
 		lastTime = time;
 		spawnerTime += deltaTime;
 		staticUpdateTime += deltaTime;
+		sectorSelectorTime += deltaTime;
 		//std::cout << "Delta time: " << deltaTime << std::endl;
 
 		tm->setTime(deltaTime);
@@ -490,6 +494,7 @@ int main() {
 								enemy->chosenTree = nullptr;
 							}
 						}
+						//TODO: napraw znikające drzewa
 						transformsBranch.clear();
 						transformsLog.clear();
 						transformsTree.clear();
@@ -515,6 +520,13 @@ int main() {
 						}
 						
 						delete treeActual;
+						if (object->name.ends_with(std::to_string(sectorSelector.selectedSector)) && object->children.size() == 0 && sectorSelectorTime > 30.0f) {
+							sectorSelector.selectSector(1);
+						}
+						else if (object->name.ends_with(std::to_string(sectorSelector.selectedSector2)) && object->children.size() == 0 && sectorSelectorTime > 30.0f) {
+							sectorSelector.selectSector(2);
+						}
+						sectorSelectorTime = 0;
 					}
 				}
 			}
@@ -668,10 +680,10 @@ int main() {
 			enemyManager->enemies.clear();
 			pathfinder->trees.clear();
 			spawnedEnemies = 0;
-
+			int sectorcounter = 1;
 			for (int i = 0; i < sectorsPom; i++) {
 				for (int j = 0; j < sectorsPom; j++) {
-					GameObject* planeSector = new GameObject("sector"+std::to_string((i+1)*(j+1)));
+					GameObject* planeSector = new GameObject("sector"+std::to_string(sectorcounter));
 					planeSector->localTransform->localScale = glm::vec3(2.f, 2.f, 2.f);
 					planeSector->addModelComponent(planeSectormodel);
 					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, 0.f, j * 20*planeSector->localTransform->localScale.z);
@@ -725,7 +737,7 @@ int main() {
 					sm->activeScene->addObject(planeSector);
 					for(auto ch : planeSector->children)
 					{
-						pathfinder->trees.push_back(std::make_pair((i + 1)* j, ch->getAsActualType<Tree>()));
+						pathfinder->trees.push_back(std::make_pair(sectorcounter, ch->getAsActualType<Tree>()));
 					}
 					transformsBranch.clear();
 					transformsLog.clear();
@@ -744,9 +756,12 @@ int main() {
 						pathfinder->trees.at(0).second->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
 						pathfinder->sortTrees();
 					}
+					sectorcounter++;
 				}
 				loaded = true;
 				spawnerTime = 0;
+				sectorSelector.selectSector(1);
+				sectorSelectorTime = 0;
 			}
 			
 				//sm->saveScene("first");
@@ -833,7 +848,7 @@ int main() {
 			GameObject* outlineObj = new GameObject("outline");
 			auto outlinemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/Lumberjack.obj"), false);
 
-			outlinemodel->SetShader(shaderTree);
+			/*outlinemodel->SetShader(shaderTree);
 			outlinemodel->SetOutlineShader(outlineShader);
 			outlinemodel->SetFillingShader(fillingShader);
 
@@ -842,7 +857,7 @@ int main() {
 
 			sm->getActiveScene()->findByName("outline")->getTransform()->localPosition = glm::vec3(0.f, 0.f, 0.f);
 			sm->getActiveScene()->findByName("outline")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
-			sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);
+			sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);*/
 
 			sm->getActiveScene()->addObject(HPcount);
 
@@ -889,17 +904,17 @@ int main() {
 				}
 			}
 		}
-		for (auto object : sm->getActiveScene()->gameObjects) {
+		/*for (auto object : sm->getActiveScene()->gameObjects) {
 			if (object->name.starts_with("sector")) {
 				for (auto ch : object->children) {
 					if (glm::distance(ch->getTransform()->localPosition, camera->transform->localPosition) > 100.f) {
 						if (ch->modelComponent != box2model) {
 							ch->modelComponent = box2model;
-							ch->children.at(0)->modelComponent = nullptr;
-							for (auto branch : ch->children.at(0)->children)
-							{
-								branch->modelComponent = nullptr;
-							}
+							ch->children.at(0)->modelComponent = box2model;
+							//for (auto branch : ch->children.at(0)->children)
+							//{
+							//	branch->modelComponent = nullptr;
+							//}
 						}
 					}
 					else {
@@ -915,11 +930,39 @@ int main() {
 					}
 				}
 			}
-		}
+		}*/
 		int pom = 0;
+		if (sectorSelectorTime > 30.0f) {
+			bool selected = false;
+			if (sectorSelector.selectedSector == 0) {
+				sectorSelector.selectSector(1);
+				selected = true;
+			}
+			else if (sectorSelector.selectedSector2 == 0) {
+				sectorSelector.selectSector(2);
+				selected = true;
+			}
+			if (selected) {
+				sectorSelectorTime = 0;
+			}
+		}
 		if (spawnerTime > 8.f && loaded && spawnedEnemies <= maxEnemies) {
 			spawnerTime = 0;
-			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),glm::vec3(5.f,5.f,0.f), glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
+			int sector = rand() % 2 + 1;
+			if (sectorSelector.selectedSector2 != 0) {
+				if (sector == 1) {
+					sector = sectorSelector.selectedSector;
+				}
+				else if (sector == 2) {
+					sector = sectorSelector.selectedSector2;
+				}
+			}
+			else {
+				sector = sectorSelector.selectedSector;
+			}
+			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),sm->getActiveScene()->findByName("sector" + std::to_string(sector))->localTransform->localPosition, glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
+			enemy->Move(glm::vec3(5.0f));
+			enemy->sector = sector;
 			enemy->addModelComponent(enemyModel);
 			pbd->objects.push_back(enemy);
 			enemy->addColider(2);

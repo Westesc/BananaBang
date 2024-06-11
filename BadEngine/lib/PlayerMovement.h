@@ -26,9 +26,10 @@ private:
     TimeManager* tm;
     RigidBody* rb;
     GameObject* player;
+    PlayerMovement* pm = nullptr;
 
     //animation
-    std::queue < std:: string > queueAnim;
+    std::queue < std::string > queueAnim;
     int animCount = 0;
 
     //walking
@@ -39,19 +40,26 @@ private:
 
     float currentTurn = 0.f;
     float rotateAngle = 0.f;
-    
+
     //jumping
     float limitJump = 7.f;
     float jumpPower = 7.f;
     glm::vec3 initialPosition;
-    float airSpeed = 4.f;
+    float airSpeed = 6.f;
 
     //climbing
     float climbingSpeed = 3.f;
-    float currentClimbingSpeed = 3.f;
+    float currentClimbingSpeed = 4.f;
     float groundPosition;
+    glm::vec3 treePosition;
+    float direction = 0.0f;
 
-    
+    //attack
+    bool isMove = false;
+
+    //treeAttack
+    Enemy* closestEnemy;
+
     PlayerState state = PlayerState::walking;
 
     bool wasSpacePressed = false;
@@ -86,9 +94,9 @@ private:
         float dx = player->getTransform()->getLocalScale().x * player->getAnimateBody()->getPosition().z * sinRotate + player->getAnimateBody()->getPosition().x * cosRotate;
         float dz = player->getTransform()->getLocalScale().z * player->getAnimateBody()->getPosition().z * cosRotate - player->getAnimateBody()->getPosition().x * sinRotate;
 
-       // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
-        glm::vec3 vel = glm::vec3(dx, 0.f, dz)/ deltaTime;
-        player->velocity = vel * 4.0f;
+        // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
+        glm::vec3 vel = glm::vec3(dx, 0.f, dz) / deltaTime;
+        player->velocity = vel * 2.0f;
     }
 
     void moveInAir(float speed, float deltaTime) {
@@ -98,9 +106,30 @@ private:
         float distance = speed * tm->getFramePerSeconds();
         float dx = distance * sin(glm::radians(player->getTransform()->getLocalRotation().y));
         float dz = distance * cos(glm::radians(player->getTransform()->getLocalRotation().y));
-        std::cout<< "dx: " << dx / deltaTime << "dz: " << dz / deltaTime << std::endl;
+        std::cout << "dx: " << dx / deltaTime << "dz: " << dz / deltaTime << std::endl;
         player->velocity.x = dx / deltaTime;
         player->velocity.z = dz / deltaTime;
+    }
+
+    void climbMove(float deltaTime) {
+        static float radius = glm::distance(glm::vec2(player->getTransform()->getLocalPosition().x, player->getTransform()->getLocalPosition().z),
+            glm::vec2(treePosition.x, treePosition.z)) - 0.4f;
+        static float angle = std::atan2(player->getTransform()->getLocalPosition().z - treePosition.z, player->getTransform()->getLocalPosition().x - treePosition.x);
+
+        float speed = direction * glm::pi<float>() / 2.0f;
+        angle += speed * deltaTime;
+
+        if (angle > 2 * glm::pi<float>()) {
+            angle -= 2 * glm::pi<float>();
+        }
+        std::cout << angle << std::endl;
+        player->getTransform()->localRotation.y = -angle * (180.0 / M_PI) - 90.f;
+
+        float x = treePosition.x + radius * std::cos(angle);
+        float z = treePosition.z + radius * std::sin(angle);
+
+        glm::vec3 newPosition = glm::vec3(x, player->getTransform()->getLocalPosition().y, z);
+        player->getTransform()->localPosition = newPosition;
     }
 
     void MovePlayer(float deltaTime) {
@@ -178,22 +207,43 @@ private:
             animCount = 0;
         }
         if (input->checkAnyKey()) {
-             if (state == PlayerState::climbing) {
-                 player->getTransform()->getLocalPosition().y;
-                 if (input->checkKey(GLFW_KEY_W)) {
-                     currentClimbingSpeed = climbingSpeed;
-                 }
-                 else if (input->checkKey(GLFW_KEY_S)) {
-                     currentClimbingSpeed = -climbingSpeed;
-                 }
-                 else if (input->checkKey(GLFW_KEY_E))
-                 {
-                     state = PlayerState::treeAttack;
-                 }
-                 else if (input->checkKey(GLFW_KEY_SPACE))
-                 {
-                     state = PlayerState::air;
-                 }
+            if (state == PlayerState::attack1) {
+                if (input->checkKey(GLFW_KEY_W) || input->checkKey(GLFW_KEY_A) || input->checkKey(GLFW_KEY_S) || input->checkKey(GLFW_KEY_D))
+                {
+                    isMove = true;
+                }
+            }
+            else {
+                isMove = false;
+            }
+            if (state == PlayerState::climbing) {
+                player->getTransform()->getLocalPosition().y;
+                if (input->checkKey(GLFW_KEY_A)) {
+                    direction = 0.3f;
+                    currentClimbingSpeed = 2.6f;
+                }
+                else if (input->checkKey(GLFW_KEY_D)) {
+                    direction = -0.3f;
+                    currentClimbingSpeed = 2.6f;
+                }
+                else {
+                    direction = 0.f;
+                }
+
+                if (input->checkKey(GLFW_KEY_W)) {
+                    currentClimbingSpeed = climbingSpeed;
+                }
+                else if (input->checkKey(GLFW_KEY_S)) {
+                    currentClimbingSpeed = -climbingSpeed;
+                }
+                else if (input->checkKey(GLFW_KEY_E))
+                {
+                    state = PlayerState::treeAttack;
+                }
+                else if (input->checkKey(GLFW_KEY_SPACE))
+                {
+                    state = PlayerState::air;
+                }
             }
             else if (state != PlayerState::air && state != PlayerState::jump_up && state != PlayerState::climbing) {
                 if (input->getPressKey() == GLFW_MOUSE_BUTTON_LEFT) {
@@ -216,18 +266,25 @@ private:
             }
             else {
                 input->getPressKey();
+                isMove = false;
             }
         }
         else if (state == PlayerState::walking) {
             player->getAnimateBody()->setActiveAnimation("standing");
         }
         else {
+            direction = 0.f;
             currentClimbingSpeed = 0.1f;
+            isMove = false;
         }
         if (glm::distance(player->getTransform()->getLocalPosition().y, groundPosition) < 0.5f && state == PlayerState::air) {
             state = PlayerState::walking;
             player->getAnimateBody()->setActiveAnimation("standing");
             player->getTransform()->localPosition.y = initialPosition.y;
+        }
+        else if (state != PlayerState::attack1)
+        {
+            player->getAnimateBody()->removeLegAnimation("walking");
         }
         wasSpacePressed = input->checkKey(GLFW_KEY_SPACE);
         if (state != PlayerState::attack1) {
@@ -236,14 +293,14 @@ private:
     }
 
 public:
-    
+
     PlayerMovement(SceneManager* sm, Input* input, Camera* camera, TimeManager* tm) {
         this->sm = sm;
         this->input = input;
         this->camera = camera;
         this->tm = tm;
         rb = new RigidBody("player", sm, tm);
-        player = sm->getActiveScene()->findByName("player");  
+        player = sm->getActiveScene()->findByName("player");
     }
 
     void ManagePlayer(float& deltaTime2, float deltaTime) {
@@ -257,22 +314,28 @@ public:
             // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         }
         else if (state == PlayerState::attack1) {
-            if (animCount == 0 && queueAnim.size()!= 0) {
+            if (isMove) {
+                player->getAnimateBody()->addLegAnimation("walking");
+            }
+            else {
+                player->getAnimateBody()->removeLegAnimation("walking");
+            }
+            if (animCount == 0 && queueAnim.size() != 0) {
                 animCount++;
                 player->getAnimateBody()->setActiveAnimation("attack1");
             }
-            move(deltaTime, false);
+            MovePlayer(deltaTime);
             if (player->getAnimateBody()->isPlay() == false) {
                 if (queueAnim.size() > 1 && animCount == 1) {
                     player->getAnimateBody()->setActiveAnimation("attack2");
                     animCount++;
                 }
                 else if (queueAnim.size() > 2 && animCount == 2) {
-                        animCount = 0;
-                        while (!queueAnim.empty()) {
-                            queueAnim.pop();
-                        }
-                        player->getAnimateBody()->setActiveAnimation("attack3");
+                    animCount = 0;
+                    while (!queueAnim.empty()) {
+                        queueAnim.pop();
+                    }
+                    player->getAnimateBody()->setActiveAnimation("attack3");
                 }
                 else {
                     state = PlayerState::walking;
@@ -287,11 +350,12 @@ public:
                 state = PlayerState::walking;
             }
         }
-        else if(state == PlayerState::climbing)
+        else if (state == PlayerState::climbing)
         {
-            if(currentClimbingSpeed > 0) {
+            climbMove(deltaTime);
+            if (currentClimbingSpeed > 0) {
                 player->getAnimateBody()->setActiveAnimationWithY("climbing up");
-                if (currentClimbingSpeed == 0.1f) {
+                if (currentClimbingSpeed == 0.1f || currentClimbingSpeed == 2.6f) {
                     player->getAnimateBody()->changeAnimationSpeed("climbing up", 0.8f);
                 }
                 else {
@@ -306,11 +370,20 @@ public:
             }
 
             float climbingY = abs(currentClimbingSpeed) * player->getTransform()->getLocalScale().y * player->getAnimateBody()->getPosition().y;
-            player->velocity = glm::vec3(0.f, climbingY, 0.f) / deltaTime;
+            player->velocity.y = climbingY / deltaTime;
         }
         else if (state == PlayerState::treeAttack) {
-            //zaatakuj tego który jest najblizej
-            player->velocity = glm::vec3(0.f, -1.f, 0.f) / deltaTime;
+
+            player->getAnimateBody()->setActiveAnimation("tree attack");
+
+            glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
+            glm::vec3 direction = glm::normalize(closestEnemy->getTransform()->getLocalPosition() - currentPosition);
+
+            float speed = 1.5f;
+            glm::vec3 velocity = direction * speed;
+
+            player->velocity = velocity / deltaTime;
+
             if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
                 state = PlayerState::walking;
             }
@@ -330,6 +403,14 @@ public:
         }
     }
 
+    void setTreePosition(glm::vec3 treePos) {
+        treePosition = treePos;
+    }
+
+    void setAttackDestination(Enemy* enemy) {
+        closestEnemy = enemy;
+    }
+
     void changeState(PlayerState state) {
         this->state = state;
     }
@@ -343,8 +424,8 @@ public:
     }
 
     Input* getInput() {
-		return input;
-	}
+        return input;
+    }
 
     ~PlayerMovement();
 };

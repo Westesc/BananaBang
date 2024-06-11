@@ -69,7 +69,43 @@ void AnimateBody::setActiveAnimation(std::string name, bool playOnce) {
     if (activeAnimation != name) {
         activeAnimation = name;
         Animacje anim = searchActiveAnimation();
-        animator->PlayAnimation(anim.animation, playOnce);
+        if (activeLegAnimation == "walking") {
+            Animacje* anim2 = findAnimationByName("walking");
+            animator->PlayAnimation(anim.animation, anim2->animation, playOnce);
+        }
+        else {
+            animator->PlayAnimation(anim.animation, playOnce);
+        }
+        animator->setIsAnimY(true);
+        //animator->changeAnimation();
+    }
+}
+
+void AnimateBody::addLegAnimation(std::string name) {
+    if (activeLegAnimation != name) {
+        activeLegAnimation = name;
+        Animacje* anim = findAnimationByName(name);
+        animator->addLegAnimation(anim->animation);
+        //animator->changeAnimation();
+    }
+}
+
+void AnimateBody::removeLegAnimation(std::string name) {
+    if (activeLegAnimation == name) {
+        activeLegAnimation = " ";
+        Animacje* anim = findAnimationByName(name);
+        animator->removeLegAnimation();
+        //animator->changeAnimation();
+    }
+}
+
+
+void AnimateBody::setActiveAnimation(std::string name, std::string name2, bool playOnce) {
+    if (activeAnimation != name) {
+        activeAnimation = name;
+        Animacje anim = searchActiveAnimation();
+        Animacje* anim2 = findAnimationByName(name2);
+        animator->PlayAnimation(anim.animation, anim2->animation, playOnce);
         animator->setIsAnimY(true);
         //animator->changeAnimation();
     }

@@ -367,7 +367,7 @@ int main() {
 
 	Pathfinder* pathfinder = new Pathfinder();
 	PBDManager* pbd = new PBDManager(10);
-	EnemyStateManager* enemyManager = new EnemyStateManager(pathfinder, &cm);
+	EnemyStateManager* enemyManager = new EnemyStateManager(pathfinder, &cm, pm);
 	std::vector<Transform*> transformsTree;
 	std::vector<Transform*> transformsLog;
 	std::vector<Transform*> transformsBranch;
@@ -850,6 +850,7 @@ int main() {
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Up Wall.dae"), "climbing up", 1.3f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Down Wall.dae"), "climbing down", 1.3f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jump Attack.dae"), "tree attack", 0.7f);
 
 			anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
 			pbd->objects.push_back(anim);

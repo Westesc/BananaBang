@@ -14,7 +14,8 @@ enum class PlayerState {
     attack1,
     dodge,
     climbing,
-    treeAttack
+    tree_attack,
+    leave_banana
 };
 
 class PlayerMovement {
@@ -238,7 +239,7 @@ private:
                 }
                 else if (input->checkKey(GLFW_KEY_E))
                 {
-                    state = PlayerState::treeAttack;
+                    state = PlayerState::tree_attack;
                 }
                 else if (input->checkKey(GLFW_KEY_SPACE))
                 {
@@ -254,7 +255,11 @@ private:
                     player->children.at(0)->active = true;
                     player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
                 }
-                if (input->checkKey(GLFW_MOUSE_BUTTON_RIGHT))
+                if (input->checkKey(GLFW_KEY_E)) {
+                    //jeœli ma banana zmieñ state
+                    state = PlayerState::leave_banana;
+                }
+                else if (input->checkKey(GLFW_MOUSE_BUTTON_RIGHT))
                 {
                     state = PlayerState::dodge;
                 }
@@ -320,7 +325,8 @@ public:
             else {
                 player->getAnimateBody()->removeLegAnimation("walking");
             }
-            if (animCount == 0 && queueAnim.size() != 0) {
+            if (animCount == 0 && queueAnim.size() != 0 
+                && (player->getAnimateBody()->getActiveAnimation() != "attack3" || player->getAnimateBody()->isPlay() == false)) {
                 animCount++;
                 player->getAnimateBody()->setActiveAnimation("attack1");
             }
@@ -372,7 +378,7 @@ public:
             float climbingY = abs(currentClimbingSpeed) * player->getTransform()->getLocalScale().y * player->getAnimateBody()->getPosition().y;
             player->velocity.y = climbingY / deltaTime;
         }
-        else if (state == PlayerState::treeAttack) {
+        else if (state == PlayerState::tree_attack) {
 
             player->getAnimateBody()->setActiveAnimation("tree attack");
 
@@ -395,6 +401,18 @@ public:
             MovePlayer(deltaTime);
             rb->upwardsSpeed = -7.f;
             rb->useGravity();
+        }
+        else if (state == PlayerState::leave_banana) {
+            //dodaæ zostawianie banana w miejscu gdzie stoi ma³pa
+            if (player->getAnimateBody()->getActiveAnimation() != "leave banana up") {
+                player->getAnimateBody()->setActiveAnimation("leave banana down", true);
+            }
+            if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana down") {
+                player->getAnimateBody()->setActiveAnimation("leave banana up", true);
+            }
+            else if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana up") {
+                state = PlayerState::walking;
+            }
         }
         if (state != PlayerState::attack1) {
             while (!queueAnim.empty()) {

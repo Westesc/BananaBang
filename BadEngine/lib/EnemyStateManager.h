@@ -19,17 +19,17 @@ public:
     PlayerMovement* pm = nullptr;
 
     void update(float deltaTime, bool playerAtention) {
-        glm::vec3 closestEnemy = glm::vec3(1.f);
+        Enemy* closestEnemy = nullptr;
         glm::vec3 closestDistance = glm::vec3(1.f);
         if (player && enemies.size() != 0) {
             closestDistance = abs(player->getTransform()->getLocalPosition() - enemies.back()->getTransform()->getLocalPosition());
-            closestEnemy = enemies.back()->getTransform()->getLocalPosition();
+            closestEnemy = enemies.back();
         }
         for (auto& enemy : enemies) {
             if (pm->getState() == PlayerState::climbing && player) {
-                if (glm::length(closestDistance) > glm::length(abs(player->getTransform()->getLocalPosition() - closestEnemy)))
-                    glm::vec3 closestEnemy = enemy->getTransform()->getLocalPosition();
-                    closestDistance = abs(player->getTransform()->getLocalPosition() - closestEnemy);
+                if (glm::length(closestDistance) > glm::length(abs(player->getTransform()->getLocalPosition() - closestEnemy->getTransform()->getLocalPosition())))
+                    closestEnemy = enemy;
+                    closestDistance = abs(player->getTransform()->getLocalPosition() - closestEnemy->getTransform()->getLocalPosition());
             }
             if (playerAtention && glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) < 15.0f) {
                 enemy->state = EnemyState::Attacking;
@@ -52,7 +52,7 @@ public:
                 break;
             }
         }
-        pm->setAttackDestination(closestEnemy - glm::vec3(1.f, 0.f, 1.f));
+        pm->setAttackDestination(closestEnemy);
     }
 
     void addEnemy(Enemy* enemy) {

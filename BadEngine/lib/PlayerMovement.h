@@ -57,7 +57,7 @@ private:
     bool isMove = false;
 
     //treeAttack
-    glm::vec3 attackDestination;
+    Enemy* closestEnemy;
 
     PlayerState state = PlayerState::walking;
 
@@ -95,7 +95,7 @@ private:
 
        // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
         glm::vec3 vel = glm::vec3(dx, 0.f, dz)/ deltaTime;
-        player->velocity = vel * 4.0f;
+        player->velocity = vel * 2.0f;
     }
 
     void moveInAir(float speed, float deltaTime) {
@@ -121,7 +121,8 @@ private:
         if (angle > 2 * glm::pi<float>()) {
             angle -= 2 * glm::pi<float>();
         }
-        player->getTransform()->localRotation = glm::vec3(0, angle, 0);
+        std::cout << angle<<std::endl;
+        player->getTransform()->localRotation.y = - angle * (180.0 / M_PI) - 90.f;
 
         float x = treePosition.x + radius * std::cos(angle);
         float z = treePosition.z + radius * std::sin(angle);
@@ -218,11 +219,11 @@ private:
                  player->getTransform()->getLocalPosition().y;
                  if (input->checkKey(GLFW_KEY_A)) {
                      direction = 0.3f;
-                     currentClimbingSpeed = 1.2f;
+                     currentClimbingSpeed = 2.6f;
                  } 
                  else if (input->checkKey(GLFW_KEY_D)) {
                      direction = -0.3f;
-                     currentClimbingSpeed = 1.2f;
+                     currentClimbingSpeed = 2.6f;
                  }
                  else {
                      direction = 0.f;
@@ -353,7 +354,7 @@ public:
             climbMove(deltaTime);
             if(currentClimbingSpeed > 0) {
                 player->getAnimateBody()->setActiveAnimationWithY("climbing up");
-                if (currentClimbingSpeed == 0.1f) {
+                if (currentClimbingSpeed == 0.1f || currentClimbingSpeed == 2.6f) {
                     player->getAnimateBody()->changeAnimationSpeed("climbing up", 0.8f);
                 }
                 else {
@@ -375,7 +376,7 @@ public:
             player->getAnimateBody()->setActiveAnimation("tree attack");
 
             glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
-            glm::vec3 direction = glm::normalize(attackDestination - currentPosition);
+            glm::vec3 direction = glm::normalize(closestEnemy->getTransform()->getLocalPosition() - currentPosition);
 
             float speed = 1.5f; 
             glm::vec3 velocity = direction * speed;
@@ -405,8 +406,8 @@ public:
         treePosition = treePos;
     }
 
-    void setAttackDestination(glm::vec3 newDestiny) {
-        attackDestination = newDestiny;
+    void setAttackDestination(Enemy* enemy) {
+        closestEnemy = enemy;
     }
 
     void changeState(PlayerState state) {

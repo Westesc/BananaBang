@@ -376,6 +376,7 @@ public:
     }
     std::vector<glm::mat4> instanceMatrices;
     unsigned int instanceVBO;
+
     void initInstances(std::vector<Transform*> transforms) {
         instanceMatrices.clear();
         for (Transform* transform : transforms) {

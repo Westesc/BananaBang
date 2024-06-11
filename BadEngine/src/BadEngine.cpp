@@ -366,6 +366,9 @@ int main() {
 	Pathfinder* pathfinder = new Pathfinder();
 	PBDManager* pbd = new PBDManager(10);
 	EnemyStateManager* enemyManager = new EnemyStateManager(pathfinder, &cm);
+	std::vector<Transform*> transformsTree;
+	std::vector<Transform*> transformsLog;
+	std::vector<Transform*> transformsBranch;
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -487,9 +490,9 @@ int main() {
 								enemy->chosenTree = nullptr;
 							}
 						}
-						std::vector<Transform*> transformsTree;
-						std::vector<Transform*> transformsLog;
-						std::vector<Transform*> transformsBranch;
+						transformsBranch.clear();
+						transformsLog.clear();
+						transformsTree.clear();
 						for (auto tree : object->children) {
 							if (tree->name.starts_with("tree")) {
 								transformsTree.push_back(tree->getTransform());
@@ -561,13 +564,13 @@ int main() {
 				sm->getActiveScene()->gameObjects.erase(std::remove(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), enemy), sm->getActiveScene()->gameObjects.end());
 				enemyManager->enemies.erase(std::remove(enemyManager->enemies.begin(), enemyManager->enemies.end(), enemy), enemyManager->enemies.end());
 				enemy->chosenTree->getAsActualType<Tree>()->removeChopper(enemy);
-				if (enemyManager->enemies.size() > 0) {
+				/*if (enemyManager->enemies.size() > 0) {
 					std::vector<Transform*> transformsEnemy;
 					for (auto enemy : enemyManager->enemies) {
 						transformsEnemy.push_back(enemy->getTransform());
 					}
 					enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
-				}
+				}*/
 				delete enemy;
 			}
 			else {
@@ -597,25 +600,37 @@ int main() {
 			if (sector->name.starts_with("sector")) {
 				for (auto tree : sector->children) {
 					tree->getModelComponent().get()->GetShader()->use();
-					tree->getModelComponent().get()->GetShader()->setMat4("model", *tree->getModelComponent().get()->getTransform());
+					tree->getModelComponent().get()->GetShader()->setVec3("lightPos", lightPos);
+					tree->getModelComponent().get()->GetShader()->setVec3("viewPos", camera->transform->getLocalPosition());
+					tree->getModelComponent().get()->GetShader()->setVec3("lightColor", *lightColor);
+					tree->getModelComponent().get()->GetShader()->setMat4("LSMatrix", lightSpaceMatrix);
 					tree->getModelComponent().get()->GetShader()->setMat4("view", V);
 					tree->getModelComponent().get()->GetShader()->setMat4("projection", P);
 				}
 				if (sector->children.size() > 0) {
+					sector->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
 					sector->children.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
 					for (auto log : sector->children.at(0)->children) {
 						log->getModelComponent().get()->GetShader()->use();
-						log->getModelComponent().get()->GetShader()->setMat4("model", *log->getModelComponent().get()->getTransform());
+						log->getModelComponent().get()->GetShader()->setVec3("lightPos", lightPos);;
+						log->getModelComponent().get()->GetShader()->setVec3("viewPos", camera->transform->getLocalPosition());
+						log->getModelComponent().get()->GetShader()->setVec3("lightColor", *lightColor);
+						log->getModelComponent().get()->GetShader()->setMat4("LSMatrix", lightSpaceMatrix);
 						log->getModelComponent().get()->GetShader()->setMat4("view", V);
 						log->getModelComponent().get()->GetShader()->setMat4("projection", P);
 						for (auto branch : log->children) {
 							branch->getModelComponent().get()->GetShader()->use();
-							branch->getModelComponent().get()->GetShader()->setMat4("model", *branch->getModelComponent().get()->getTransform());
+							branch->getModelComponent().get()->GetShader()->setVec3("lightPos", lightPos);;
+							branch->getModelComponent().get()->GetShader()->setVec3("viewPos", camera->transform->getLocalPosition());
+							branch->getModelComponent().get()->GetShader()->setVec3("lightColor", *lightColor);
+							branch->getModelComponent().get()->GetShader()->setMat4("LSMatrix", lightSpaceMatrix);
 							branch->getModelComponent().get()->GetShader()->setMat4("view", V);
 							branch->getModelComponent().get()->GetShader()->setMat4("projection", P);
 						}
 					}
+					sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
 					sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
+					sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
 					sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
 				}
 			}
@@ -712,9 +727,9 @@ int main() {
 					{
 						pathfinder->trees.push_back(std::make_pair((i + 1)* j, ch->getAsActualType<Tree>()));
 					}
-					std::vector<Transform*> transformsTree;
-					std::vector<Transform*> transformsLog;
-					std::vector<Transform*> transformsBranch;
+					transformsBranch.clear();
+					transformsLog.clear();
+					transformsTree.clear();
 					for (auto tree : pathfinder->trees) {
 						transformsTree.push_back(tree.second->getTransform());
 						transformsLog.push_back(tree.second->children.at(0)->getTransform());
@@ -928,11 +943,11 @@ int main() {
 			enemyWeapon->boundingBox->isTriggerOnly = true;
 			enemyWeapon->colliders.push_back(enemyWeapon->boundingBox);
 			enemyWeapon = nullptr;
-			std::vector<Transform*> transformsEnemy;
+			/*std::vector<Transform*> transformsEnemy;
 			for (auto enemy : enemyManager->enemies) {
 				transformsEnemy.push_back(enemy->getTransform());
 			}
-			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
+			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);*/
 		}
 		renderImGui();
 		glfwSwapBuffers(window);

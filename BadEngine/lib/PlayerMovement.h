@@ -15,7 +15,9 @@ enum class PlayerState {
     dodge,
     climbing,
     tree_attack,
-    leave_banana
+    leave_banana, 
+    dashing,
+    sprint
 };
 
 class PlayerMovement {
@@ -61,6 +63,11 @@ private:
     //treeAttack
     Enemy* closestEnemy;
 
+    //dash
+    float dashSpeed = 25.f;
+    float dashDuration = 2000.f; 
+    float currentDashTime = 0.f; 
+
     PlayerState state = PlayerState::walking;
 
     bool wasSpacePressed = false;
@@ -88,16 +95,18 @@ private:
     void move(float deltaTime, bool isRotate = true) {
         getRotate(isRotate);
 
-        float rotate = player->getTransform()->getLocalRotation().y;
-        float sinRotate = sin(glm::radians(rotate));
-        float cosRotate = cos(glm::radians(rotate));
+        if (state != PlayerState::dashing) {
+            float rotate = player->getTransform()->getLocalRotation().y;
+            float sinRotate = sin(glm::radians(rotate));
+            float cosRotate = cos(glm::radians(rotate));
 
-        float dx = player->getTransform()->getLocalScale().x * player->getAnimateBody()->getPosition().z * sinRotate + player->getAnimateBody()->getPosition().x * cosRotate;
-        float dz = player->getTransform()->getLocalScale().z * player->getAnimateBody()->getPosition().z * cosRotate - player->getAnimateBody()->getPosition().x * sinRotate;
+            float dx = player->getTransform()->getLocalScale().x * player->getAnimateBody()->getPosition().z * sinRotate + player->getAnimateBody()->getPosition().x * cosRotate;
+            float dz = player->getTransform()->getLocalScale().z * player->getAnimateBody()->getPosition().z * cosRotate - player->getAnimateBody()->getPosition().x * sinRotate;
 
-        // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
-        glm::vec3 vel = glm::vec3(dx, 0.f, dz) / deltaTime;
-        player->velocity = vel * 4.0f;
+            // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
+            glm::vec3 vel = glm::vec3(dx, 0.f, dz) / deltaTime;
+            player->velocity = vel * 2.0f;
+        }
     }
 
     void moveInAir(float speed, float deltaTime) {
@@ -137,9 +146,6 @@ private:
         float speed = 0.f;
         if (input->checkAnyKey() && deltaTime2 > 0.02f) {
             deltaTime2 = 0.f;
-            if (input->checkKey(GLFW_KEY_LEFT_SHIFT) && state == PlayerState::walking) {
-                // speed = runSpeed;
-            }
             if (input->checkKey(GLFW_KEY_W)) {
                 speed = airSpeed;
                 if (state == PlayerState::walking) {
@@ -256,7 +262,6 @@ private:
                     player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
                 }
                 if (input->checkKey(GLFW_KEY_E) && state == PlayerState::walking) {
-                    //jeœli ma banana zmieñ state
                     state = PlayerState::leave_banana;
                 }
                 else if (input->checkKey(GLFW_MOUSE_BUTTON_RIGHT))
@@ -267,6 +272,19 @@ private:
                     player->getAnimateBody()->setActiveAnimationWithY("jumping up", true);
                     state = PlayerState::jump_up;
                     initialPosition = player->getTransform()->getLocalPosition();
+                }
+                else if(input->checkKey(GLFW_KEY_LEFT_SHIFT)) {
+                    state = PlayerState::sprint;
+                }
+                else if (state == PlayerState::sprint) {
+                    state = PlayerState::walking;
+                }
+                else if (input->checkKey(GLFW_KEY_Z) /* && state != PlayerState::dashing*/) {
+                    state = PlayerState::dashing;
+                    currentDashTime = 0.f;
+                }
+                else if (state == PlayerState::dashing){
+                    state = PlayerState::walking;
                 }
             }
             else {
@@ -317,6 +335,10 @@ public:
         if (state == PlayerState::walking) {
             MovePlayer(deltaTime);
             // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
+        }
+        else if (state == PlayerState::sprint) {
+            player->getAnimateBody()->setActiveAnimation("sprint");
+            MovePlayer(deltaTime);
         }
         else if (state == PlayerState::attack1) {
             if (isMove) {
@@ -412,6 +434,23 @@ public:
                 player->getAnimateBody()->setActiveAnimation("leave banana up", true);
             }
             else if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana up") {
+                state = PlayerState::walking;
+            }
+        }
+        else if (state == PlayerState::dashing) {
+            if (currentDashTime < dashDuration) {
+                MovePlayer(deltaTime);
+                float rotate = glm::radians(player->getTransform()->getLocalRotation().y);
+                glm::vec3 dashDirection;
+                dashDirection.x = sin(rotate);
+                dashDirection.z = cos(rotate);
+                dashDirection.y = 0;
+                currentDashTime += deltaTime;
+                //std::cout << "dush" << std::endl;
+                player->velocity = glm::normalize(dashDirection) * dashSpeed;
+            }
+            else {
+                //std::cout << "nie dush" << std::endl;
                 state = PlayerState::walking;
             }
         }

@@ -438,10 +438,10 @@ int main() {
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("outline")->getModelComponent()->SetOutlineShader(nullptr);
+			//sm->getActiveScene()->findByName("outline")->getModelComponent()->SetOutlineShader(nullptr);
 		}
 		if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
-			sm->getActiveScene()->findByName("outline")->getModelComponent()->SetOutlineShader(outlineShader);
+			//sm->getActiveScene()->findByName("outline")->getModelComponent()->SetOutlineShader(outlineShader);
 		}
 
 		if (sm->getActiveScene()->findByName("player")) {
@@ -846,7 +846,7 @@ int main() {
 			GameObject* anim = new GameObject("player");
 			//animodel->SetShader(shaderAnimation);
 			anim->addModelComponent(animodel);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.2f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.4f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
@@ -859,6 +859,7 @@ int main() {
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jump Attack.dae"), "tree attack", 0.7f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Crouch To Standing.dae"), "leave banana up", 1.4f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Standing To Crouch.dae"), "leave banana down", 1.4f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Sprint.dae"), "sprint", 1.f);
 
 			anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
 			pbd->objects.push_back(anim);

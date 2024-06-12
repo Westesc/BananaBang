@@ -994,37 +994,40 @@ int main() {
 			else {
 				sector = sectorSelector.selectedSector;
 			}
-			Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies),sm->getActiveScene()->findByName("sector" + std::to_string(sector))->localTransform->localPosition, glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
-			enemy->Move(glm::vec3(5.0f));
-			enemy->sector = sector;
-			enemy->addModelComponent(enemyModel);
-			pbd->objects.push_back(enemy);
-			enemy->addColider(2);
-			enemy->capsuleCollider = new CapsuleCollider(enemy->capsuleCollider->center, enemy->capsuleCollider->radius * 0.8f, enemy->capsuleCollider->height, 1.0f, true);
-			sm->getActiveScene()->addObject(enemy);
-			cm.addObject(enemy);
-			spawnedEnemies++;
-			std::pair<glm::vec3, Tree*> tree = pathfinder->decideInitalDestination(enemy->sector);
-			enemy->chosenTreePos = tree.first;
-			enemy->chosenTree = tree.second;
-			enemy->velocity = enemy->chosenTreePos - enemy->localTransform->localPosition;
-			enemy->state = EnemyState::Walking;
-			enemyManager->addEnemy(enemy);
-			enemy->hp = 30;
-			GameObject* enemyWeapon = new GameObject("enemyWeapon" + std::to_string(spawnedEnemies));
-			enemyWeapon->addModelComponent(box2model);
-			enemyWeapon->getTransform()->localScale = glm::vec3(0.1f);
-			enemyWeapon->active = false;
-			enemy->addChild(enemyWeapon);
-			enemyWeapon->addColider(1);
-			enemyWeapon->boundingBox->isTriggerOnly = true;
-			enemyWeapon->colliders.push_back(enemyWeapon->boundingBox);
-			enemyWeapon = nullptr;
-			/*std::vector<Transform*> transformsEnemy;
-			for (auto enemy : enemyManager->enemies) {
-				transformsEnemy.push_back(enemy->getTransform());
+			std::cout << sectorSelector.selectedSector << ", " << sectorSelector.selectedSector2 << std::endl;
+			if (sm->getActiveScene()->findByName("sector" + std::to_string(sector))) {
+				Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies), sm->getActiveScene()->findByName("sector" + std::to_string(sector))->localTransform->localPosition, glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
+				enemy->Move(glm::vec3(5.0f));
+				enemy->sector = sector;
+				enemy->addModelComponent(enemyModel);
+				pbd->objects.push_back(enemy);
+				enemy->addColider(2);
+				enemy->capsuleCollider = new CapsuleCollider(enemy->capsuleCollider->center, enemy->capsuleCollider->radius * 0.8f, enemy->capsuleCollider->height, 1.0f, true);
+				sm->getActiveScene()->addObject(enemy);
+				cm.addObject(enemy);
+				spawnedEnemies++;
+				std::pair<glm::vec3, Tree*> tree = pathfinder->decideInitalDestination(enemy->sector);
+				enemy->chosenTreePos = tree.first;
+				enemy->chosenTree = tree.second;
+				enemy->velocity = enemy->chosenTreePos - enemy->localTransform->localPosition;
+				enemy->state = EnemyState::Walking;
+				enemyManager->addEnemy(enemy);
+				enemy->hp = 30;
+				GameObject* enemyWeapon = new GameObject("enemyWeapon" + std::to_string(spawnedEnemies));
+				enemyWeapon->addModelComponent(box2model);
+				enemyWeapon->getTransform()->localScale = glm::vec3(0.1f);
+				enemyWeapon->active = false;
+				enemy->addChild(enemyWeapon);
+				enemyWeapon->addColider(1);
+				enemyWeapon->boundingBox->isTriggerOnly = true;
+				enemyWeapon->colliders.push_back(enemyWeapon->boundingBox);
+				enemyWeapon = nullptr;
+				/*std::vector<Transform*> transformsEnemy;
+				for (auto enemy : enemyManager->enemies) {
+					transformsEnemy.push_back(enemy->getTransform());
+				}
+				enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);*/
 			}
-			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);*/
 		}
 		renderImGui();
 		glfwSwapBuffers(window);

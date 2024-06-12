@@ -97,7 +97,7 @@ private:
 
         // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
         glm::vec3 vel = glm::vec3(dx, 0.f, dz) / deltaTime;
-        player->velocity = vel * 2.0f;
+        player->velocity = vel * 4.0f;
     }
 
     void moveInAir(float speed, float deltaTime) {
@@ -255,7 +255,7 @@ private:
                     player->children.at(0)->active = true;
                     player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
                 }
-                if (input->checkKey(GLFW_KEY_E)) {
+                if (input->checkKey(GLFW_KEY_E) && state == PlayerState::walking) {
                     //jeœli ma banana zmieñ state
                     state = PlayerState::leave_banana;
                 }

@@ -364,6 +364,7 @@ int main() {
 	float spawnerTime = 0;
 	float staticUpdateTime = 0;
 	float sectorSelectorTime = 0;
+	int shadowsFrameCounter = -1;
 	GameMode gameMode;
 	bool isFromFile = false;
 	bool rotating = true;
@@ -394,6 +395,7 @@ int main() {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
+		shadowsFrameCounter++;
 		deltaTime = time - lastTime;
 		deltaTime2 += time - lastTime;
 		lastTime = time;
@@ -586,25 +588,27 @@ int main() {
 		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 		lightSpaceMatrix = lightProjection * lightView;
 		// render scene from light's point of view
-		depthShader->use();
-		depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
-		depthAnimationShader->use();
-		depthAnimationShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+		if (shadowsFrameCounter % 6 == 0) {
+			depthShader->use();
+			depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+			depthAnimationShader->use();
+			depthAnimationShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
 
-		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-		glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
-		glClear(GL_DEPTH_BUFFER_BIT);
-		sm->getActiveScene()->Draw(depthShader, depthAnimationShader);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, Window::windowWidth, Window::windowHeight);
-		planeSectormodel->AddTexture(depthMap, "depthMap");
-		treetrunk.get()->AddTexture(depthMap, "depthMap");
-		treelog.get()->AddTexture(depthMap, "depthMap");
-		treebranch1.get()->AddTexture(depthMap, "depthMap");
+			glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			sm->getActiveScene()->Draw(depthShader, depthAnimationShader);
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, Window::windowWidth, Window::windowHeight);
+			planeSectormodel->AddTexture(depthMap, "depthMap");
+			treetrunk.get()->AddTexture(depthMap, "depthMap");
+			treelog.get()->AddTexture(depthMap, "depthMap");
+			treebranch1.get()->AddTexture(depthMap, "depthMap");
 
-		sm->getActiveScene()->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
-		sm->getActiveScene()->shadowSetting(lightSpaceMatrix);
+			sm->getActiveScene()->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
+			sm->getActiveScene()->shadowSetting(lightSpaceMatrix);
+		}
 
 		if (sm->getActiveScene()->findByName("player")) {
 			if (sm->getActiveScene()->findByName("HPcount")) {
@@ -729,11 +733,13 @@ int main() {
 								}
 							}*/
 						Tree* tree = new Tree("tree_"+std::to_string(k), 100.0f);
+						tree->isInstanced = true;
 						tree->addModelComponent(treetrunk);
 						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
 						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
 						tree->addColider(1);
 						GameObject* log = new GameObject("log"+std::to_string(k));
+						log->isInstanced = true;
 						log->addModelComponent(treelog);
 						log->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX;
 						log->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
@@ -745,6 +751,7 @@ int main() {
 						int branchCount = losujLiczbe(3, 8);
 						for (int m = 0; m < branchCount; m++) {
 							GameObject* branch = new GameObject("branch" + std::to_string(m));
+							branch->isInstanced = true;
 							branch->addModelComponent(treebranch1);
 							branch->localTransform->localPosition.x = planeSector->localTransform->localPosition.x + treeX;
 							branch->localTransform->localPosition.y = float(losujLiczbe((m * 13 / branchCount)+5, ((m + 1) * 13 / branchCount)+5));

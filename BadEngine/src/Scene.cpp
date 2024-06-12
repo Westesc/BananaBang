@@ -54,7 +54,7 @@ void Scene::Draw(glm::mat4 view, glm::mat4 perspective) {
 void Scene::Draw(Shader* shader, Shader* animationShader) {
 	ZoneTransientN(zoneName, "DrawShadows", true);
 	for (auto go : gameObjects) {
-		if (go->isVisible) {
+		if (go->isVisible && go->active && !go->isInstanced) {
 			go->Draw(shader, animationShader);
 		}
 	}

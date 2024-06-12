@@ -38,6 +38,7 @@ public:
 	glm::vec3 colliderOffset = glm::vec3(0.f);
 	bool friction = true;
 	int hp = 0;
+	bool isInstanced = false;
 
 	void setParent(GameObject* Parent);
 	void addChild(GameObject* Child);

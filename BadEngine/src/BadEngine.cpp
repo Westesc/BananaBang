@@ -304,6 +304,10 @@ int main() {
 	treetrunk->SetShader(phongInstancedShader);
 	treelog->SetShader(phongInstancedShader);
 	planeSectormodel->SetShader(phongShader);
+	treetrunk.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	treelog.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	phongInstancedShader->use();
+	phongInstancedShader->setVec3("lightPos", lightPos);
 
 	box2model->SetShader(shaderTree);
 	skydomeModel->SetShader(skydomeShader);
@@ -329,6 +333,8 @@ int main() {
 	
 	//glm::vec3 lightPos(0.5f, 20.0f, 0.3f);
 	glm::vec3* lightColor = new glm::vec3(1.f, 1.0f, 1.f);
+	phongInstancedShader->use();
+	phongInstancedShader->setVec3("lightColor", *lightColor);
 
 	//Depth map to generate shadows
 	const unsigned int SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
@@ -593,7 +599,9 @@ int main() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glViewport(0, 0, Window::windowWidth, Window::windowHeight);
 		planeSectormodel->AddTexture(depthMap, "depthMap");
-
+		treetrunk.get()->AddTexture(depthMap, "depthMap");
+		treelog.get()->AddTexture(depthMap, "depthMap");
+		treebranch1.get()->AddTexture(depthMap, "depthMap");
 
 		sm->getActiveScene()->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
 		sm->getActiveScene()->shadowSetting(lightSpaceMatrix);
@@ -612,7 +620,9 @@ int main() {
 				}
 				sm->getActiveScene()->gameObjects.erase(std::remove(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), enemy), sm->getActiveScene()->gameObjects.end());
 				enemyManager->enemies.erase(std::remove(enemyManager->enemies.begin(), enemyManager->enemies.end(), enemy), enemyManager->enemies.end());
-				enemy->chosenTree->getAsActualType<Tree>()->removeChopper(enemy);
+				if (enemy->chosenTree) {
+					enemy->chosenTree->getAsActualType<Tree>()->removeChopper(enemy);
+				}
 				/*if (enemyManager->enemies.size() > 0) {
 					std::vector<Transform*> transformsEnemy;
 					for (auto enemy : enemyManager->enemies) {
@@ -649,41 +659,25 @@ int main() {
 			if (sector->name.starts_with("sector")) {
 				for (auto tree : sector->children) {
 					tree->getModelComponent().get()->GetShader()->use();
-					tree->getModelComponent().get()->GetShader()->setVec3("lightPos", lightPos);
 					tree->getModelComponent().get()->GetShader()->setVec3("viewPos", camera->transform->getLocalPosition());
-					tree->getModelComponent().get()->GetShader()->setVec3("lightColor", *lightColor);
 					tree->getModelComponent().get()->GetShader()->setMat4("LSMatrix", lightSpaceMatrix);
 					tree->getModelComponent().get()->GetShader()->setMat4("view", V);
 					tree->getModelComponent().get()->GetShader()->setMat4("projection", P);
 				}
-				if (sector->children.size() > 0) {
-					sector->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
-					sector->children.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
-					for (auto log : sector->children.at(0)->children) {
-						log->getModelComponent().get()->GetShader()->use();
-						log->getModelComponent().get()->GetShader()->setVec3("lightPos", lightPos);;
-						log->getModelComponent().get()->GetShader()->setVec3("viewPos", camera->transform->getLocalPosition());
-						log->getModelComponent().get()->GetShader()->setVec3("lightColor", *lightColor);
-						log->getModelComponent().get()->GetShader()->setMat4("LSMatrix", lightSpaceMatrix);
-						log->getModelComponent().get()->GetShader()->setMat4("view", V);
-						log->getModelComponent().get()->GetShader()->setMat4("projection", P);
-						for (auto branch : log->children) {
-							branch->getModelComponent().get()->GetShader()->use();
-							branch->getModelComponent().get()->GetShader()->setVec3("lightPos", lightPos);;
-							branch->getModelComponent().get()->GetShader()->setVec3("viewPos", camera->transform->getLocalPosition());
-							branch->getModelComponent().get()->GetShader()->setVec3("lightColor", *lightColor);
-							branch->getModelComponent().get()->GetShader()->setMat4("LSMatrix", lightSpaceMatrix);
-							branch->getModelComponent().get()->GetShader()->setMat4("view", V);
-							branch->getModelComponent().get()->GetShader()->setMat4("projection", P);
-						}
-					}
-					sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
-					sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
-					sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
-					sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
-				}
 			}
 		}
+		for (auto sector : sm->getActiveScene()->gameObjects) {
+			if (sector->name.starts_with("sector") && sector->children.size() > 0) {
+				sector->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
+				sector->children.at(0)->getModelComponent().get()->drawInstances();
+				sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
+				sector->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
+				sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
+				sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
+				break;
+			}
+		}
+
 		/*if (enemyManager->enemies.size() > 0) {
 			for (auto enemy : enemyManager->enemies) {
 				enemy->getModelComponent().get()->GetShader()->use();

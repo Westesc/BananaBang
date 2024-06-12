@@ -484,6 +484,9 @@ public:
         }
     }
 
+    void drawInstances() {
+        getFirstMesh()->drawInstances(shader, textures_loaded);
+    }
 
     void DrawBoundingBox(const BoundingBox& bbox) {
         glm::vec3 vertices[] = {

@@ -9,13 +9,12 @@ uniform sampler2D texNoise;
 
 uniform vec3 samples[64];
 
-// parameters (you'd probably want to use them as uniforms to more easily tweak the effect)
 int kernelSize = 64;
 float radius = 0.5;
 float bias = 0.025;
 
 // tile noise texture over screen based on screen dimensions divided by noise size
-const vec2 noiseScale = vec2(800.0/4.0, 600.0/4.0); 
+const vec2 noiseScale = vec2(1640.0/4.0, 960.0/4.0); 
 
 uniform mat4 projection;
 
@@ -33,7 +32,6 @@ void main()
     float occlusion = 0.0;
     for(int i = 0; i < kernelSize; ++i)
     {
-        // get sample position
         vec3 samplePos = TBN * samples[i]; // from tangent to view-space
         samplePos = fragPos + samplePos * radius; 
         
@@ -46,7 +44,6 @@ void main()
         // get sample depth
         float sampleDepth = texture(gPosition, offset.xy).z; // get depth value of kernel sample
         
-        // range check & accumulate
         float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPos.z - sampleDepth));
         occlusion += (sampleDepth >= samplePos.z + bias ? 1.0 : 0.0) * rangeCheck;           
     }

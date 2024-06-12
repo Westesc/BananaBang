@@ -461,13 +461,9 @@ int main() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	// lighting info
-	// -------------
 	glm::vec3 lightPosSSAO = glm::vec3(2.0, 4.0, -2.0);
 	glm::vec3 lightColorSSAO = glm::vec3(0.2, 0.2, 0.7);
 
-	// shader configuration
-	// --------------------
 	shaderLightingPass.use();
 	shaderLightingPass.setInt("gPosition", 0);
 	shaderLightingPass.setInt("gNormal", 1);
@@ -672,15 +668,13 @@ int main() {
 			shaderGeometryPass.use();
 			shaderGeometryPass.setMat4("projection", projection);
 			shaderGeometryPass.setMat4("view", view);
-			// room cube
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0, 7.0f, 0.0f));
 			model = glm::scale(model, glm::vec3(7.5f, 7.5f, 7.5f));
 			shaderGeometryPass.setMat4("model", model);
-			shaderGeometryPass.setInt("invertedNormals", 1); // invert normals as we're inside the cube
+			shaderGeometryPass.setInt("invertedNormals", 1);
 			renderCube();
 			shaderGeometryPass.setInt("invertedNormals", 0);
-			// backpack model on the floor
 			model = glm::mat4(1.0f);
 			model = glm::translate(model, glm::vec3(0.0f, 0.5f, 0.0));
 			model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(1.0, 0.0, 0.0));
@@ -693,7 +687,6 @@ int main() {
 				glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
 				glClear(GL_COLOR_BUFFER_BIT);
 				shaderSSAO.use();
-				// Send kernel + rotation 
 				for (unsigned int i = 0; i < 64; ++i)
 					shaderSSAO.setVec3("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
 				shaderSSAO.setMat4("projection", projection);
@@ -717,7 +710,6 @@ int main() {
 
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			shaderLightingPass.use();
-			// send light relevant uniforms
 			glm::vec3 lightPosView = glm::vec3(camera->getViewMatrix() * glm::vec4(lightPosSSAO, 1.0));
 			shaderLightingPass.setVec3("light.Position", lightPosView);
 			shaderLightingPass.setVec3("light.Color", lightColorSSAO);

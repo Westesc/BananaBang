@@ -248,12 +248,17 @@ int main() {
 	Shader* mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");
 	Shader* shaderTree = new Shader("../../../../src/shaders/vsTree.vert", "../../../../src/shaders/fsTree.frag");
 	Shader* enemyShader = new Shader("../../../../src/shaders/enemy.vert", "../../../../src/shaders/enemy.frag");
+	Shader* diffuseShader = new Shader("../../../../src/shaders/diffuse.vert", "../../../../src/shaders/diffuse.frag");
 	auto enemyModel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"), false);
 	enemyModel->SetShader(enemyShader);
 	
 
 	GameObject* outlineObj = new GameObject("outline");
 	auto outlinemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/Lumberjack.obj"), false);
+
+	auto bananaModel = std::make_shared<Model>(const_cast<char*>("../../../../res/banana.obj"), false);
+	bananaModel->AddTexture("../../../../res/textures/Banana.png", "diffuseMap");
+	bananaModel->SetShader(diffuseShader);
 
 	outlinemodel->SetShader(shaderTree);
 	outlinemodel->SetOutlineShader(outlineShader);
@@ -275,7 +280,7 @@ int main() {
 	auto box2model = std::make_shared<Model>(const_cast<char*>("../../../../res/tree.obj"), false);
 
 	Mesh* meshSphere = new Mesh();
-	meshSphere->createDome(20, 20, 50);
+	meshSphere->createDome(10, 10, 50);
 	auto skydomeModel = std::make_shared<Model>(meshSphere);
 
 	//Fruit
@@ -284,14 +289,15 @@ int main() {
 	auto FruitModel = std::make_shared<Model>(meshFruit);
 
 	//drzewa
-	auto treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"), false);
+	auto treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree2.obj"), false);
     treelog->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	auto treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"), false);
+	auto treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree1.obj"), false);
     treetrunk->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	Shader* phongShader = new Shader("../../../../src/shaders/phong.vert", "../../../../src/shaders/phong.frag");
 	Shader* phongInstancedShader = new Shader("../../../../src/shaders/phonginstanced.vert", "../../../../src/shaders/phong.frag");
-	auto treebranch1= std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_branch_1.obj"), false);
+	auto treebranch1= std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree3.obj"), false);
     treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	//treebranch1->AddTexture("../../../../res/textures/Tree3_normal.png", "normalMap");
 	treebranch1->SetShader(phongInstancedShader);
 	auto planeSectormodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"), false);
 	planeSectormodel->AddTexture("../../../../res/drewno.png", "diffuseMap");
@@ -748,9 +754,9 @@ int main() {
 							branch->addModelComponent(treebranch1);
 							branch->localTransform->localPosition.x = planeSector->localTransform->localPosition.x + treeX;
 							branch->localTransform->localPosition.y = float(losujLiczbe((m * 13 / branchCount)+5, ((m + 1) * 13 / branchCount)+5));
-							branch->localTransform->localScale.x = 12 / branch->localTransform->localPosition.y;
-							branch->localTransform->localScale.y = 12 / branch->localTransform->localPosition.y;
-							branch->localTransform->localScale.z = 12 / branch->localTransform->localPosition.y;
+							branch->localTransform->localScale.x = 6 / branch->localTransform->localPosition.y;
+							branch->localTransform->localScale.y = 6 / branch->localTransform->localPosition.y;
+							branch->localTransform->localScale.z = 6 / branch->localTransform->localPosition.y;
 							branch->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
 							branch->localTransform->localRotation.y = float(losujLiczbe(m * 360 / branchCount, (m + 1) * 360 / branchCount));
 							//branch->localTransform->localRotation.x =losujLiczbe(10,45) ;
@@ -851,8 +857,8 @@ int main() {
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Up Wall.dae"), "climbing up", 1.3f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Down Wall.dae"), "climbing down", 1.3f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jump Attack.dae"), "tree attack", 0.7f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Crouch To Standing.dae"), "leave banana up", 1.2f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Standing To Crouch.dae"), "leave banana down", 1.2f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Crouch To Standing.dae"), "leave banana up", 1.4f);
+			anim->addAnimation(const_cast<char*>("../../../../res/animations/Standing To Crouch.dae"), "leave banana down", 1.4f);
 
 			anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
 			pbd->objects.push_back(anim);
@@ -879,10 +885,18 @@ int main() {
 			sm->getActiveScene()->addObject(skydome);
 			sm->getActiveScene()->findByName("skydome")->timeSetting(time / 7, glm::vec2(10, 10));
 
-			GameObject* outlineObj = new GameObject("outline");
+			GameObject* bananaObj = new GameObject("banana");
+
+			bananaObj->addModelComponent(bananaModel);
+			bananaObj->getTransform()->localPosition = glm::vec3(0.f, 1.f, -1.f);
+			bananaObj->getTransform()->localScale = glm::vec3(0.1f);
+			sm->getActiveScene()->addObject(bananaObj);
+
+
+			/*GameObject* outlineObj = new GameObject("outline");
 			auto outlinemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/Lumberjack.obj"), false);
 
-			/*outlinemodel->SetShader(shaderTree);
+			outlinemodel->SetShader(shaderTree);
 			outlinemodel->SetOutlineShader(outlineShader);
 			outlinemodel->SetFillingShader(fillingShader);
 

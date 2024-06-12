@@ -408,6 +408,7 @@ public:
                 player->getAnimateBody()->setActiveAnimation("leave banana down", true);
             }
             if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana down") {
+                sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
                 player->getAnimateBody()->setActiveAnimation("leave banana up", true);
             }
             else if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana up") {

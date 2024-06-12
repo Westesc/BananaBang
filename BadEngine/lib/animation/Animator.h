@@ -89,13 +89,13 @@ public:
     void PlayAnimation(Animation* pAnimation, bool once)
     {
         m_PreviousAnimationArms = m_CurrentAnimationArms;
-        m_PreviousAnimationLeg = m_CurrentAnimationLeg;
+        //m_PreviousAnimationLeg = m_CurrentAnimationLeg;
         m_CurrentAnimationArms = pAnimation;
-        m_CurrentAnimationLeg = nullptr;
+        //m_CurrentAnimationLeg = nullptr;
         m_PrevTimeArm = m_CurrentTimeArm;
-        m_PrevTimeLeg = m_CurrentTimeLeg;
+        //m_PrevTimeLeg = m_CurrentTimeLeg;
         m_CurrentTimeArm = 0.0f;
-        m_CurrentTimeLeg = 0.0f;
+        //m_CurrentTimeLeg = 0.0f;
         m_BlendFactor = 0.0f;
         m_Blending = true;
         m_Playing = true;

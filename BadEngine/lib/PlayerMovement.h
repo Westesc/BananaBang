@@ -22,6 +22,13 @@ enum class PlayerState {
 
 class PlayerMovement {
 private:
+
+    enum class PlayerStateAttack {
+        none, 
+        walking,
+        sprint
+    };
+
     //references
     SceneManager* sm;
     Input* input;
@@ -69,6 +76,7 @@ private:
     float currentDashTime = 0.f; 
 
     PlayerState state = PlayerState::walking;
+    PlayerStateAttack attackState = PlayerStateAttack::none;
 
     bool wasSpacePressed = false;
 
@@ -224,11 +232,14 @@ private:
             if (state == PlayerState::attack1) {
                 if (input->checkKey(GLFW_KEY_W) || input->checkKey(GLFW_KEY_A) || input->checkKey(GLFW_KEY_S) || input->checkKey(GLFW_KEY_D))
                 {
-                    isMove = true;
+                    attackState = PlayerStateAttack::walking;
+                    if (input->checkKey(GLFW_KEY_LEFT_SHIFT)) {
+                            attackState = PlayerStateAttack::sprint;
+                    }
                 }
-            }
-            else {
-                isMove = false;
+                else if (attackState != PlayerStateAttack::none) {
+                    attackState = PlayerStateAttack::none;
+                }
             }
             if (state == PlayerState::climbing) {
                 player->getTransform()->getLocalPosition().y;
@@ -281,7 +292,9 @@ private:
                     initialPosition = player->getTransform()->getLocalPosition();
                 }
                 else if(input->checkKey(GLFW_KEY_LEFT_SHIFT)) {
-                    state = PlayerState::sprint;
+                    if (state != PlayerState::attack1) {
+                        state = PlayerState::sprint;
+                    }
                 }
                 else if (state == PlayerState::sprint) {
                     state = PlayerState::walking;
@@ -314,7 +327,7 @@ private:
         }
         else if (state != PlayerState::attack1)
         {
-            player->getAnimateBody()->removeLegAnimation("walking");
+            player->getAnimateBody()->removeLegAnimation();
         }
         wasSpacePressed = input->checkKey(GLFW_KEY_SPACE);
         if (state != PlayerState::attack1) {
@@ -348,11 +361,14 @@ public:
             MovePlayer(deltaTime);
         }
         else if (state == PlayerState::attack1) {
-            if (isMove) {
+            if (attackState == PlayerStateAttack::walking) {
                 player->getAnimateBody()->addLegAnimation("walking");
             }
+            else if (attackState == PlayerStateAttack::sprint){
+                player->getAnimateBody()->addLegAnimation("sprint");
+            }
             else {
-                player->getAnimateBody()->removeLegAnimation("walking");
+                player->getAnimateBody()->removeLegAnimation();
             }
             if (animCount == 0 && queueAnim.size() != 0 
                 && (player->getAnimateBody()->getActiveAnimation() != "attack3" || player->getAnimateBody()->isPlay() == false)) {

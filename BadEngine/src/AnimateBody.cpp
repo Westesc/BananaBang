@@ -90,10 +90,10 @@ void AnimateBody::addLegAnimation(std::string name) {
     }
 }
 
-void AnimateBody::removeLegAnimation(std::string name) {
-    if (activeLegAnimation == name) {
+void AnimateBody::removeLegAnimation() {
+    if (activeLegAnimation != " ") {
         activeLegAnimation = " ";
-        Animacje* anim = findAnimationByName(name);
+        //Animacje* anim = findAnimationByName(name);
         animator->removeLegAnimation();
         //animator->changeAnimation();
     }

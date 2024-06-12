@@ -35,7 +35,7 @@ class AnimateBody : Component {
 				return &anim;
 			}
 		}
-		return nullptr; // Zwraca nullptr, jeœli nie znaleziono animacji
+		return nullptr; 
 	}
 
 public:
@@ -50,7 +50,7 @@ public:
 	glm::vec3 getPosition();
 	std::string getActiveAnimation();
 	void addLegAnimation(std::string name);
-	void removeLegAnimation(std::string name);
+	void removeLegAnimation();
 	void setActiveAnimationWithY(std::string name, bool playOnce = false);
 	void setActiveAnimation(std::string name, std::string name2, bool playOnce);
 	void changeAnimationSpeed(const std::string& nameAnim, float newSpeed);

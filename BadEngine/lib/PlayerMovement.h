@@ -132,7 +132,7 @@ private:
         if (angle > 2 * glm::pi<float>()) {
             angle -= 2 * glm::pi<float>();
         }
-        std::cout << angle << std::endl;
+        //std::cout << angle << std::endl;
         player->getTransform()->localRotation.y = -angle * (180.0 / M_PI) - 90.f;
 
         float x = treePosition.x + radius * std::cos(angle);
@@ -207,6 +207,13 @@ private:
             rb->upwardsSpeed = 0.f;
             player->getAnimateBody()->setActiveAnimationWithY("jumping down", true);
         }
+    }
+
+    void rotatePlayerTowards(glm::vec3 targetPosition) {
+        glm::vec3 playerPosition = player->getTransform()->getLocalPosition();
+        glm::vec3 direction = glm::normalize(targetPosition - playerPosition);
+        float angle = atan2(direction.x, direction.z);
+        player->getTransform()->localRotation.y = glm::degrees(angle);
     }
 
     void checkState() {
@@ -401,19 +408,27 @@ public:
             player->velocity.y = climbingY / deltaTime;
         }
         else if (state == PlayerState::tree_attack) {
+            //Jakiœ warunek co bêdzie sprawdza³ czy œcie¿ka jest git
+            if (closestEnemy != nullptr) {
+                rotatePlayerTowards(closestEnemy->getTransform()->getLocalPosition());
 
-            player->getAnimateBody()->setActiveAnimation("tree attack");
+                player->getAnimateBody()->setActiveAnimation("tree attack");
 
-            glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
-            glm::vec3 direction = glm::normalize(closestEnemy->getTransform()->getLocalPosition() - currentPosition);
+                glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
+                glm::vec3 direction = glm::normalize(closestEnemy->getTransform()->getLocalPosition() - currentPosition);
 
-            float speed = 1.5f;
-            glm::vec3 velocity = direction * speed;
+                float speed = 1.5f;
+                direction.y -= 0.05;
+                glm::vec3 velocity = direction * speed;
 
-            player->velocity = velocity / deltaTime;
+                player->velocity = velocity / deltaTime;
 
-            if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
-                state = PlayerState::walking;
+                if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
+                    state = PlayerState::walking;
+                }
+            }
+            else {
+                state == PlayerState::climbing;
             }
         }
         else if (state == PlayerState::jump_up) {

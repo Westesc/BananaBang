@@ -289,13 +289,13 @@ int main() {
 	auto FruitModel = std::make_shared<Model>(meshFruit);
 
 	//drzewa
-	auto treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree2.obj"), false);
+	auto treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"), false);
     treelog->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	auto treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree1.obj"), false);
+	auto treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"), false);
     treetrunk->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	Shader* phongShader = new Shader("../../../../src/shaders/phong.vert", "../../../../src/shaders/phong.frag");
 	Shader* phongInstancedShader = new Shader("../../../../src/shaders/phonginstanced.vert", "../../../../src/shaders/phong.frag");
-	auto treebranch1= std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree3.obj"), false);
+	auto treebranch1= std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_branch_1.obj"), false);
     treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	//treebranch1->AddTexture("../../../../res/textures/Tree3_normal.png", "normalMap");
 	treebranch1->SetShader(phongInstancedShader);

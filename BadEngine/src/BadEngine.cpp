@@ -199,7 +199,7 @@ int main() {
 	Start();
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 	AudioManager* audioManager = new AudioManager();
-	audioManager->loadSound("test", "../../../../res/media/test.wav");
+	audioManager->loadSound("test", "../../../../res/media/jungle_music.wav");
 	audioManager->playSound("test");
 	GameObject* logo = new GameObject("logo");
 	UI* logoui = new UI(plane);

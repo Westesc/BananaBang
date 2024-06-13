@@ -40,6 +40,7 @@
 #include "../lib/Globals.h"
 #include "../lib/EnemyStateManager.h"
 #include "../lib/SectorSelector.h"
+#include "../lib/AudioManager.h"
 
 bool test = false;
 bool frustumTest = false;
@@ -197,7 +198,9 @@ void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const 
 int main() {
 	Start();
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
-
+	AudioManager* audioManager = new AudioManager();
+	audioManager->loadSound("test", "../../../../res/media/test.wav");
+	audioManager->playSound("test");
 	GameObject* logo = new GameObject("logo");
 	UI* logoui = new UI(plane);
 	logoui->setTexture("../../../../res/logo.png");
@@ -213,35 +216,6 @@ int main() {
 	
 	glfwSwapBuffers(window);
 	glfwPollEvents();
-
-	//sound test
-	//std::cout << "starting...\n";
-
-	//ALCdevice* p_ALCDevice = alcOpenDevice(nullptr); // nullptr = get default device
-	//if (!p_ALCDevice)
-	//	throw("failed to get sound device");
-
-	//ALCcontext* p_ALCContext = alcCreateContext(p_ALCDevice, nullptr);  // create context
-	//if (!p_ALCContext)
-	//	throw("Failed to set sound context");
-
-	//if (!alcMakeContextCurrent(p_ALCContext))   // make context current
-	//	throw("failed to make context current");
-
-	//const ALCchar* name = nullptr;
-	//if (alcIsExtensionPresent(p_ALCDevice, "ALC_ENUMERATE_ALL_EXT"))
-	//	name = alcGetString(p_ALCDevice, ALC_ALL_DEVICES_SPECIFIER);
-	//if (!name || alcGetError(p_ALCDevice) != AL_NO_ERROR)
-	//	name = alcGetString(p_ALCDevice, ALC_DEVICE_SPECIFIER);
-	//printf("Opened \"%s\"\n", name);
-
-	//uint32_t /*ALuint*/ sound1 = SoundBuffer::get()->addSoundEffect("../../../../res/media/spell.ogg");
-	//uint32_t /*ALuint*/ sound2 = SoundBuffer::get()->addSoundEffect("../../../../res/media/magicfail.ogg");
-
-	//SoundSource mySpeaker;
-
-	//mySpeaker.Play(sound1);
-	//mySpeaker.Play(sound2);
 
 	auto animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Walking.dae"), true); 
 
@@ -1084,6 +1058,7 @@ int main() {
 			test = false;
 		}
 	}
+	delete audioManager;
 	cleanupImGui();
 	glfwTerminate();
 	return 0;

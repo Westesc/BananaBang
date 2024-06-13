@@ -612,7 +612,12 @@ int main() {
 
 		if (sm->getActiveScene()->findByName("player")) {
 			if (sm->getActiveScene()->findByName("HPcount")) {
-				sm->getActiveScene()->findByName("HPcount")->uiComponent->setText("HP: " + std::to_string(sm->getActiveScene()->findByName("player")->hp));
+				if (sm->getActiveScene()->findByName("player")->hp > 0) {
+					sm->getActiveScene()->findByName("HPcount")->uiComponent->setTexture("../../../../res/serce" + std::to_string(sm->getActiveScene()->findByName("player")->hp) + ".png");
+				}
+				else {
+					sm->getActiveScene()->findByName("HPcount")->uiComponent->setTexture("../../../../res/serce0.png");
+				}
 			}
 			cm.addObject(sm->getActiveScene()->findByName("player"));
 		}
@@ -819,16 +824,24 @@ int main() {
 			}
 			
 			buttonPressed = false;
-			GameObject* HPcount = new GameObject("HPcount");
+			GameObject* Button = new GameObject("Button");
 			UI* ui = new UI(button);
 			Shader* UIShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
 			ui->addShader(UIShader);
 			ui->setTexture("../../../../res/chmury.png");
-			HPcount->localTransform->localPosition = glm::vec3(25.f);
+			Button->localTransform->localPosition = glm::vec3(25.f);
 			ui->input = input;
 			//ui->onClick = std::bind(&typKlasy::nazwafunkcji,&stworzonaKalsa);
 			ui->setText("Ala ma kota");
-			HPcount->uiComponent = ui;
+			Button->uiComponent = ui;
+
+			GameObject* HPcount = new GameObject("HPcount");
+			UI* ui2 = new UI(plane);
+			ui2->addShader(UIShader);
+			ui2->setTexture("../../../../res/serce5.png");
+			HPcount->localTransform->localPosition = glm::vec3(0, Window::windowHeight - 100.0f, 0.f);
+			ui->input = input;
+			HPcount->uiComponent = ui2;
 
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 				for (auto go : sm->getActiveScene()->gameObjects.at(i)->children)
@@ -909,6 +922,7 @@ int main() {
 			sm->getActiveScene()->findByName("outline")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
 			sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);*/
 
+			sm->getActiveScene()->addObject(Button);
 			sm->getActiveScene()->addObject(HPcount);
 
 		}

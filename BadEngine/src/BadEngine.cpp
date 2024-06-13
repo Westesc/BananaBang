@@ -380,6 +380,31 @@ int main() {
 	std::vector<Transform*> transformsBranch;
 	SectorSelector sectorSelector = SectorSelector(&sectorsPom);
 	bool regenInstances = false;
+
+	GameObject* tutorial1 = new GameObject("tutorial1");
+	UI* tutorialui1 = new UI(writing);
+	tutorialui1->addShader(LogoShader);
+	tutorial1->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight - 100.f, 0.0f);
+	tutorialui1->input = input;
+	tutorialui1->setText("WASD - ruch");
+	tutorial1->uiComponent = tutorialui1;
+
+	GameObject* tutorial2 = new GameObject("tutorial2");
+	UI* tutorialui2 = new UI(writing);
+	tutorialui2->addShader(LogoShader);
+	tutorial2->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight - 150.f, 0.0f);
+	tutorialui2->input = input;
+	tutorialui2->setText("spacja - skok");
+	tutorial2->uiComponent = tutorialui2;
+
+	GameObject* tutorial3 = new GameObject("tutorial3");
+	UI* tutorialui3 = new UI(writing);
+	tutorialui3->addShader(LogoShader);
+	tutorial3->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight - 200.f, 0.0f);
+	tutorialui3->input = input;
+	tutorialui3->setText("lewy przycisk myszy - atak");
+	tutorial3->uiComponent = tutorialui3;
+
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -818,6 +843,10 @@ int main() {
 			}
 			
 			buttonPressed = false;
+			gameMode.setMode(GameMode::Game);
+			delete tutorial1;
+			delete tutorial2;
+			delete tutorial3;
 			GameObject* Button = new GameObject("Button");
 			UI* ui = new UI(button);
 			Shader* UIShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
@@ -1054,6 +1083,15 @@ int main() {
 			}
 		}
 		renderImGui();
+		if (tutorial1) {
+			tutorial1->Draw(V, P);
+		}
+		if (tutorial2) {
+			tutorial2->Draw(V, P);
+		}
+		if (tutorial3) {
+			tutorial3->Draw(V, P);
+		}
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		if (test) {

@@ -198,6 +198,22 @@ int main() {
 	Start();
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
+	GameObject* logo = new GameObject("logo");
+	UI* logoui = new UI(plane);
+	logoui->setTexture("../../../../res/logo.png");
+	Shader* LogoShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
+	logoui->addShader(LogoShader);
+	logoui->input = input;
+	logo->uiComponent = logoui;
+	logo->localTransform->localPosition = glm::vec3(Window::windowWidth *0.25f, 0.0f / 2, 0.f);
+	logo->localTransform->localScale = glm::vec3(10.f, 10.f, 1.f);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	logo->Draw(camera->getViewMatrix(), glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 5000.f));
+	
+	glfwSwapBuffers(window);
+	glfwPollEvents();
+
 	//sound test
 	//std::cout << "starting...\n";
 

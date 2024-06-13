@@ -224,6 +224,7 @@ void UI::Draw(Transform* transform) {
 
 void UI::setTexture(std::string path)
 {
+	glDeleteTextures(1, &planeTexture);
 
 	unsigned int textureID;
 	glGenTextures(1, &textureID);

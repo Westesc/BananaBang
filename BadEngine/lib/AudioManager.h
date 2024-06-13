@@ -52,7 +52,7 @@ public:
     ~AudioManager();
 
     void loadSound(std::string name, std::string path);
-    void playSound(std::string name);
+    void playSound(std::string name, bool loop = true);
 
 };
 

@@ -108,9 +108,10 @@ bool AudioManager::loadWAV(std::string& path, ALuint& buffer) {
     return true;
 }
 
-void AudioManager::playSound(std::string name) {
+void AudioManager::playSound(std::string name,bool loop) {
     auto it = sounds.find(name);
     if (it != sounds.end()) {
+        alSourcei(it->second.source, AL_LOOPING, loop);
         alSourcePlay(it->second.source);
     }
     else {

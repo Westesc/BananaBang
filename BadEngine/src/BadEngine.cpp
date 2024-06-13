@@ -198,9 +198,13 @@ void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const 
 int main() {
 	Start();
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
+
 	AudioManager* audioManager = new AudioManager();
 	audioManager->loadSound("test", "../../../../res/media/jungle_music.wav");
-	audioManager->playSound("test");
+	audioManager->playSound("test",true);
+
+
 	GameObject* logo = new GameObject("logo");
 	UI* logoui = new UI(plane);
 	logoui->setTexture("../../../../res/logo.png");

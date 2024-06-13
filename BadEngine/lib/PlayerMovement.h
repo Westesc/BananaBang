@@ -444,7 +444,7 @@ public:
                 }
             }
             else {
-                state == PlayerState::climbing;
+                state = PlayerState::climbing;
             }
         }
         else if (state == PlayerState::jump_up) {

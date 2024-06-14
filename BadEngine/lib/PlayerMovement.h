@@ -124,7 +124,7 @@ private:
         float distance = speed * tm->getFramePerSeconds();
         float dx = distance * sin(glm::radians(player->getTransform()->getLocalRotation().y));
         float dz = distance * cos(glm::radians(player->getTransform()->getLocalRotation().y));
-        std::cout << "dx: " << dx / deltaTime << "dz: " << dz / deltaTime << std::endl;
+        //std::cout << "dx: " << dx / deltaTime << "dz: " << dz / deltaTime << std::endl;
         player->velocity.x = dx / deltaTime;
         player->velocity.z = dz / deltaTime;
     }
@@ -330,7 +330,7 @@ private:
             player->getAnimateBody()->removeLegAnimation();
         }
         wasSpacePressed = input->checkKey(GLFW_KEY_SPACE);
-        if (state != PlayerState::attack1) {
+        if (!(state == PlayerState::attack1 || state == PlayerState::tree_attack)) {
             player->children.at(0)->active = false;
         }
     }
@@ -438,9 +438,12 @@ public:
                 glm::vec3 velocity = direction * speed;
 
                 player->velocity = velocity / deltaTime;
+                player->children.at(0)->active = true;
+                player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
 
                 if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
                     state = PlayerState::walking;
+                    player->children.at(0)->active = false;
                 }
             }
             else {

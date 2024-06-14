@@ -84,7 +84,7 @@ void Start() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	window = glfwCreateWindow(Window::windowWidth, Window::windowHeight, "Monke", nullptr, nullptr);
+	window = glfwCreateWindow(Window::windowWidth, Window::windowHeight, "Primal Guardian", nullptr, nullptr);
 	if (!window) exit(1);
 
 	glfwMakeContextCurrent(window);
@@ -379,9 +379,11 @@ int main() {
 	std::vector<Transform*> transformsLog;
 	std::vector<Transform*> transformsBranch;
 	std::vector<Transform*> transformsEnemy;
+	std::vector<Transform*> transformsEnemyWeapon;
 	SectorSelector sectorSelector = SectorSelector(&sectorsPom);
 	bool regenInstances = false;
 	bool regenInstancesEnemy = false;
+	bool regenInstancesEnemyWeapon = false;
 
 	GameObject* tutorial1 = new GameObject("tutorial1");
 	UI* tutorialui1 = new UI(writing);
@@ -459,7 +461,7 @@ int main() {
 			else if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_4))
 			{
 				gameMode.setMode(GameMode::Menu);
-			} 
+			}
 		}
 
 		if (gameMode.getMode() == GameMode::Game) {
@@ -475,7 +477,7 @@ int main() {
 
 		if (sm->getActiveScene()->findByName("player")) {
 			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-				sm->getActiveScene()->findByName("player")->velocity+=glm::vec3(0.0f, 0.0f, boxSpeed);
+				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, 0.0f, boxSpeed);
 			}
 			if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
 				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, 0.0f, -boxSpeed);
@@ -500,10 +502,10 @@ int main() {
 				playerAtention = true;
 			}
 		}
-		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+		if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
 			frustumTest = !frustumTest;
 		}
-	
+
 		if (staticUpdateTime > 1.5f) {
 			staticUpdateTime = 0.f;
 			playerAtention = false;
@@ -562,12 +564,14 @@ int main() {
 				}
 			}
 			for (int i = 0; i < sectorsPom * sectorsPom; i++) {
-				if (sm->getActiveScene()->findByName("sector" + std::to_string(i + 1))->children.size() > 0) {
-					GameObject* sector = sm->getActiveScene()->findByName("sector" + std::to_string(i + 1));
-					sector->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
-					sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
-					sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
-					break;
+				if (sm->getActiveScene()->findByName("sector" + std::to_string(i + 1))) {
+					if (sm->getActiveScene()->findByName("sector" + std::to_string(i + 1))->children.size() > 0) {
+						GameObject* sector = sm->getActiveScene()->findByName("sector" + std::to_string(i + 1));
+						sector->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
+						sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
+						sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
+						break;
+					}
 				}
 			}
 			regenInstances = false;
@@ -652,6 +656,13 @@ int main() {
 			}
 			regenInstancesEnemy = false;
 		}
+		transformsEnemyWeapon.clear();
+		for (auto enemy : enemyManager->enemies) {
+			if (enemy->children.at(0)->active) {
+				transformsEnemyWeapon.push_back(enemy->children.at(0)->getTransform());
+			}
+		}
+
 		pbd->simulateB4Collisions(deltaTime);
 		cm.simulate(deltaTime);
 		pbd->simulateAfterCollisions(deltaTime);
@@ -699,6 +710,13 @@ int main() {
 			enemyShader->setMat4("projection", P);
 			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
 			enemyManager->enemies.at(0)->getModelComponent().get()->drawInstances();
+			enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->GetShader()->use();
+			enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->GetShader()->setMat4("view", V);
+			enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->GetShader()->setMat4("projection", P);
+			if (transformsEnemyWeapon.size() > 0) {
+				enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemyWeapon);
+				enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
+			}
 		}
 
 
@@ -824,6 +842,7 @@ int main() {
 			
 				//sm->saveScene("first");
 			buttonPressed = false;
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 				for (auto go : sm->getActiveScene()->gameObjects.at(i)->children)
 				{
@@ -1070,10 +1089,13 @@ int main() {
 				enemyWeapon->addColider(1);
 				enemyWeapon->boundingBox->isTriggerOnly = true;
 				enemyWeapon->colliders.push_back(enemyWeapon->boundingBox);
+				enemyWeapon->isInstanced = true;
 				enemyWeapon = nullptr;
 				transformsEnemy.clear();
+				transformsEnemyWeapon.clear();
 				for (auto enemy : enemyManager->enemies) {
 					transformsEnemy.push_back(enemy->getTransform());
+					transformsEnemyWeapon.push_back(enemy->children.at(0)->getTransform());
 				}
 				enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
 				enemy->isInstanced = true;
@@ -1119,6 +1141,12 @@ void renderImGui() {
 		ImGui::Text(go->name.c_str());
 		ImGui::Text("x: %.2f, y: %.2f, z: %.2f",go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);
 		
+	}
+	if (sm->getActiveScene()->findByName("enemy0")) {
+		GameObject* enemy = sm->getActiveScene()->findByName("enemy0");
+		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", enemy->localTransform->localPosition.x, enemy->localTransform->localPosition.y, enemy->localTransform->localPosition.z);
+		GameObject* weapon = enemy->children.at(0);
+		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", weapon->localTransform->localPosition.x, weapon->localTransform->localPosition.y, weapon->localTransform->localPosition.z);
 	}
 	ImGui::SliderFloat("light x", &lightPos.x, -100, 100); 
 	ImGui::SliderFloat("light y", &lightPos.y, -100, 100);

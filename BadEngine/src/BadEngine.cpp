@@ -41,6 +41,7 @@
 #include "../lib/EnemyStateManager.h"
 #include "../lib/SectorSelector.h"
 #include "../lib/AudioManager.h"
+#include "../lib/ResourceLoader.h"
 
 bool test = false;
 bool frustumTest = false;
@@ -221,12 +222,12 @@ int main() {
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 
-	auto animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Walking.dae"), true); 
+	ResourceLoader RL;
+	RL.load();
 
-	Shader* shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
 	GameObject* anim = new GameObject("player");
-	animodel->SetShader(shaderAnimation);
-	anim->addModelComponent(animodel);
+	RL.animodel ->SetShader(RL.shaderAnimation);
+	anim->addModelComponent(RL.animodel);
 	anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
 	anim->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
 	anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
@@ -234,44 +235,25 @@ int main() {
 	anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
 	anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
 	sm->getActiveScene()->addObject(anim);
-
-	Shader* fillingShader = new Shader("../../../../src/shaders/vs_filling.vert", "../../../../src/shaders/fs_filling.frag");
-	Shader* outlineShader = new Shader("../../../../src/shaders/vs_outline.vert", "../../../../src/shaders/fs_outline.frag");
-	Shader* shaders = new Shader("../../../../src/shaders/vs.vert", "../../../../src/shaders/fs.frag");
-	Shader* skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
-	Shader* mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");
-	Shader* shaderTree = new Shader("../../../../src/shaders/vsTree.vert", "../../../../src/shaders/fsTree.frag");
-	Shader* enemyShader = new Shader("../../../../src/shaders/enemy.vert", "../../../../src/shaders/enemy.frag");
-	Shader* diffuseShader = new Shader("../../../../src/shaders/diffuse.vert", "../../../../src/shaders/diffuse.frag");
-	auto enemyModel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"), false);
-	enemyModel->SetShader(enemyShader);
+	RL.enemyModel->SetShader(RL.enemyShader);
 	
-
 	GameObject* outlineObj = new GameObject("outline");
-	auto outlinemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/Lumberjack.obj"), false);
 
-	auto bananaModel = std::make_shared<Model>(const_cast<char*>("../../../../res/banana.obj"), false);
-	bananaModel->AddTexture("../../../../res/textures/Banana.png", "diffuseMap");
-	bananaModel->SetShader(diffuseShader);
+	RL.bananaModel->AddTexture("../../../../res/textures/Banana.png", "diffuseMap");
+	RL.bananaModel->SetShader(RL.diffuseShader);
 
-	outlinemodel->SetShader(shaderTree);
-	outlinemodel->SetOutlineShader(outlineShader);
-	outlinemodel->SetFillingShader(fillingShader);
+	RL.outlinemodel->SetShader(RL.shaderTree);
+	RL.outlinemodel->SetOutlineShader(RL.outlineShader);
+	RL.outlinemodel->SetFillingShader(RL.fillingShader);
 
-	outlineObj->addModelComponent(outlinemodel);
+	outlineObj->addModelComponent(RL.outlinemodel);
 	sm->getActiveScene()->addObject(outlineObj);
 
 	sm->getActiveScene()->findByName("outline")->getTransform()->localPosition = glm::vec3(0.f, 0.f, 0.f);
 	sm->getActiveScene()->findByName("outline")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
 	sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);
 
-	//depth shader
-	Shader* depthShader = new Shader("../../../../src/shaders/depthShader.vert", "../../../../src/shaders/depthShader.frag");
-	Shader* depthAnimationShader = new Shader("../../../../src/shaders/depthAnimationShader.vert", "../../../../src/shaders/depthAnimationShader.frag");
-
 	GameObject* skydome = new GameObject("skydome");
-
-	auto box2model = std::make_shared<Model>(const_cast<char*>("../../../../res/tree.obj"), false);
 
 	Mesh* meshSphere = new Mesh();
 	meshSphere->createDome(10, 10, 50);
@@ -283,28 +265,23 @@ int main() {
 	auto FruitModel = std::make_shared<Model>(meshFruit);
 
 	//drzewa
-	auto treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"), false);
-    treelog->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	auto treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"), false);
-    treetrunk->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	Shader* phongShader = new Shader("../../../../src/shaders/phong.vert", "../../../../src/shaders/phong.frag");
-	Shader* phongInstancedShader = new Shader("../../../../src/shaders/phonginstanced.vert", "../../../../src/shaders/phong.frag");
-	auto treebranch1= std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_branch_1.obj"), false);
-    treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+    RL.treelog->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+    RL.treetrunk->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+    RL.treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	//treebranch1->AddTexture("../../../../res/textures/Tree3_normal.png", "normalMap");
-	treebranch1->SetShader(phongInstancedShader);
-	auto planeSectormodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"), false);
-	planeSectormodel->AddTexture("../../../../res/drewno.png", "diffuseMap");
-	treetrunk->SetShader(phongInstancedShader);
-	treelog->SetShader(phongInstancedShader);
-	planeSectormodel->SetShader(phongShader);
-	treetrunk.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	treelog.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	phongInstancedShader->use();
-	phongInstancedShader->setVec3("lightPos", lightPos);
+	RL.treebranch1->SetShader(RL.phongInstancedShader);
+	RL.planeSectormodel->AddTexture("../../../../res/drewno.png", "diffuseMap");
+	RL.treetrunk->SetShader(RL.phongInstancedShader);
+	RL.treelog->SetShader(RL.phongInstancedShader);
+	RL.planeSectormodel->SetShader(RL.phongShader);
+	RL.treetrunk.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	RL.treelog.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	RL.phongInstancedShader->use();
+	RL.phongInstancedShader->setVec3("lightPos", lightPos);
 
-	box2model->SetShader(shaderTree);
-	skydomeModel->SetShader(skydomeShader);
+	RL.box2model->SetShader(RL.shaderTree);
+	skydomeModel->SetShader(RL.skydomeShader);
+	RL.enemyWeaponmodel.get()->SetShader(RL.phongInstancedShader);
 
 	skydome->addModelComponent(skydomeModel);
 
@@ -327,8 +304,8 @@ int main() {
 	
 	//glm::vec3 lightPos(0.5f, 20.0f, 0.3f);
 	glm::vec3* lightColor = new glm::vec3(1.f, 1.0f, 1.f);
-	phongInstancedShader->use();
-	phongInstancedShader->setVec3("lightColor", *lightColor);
+	RL.phongInstancedShader->use();
+	RL.phongInstancedShader->setVec3("lightColor", *lightColor);
 
 	//Depth map to generate shadows
 	const unsigned int SHADOW_WIDTH = 4096, SHADOW_HEIGHT = 4096;
@@ -589,22 +566,22 @@ int main() {
 		lightSpaceMatrix = lightProjection * lightView;
 		// render scene from light's point of view
 		if (shadowsFrameCounter % 6 == 0) {
-			depthShader->use();
-			depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
-			depthAnimationShader->use();
-			depthAnimationShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+			RL.depthShader->use();
+			RL.depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+			RL.depthAnimationShader->use();
+			RL.depthAnimationShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
 
 			glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 			glClear(GL_DEPTH_BUFFER_BIT);
-			sm->getActiveScene()->Draw(depthShader, depthAnimationShader);
+			sm->getActiveScene()->Draw(RL.depthShader, RL.depthAnimationShader);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, Window::windowWidth, Window::windowHeight);
-			planeSectormodel->AddTexture(depthMap, "depthMap");
-			treetrunk.get()->AddTexture(depthMap, "depthMap");
-			treelog.get()->AddTexture(depthMap, "depthMap");
-			treebranch1.get()->AddTexture(depthMap, "depthMap");
+			RL.planeSectormodel->AddTexture(depthMap, "depthMap");
+			RL.treetrunk.get()->AddTexture(depthMap, "depthMap");
+			RL.treelog.get()->AddTexture(depthMap, "depthMap");
+			RL.treebranch1.get()->AddTexture(depthMap, "depthMap");
 
 			sm->getActiveScene()->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
 			sm->getActiveScene()->shadowSetting(lightSpaceMatrix);
@@ -705,9 +682,9 @@ int main() {
 			}
 		}
 		if (enemyManager->enemies.size() > 0) {
-			enemyShader->use();
-			enemyShader->setMat4("view", V);
-			enemyShader->setMat4("projection", P);
+			RL.enemyShader->use();
+			RL.enemyShader->setMat4("view", V);
+			RL.enemyShader->setMat4("projection", P);
 			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
 			enemyManager->enemies.at(0)->getModelComponent().get()->drawInstances();
 			enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->GetShader()->use();
@@ -730,9 +707,9 @@ int main() {
 			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
 		}*/
 
-		shaderTree->use();
-		shaderTree->setMat4("view", V);
-		shaderTree->setMat4("projection", P);
+		RL.shaderTree->use();
+		RL.shaderTree->setMat4("view", V);
+		RL.shaderTree->setMat4("projection", P);
 
 		while (input->IsMove()) {
 			glm::vec2 dpos = input->getPosMouse();
@@ -758,7 +735,7 @@ int main() {
 				for (int j = 0; j < sectorsPom; j++) {
 					GameObject* planeSector = new GameObject("sector"+std::to_string(sectorcounter));
 					planeSector->localTransform->localScale = glm::vec3(2.f, 2.f, 2.f);
-					planeSector->addModelComponent(planeSectormodel);
+					planeSector->addModelComponent(RL.planeSectormodel);
 					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, 0.f, j * 20*planeSector->localTransform->localScale.z);
 					int treeCount = losujLiczbe(a, b);
 					for (int k = 0; k < treeCount; k++) {
@@ -772,13 +749,13 @@ int main() {
 							}*/
 						Tree* tree = new Tree("tree_"+std::to_string(k), 100.0f);
 						tree->isInstanced = true;
-						tree->addModelComponent(treetrunk);
+						tree->addModelComponent(RL.treetrunk);
 						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
 						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
 						tree->addColider(1);
 						GameObject* log = new GameObject("log"+std::to_string(k));
 						log->isInstanced = true;
-						log->addModelComponent(treelog);
+						log->addModelComponent(RL.treelog);
 						log->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX;
 						log->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
 						log->localTransform->localPosition.y = planeSector->localTransform->localPosition.y+ 1.2;
@@ -790,7 +767,7 @@ int main() {
 						for (int m = 0; m < branchCount; m++) {
 							GameObject* branch = new GameObject("branch" + std::to_string(m));
 							branch->isInstanced = true;
-							branch->addModelComponent(treebranch1);
+							branch->addModelComponent(RL.treebranch1);
 							branch->localTransform->localPosition.x = planeSector->localTransform->localPosition.x + treeX;
 							branch->localTransform->localPosition.y = float(losujLiczbe((m * 13 / branchCount)+5, ((m + 1) * 13 / branchCount)+5));
 							branch->localTransform->localScale.x = 6 / branch->localTransform->localPosition.y;
@@ -897,7 +874,7 @@ int main() {
 			
 			GameObject* anim = new GameObject("player");
 			//animodel->SetShader(shaderAnimation);
-			anim->addModelComponent(animodel);
+			anim->addModelComponent(RL.animodel);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.4f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
 			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
@@ -940,7 +917,7 @@ int main() {
 
 			GameObject* bananaObj = new GameObject("banana");
 
-			bananaObj->addModelComponent(bananaModel);
+			bananaObj->addModelComponent(RL.bananaModel);
 			bananaObj->getTransform()->localPosition = glm::vec3(0.f, 1.f, -1.f);
 			bananaObj->getTransform()->localScale = glm::vec3(0.1f);
 			sm->getActiveScene()->addObject(bananaObj);
@@ -1067,7 +1044,7 @@ int main() {
 				Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies), sm->getActiveScene()->findByName("sector" + std::to_string(sector))->localTransform->localPosition, glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
 				enemy->Move(glm::vec3(5.0f));
 				enemy->sector = sector;
-				enemy->addModelComponent(enemyModel);
+				enemy->addModelComponent(RL.enemyModel);
 				pbd->objects.push_back(enemy);
 				enemy->addColider(2);
 				enemy->capsuleCollider = new CapsuleCollider(enemy->capsuleCollider->center, enemy->capsuleCollider->radius * 0.8f, enemy->capsuleCollider->height, 1.0f, true);
@@ -1082,14 +1059,15 @@ int main() {
 				enemyManager->addEnemy(enemy);
 				enemy->hp = 30;
 				GameObject* enemyWeapon = new GameObject("enemyWeapon" + std::to_string(spawnedEnemies));
-				enemyWeapon->addModelComponent(box2model);
-				enemyWeapon->getTransform()->localScale = glm::vec3(0.1f);
+				enemyWeapon->addModelComponent(RL.box2model);
+				enemyWeapon->getTransform()->localScale = glm::vec3(0.3f);
 				enemyWeapon->active = false;
 				enemy->addChild(enemyWeapon);
 				enemyWeapon->addColider(1);
 				enemyWeapon->boundingBox->isTriggerOnly = true;
 				enemyWeapon->colliders.push_back(enemyWeapon->boundingBox);
 				enemyWeapon->isInstanced = true;
+				enemyWeapon->modelComponent = RL.enemyWeaponmodel;
 				enemyWeapon = nullptr;
 				transformsEnemy.clear();
 				transformsEnemyWeapon.clear();
@@ -1144,9 +1122,10 @@ void renderImGui() {
 	}
 	if (sm->getActiveScene()->findByName("enemy0")) {
 		GameObject* enemy = sm->getActiveScene()->findByName("enemy0");
-		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", enemy->localTransform->localPosition.x, enemy->localTransform->localPosition.y, enemy->localTransform->localPosition.z);
-		GameObject* weapon = enemy->children.at(0);
-		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", weapon->localTransform->localPosition.x, weapon->localTransform->localPosition.y, weapon->localTransform->localPosition.z);
+		ImGui::Text("weapon");
+		BoundingBox* box = enemy->children.at(0)->boundingBox;
+		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", box->min.x, box->min.y, box->min.z);
+		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", box->max.x, box->max.y, box->max.z);
 	}
 	ImGui::SliderFloat("light x", &lightPos.x, -100, 100); 
 	ImGui::SliderFloat("light y", &lightPos.y, -100, 100);

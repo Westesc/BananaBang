@@ -378,8 +378,10 @@ int main() {
 	std::vector<Transform*> transformsTree;
 	std::vector<Transform*> transformsLog;
 	std::vector<Transform*> transformsBranch;
+	std::vector<Transform*> transformsEnemy;
 	SectorSelector sectorSelector = SectorSelector(&sectorsPom);
 	bool regenInstances = false;
+	bool regenInstancesEnemy = false;
 
 	GameObject* tutorial1 = new GameObject("tutorial1");
 	UI* tutorialui1 = new UI(writing);
@@ -528,31 +530,6 @@ int main() {
 								enemy->chosenTree = nullptr;
 							}
 						}
-						/*
-						transformsBranch.clear();
-						transformsLog.clear();
-						transformsTree.clear();
-						for (auto tree : object->children) {
-							if (tree->name.starts_with("tree")) {
-								transformsTree.push_back(tree->getTransform());
-								transformsLog.push_back(tree->children.at(0)->getTransform());
-								for (auto ch : tree->children.at(0)->children)
-								{
-									transformsBranch.push_back(ch->getTransform());
-								}
-							}
-						}
-						if (object->children.size() > 0) {
-							for (int i = 0; i < object->children.size(); i++) {
-								if (object->children.at(i)->name.starts_with("tree")) {
-									object->children.at(i)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
-									object->children.at(i)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
-									object->children.at(i)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
-									break;
-								}
-							}
-						}
-						*/
 						regenInstances = true;
 						delete treeActual;
 						if (object->name.ends_with(std::to_string(sectorSelector.selectedSector)) && object->children.size() == 0 && sectorSelectorTime > 30.0f) {
@@ -651,6 +628,7 @@ int main() {
 				if (enemy->chosenTree) {
 					enemy->chosenTree->getAsActualType<Tree>()->removeChopper(enemy);
 				}
+				regenInstancesEnemy = true;
 				/*if (enemyManager->enemies.size() > 0) {
 					std::vector<Transform*> transformsEnemy;
 					for (auto enemy : enemyManager->enemies) {
@@ -663,6 +641,16 @@ int main() {
 			else {
 				cm.addObject(enemy);
 			}
+		}
+		if (regenInstancesEnemy) {
+			transformsEnemy.clear();
+			for (auto enemy : enemyManager->enemies) {
+				transformsEnemy.push_back(enemy->getTransform());
+			}
+			if (enemyManager->enemies.size() > 0) {
+				enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
+			}
+			regenInstancesEnemy = false;
 		}
 		pbd->simulateB4Collisions(deltaTime);
 		cm.simulate(deltaTime);
@@ -705,6 +693,14 @@ int main() {
 				break;
 			}
 		}
+		if (enemyManager->enemies.size() > 0) {
+			enemyShader->use();
+			enemyShader->setMat4("view", V);
+			enemyShader->setMat4("projection", P);
+			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
+			enemyManager->enemies.at(0)->getModelComponent().get()->drawInstances();
+		}
+
 
 		/*if (enemyManager->enemies.size() > 0) {
 			for (auto enemy : enemyManager->enemies) {
@@ -1075,11 +1071,12 @@ int main() {
 				enemyWeapon->boundingBox->isTriggerOnly = true;
 				enemyWeapon->colliders.push_back(enemyWeapon->boundingBox);
 				enemyWeapon = nullptr;
-				/*std::vector<Transform*> transformsEnemy;
+				transformsEnemy.clear();
 				for (auto enemy : enemyManager->enemies) {
 					transformsEnemy.push_back(enemy->getTransform());
 				}
-				enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);*/
+				enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
+				enemy->isInstanced = true;
 			}
 		}
 		renderImGui();

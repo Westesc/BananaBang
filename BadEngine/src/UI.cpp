@@ -46,6 +46,11 @@ void UI::setText(std::string text) {
 	this->text = text;
 }
 
+void UI::setSize(glm::vec2 size)
+{
+	this->size = size;
+}
+
 bool UI::loadFreetype() {
 	FT_Library ft;
 	// All functions return a value different than 0 whenever an error occurred

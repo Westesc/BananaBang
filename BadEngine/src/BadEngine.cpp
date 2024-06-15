@@ -98,6 +98,11 @@ glm::mat4 lightSpaceMatrix;
 std::shared_ptr<Model> skydomeModel;
 float gameTime = 0;
 GameObject* playButton;
+GameObject* titlescreen;
+GameObject* tutorialButton;
+GameObject* acknowledgmentsButton;
+GameObject* backButton;
+GameObject* acknowledgments;
 
 void generate() {
 	sectorsPom = 4;
@@ -222,9 +227,6 @@ void generate() {
 
 	buttonPressed = false;
 	gameMode.setMode(GameMode::Game);
-	delete tutorial1;
-	delete tutorial2;
-	delete tutorial3;
 	GameObject* Button = new GameObject("Button");
 	UI* ui = new UI(button);
 	Shader* UIShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
@@ -316,6 +318,48 @@ void generate() {
 	std::cout << sectorsPom << std::endl;
 	std::cout << pathfinder->trees.size() << std::endl;
 	//delete playButton;
+}
+
+void showTutorial() {
+	sm->getActiveScene()->gameObjects.clear();
+	sm->getActiveScene()->addObject(titlescreen);
+	sm->getActiveScene()->addObject(playButton);
+	sm->getActiveScene()->addObject(tutorial1);
+	sm->getActiveScene()->addObject(tutorial2);
+	sm->getActiveScene()->addObject(tutorial3);
+}
+
+void showMain() {
+	sm->getActiveScene()->gameObjects.clear();
+	sm->getActiveScene()->addObject(titlescreen);
+	sm->getActiveScene()->addObject(playButton);
+	sm->getActiveScene()->addObject(tutorialButton);
+	sm->getActiveScene()->addObject(acknowledgmentsButton);
+
+}
+
+void showAcknowledgments() {
+	sm->getActiveScene()->gameObjects.clear();
+	sm->getActiveScene()->addObject(titlescreen);
+	backButton = new GameObject("backButton");
+	UI* backbuttonui = new UI(button);
+	backbuttonui->addShader(RL.shaders);
+	backbuttonui->setTexture("../../../../res/button.png");
+	backbuttonui->setSize(glm::vec2(250.0f, 60.f));
+	backButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 100.0f, 0.0f);
+	backbuttonui->input = input;
+	backbuttonui->onClick = std::bind(&showMain);
+	backbuttonui->setText("BACK");
+	backButton->uiComponent = backbuttonui;
+	sm->getActiveScene()->addObject(backButton);
+
+	acknowledgments = new GameObject("acknowledgments");
+	UI* acknowledgmentsui = new UI(writing);
+	acknowledgmentsui->addShader(RL.shaders);
+	acknowledgmentsui->setText("Splash screen image was sourced from https://www.aipromptsdirectory.com/wp-content/uploads/2023/11/hard_drive_white_background_simple_colored_sketch_-_7c0b4171-90ce-4a92-8351-cb652420715b_0.webp");
+	acknowledgments->localTransform->localPosition = glm::vec3(100.0f, Window::windowHeight - 100.0f, 0.0f);
+	acknowledgments->uiComponent = acknowledgmentsui;
+	sm->getActiveScene()->addObject(acknowledgments);
 }
 
 void Start() {
@@ -593,37 +637,69 @@ int main() {
 	UI* tutorialui1 = new UI(writing);
 	tutorialui1->addShader(LogoShader);
 	tutorial1->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight - 100.f, 0.0f);
-	tutorialui1->input = input;
 	tutorialui1->setText("WASD - ruch");
 	tutorial1->uiComponent = tutorialui1;
+	sm->getActiveScene()->addObject(tutorial1);
 
 	tutorial2 = new GameObject("tutorial2");
 	UI* tutorialui2 = new UI(writing);
 	tutorialui2->addShader(LogoShader);
 	tutorial2->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight - 150.f, 0.0f);
-	tutorialui2->input = input;
 	tutorialui2->setText("spacja - skok");
 	tutorial2->uiComponent = tutorialui2;
+	sm->getActiveScene()->addObject(tutorial2);
 
 	tutorial3 = new GameObject("tutorial3");
 	UI* tutorialui3 = new UI(writing);
 	tutorialui3->addShader(LogoShader);
 	tutorial3->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight - 200.f, 0.0f);
-	tutorialui3->input = input;
 	tutorialui3->setText("lewy przycisk myszy - atak");
 	tutorial3->uiComponent = tutorialui3;
+	sm->getActiveScene()->addObject(tutorial3);
+
+	titlescreen = new GameObject("titlescreen");
+	UI* titleui = new UI(plane);
+	titleui->addShader(LogoShader);
+	titleui->setTexture("../../../../res/titlescreen.png");
+	titlescreen->uiComponent = titleui;
+	titlescreen->localTransform->localScale = glm::vec3(18.f, 10.f, 1.f);
+	sm->getActiveScene()->addObject(titlescreen);
 
 	playButton = new GameObject("playButton");
 	UI* playui = new UI(button);
-	Shader* UIShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
-	playui->addShader(UIShader);
-	playui->setTexture("../../../../res/chmury.png");
-	playButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight * 0.5f, 0.0f);
+	playui->addShader(LogoShader);
+	playui->setTexture("../../../../res/button.png");
+	playui->setSize(glm::vec2(150.0f, 60.f));
+	playButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f, 0.0f);
 	playui->input = input;
 	playui->onClick = std::bind(&generate);
 	playui->setText("PLAY");
 	playButton->uiComponent = playui;
 	sm->getActiveScene()->addObject(playButton);
+
+	/*tutorialButton = new GameObject("tutorialButton");
+	UI* tutorialbuttonui = new UI(button);
+	tutorialbuttonui->addShader(LogoShader);
+	tutorialbuttonui->setTexture("../../../../res/button.png");
+	tutorialbuttonui->setSize(glm::vec2(250.0f, 60.f));
+	tutorialButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 100.0f, 0.0f);
+	tutorialbuttonui->input = input;
+	tutorialbuttonui->onClick = std::bind(&showTutorial);
+	tutorialbuttonui->setText("TUTORIAL");
+	tutorialButton->uiComponent = tutorialbuttonui;
+	sm->getActiveScene()->addObject(tutorialButton);
+
+	acknowledgmentsButton = new GameObject("acknowledgmentsButton");
+	UI* acknowledgmentsButtonui = new UI(button);
+	acknowledgmentsButtonui->addShader(LogoShader);
+	acknowledgmentsButtonui->setTexture("../../../../res/button.png");
+	acknowledgmentsButtonui->setSize(glm::vec2(500.0f, 60.f));
+	acknowledgmentsButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 200.0f, 0.0f);
+	acknowledgmentsButtonui->input = input;
+	acknowledgmentsButtonui->onClick = std::bind(&showTutorial);
+	acknowledgmentsButtonui->setText("ACKNOWLEDGMENTS");
+	acknowledgmentsButton->uiComponent = acknowledgmentsButtonui;
+	sm->getActiveScene()->addObject(acknowledgmentsButton);*/
 
 	audioManager->playSound("test", true);
 	while (!glfwWindowShouldClose(window)) {
@@ -1320,18 +1396,6 @@ int main() {
 			}
 		}
 		renderImGui();
-		if (tutorial1) {
-			tutorial1->Draw(V, P);
-		}
-		if (tutorial2) {
-			tutorial2->Draw(V, P);
-		}
-		if (tutorial3) {
-			tutorial3->Draw(V, P);
-		}
-		/*if (playButton) {
-			playButton->Draw(V, P);
-		}*/
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		if (test) {

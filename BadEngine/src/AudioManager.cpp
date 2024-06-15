@@ -118,3 +118,45 @@ void AudioManager::playSound(std::string name,bool loop) {
         std::cerr << "Sound " << name << " not found!" << std::endl;
     }
 }
+
+void AudioManager::stopSound(std::string name)
+{
+    auto it = sounds.find(name);
+    if (it != sounds.end()) {
+        alSourceStop(it->second.source);
+    }
+    else {
+        std::cerr << "Sound " << name << " not found!" << std::endl;
+    }
+}
+
+void AudioManager::changeVolume(std::string name, float volume)
+{
+    auto it = sounds.find(name);
+    if (it != sounds.end()) {
+        alSourcef(it->second.source,AL_GAIN,volume);
+    }
+    else {
+        std::cerr << "Sound " << name << " not found!" << std::endl;
+    }
+}
+
+void AudioManager::setSoundPosition(std::string name, float x, float y, float z) {
+    auto it = sounds.find(name);
+    if (it != sounds.end()) {
+        alSource3f(it->second.source, AL_POSITION, x,y,z);
+    }
+    else {
+        std::cerr << "Sound " << name << " not found!" << std::endl;
+    }
+}
+
+void AudioManager::setListenerPosition(float x, float y, float z) {
+    alListener3f(AL_POSITION, x, y, z);
+}
+
+void AudioManager::setListenerOrientation(glm::mat4& viewMatrix) {
+    //front xyz , up xyz
+    float orientation[] = { viewMatrix[0][2],viewMatrix[1][2], viewMatrix[2][2],viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1] };
+    alListenerfv(AL_ORIENTATION, orientation);
+}

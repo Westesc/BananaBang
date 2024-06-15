@@ -8,6 +8,9 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 
 class AudioManager {
 private:
@@ -53,6 +56,11 @@ public:
 
     void loadSound(std::string name, std::string path);
     void playSound(std::string name, bool loop = true);
+    void stopSound(std::string name);
+    void changeVolume(std::string name, float volume);
+    void setSoundPosition(std::string, float x, float y, float z);
+    void setListenerPosition(float x, float y, float z);
+    void setListenerOrientation(glm::mat4& viewMatrix);
 
 };
 

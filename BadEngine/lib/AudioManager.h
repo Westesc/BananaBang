@@ -48,19 +48,21 @@ private:
     std::map<std::string, SoundData> sounds;
     ALCdevice* p_ALCDevice;
     ALCcontext* p_ALCContext;
-    bool loadWAV(std::string& path, ALuint& buffer);
+    bool loadWAV(std::string& path, ALuint& buffer,bool is3D);
 
 public:
     AudioManager();
     ~AudioManager();
 
-    void loadSound(std::string name, std::string path);
+    void loadSound(std::string name, std::string path, bool is3D=false);
     void playSound(std::string name, bool loop = true);
     void stopSound(std::string name);
     void changeVolume(std::string name, float volume);
     void setSoundPosition(std::string, float x, float y, float z);
     void setListenerPosition(float x, float y, float z);
-    void setListenerOrientation(glm::mat4& viewMatrix);
+    void setListenerOrientation(glm::mat4 viewMatrix);
+    void setRollofFactor(std::string name, float value);
+
 
 };
 

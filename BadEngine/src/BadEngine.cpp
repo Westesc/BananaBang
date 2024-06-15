@@ -202,8 +202,10 @@ int main() {
 
 
 	AudioManager* audioManager = new AudioManager();
-	audioManager->loadSound("test", "../../../../res/media/jungle_music.wav");
-	audioManager->playSound("test",true);
+	audioManager->loadSound("jungle_music", "../../../../res/media/jungle_music.wav");
+	//audioManager->playSound("jungle_music",true);
+	audioManager->loadSound("test", "../../../../res/media/test.wav",true);
+	audioManager->setSoundPosition("test", 10, 0, 0);
 
 
 	GameObject* logo = new GameObject("logo");
@@ -386,13 +388,13 @@ int main() {
 	tutorialui3->setText("lewy przycisk myszy - atak");
 	tutorial3->uiComponent = tutorialui3;
 
+	audioManager->playSound("test", true);
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
 		}
 		glClearColor(0.2f, 0.3f, 0.7f, 1.f);
-
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		const float time = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
 		shadowsFrameCounter++;
@@ -414,6 +416,8 @@ int main() {
 
 			V = camera->getViewMatrix();
 		}
+		audioManager->setListenerPosition(camera->transform->localPosition.x, camera->transform->localPosition.y, camera->transform->localPosition.z);
+		audioManager->setListenerOrientation(V);
 		//animacje
 		//animPlayer->UpdateAnimation(deltaTime);
 		sm->getActiveScene()->findByName("skydome")->timeSetting(time / 7, glm::vec2(10, 10));

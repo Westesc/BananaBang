@@ -159,7 +159,7 @@ void AudioManager::setSoundPosition(std::string name, float x, float y, float z)
 }
 
 void AudioManager::setListenerPosition(float x, float y, float z) {
-    std::cout << "x:" << x << " y:" << y << " z" << z << std::endl;
+    //std::cout << "x:" << x << " y:" << y << " z" << z << std::endl;
     alListener3f(AL_POSITION, x, y, z);
 }
 
@@ -168,7 +168,7 @@ void AudioManager::setListenerOrientation(glm::mat4 viewMatrix) {
     glm::vec3 up = glm::vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
     up = glm::normalize(up);
     float orientation[] = { -viewMatrix[0][2],-viewMatrix[1][2], -viewMatrix[2][2], };
-    std::cout <<"front x"<< viewMatrix[0][2] <<"front y"<< viewMatrix[1][2] << "front z" << viewMatrix[2][2] << "x" << up.x << "y" << up.y << "z" << up.y << std::endl;
+    //std::cout <<"front x"<< viewMatrix[0][2] <<"front y"<< viewMatrix[1][2] << "front z" << viewMatrix[2][2] << "x" << up.x << "y" << up.y << "z" << up.y << std::endl;
     alListenerfv(AL_ORIENTATION, orientation);
 
 }

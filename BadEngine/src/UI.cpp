@@ -269,7 +269,7 @@ void UI::update(Transform* transform) {
 		if(mousePosition.x>transform->getLocalPosition().x && mousePosition.x < transform->getLocalPosition().x + size.x * transform->getLocalScale().x)
 			if (mousePosition.y > transform->getLocalPosition().y && mousePosition.y < transform->getLocalPosition().y + size.y * transform->getLocalScale().y) {
 				printf("przycisk dzia³a\n");
-				//onClick();
+				onClick();
 			}
 	}
 }

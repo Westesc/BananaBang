@@ -163,6 +163,7 @@ void UI::Draw(Transform* transform) {
 		glUniform3f(glGetUniformLocation(shader->ID, "color"), color.x, color.y, color.z);
 		glActiveTexture(GL_TEXTURE0);
 		glBindVertexArray(VAO);
+		
 		float vertices[6][4] = {
 				{ transform->localPosition.x,								 transform->localPosition.y + size.y * transform->localScale.y,    0.0f, 0.0f },
 				{ transform->localPosition.x,								 transform->localPosition.y,									0.0f, 1.0f },
@@ -190,12 +191,39 @@ void UI::Draw(Transform* transform) {
 		float x = transform->localPosition.x;
 		// iterate through all characters
 		std::string::const_iterator c;
+		float xShift = 0.f;
+		float yShift = 0.f;
+		if (type == button) {
+			float textSizeX=0;
+			float textSizeY=0;
+			for (c = text.begin(); c != text.end(); c++)
+			{
+				Character ch = Characters[*c];
+				textSizeX += ch.Size.x * transform->localScale.x;
+				textSizeY = ch.Size.y * transform->localScale.y;
+			}
+
+			switch (locate) {
+			case center:
+				xShift = (size.x*transform->localScale.x - textSizeX) / 2;
+				if (xShift - padding.x < 0) {
+					xShift = padding.x;
+				}
+				yShift = (size.y - textSizeY) / 2;
+				if (yShift - padding.y < 0) {
+					yShift = padding.y;
+				}
+				break;
+			}
+			
+
+		}
 		for (c = text.begin(); c != text.end(); c++)
 		{
 			Character ch = Characters[*c];
 
-			float xpos = x + ch.Bearing.x * transform->localScale.x;
-			float ypos = transform->localPosition.y - (ch.Size.y - ch.Bearing.y) * transform->localScale.y;
+			float xpos = x + ch.Bearing.x * transform->localScale.x +xShift;
+			float ypos = transform->localPosition.y - (ch.Size.y - ch.Bearing.y) * transform->localScale.y +yShift;
 
 			float w = ch.Size.x * transform->localScale.x;
 			float h = ch.Size.y * transform->localScale.y;

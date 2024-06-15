@@ -348,7 +348,7 @@ void showAcknowledgments() {
 	backbuttonui->setSize(glm::vec2(250.0f, 60.f));
 	backButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 100.0f, 0.0f);
 	backbuttonui->input = input;
-	backbuttonui->onClick = std::bind(&showMain);
+	backbuttonui->onClick = showMain;
 	backbuttonui->setText("BACK");
 	backButton->uiComponent = backbuttonui;
 	sm->getActiveScene()->addObject(backButton);
@@ -677,7 +677,7 @@ int main() {
 	playui->setSize(glm::vec2(150.0f, 60.f));
 	playButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f, 0.0f);
 	playui->input = input;
-	playui->onClick = std::bind(&generate);
+	playui->onClick = generate;
 	playui->setText("PLAY");
 	playButton->uiComponent = playui;
 	sm->getActiveScene()->addObject(playButton);

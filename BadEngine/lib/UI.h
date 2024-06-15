@@ -25,6 +25,15 @@ enum typeUI {
 	button,
 
 };
+
+enum location{
+	center,
+	rightDown,
+	leftDown,
+	rightUp,
+	leftUp
+
+};
 struct Character {
 	unsigned int TextureID; // ID handle of the glyph texture
 	glm::ivec2   Size;      // Size of glyph
@@ -40,6 +49,8 @@ private:
 	unsigned int planeTexture;
 	typeUI type;
 	std::map<GLchar, Character> Characters;
+	location locate = center;
+	glm::vec2 padding = glm::vec2(3.f);
 	bool loadFreetype();
 	void loadPlane();
 	Shader* shader;

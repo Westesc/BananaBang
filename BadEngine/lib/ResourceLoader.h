@@ -47,11 +47,11 @@ public:
 		depthShader = new Shader("../../../../src/shaders/depthShader.vert", "../../../../src/shaders/depthShader.frag");
 		depthAnimationShader = new Shader("../../../../src/shaders/depthAnimationShader.vert", "../../../../src/shaders/depthAnimationShader.frag");
 		box2model = std::make_shared<Model>(const_cast<char*>("../../../../res/tree.obj"), false);
-		treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log.obj"), false);
-		treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"), false);
+		treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log_l1.obj"), false);
+		treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk_l.obj"), false);
 		phongShader = new Shader("../../../../src/shaders/phong.vert", "../../../../src/shaders/phong.frag");
 		phongInstancedShader = new Shader("../../../../src/shaders/phonginstanced.vert", "../../../../src/shaders/phong.frag");
-		treebranch1 = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_branch_1.obj"), false);
+		treebranch1 = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_branch_l.obj"), false);
 		planeSectormodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"), false);
 		enemyWeaponmodel = std::make_shared<Model>(const_cast<char*>("../../../../res/axe.obj"), false);
 	}

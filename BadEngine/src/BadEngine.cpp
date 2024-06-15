@@ -263,14 +263,18 @@ int main() {
 	Mesh* meshFruit = new Mesh();
 	meshFruit->createSphere(20, 20, 50);
 	auto FruitModel = std::make_shared<Model>(meshFruit);
-
 	//drzewa
-    RL.treelog->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-    RL.treetrunk->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-    RL.treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	//treebranch1->AddTexture("../../../../res/textures/Tree3_normal.png", "normalMap");
+	RL.treelog->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	RL.treetrunk->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	RL.treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+
+	RL.treelog->AddTexture("../../../../res/textures/Tree2_normal.png", "normalMap");
+	RL.treetrunk->AddTexture("../../../../res/textures/Tree1_normal.png", "normalMap");
+	RL.treebranch1->AddTexture("../../../../res/textures/Tree3_normal.png", "normalMap");
+
 	RL.treebranch1->SetShader(RL.phongInstancedShader);
 	RL.planeSectormodel->AddTexture("../../../../res/drewno.png", "diffuseMap");
+	RL.planeSectormodel->AddTexture("../../../../res/normal.png", "normalMap");
 	RL.treetrunk->SetShader(RL.phongInstancedShader);
 	RL.treelog->SetShader(RL.phongInstancedShader);
 	RL.planeSectormodel->SetShader(RL.phongShader);
@@ -278,6 +282,7 @@ int main() {
 	RL.treelog.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	RL.phongInstancedShader->use();
 	RL.phongInstancedShader->setVec3("lightPos", lightPos);
+
 
 	RL.box2model->SetShader(RL.shaderTree);
 	skydomeModel->SetShader(RL.skydomeShader);
@@ -403,6 +408,15 @@ int main() {
 		staticUpdateTime += deltaTime;
 		sectorSelectorTime += deltaTime;
 		//std::cout << "Delta time: " << deltaTime << std::endl;
+
+
+		RL.phongShader->use();
+		//RL.phongShader->setVec3("lightPos", lightPos);
+		RL.phongShader->setVec3("viewPos", camera->transform->getLocalPosition());
+		RL.phongInstancedShader->use();
+		//RL.phongInstancedShader->setVec3("lightPos", lightPos);
+		RL.phongInstancedShader->setVec3("viewPos", camera->transform->getLocalPosition());
+
 
 		tm->setTime(deltaTime);
 		glm::mat4 V(1.f);

@@ -46,6 +46,11 @@ void UI::setText(std::string text) {
 	this->text = text;
 }
 
+void UI::setSize(glm::vec2 size)
+{
+	this->size = size;
+}
+
 bool UI::loadFreetype() {
 	FT_Library ft;
 	// All functions return a value different than 0 whenever an error occurred
@@ -269,7 +274,7 @@ void UI::update(Transform* transform) {
 		if(mousePosition.x>transform->getLocalPosition().x && mousePosition.x < transform->getLocalPosition().x + size.x * transform->getLocalScale().x)
 			if (mousePosition.y > transform->getLocalPosition().y && mousePosition.y < transform->getLocalPosition().y + size.y * transform->getLocalScale().y) {
 				printf("przycisk dzia³a\n");
-				//onClick();
+				onClick();
 			}
 	}
 }

@@ -18,6 +18,8 @@ AudioManager::AudioManager() {
 	if (!name || alcGetError(p_ALCDevice) != AL_NO_ERROR)
 		name = alcGetString(p_ALCDevice, ALC_DEVICE_SPECIFIER);
 	std::cout << "Opened " << name << std::endl;
+    alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
+
 }
 
 AudioManager::~AudioManager() {
@@ -30,9 +32,9 @@ AudioManager::~AudioManager() {
 	alcDestroyContext(p_ALCContext);
 	alcCloseDevice(p_ALCDevice);
 }
-void AudioManager::loadSound(std::string name, std::string path) {
+void AudioManager::loadSound(std::string name, std::string path, bool is3D) {
 	ALuint buffer;
-	if (!loadWAV(path, buffer)) {
+	if (!loadWAV(path, buffer,is3D)) {
 		std::cout << "Failed to load WAV file" << std::endl;
 	}
 
@@ -45,7 +47,7 @@ void AudioManager::loadSound(std::string name, std::string path) {
 }
 
 
-bool AudioManager::loadWAV(std::string& path, ALuint& buffer) {
+bool AudioManager::loadWAV(std::string& path, ALuint& buffer,bool is3D) {
     WAVHeader header;
     std::ifstream file(path, std::ios::binary);
     if (!file) {
@@ -100,7 +102,9 @@ bool AudioManager::loadWAV(std::string& path, ALuint& buffer) {
         std::cerr << "Unsupported bit depth: " << header.bitsPerSample << " bits" << std::endl;
         return false;
     }
-
+    if (is3D) {
+        format = AL_FORMAT_MONO16;
+    }
     // Generowanie bufora i ³adowanie danych do OpenAL
     alGenBuffers(1, &buffer);
     alBufferData(buffer, format, data.data(), dataHeader.dataSize, header.sampleRate);
@@ -111,6 +115,7 @@ bool AudioManager::loadWAV(std::string& path, ALuint& buffer) {
 void AudioManager::playSound(std::string name,bool loop) {
     auto it = sounds.find(name);
     if (it != sounds.end()) {
+        
         alSourcei(it->second.source, AL_LOOPING, loop);
         alSourcePlay(it->second.source);
     }
@@ -145,6 +150,8 @@ void AudioManager::setSoundPosition(std::string name, float x, float y, float z)
     auto it = sounds.find(name);
     if (it != sounds.end()) {
         alSource3f(it->second.source, AL_POSITION, x,y,z);
+        alSourcef(it->second.source, AL_REFERENCE_DISTANCE, 10.0f); 
+        alSourcef(it->second.source, AL_MAX_DISTANCE, 100.0f);
     }
     else {
         std::cerr << "Sound " << name << " not found!" << std::endl;
@@ -152,11 +159,26 @@ void AudioManager::setSoundPosition(std::string name, float x, float y, float z)
 }
 
 void AudioManager::setListenerPosition(float x, float y, float z) {
+    //std::cout << "x:" << x << " y:" << y << " z" << z << std::endl;
     alListener3f(AL_POSITION, x, y, z);
 }
 
-void AudioManager::setListenerOrientation(glm::mat4& viewMatrix) {
+void AudioManager::setListenerOrientation(glm::mat4 viewMatrix) {
     //front xyz , up xyz
-    float orientation[] = { viewMatrix[0][2],viewMatrix[1][2], viewMatrix[2][2],viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1] };
+    glm::vec3 up = glm::vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
+    up = glm::normalize(up);
+    float orientation[] = { -viewMatrix[0][2],-viewMatrix[1][2], -viewMatrix[2][2], };
+    //std::cout <<"front x"<< viewMatrix[0][2] <<"front y"<< viewMatrix[1][2] << "front z" << viewMatrix[2][2] << "x" << up.x << "y" << up.y << "z" << up.y << std::endl;
     alListenerfv(AL_ORIENTATION, orientation);
+
+}
+
+void AudioManager::setRollofFactor(std::string name, float value) {
+    auto it = sounds.find(name);
+    if (it != sounds.end()) {
+        alSourcef(it->second.source, AL_ROLLOFF_FACTOR, value);
+    }
+    else {
+        std::cerr << "Sound " << name << " not found!" << std::endl;
+    }
 }

@@ -58,7 +58,7 @@ private:
     float airSpeed = 6.f;
 
     //climbing
-    float climbingSpeed = 3.f;
+    float climbingSpeed = 0.2f;
     float currentClimbingSpeed = 4.f;
     float groundPosition;
     glm::vec3 treePosition;
@@ -245,11 +245,11 @@ private:
                 player->getTransform()->getLocalPosition().y;
                 if (input->checkKey(GLFW_KEY_A)) {
                     direction = 0.3f;
-                    currentClimbingSpeed = 2.6f;
+                    currentClimbingSpeed = 0.0f;
                 }
                 else if (input->checkKey(GLFW_KEY_D)) {
                     direction = -0.3f;
-                    currentClimbingSpeed = 2.6f;
+                    currentClimbingSpeed = 0.0;
                 }
                 else {
                     direction = 0.f;
@@ -317,7 +317,7 @@ private:
         }
         else {
             direction = 0.f;
-            currentClimbingSpeed = 0.1f;
+            currentClimbingSpeed = -0.02f;
             isMove = false;
         }
         if (glm::distance(player->getTransform()->getLocalPosition().y, groundPosition) < 0.5f && state == PlayerState::air) {
@@ -403,25 +403,27 @@ public:
         }
         else if (state == PlayerState::climbing)
         {
+            player->useGravity = false;
             climbMove(deltaTime);
             if (currentClimbingSpeed > 0) {
                 player->getAnimateBody()->setActiveAnimationWithY("climbing up");
-                if (currentClimbingSpeed == 0.1f || currentClimbingSpeed == 2.6f) {
-                    player->getAnimateBody()->changeAnimationSpeed("climbing up", 0.8f);
+                if (currentClimbingSpeed == -0.02f) {
+                    player->getAnimateBody()->changeAnimationSpeed("climbing up", 0.6f);
                 }
                 else {
                     player->getAnimateBody()->changeAnimationSpeed("climbing up", 1.3f);
                 }
             }
-            else if (currentClimbingSpeed < 0) {
+            else if (currentClimbingSpeed < -0.02f) {
                 player->getAnimateBody()->setActiveAnimationWithY("climbing down");
                 if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
                     state = PlayerState::walking;
                 }
             }
 
-            float climbingY = abs(currentClimbingSpeed) * player->getTransform()->getLocalScale().y * player->getAnimateBody()->getPosition().y;
-            player->velocity.y = climbingY / deltaTime;
+            //float climbingY = abs(currentClimbingSpeed) * player->getTransform()->getLocalScale().y * player->getAnimateBody()->getPosition().y;
+            //std::cout << climbingY << std::endl;
+            player->velocity.y = currentClimbingSpeed / deltaTime;
         }
         else if (state == PlayerState::tree_attack) {
             //Jakiœ warunek co bêdzie sprawdza³ czy œcie¿ka jest git
@@ -492,6 +494,9 @@ public:
             while (!queueAnim.empty()) {
                 queueAnim.pop();
             }
+        }
+        if (state != PlayerState::climbing) {
+            player->useGravity = false;
         }
     }
 

@@ -250,8 +250,8 @@ public:
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
 		bool resolved = false;
 		if (second->name.starts_with("branch")) {
-			first->localTransform->predictedPosition.y = first->localTransform->localPosition.y;
-			resolved = true;
+			//first->localTransform->predictedPosition.y = first->localTransform->localPosition.y;
+			//resolved = true;
 		}
 		/*else if (first->velocity.y > 0 && second->name.starts_with("tree")) {
 			first->localTransform->predictedPosition = first->localTransform->localPosition;
@@ -288,7 +288,7 @@ public:
 				glm::vec3 otherDisplacement = -displacement;
 				//float scalar = glm::length(glm::normalize(displacement));
 				displacement *= deltaTime;
-				if (second->name.starts_with("branch") || second->name.starts_with("log")) {
+				if ( second->name.starts_with("log")) {
 					displacement *= 0.1f;
 				}
 				if (second->name.starts_with("tree") || second->name.starts_with("log")) {

@@ -39,6 +39,7 @@ public:
 	bool friction = true;
 	int hp = 0;
 	bool isInstanced = false;
+	bool useGravity = true;
 
 	void setParent(GameObject* Parent);
 	void addChild(GameObject* Child);

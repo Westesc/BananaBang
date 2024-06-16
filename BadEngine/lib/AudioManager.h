@@ -62,7 +62,7 @@ public:
     void setListenerPosition(float x, float y, float z);
     void setListenerOrientation(glm::mat4 viewMatrix);
     void setRollofFactor(std::string name, float value);
-
+    ALuint getSource(std::string name);
 
 };
 

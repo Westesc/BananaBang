@@ -105,12 +105,29 @@ GameObject* backButton;
 GameObject* acknowledgments;
 
 void generate() {
+	playButton->uiComponent->pressed = true;
 	sectorsPom = 4;
 	a = 5;
 	b = 10;
-	for (auto go : sm->getActiveScene()->gameObjects) {
+	GameObject* loading = new GameObject("loading");
+	UI* loadingui = new UI(plane);
+	loadingui->setTexture("../../../../res/loading.png");
+	Shader* LogoShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
+	loadingui->addShader(LogoShader);
+	loadingui->input = input;
+	loading->uiComponent = loadingui;
+	loading->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.25f, 0.0f / 2, 0.f);
+	loading->localTransform->localScale = glm::vec3(10.f, 10.f, 1.f);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	loading->Draw(camera->getViewMatrix(), glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 5000.f));
+
+	glfwSwapBuffers(window);
+	glfwPollEvents();
+	/*for (GameObject* go : sm->getActiveScene()->gameObjects) {
 		delete go;
-	}
+	}*/
+	sm->activeScene = new Scene("mainLoop");
 	for (auto sect : cm.sections) {
 		sect->staticObjects.clear();
 		sect->objects.clear();
@@ -683,26 +700,26 @@ int main() {
 	playButton->uiComponent = playui;
 	sm->getActiveScene()->addObject(playButton);
 
-	/*tutorialButton = new GameObject("tutorialButton");
+	tutorialButton = new GameObject("tutorialButton");
 	UI* tutorialbuttonui = new UI(button);
 	tutorialbuttonui->addShader(LogoShader);
 	tutorialbuttonui->setTexture("../../../../res/button.png");
-	tutorialbuttonui->setSize(glm::vec2(250.0f, 60.f));
+	tutorialbuttonui->setSize(glm::vec2(260.0f, 60.f));
 	tutorialButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 100.0f, 0.0f);
 	tutorialbuttonui->input = input;
-	tutorialbuttonui->onClick = std::bind(&showTutorial);
+	tutorialbuttonui->onClick = []() { std::cout << "Test button clicked!" << std::endl; };//showTutorial;
 	tutorialbuttonui->setText("TUTORIAL");
 	tutorialButton->uiComponent = tutorialbuttonui;
 	sm->getActiveScene()->addObject(tutorialButton);
 
-	acknowledgmentsButton = new GameObject("acknowledgmentsButton");
+	/*acknowledgmentsButton = new GameObject("acknowledgmentsButton");
 	UI* acknowledgmentsButtonui = new UI(button);
 	acknowledgmentsButtonui->addShader(LogoShader);
 	acknowledgmentsButtonui->setTexture("../../../../res/button.png");
-	acknowledgmentsButtonui->setSize(glm::vec2(500.0f, 60.f));
+	acknowledgmentsButtonui->setSize(glm::vec2(520.0f, 60.f));
 	acknowledgmentsButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 200.0f, 0.0f);
 	acknowledgmentsButtonui->input = input;
-	acknowledgmentsButtonui->onClick = std::bind(&showTutorial);
+	acknowledgmentsButtonui->onClick = showAcknowledgments;
 	acknowledgmentsButtonui->setText("ACKNOWLEDGMENTS");
 	acknowledgmentsButton->uiComponent = acknowledgmentsButtonui;
 	sm->getActiveScene()->addObject(acknowledgmentsButton);*/
@@ -896,7 +913,7 @@ int main() {
 		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 		lightSpaceMatrix = lightProjection * lightView;
 		// render scene from light's point of view
-		if (shadowsFrameCounter % 6 == 0) {
+		if (shadowsFrameCounter % 2 == 0) {
 			RL.depthShader->use();
 			RL.depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 			RL.depthAnimationShader->use();
@@ -1048,9 +1065,9 @@ int main() {
 				camera->updateCamera(dpos);
 			}
 		}
-		if (buttonPressed) {
+		/*if (buttonPressed) {
 			for (auto go : sm->getActiveScene()->gameObjects) {
-					delete go;
+				delete go;
 			}
 			for (auto sect : cm.sections) {
 				sect->staticObjects.clear();
@@ -1077,7 +1094,7 @@ int main() {
 								{
 									treeX = losujLiczbe2() * planeSector->localTransform->localScale.x; treeZ = losujLiczbe2() * planeSector->localTransform->localScale.z;
 								}
-							}*/
+							}
 						Tree* tree = new Tree("tree_"+std::to_string(k), 100.0f);
 						tree->isInstanced = true;
 						tree->addModelComponent(RL.treetrunk);
@@ -1266,12 +1283,12 @@ int main() {
 
 			sm->getActiveScene()->findByName("outline")->getTransform()->localPosition = glm::vec3(0.f, 0.f, 0.f);
 			sm->getActiveScene()->findByName("outline")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
-			sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);*/
+			sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);
 
 			sm->getActiveScene()->addObject(Button);
 			sm->getActiveScene()->addObject(HPcount);
 
-		}
+		}*/
 		while (input->IsKeobarodAction(window)) {
 			input->getMessage(key, action);
 

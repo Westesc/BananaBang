@@ -58,6 +58,7 @@ private:
 public:
 	Input* input = nullptr;
 	std::function<void()> onClick;
+	bool pressed = false;
 	UI(typeUI type,glm::vec3 color = glm::vec3(1.f));
 	
 	~UI();

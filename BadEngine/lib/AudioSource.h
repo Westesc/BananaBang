@@ -4,13 +4,19 @@
 #include <al/al.h>
 #include <al/alc.h>
 #include <glm/glm.hpp>
+#include "Transform.h"
 
 class AudioSource : Component {
 private:
-	Aluint source;
+	ALuint source;
+	bool p_LoopSound = false;
 public:
-	
-void update(Transform* Transform)
+	AudioSource(ALuint source);
+	~AudioSource();
+
+	void play();
+	void setVolume(float volume);
+	void update(Transform* transform);
 };
 
 #endif

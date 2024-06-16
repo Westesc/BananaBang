@@ -22,7 +22,7 @@ Scene::Scene(YAML::Node node) {
 }
 void Scene::Update(glm::mat4 view, glm::mat4 perspective, float time) {
 	ZoneTransientN(zoneName, "Update", true);
-	for (auto go : gameObjects) {
+	for (GameObject* go : gameObjects) {
 		go->Update(view, perspective, time);
 	}
 }

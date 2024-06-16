@@ -348,6 +348,7 @@ public:
 
     void ManagePlayer(float& deltaTime2, float deltaTime) {
         player = sm->getActiveScene()->findByName("player");
+        player->useGravity = false;
         //std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         this->deltaTime2 = deltaTime2;
         PlayerState prevState = state;
@@ -428,6 +429,7 @@ public:
         else if (state == PlayerState::tree_attack) {
             //Jakiœ warunek co bêdzie sprawdza³ czy œcie¿ka jest git
             if (closestEnemy != nullptr) {
+                player->useGravity = false;
                 rotatePlayerTowards(closestEnemy->getTransform()->getLocalPosition());
 
                 player->getAnimateBody()->setActiveAnimation("tree attack");
@@ -494,9 +496,6 @@ public:
             while (!queueAnim.empty()) {
                 queueAnim.pop();
             }
-        }
-        if (state != PlayerState::climbing) {
-            player->useGravity = false;
         }
     }
 

@@ -17,21 +17,31 @@ public:
     CollisionManager* cm;
     GameObject* player = nullptr;
     PlayerMovement* pm = nullptr;
+    float multipierDistance = 4.5f;
 
     void update(float deltaTime, bool playerAtention) {
-        Enemy* closestEnemy = nullptr;
-        glm::vec2 closestDistance = glm::vec3(1.f);
-        if (player && enemies.size() != 0) {
-            closestDistance = abs(glm::vec2(player->getTransform()->getLocalPosition().x, player->getTransform()->getLocalPosition().z) - glm::vec2(enemies.at(0)->getTransform()->getLocalPosition().x, enemies.at(0)->getTransform()->getLocalPosition().z));
-            closestEnemy = enemies.at(0);
-        }
-        for (auto& enemy : enemies) {
-            if (pm->getState() == PlayerState::climbing && player) {
-                if (glm::length(closestDistance) > glm::length(abs(glm::vec2(player->getTransform()->getLocalPosition().x, player->getTransform()->getLocalPosition().z) - glm::vec2(enemy->getTransform()->getLocalPosition().x, enemy->getTransform()->getLocalPosition().z)))) {
-                    closestEnemy = enemy;
-                    closestDistance = abs(glm::vec2(player->getTransform()->getLocalPosition().x, player->getTransform()->getLocalPosition().z) - glm::vec2(enemy->getTransform()->getLocalPosition().x, enemy->getTransform()->getLocalPosition().z));
+        if (pm->getState() == PlayerState::climbing) {
+            Enemy* closestEnemy = nullptr;
+            float yDistance;
+            float closestDistance = std::numeric_limits<float>::max();
+            if (player && !enemies.empty()) {
+                glm::vec2 playerPos = glm::vec2(player->getTransform()->getLocalPosition().x, player->getTransform()->getLocalPosition().z);
+                for (auto& enemy : enemies) {
+                    glm::vec2 enemyPos = glm::vec2(enemy->getTransform()->getLocalPosition().x, enemy->getTransform()->getLocalPosition().z);
+                    float distance = glm::distance(playerPos, enemyPos);
+                    if (distance < closestDistance) {
+                        closestEnemy = enemy;
+                        closestDistance = distance;
+                        yDistance = abs(player->getTransform()->getLocalPosition().y - enemy->getTransform()->getLocalPosition().y);
+                    }
+                }
+                if (multipierDistance * yDistance < closestDistance) {
+                    closestEnemy = nullptr;
                 }
             }
+            pm->setAttackDestination(closestEnemy);
+        }
+        for (auto& enemy : enemies) {
             if (playerAtention && glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) < 15.0f) {
                 enemy->state = EnemyState::Attacking;
             }
@@ -53,7 +63,6 @@ public:
                 break;
             }
         }
-        pm->setAttackDestination(closestEnemy);
     }
 
     void addEnemy(Enemy* enemy) {

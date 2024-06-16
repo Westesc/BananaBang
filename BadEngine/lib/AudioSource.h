@@ -8,10 +8,15 @@
 
 class AudioSource : Component {
 private:
-	unsigned int source;
+	ALuint source;
+	bool p_LoopSound = false;
 public:
-	
-	void update(Transform* Transform);
+	AudioSource(ALuint source);
+	~AudioSource();
+
+	void play();
+	void setVolume(float volume);
+	void update(Transform* transform);
 };
 
 #endif

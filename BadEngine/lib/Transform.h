@@ -7,7 +7,7 @@
 #include "Component.h"
 #include "Serialize.h"
 
-class Transform : Component {
+class Transform {
 public:
 	Transform();
 	Transform(YAML::Node node);

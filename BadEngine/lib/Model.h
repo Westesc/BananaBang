@@ -355,16 +355,22 @@ public:
     void AddTexture(unsigned int id, std::string typeName, std::string filename = "")
     {
 
-        for (auto tex : textures_loaded) {
+        bool textureUpdated = false;
+        for (auto& tex : textures_loaded) {
             if (tex.type == typeName) {
                 tex.id = id;
+                tex.path = filename; 
+                textureUpdated = true;
+                break;
             }
         }
-        Texture texture;
-        texture.id = id;
-        texture.type = typeName;
-        texture.path = filename;
-        textures_loaded.push_back(texture);
+        if (!textureUpdated) {
+            Texture texture;
+            texture.id = id;
+            texture.type = typeName;
+            texture.path = filename;
+            textures_loaded.push_back(texture);
+        }
     }
 
     Model(char* path, bool isAnim, bool rotate = true, bool gamma = false) : gammaCorrection(gamma)

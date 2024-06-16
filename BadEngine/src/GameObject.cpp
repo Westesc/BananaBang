@@ -189,11 +189,12 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
             M = glm::rotate(M, glm::radians(localTransform->localRotation.z), glm::vec3(0.f, 0.f, 1.f));
             M = glm::scale(M, localTransform->localScale);
             modelComponent->setTransform(M);
-            if (modelComponent->GetOutlineShader() != nullptr) {
+            if (modelComponent->GetOutlineShader() != nullptr && modelComponent->isAnim) {
 
                 glStencilFunc(GL_ALWAYS, 1, 0xFF);
                 glStencilMask(0xFF);
 
+                animPlayer->UpdateAnimation(deltaTime);
                 modelComponent->GetShader()->use();
                 modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
                 modelComponent->GetShader()->setMat4("view", view);
@@ -204,12 +205,12 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
                 glStencilMask(0x00);
                 //glDisable(GL_DEPTH_TEST);
 
-
+                animPlayer->UpdateAnimation(deltaTime, modelComponent->GetOutlineShader());
                 modelComponent->GetOutlineShader()->use();
                 modelComponent->GetOutlineShader()->setMat4("M", *modelComponent->getTransform());
                 modelComponent->GetOutlineShader()->setMat4("view", view);
                 modelComponent->GetOutlineShader()->setMat4("projection", perspective);
-                modelComponent->GetOutlineShader()->setFloat("outlineScale", 0.03f);
+                //modelComponent->GetOutlineShader()->setFloat("outlineScale", 0.03f);
                 modelComponent->Draw(modelComponent->GetOutlineShader());
 
                 glStencilMask(0xFF);
@@ -253,13 +254,13 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
             }
             if (modelComponent != nullptr) {
                 if (modelComponent->isAnim) {
-                    animPlayer->UpdateAnimation(deltaTime / 2);
+                    //animPlayer->UpdateAnimation(deltaTime / 2);
 
-                    modelComponent->GetShader()->use();
-                    modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
-                    modelComponent->GetShader()->setMat4("view", view);
-                    modelComponent->GetShader()->setMat4("projection", perspective);
-                    modelComponent->Draw();
+                    //modelComponent->GetShader()->use();
+                    //modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
+                    //modelComponent->GetShader()->setMat4("view", view);
+                   // modelComponent->GetShader()->setMat4("projection", perspective);
+                    //modelComponent->Draw();
                 }
             }
             /*if (modelComponent->boundingBox != nullptr) {

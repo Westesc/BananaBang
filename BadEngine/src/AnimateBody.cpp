@@ -54,7 +54,7 @@ void AnimateBody::UpdateAnimation(float deltaTime) {
 
 void AnimateBody::UpdateAnimation(float deltaTime, Shader* shader) {
     Animacje anim = searchActiveAnimation();
-    animator->UpdateAnimation(deltaTime * anim.speedAnimation);
+    //animator->UpdateAnimation(deltaTime * anim.speedAnimation);
     shader->use();
     auto transforms = animator->GetFinalBoneMatrices();
     for (int i = 0; i < transforms.size(); ++i)

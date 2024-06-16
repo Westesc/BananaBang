@@ -34,7 +34,7 @@ public:
 		animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
 		shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
 		fillingShader = new Shader("../../../../src/shaders/vs_filling.vert", "../../../../src/shaders/fs_filling.frag");
-		outlineShader = new Shader("../../../../src/shaders/vs_outline.vert", "../../../../src/shaders/fs_outline.frag");
+		outlineShader = new Shader("../../../../src/shaders/outline_animation.vert", "../../../../src/shaders/outline_animation.frag");
 		shaders = new Shader("../../../../src/shaders/vs.vert", "../../../../src/shaders/fs.frag");
 		skydomeShader = new Shader("../../../../src/shaders/vsS.vert", "../../../../src/shaders/fsS.frag");
 		mapsShader = new Shader("../../../../src/shaders/v_maps.vert", "../../../../src/shaders/f_maps.frag");

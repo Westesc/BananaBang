@@ -285,9 +285,9 @@ void generate() {
 		cm.addObject(anim);
 	}
 	sm->getActiveScene()->addObject(anim);
-	sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
-	sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
-	pm->setGroundPosition(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y);
+	anim->Move(glm::vec3(0.f, 2.f, 0.f));
+	anim->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
+	pm->setGroundPosition(anim->getTransform()->getLocalPosition().y);
 	enemyManager->player = anim;
 	anim->hp = 5;
 	GameObject* fist = new GameObject("fist");
@@ -512,6 +512,7 @@ int main() {
 
 	GameObject* anim = new GameObject("player");
 	RL.animodel ->SetShader(RL.shaderAnimation);
+	RL.animodel->SetOutlineShader(RL.outlineShader);
 	anim->addModelComponent(RL.animodel);
 	anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
 	anim->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);

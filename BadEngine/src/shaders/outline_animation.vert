@@ -10,8 +10,7 @@ layout(location = 6) in vec4 weights;
 
 uniform mat4 projection;
 uniform mat4 view;
-uniform mat4 model;
-const bool outline = true;  
+uniform mat4 M;
 const float outlineThickness = 0.05f; 
 
 const int MAX_BONES = 100;
@@ -36,15 +35,11 @@ void main()
         totalPosition += localPosition * weights[i];
     }
 	
-    mat4 viewModel = view * model;
+    mat4 viewModel = view * M;
 
-    // Adjust the position for the outline effect
     vec4 finalPosition = totalPosition;
-    if (outline)
-    {
-        vec3 normal = normalize(mat3(model) * norm); // Transform normal to world space
-        finalPosition = totalPosition + vec4(normal * outlineThickness, 0.0);
-    }
+    finalPosition = totalPosition + vec4(norm * outlineThickness, 0.0);
+
 
     gl_Position = projection * viewModel * finalPosition;
     TexCoords = tex;

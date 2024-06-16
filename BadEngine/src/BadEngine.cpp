@@ -896,7 +896,7 @@ int main() {
 		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 		lightSpaceMatrix = lightProjection * lightView;
 		// render scene from light's point of view
-		if (shadowsFrameCounter % 6 == 0) {
+		if (shadowsFrameCounter % 2 == 0) {
 			RL.depthShader->use();
 			RL.depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 			RL.depthAnimationShader->use();

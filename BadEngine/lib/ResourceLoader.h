@@ -29,6 +29,8 @@ public:
 	std::shared_ptr<Model> treebranch1;
 	std::shared_ptr<Model> planeSectormodel;
 	std::shared_ptr<Model> enemyWeaponmodel;
+	std::shared_ptr<Model> treetrunklow;
+	std::shared_ptr<Model> treeloglow;
 
 	void load() {
 		animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
@@ -47,13 +49,15 @@ public:
 		depthShader = new Shader("../../../../src/shaders/depthShader.vert", "../../../../src/shaders/depthShader.frag");
 		depthAnimationShader = new Shader("../../../../src/shaders/depthAnimationShader.vert", "../../../../src/shaders/depthAnimationShader.frag");
 		box2model = std::make_shared<Model>(const_cast<char*>("../../../../res/tree.obj"), false);
-		treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log_l1.obj"), false);
-		treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk_l.obj"), false);
+		treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log_l.obj"), false);
+		treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"), false);
 		phongShader = new Shader("../../../../src/shaders/phong.vert", "../../../../src/shaders/phong.frag");
 		phongInstancedShader = new Shader("../../../../src/shaders/phonginstanced.vert", "../../../../src/shaders/phong.frag");
 		treebranch1 = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_branch_l.obj"), false);
 		planeSectormodel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"), false);
 		enemyWeaponmodel = std::make_shared<Model>(const_cast<char*>("../../../../res/axe.obj"), false);
+		treetrunklow = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk_l.obj"), false);
+		treeloglow = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log_l.obj"), false);
 	}
 };
 #endif

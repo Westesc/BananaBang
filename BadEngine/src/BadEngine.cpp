@@ -87,6 +87,10 @@ std::vector<Transform*> transformsLog;
 std::vector<Transform*> transformsBranch;
 std::vector<Transform*> transformsEnemy;
 std::vector<Transform*> transformsEnemyWeapon;
+std::vector<Transform*> transformsTreeLow;
+std::vector<Transform*> transformsLogLow;
+GameObject* lowTree;
+GameObject* lowLog;
 float spawnerTime = 0;
 float sectorSelectorTime = 0;
 GameMode gameMode;
@@ -586,6 +590,14 @@ int main() {
 	RL.phongInstancedShader->use();
 	RL.phongInstancedShader->setVec3("lightPos", lightPos);
 
+	RL.treeloglow.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	RL.treetrunklow.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+
+	RL.treeloglow.get()->AddTexture("../../../../res/textures/Tree2_normal.png", "normalMap");
+	RL.treetrunklow.get()->AddTexture("../../../../res/textures/Tree1_normal.png", "normalMap");
+
+	RL.treetrunklow.get()->SetShader(RL.phongInstancedShader);
+	RL.treeloglow.get()->SetShader(RL.phongInstancedShader);
 
 	RL.box2model->SetShader(RL.shaderTree);
 	skydomeModel->SetShader(RL.skydomeShader);
@@ -871,36 +883,37 @@ int main() {
 				}
 			}
 		}
-		if (regenInstances) {
-			transformsBranch.clear();
-			transformsLog.clear();
-			transformsTree.clear();
-			for (auto object : sm->getActiveScene()->gameObjects) {
-				if (object->name.starts_with("sector")) {
-					for (auto tree : object->children) {
-						if (tree->name.starts_with("tree")) {
+		transformsBranch.clear();
+		transformsLog.clear();
+		transformsTree.clear();
+		transformsLogLow.clear();
+		transformsTreeLow.clear();
+		glm::vec2 PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
+		for (auto object : sm->getActiveScene()->gameObjects) {
+			if (object->name.starts_with("sector")) {
+				for (auto tree : object->children) {
+					if (tree->name.starts_with("tree")) {
+						if (glm::distance(PlayerPosv2, glm::vec2(tree->getTransform()->localPosition.x, tree->getTransform()->localPosition.z)) < 75.0f) {
 							transformsTree.push_back(tree->getTransform());
 							transformsLog.push_back(tree->children.at(0)->getTransform());
+							tree->modelComponent = RL.treetrunk;
+							tree->children.at(0)->modelComponent = RL.treelog;
 							for (auto ch : tree->children.at(0)->children)
 							{
 								transformsBranch.push_back(ch->getTransform());
 							}
 						}
+						else {
+							transformsTreeLow.push_back(tree->getTransform());
+							transformsLogLow.push_back(tree->children.at(0)->getTransform());
+							lowTree = tree;
+							lowLog = tree->children.at(0);
+							lowTree->modelComponent = RL.treetrunklow;
+							lowLog->modelComponent = RL.treeloglow;
+						}
 					}
 				}
 			}
-			for (int i = 0; i < sectorsPom * sectorsPom; i++) {
-				if (sm->getActiveScene()->findByName("sector" + std::to_string(i + 1))) {
-					if (sm->getActiveScene()->findByName("sector" + std::to_string(i + 1))->children.size() > 0) {
-						GameObject* sector = sm->getActiveScene()->findByName("sector" + std::to_string(i + 1));
-						sector->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
-						sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
-						sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
-						break;
-					}
-				}
-			}
-			regenInstances = false;
 		}
 		sm->getActiveScene()->Update(V, P, deltaTime);
 
@@ -1026,6 +1039,12 @@ int main() {
 				sector->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
 				sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
 				sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
+				if (lowTree) {
+					lowTree->getModelComponent().get()->getFirstMesh()->initInstances(transformsTreeLow);
+					lowTree->getModelComponent().get()->drawInstances();
+					lowLog->getModelComponent().get()->getFirstMesh()->initInstances(transformsLogLow);
+					lowLog->getModelComponent().get()->drawInstances();
+				}
 				break;
 			}
 		}
@@ -1065,7 +1084,7 @@ int main() {
 				camera->updateCamera(dpos);
 			}
 		}
-		/*if (buttonPressed) {
+		if (buttonPressed) {
 			for (auto go : sm->getActiveScene()->gameObjects) {
 				delete go;
 			}
@@ -1094,7 +1113,7 @@ int main() {
 								{
 									treeX = losujLiczbe2() * planeSector->localTransform->localScale.x; treeZ = losujLiczbe2() * planeSector->localTransform->localScale.z;
 								}
-							}
+							}*/
 						Tree* tree = new Tree("tree_"+std::to_string(k), 100.0f);
 						tree->isInstanced = true;
 						tree->addModelComponent(RL.treetrunk);
@@ -1283,12 +1302,12 @@ int main() {
 
 			sm->getActiveScene()->findByName("outline")->getTransform()->localPosition = glm::vec3(0.f, 0.f, 0.f);
 			sm->getActiveScene()->findByName("outline")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
-			sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);
+			sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);*/
 
 			sm->getActiveScene()->addObject(Button);
 			sm->getActiveScene()->addObject(HPcount);
 
-		}*/
+		}
 		while (input->IsKeobarodAction(window)) {
 			input->getMessage(key, action);
 

@@ -17,9 +17,9 @@ public:
 	CollisionManager(float worldSize, float sectionSize) : sectionSize(sectionSize) {
 		int numSections = worldSize / sectionSize;
 		int IDcounter = 0;
-		for (int i = -1; i < numSections*0.5f; i++) {
-			for (int j = -1; j < glm::clamp(numSections * 0.5f, 0.0f, 2.0f); j++) {
-				for (int k = -1; k < numSections * 0.5f; k++) {
+		for (int i = -1; i < numSections; i++) {
+			for (int j = -1; j < glm::clamp((float)numSections, 0.0f, 2.0f); j++) {
+				for (int k = -1; k < numSections; k++) {
 					sections.push_back(new Section(i * sectionSize, j * sectionSize, k * sectionSize, sectionSize, IDcounter));
 					IDcounter++;
 				}
@@ -36,22 +36,23 @@ public:
 		ZoneScopedN("AddObject");
 		for (auto section : sections) {
 			if (section->checkCollision(go)) {
-				addObjectToSectionAndNeighbors(go, section);
+				std::vector<int> visited;
+				addObjectToSectionAndNeighbors(go, section, &visited);
 				break;
 			}
 		}
 	}
 
-	void addObjectToSectionAndNeighbors(GameObject* go, Section* section) {
+	void addObjectToSectionAndNeighbors(GameObject* go, Section* section, std::vector<int>* visited) {
 		auto it = std::find(section->objects.begin(), section->objects.end(), go);
 		if (it == section->objects.end()) {
 			section->objects.push_back(go);
 		}
-
-		std::vector<Section*> neighbors = section->getNeighborSections(sections);
+		visited->push_back(section->ID);
+		std::vector<Section*> neighbors = section->getNeighborSections(sections, visited);
 		for (Section* neighbor : neighbors) {
 			if (neighbor->checkCollision(go)) {
-				addObjectToSectionAndNeighbors(go, neighbor);
+				addObjectToSectionAndNeighbors(go, neighbor, visited);
 			}
 		}
 	}

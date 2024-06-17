@@ -18,6 +18,27 @@ public:
         bounds = new BoundingBox(glm::vec3(x, y, z), glm::vec3(x + size, y + size, z + size), 0.0f, true);
     }
 
+    bool checkFrustumCollision(BoundingBox* frustum, glm::mat4 matrix) {
+        glm::vec3 vertices[] = {
+            glm::vec3(matrix * glm::vec4(frustum->vertices.at(0), 1.0f)),
+            glm::vec3(matrix * glm::vec4(frustum->vertices.at(1), 1.0f)),
+            glm::vec3(matrix * glm::vec4(frustum->vertices.at(2), 1.0f)),
+            glm::vec3(matrix * glm::vec4(frustum->vertices.at(3), 1.0f)),
+            glm::vec3(matrix * glm::vec4(frustum->vertices.at(4), 1.0f)),
+   			glm::vec3(matrix * glm::vec4(frustum->vertices.at(5), 1.0f)),
+            glm::vec3(matrix * glm::vec4(frustum->vertices.at(6), 1.0f)),
+			glm::vec3(matrix * glm::vec4(frustum->vertices.at(7), 1.0f))
+		};
+        for (int i = 0; i < 8; i++) {
+            if (vertices[i].x >= bounds->min.x && vertices[i].x <= bounds->max.x &&
+                vertices[i].y >= bounds->min.y && vertices[i].y <= bounds->max.y &&
+                vertices[i].z >= bounds->min.z && vertices[i].z <= bounds->max.z) {
+				return true;
+			}
+		}
+		return false;
+	}
+
     bool checkCollision(GameObject* object) {
         if (object->boundingBox) {
             glm::mat4 M = object->getTransform()->getMatrix();
@@ -69,24 +90,24 @@ public:
         return false;
     }
 
-    std::vector<Section*> getNeighborSections(std::vector<Section*> allSections) {
+    std::vector<Section*> getNeighborSections(std::vector<Section*> allSections, std::vector<int>* visited) {
         std::vector<Section*> neighbors;
-        if (getSectionByID(ID - 1)) {
+        if (getSectionByID(ID - 1) && (std::find(visited->begin(), visited->end(), ID-1) == visited->end())) {
 			neighbors.push_back(getSectionByID(ID - 1));
 		}
-        if (getSectionByID(ID + 1)) {
+        if (getSectionByID(ID + 1) && (std::find(visited->begin(), visited->end(), ID + 1) == visited->end())) {
             neighbors.push_back(getSectionByID(ID + 1));
         }
-        if (getSectionByID(ID - 10)) {
+        if (getSectionByID(ID - 10) && (std::find(visited->begin(), visited->end(), ID - 10) == visited->end())) {
 			neighbors.push_back(getSectionByID(ID - 10));
 		}
-        if (getSectionByID(ID + 10)) {
+        if (getSectionByID(ID + 10) && (std::find(visited->begin(), visited->end(), ID + 10) == visited->end())) {
             neighbors.push_back(getSectionByID(ID + 10));
         }
-        if (getSectionByID(ID - 100)) {
+        if (getSectionByID(ID - 100) && (std::find(visited->begin(), visited->end(), ID - 100) == visited->end())) {
             neighbors.push_back(getSectionByID(ID - 100));
         }
-        if (getSectionByID(ID + 100)) {
+        if (getSectionByID(ID + 100) && (std::find(visited->begin(), visited->end(), ID + 100) == visited->end())) {
 			neighbors.push_back(getSectionByID(ID + 100));
 		}
         return neighbors;

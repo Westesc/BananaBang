@@ -42,6 +42,7 @@
 #include "../lib/SectorSelector.h"
 #include "../lib/AudioManager.h"
 #include "../lib/ResourceLoader.h"
+#include "../lib/Frustum.h"
 
 bool test = false;
 bool frustumTest = false;
@@ -78,7 +79,7 @@ unsigned int maxEnemies = 5;
 unsigned int spawnedEnemies = 0;
 bool loaded = false;
 bool playerAtention = false;
-CollisionManager cm = CollisionManager(1000, 100);
+CollisionManager cm = CollisionManager(200, 40);
 Pathfinder* pathfinder = new Pathfinder();
 PBDManager* pbd = new PBDManager(10);
 EnemyStateManager* enemyManager;
@@ -452,90 +453,36 @@ void Start() {
 	pm = new PlayerMovement(sm, input, camera, tm);
 }
 
-std::array<glm::vec4, 6> calculateFrustumPlanes(const glm::mat4& viewProjectionMatrix) {
-	std::array<glm::vec4, 6> planes;
+bool CheckFrustumCollision(const std::array<Plane, 6>& planes, BoundingBox* box) {
+	for (const auto& plane : planes) {
+		glm::vec3 positiveVertex = box->min;
+		if (plane.normal.x >= 0) positiveVertex.x = box->max.x;
+		if (plane.normal.y >= 0) positiveVertex.y = box->max.y;
+		if (plane.normal.z >= 0) positiveVertex.z = box->max.z;
 
-	glm::vec4 rowX = viewProjectionMatrix[0];
-	glm::vec4 rowY = viewProjectionMatrix[1];
-	glm::vec4 rowZ = viewProjectionMatrix[2];
-	glm::vec4 rowW = viewProjectionMatrix[3];
-
-	// Left plane
-	planes[0] = rowW + rowX;
-	// Right plane
-	planes[1] = rowW - rowX;
-	// Top plane
-	planes[2] = rowW - rowY;
-	// Bottom plane
-	planes[3] = rowW + rowY;
-	// Near plane
-	planes[4] = rowW + rowZ;
-	// Far plane
-	planes[5] = rowW - rowZ;
-	for (auto& plane : planes) {
-		float length = glm::length(glm::vec3(plane));
-		plane /= length;
+		if (glm::dot(plane.normal, positiveVertex) + plane.distance < 0) {
+			return false;
+		}
 	}
-
-	return planes;
+	return true;
 }
 
-bool isBoxInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, BoundingBox& box, glm::mat4 transform) {
-	glm::vec3 vertices[] = {
-			glm::vec3(transform * glm::vec4(box.vertices.at(0), 1.0f)),
-			glm::vec3(transform * glm::vec4(box.vertices.at(1), 1.0f)),
-			glm::vec3(transform * glm::vec4(box.vertices.at(2), 1.0f)),
-			glm::vec3(transform * glm::vec4(box.vertices.at(3), 1.0f)),
-			glm::vec3(transform * glm::vec4(box.vertices.at(4), 1.0f)),
-			glm::vec3(transform * glm::vec4(box.vertices.at(5), 1.0f)),
-			glm::vec3(transform * glm::vec4(box.vertices.at(6), 1.0f)),
-			glm::vec3(transform * glm::vec4(box.vertices.at(7), 1.0f))
-	};
-	for (const auto& plane : frustumPlanes) {
-		bool allOutside = true;
-		for (const auto& vertex : vertices) {
-			if (glm::dot(glm::vec3(plane), vertex) + plane.w > 0) {
-				allOutside = false;
-				break;
+void performFrustumCulling(const std::array<Plane, 6>& planes, std::vector<Section*> sections) {
+	ZoneTransientN(zoneName, "performFrustumCulling", true);
+	for (auto section : sections) {
+		bool isVisible = CheckFrustumCollision(planes, section->bounds);
+
+		for (auto obj : section->objects) {
+			obj->isVisible = isVisible;
+		}
+		for (auto obj : section->staticObjects) {
+			obj->isVisible = isVisible;
+			for (auto ch : obj->children) {
+				ch->isVisible = isVisible;
 			}
 		}
-		if (allOutside) {
-			return false;
-		}
-	}
-	return true;
-}
-
-bool isCapsuleInFrustum(const std::array<glm::vec4, 6>& frustumPlanes, CapsuleCollider& capsule, glm::mat4 transform) {
-	for (const auto& plane : frustumPlanes) {
-		glm::vec4 normalizedPlane = plane / glm::length(glm::vec3(plane));
-		float distance = glm::dot(glm::vec3(normalizedPlane), glm::vec3(transform * glm::vec4(capsule.center, 1.0f))) + normalizedPlane.w;
-		if (distance <= -capsule.radius) {
-			return false;
-		}
-		if (distance >= capsule.height + capsule.radius) {
-			continue;
-		}
-	}
-	return true;
-}
-
-void performFrustumCulling(const std::array<glm::vec4, 6>& frustumPlanes, const std::vector<GameObject*>& objects) {
-	ZoneTransientN(zoneName, "performFrustumCulling", true);
-	bool isVisible = true;
-	for (auto object : objects) {
-		if (object->boundingBox) {
-			isVisible = isBoxInFrustum(frustumPlanes, *object->boundingBox, object->getTransform()->getMatrix());
-			object->setVisible(isVisible);
-		}
-		else if (object->capsuleCollider) {
-			isVisible = isCapsuleInFrustum(frustumPlanes, *object->capsuleCollider, object->getTransform()->getMatrix());
-			object->setVisible(isVisible);
-		}
-		performFrustumCulling(frustumPlanes, object->children);
 	}
 }
-
 
 int main() {
 	Start();
@@ -773,6 +720,7 @@ int main() {
 	sm->getActiveScene()->addObject(acknowledgmentsButton);*/
 
 	audioManager->playSound("test", true);
+	BoundingBox* frustum = new BoundingBox(glm::vec3(-10.0f, -25.0f, -2.0f), glm::vec3(10.0f, 25.0f, 200.0f), 0.0f, true);
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -816,7 +764,7 @@ int main() {
 		sm->getActiveScene()->findByName("skydome")->timeSetting(gameTime / 7, glm::vec2(10, 10));
 
 		glm::mat4 P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 5000.f);
-		std::array<glm::vec4, 6> frustumPlanes = calculateFrustumPlanes(glm::perspective(glm::radians(120.f), static_cast<float>(Window::windowWidth) / Window::windowHeight, 0.1f, 500.f) * V);
+		std::array<Plane, 6> frustumPlanes = Plane::calculateFrustumPlanes(glm::perspective(glm::radians(120.f), static_cast<float>(Window::windowWidth) / Window::windowHeight, 0.1f, 500.f) * V);
 
 		if (input->checkAnyKey())
 		{
@@ -919,38 +867,7 @@ int main() {
 				}
 			}
 		}
-		transformsBranch.clear();
-		transformsLog.clear();
-		transformsTree.clear();
-		transformsLogLow.clear();
-		transformsTreeLow.clear();
-		glm::vec2 PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
-		for (auto object : sm->getActiveScene()->gameObjects) {
-			if (object->name.starts_with("sector")) {
-				for (auto tree : object->children) {
-					if (tree->name.starts_with("tree")) {
-						if (glm::distance(PlayerPosv2, glm::vec2(tree->getTransform()->localPosition.x, tree->getTransform()->localPosition.z)) < 75.0f) {
-							transformsTree.push_back(tree->getTransform());
-							transformsLog.push_back(tree->children.at(0)->getTransform());
-							tree->modelComponent = RL.treetrunk;
-							tree->children.at(0)->modelComponent = RL.treelog;
-							for (auto ch : tree->children.at(0)->children)
-							{
-								transformsBranch.push_back(ch->getTransform());
-							}
-						}
-						else {
-							transformsTreeLow.push_back(tree->getTransform());
-							transformsLogLow.push_back(tree->children.at(0)->getTransform());
-							lowTree = tree;
-							lowLog = tree->children.at(0);
-							lowTree->modelComponent = RL.treetrunklow;
-							lowLog->modelComponent = RL.treeloglow;
-						}
-					}
-				}
-			}
-		}
+		
 		sm->getActiveScene()->Update(V, P, deltaTime);
 
 
@@ -1020,27 +937,14 @@ int main() {
 				cm.addObject(enemy);
 			}
 		}
-		if (regenInstancesEnemy) {
-			transformsEnemy.clear();
-			for (auto enemy : enemyManager->enemies) {
-				transformsEnemy.push_back(enemy->getTransform());
-			}
-			if (enemyManager->enemies.size() > 0) {
-				enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
-			}
-			regenInstancesEnemy = false;
-		}
-		transformsEnemyWeapon.clear();
-		for (auto enemy : enemyManager->enemies) {
-			if (enemy->children.at(0)->active) {
-				transformsEnemyWeapon.push_back(enemy->children.at(0)->getTransform());
-			}
-		}
 
 		pbd->simulateB4Collisions(deltaTime);
 		cm.simulate(deltaTime);
 		pbd->simulateAfterCollisions(deltaTime);
-		//performFrustumCulling(frustumPlanes, sm->getActiveScene()->gameObjects);
+		performFrustumCulling(frustumPlanes, cm.sections);
+		if (sm->getActiveScene()->findByName("player")) {
+			sm->getActiveScene()->findByName("player")->isVisible = true;
+		}
 		if (frustumTest) {
 			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 				if (sm->getActiveScene()->gameObjects.at(i)->isVisible) {
@@ -1056,6 +960,40 @@ int main() {
 			sm->getActiveScene()->findByName("skydome")->getTransform()->localPosition = camera->transform->localPosition;
 		}
 		sm->getActiveScene()->Draw(V, P);
+		transformsBranch.clear();
+		transformsLog.clear();
+		transformsTree.clear();
+		transformsLogLow.clear();
+		transformsTreeLow.clear();
+		glm::vec2 PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
+		GameObject* lowTree = nullptr;
+		GameObject* lowLog = nullptr;
+		for (auto object : sm->getActiveScene()->gameObjects) {
+			if (object->name.starts_with("sector")) {
+				for (auto tree : object->children) {
+					if (tree->name.starts_with("tree") && tree->isVisible) {
+						if (glm::distance(PlayerPosv2, glm::vec2(tree->getTransform()->localPosition.x, tree->getTransform()->localPosition.z)) < 75.0f) {
+							transformsTree.push_back(tree->getTransform());
+							transformsLog.push_back(tree->children.at(0)->getTransform());
+							tree->modelComponent = RL.treetrunk;
+							tree->children.at(0)->modelComponent = RL.treelog;
+							for (auto ch : tree->children.at(0)->children)
+							{
+								transformsBranch.push_back(ch->getTransform());
+							}
+						}
+						else {
+							transformsTreeLow.push_back(tree->getTransform());
+							transformsLogLow.push_back(tree->children.at(0)->getTransform());
+							lowTree = tree;
+							lowLog = tree->children.at(0);
+							lowTree->modelComponent = RL.treetrunklow;
+							lowLog->modelComponent = RL.treeloglow;
+						}
+					}
+				}
+			}
+		}
 		for (auto sector : sm->getActiveScene()->gameObjects) {
 			if (sector->name.starts_with("sector")) {
 				for (auto tree : sector->children) {
@@ -1068,7 +1006,7 @@ int main() {
 			}
 		}
 		for (auto sector : sm->getActiveScene()->gameObjects) {
-			if (sector->name.starts_with("sector") && sector->children.size() > 0) {
+			if (sector->name.starts_with("sector") && transformsTree.size() > 0) {
 				sector->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
 				sector->children.at(0)->getModelComponent().get()->drawInstances();
 				sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
@@ -1084,7 +1022,19 @@ int main() {
 				break;
 			}
 		}
-		if (enemyManager->enemies.size() > 0) {
+		transformsEnemy.clear();
+		for (auto enemy : enemyManager->enemies) {
+			if (enemy->isVisible) {
+				transformsEnemy.push_back(enemy->getTransform());
+			}
+		}
+		transformsEnemyWeapon.clear();
+		for (auto enemy : enemyManager->enemies) {
+			if (enemy->children.at(0)->active && enemy->isVisible) {
+				transformsEnemyWeapon.push_back(enemy->children.at(0)->getTransform());
+			}
+		}
+		if (transformsEnemy.size() > 0) {
 			RL.enemyShader->use();
 			RL.enemyShader->setMat4("view", V);
 			RL.enemyShader->setMat4("projection", P);
@@ -1510,16 +1460,18 @@ void renderImGui() {
 		buttonPressed = true;
 	}
 	for (auto go : sm->getActiveScene()->gameObjects) {
-		ImGui::Text(go->name.c_str());
-		ImGui::Text("x: %.2f, y: %.2f, z: %.2f",go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);
-		
-	}
-	if (sm->getActiveScene()->findByName("enemy0")) {
-		GameObject* enemy = sm->getActiveScene()->findByName("enemy0");
-		ImGui::Text("weapon");
-		BoundingBox* box = enemy->children.at(0)->boundingBox;
-		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", box->min.x, box->min.y, box->min.z);
-		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", box->max.x, box->max.y, box->max.z);
+		if (go->isVisible && !(go->name.starts_with("sector") || go->name.starts_with("Banana") || go->name.starts_with("Mango"))) {
+			ImGui::Text(go->name.c_str());
+			ImGui::Text("x: %.2f, y: %.2f, z: %.2f", go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);
+		}
+		if (go->name.starts_with("sector")) {
+			for (auto ch : go->children) {
+				if (ch->isVisible) {
+					ImGui::Text(ch->name.c_str());
+					ImGui::Text("x: %.2f, y: %.2f, z: %.2f", ch->localTransform->localPosition.x, ch->localTransform->localPosition.y, ch->localTransform->localPosition.z);
+				}
+			}
+		}
 	}
 	ImGui::SliderFloat("light x", &lightPos.x, -100, 100); 
 	ImGui::SliderFloat("light y", &lightPos.y, -100, 100);

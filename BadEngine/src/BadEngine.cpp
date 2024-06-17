@@ -208,6 +208,13 @@ void generate() {
 					glm::vec3 bscale = branch->localTransform->localScale;
 					branch->boundingBox = new BoundingBox(glm::vec3(1.1f, 0.0f, 1.1f),
 						glm::vec3(3.0f, 0.0f, 3.0f), 0.0f, true);
+					GameObject* leafs = new GameObject("leafs");
+					leafs->isInstanced = true;
+					leafs->localTransform->localPosition = branch->localTransform->localPosition;
+					leafs->localTransform->localPosition.x += branch->localTransform->localScale.x * 12.0f * sinf(glm::radians(branch->localTransform->localRotation.y));
+					leafs->localTransform->localPosition.z += branch->localTransform->localScale.x * 12.0f * cosf(glm::radians(branch->localTransform->localRotation.y));
+					leafs->addModelComponent(RL.leafModel);
+					branch->addChild(leafs);
 					//std::cout << branch->localTransform->localRotation.x << std::endl;
 					log->addChild(branch);
 				}
@@ -585,6 +592,9 @@ int main() {
 	RL.box2model->SetShader(RL.shaderTree);
 	skydomeModel->SetShader(RL.skydomeShader);
 	RL.enemyWeaponmodel.get()->SetShader(RL.phongInstancedShader);
+
+	RL.leafModel->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	RL.leafModel->SetShader(RL.phongInstancedShader);
 
 	skydome->addModelComponent(skydomeModel);
 

@@ -10,6 +10,7 @@
 #include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <yaml-cpp/yaml.h>
 
 
 class AudioManager {
@@ -17,6 +18,7 @@ private:
     struct SoundData {
         ALuint buffer;
         ALuint source;
+        
     };
 
 
@@ -46,6 +48,7 @@ private:
     };
 
     std::map<std::string, SoundData> sounds;
+    std::map<std::string, std::string> soundsPath;
     ALCdevice* p_ALCDevice;
     ALCcontext* p_ALCContext;
     bool loadWAV(std::string& path, ALuint& buffer,bool is3D);
@@ -53,6 +56,7 @@ private:
 public:
     AudioManager();
     ~AudioManager();
+    AudioManager(YAML::Node);
 
     void loadSound(std::string name, std::string path, bool is3D=false);
     void playSound(std::string name, bool loop = true);
@@ -63,6 +67,7 @@ public:
     void setListenerOrientation(glm::mat4 viewMatrix);
     void setRollofFactor(std::string name, float value);
     ALuint getSource(std::string name);
+    YAML::Node serialize();
 
 };
 

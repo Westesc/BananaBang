@@ -9,7 +9,7 @@
 #include <queue>
 
 
-class Input : Component {
+class Input : public Component {
 public:
 	Input(GLFWwindow* _window);
 	~Input();

@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <yaml-cpp/yaml.h>
-#include "Component.h"
 #include "Serialize.h"
 
 class Transform {

@@ -4,6 +4,7 @@
 #include <al/al.h>
 #include <al/alc.h>
 #include <glm/glm.hpp>
+#include "Component.h"
 #include "Transform.h"
 
 class AudioSource : Component {

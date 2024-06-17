@@ -42,7 +42,7 @@ void AudioManager::loadSound(std::string name, std::string path, bool is3D) {
 
 	alGenSources(1, &source);
 	alSourcei(source, AL_BUFFER, buffer);
-
+    soundsPath[name] = { path };
 	sounds[name] = { buffer,source };
 }
 
@@ -196,4 +196,13 @@ ALuint AudioManager::getSource(std::string name) {
         std::cerr << "Sound " << name << " not found!" << std::endl;
         return 0;
     }
+}
+
+YAML::Node AudioManager::serialize() {
+    YAML::Node node;
+    for (auto s : soundsPath) {
+        node["name"] = s.first;
+        node["path"] = s.second;
+    }
+    return node;
 }

@@ -348,7 +348,7 @@ public:
 
     void ManagePlayer(float& deltaTime2, float deltaTime) {
         player = sm->getActiveScene()->findByName("player");
-        player->useGravity = false;
+        player->useGravity = true;
         //std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         this->deltaTime2 = deltaTime2;
         PlayerState prevState = state;

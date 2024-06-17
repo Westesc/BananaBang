@@ -70,6 +70,7 @@ glm::vec3 lightPos(0.5f, 20.0f, 0.3f);
 float scale = 5.f;
 int sectors = 1;
 int sectorsPom = 1;
+std::vector fruits = { 2,3 }; //{bananas,mango}
 int a = 0;
 int b = 0;
 bool buttonPressed;
@@ -109,10 +110,12 @@ GameObject* backButton;
 GameObject* acknowledgments;
 
 void generate() {
+	std::cout << "przycisk generate" << std::endl;
 	playButton->uiComponent->pressed = true;
 	sectorsPom = 4;
 	a = 5;
 	b = 10;
+	std::vector<int> fruitPool;
 	GameObject* loading = new GameObject("loading");
 	UI* loadingui = new UI(plane);
 	loadingui->setTexture("../../../../res/loading.png");
@@ -149,6 +152,17 @@ void generate() {
 			planeSector->addModelComponent(RL.planeSectormodel);
 			planeSector->localTransform->localPosition = glm::vec3(i * 20 * planeSector->localTransform->localScale.x, 0.f, j * 20 * planeSector->localTransform->localScale.z);
 			int treeCount = losujLiczbe(a, b);
+
+			for (int k = 0; k < fruits.size(); k++) {
+				for (int m = 0; m < fruits.at(k); m++) {
+					fruitPool.push_back(k);
+				}
+			}
+			while (fruitPool.size() < treeCount)
+			{
+				fruitPool.push_back(fruits.size());
+			}
+			
 			for (int k = 0; k < treeCount; k++) {
 				int treeX = losujLiczbe2() * planeSector->localTransform->localScale.x;
 				int treeZ = losujLiczbe2() * planeSector->localTransform->localScale.z;
@@ -196,6 +210,28 @@ void generate() {
 					//std::cout << branch->localTransform->localRotation.x << std::endl;
 					log->addChild(branch);
 				}
+				int fruitIndex = losujLiczbe(0, fruitPool.size() - 1);
+				if (fruitPool.at(fruitIndex) != fruits.size()) {
+					GameObject* fruits = new GameObject("fruit");
+					int branchIndex = losujLiczbe(0, log->children.size()-1);
+					fruits->localTransform->localPosition = log->children.at(branchIndex)->localTransform->localPosition;
+					fruits->localTransform->localPosition.x += log->children.at(branchIndex)->localTransform->localScale.x* 12.0f* sinf(glm::radians(log->children.at(branchIndex)->localTransform->localRotation.y));
+					fruits->localTransform->localPosition.z += log->children.at(branchIndex)->localTransform->localScale.x * 12.0f * cosf(glm::radians(log->children.at(branchIndex)->localTransform->localRotation.y));
+					switch (fruitPool.at(fruitIndex)) {
+					case 0:
+						fruits->name = "Banana";
+						fruits->addModelComponent(RL.bananaModel);
+						fruits->localTransform->localScale = glm::vec3(0.1f);
+						
+						break;
+					case 1:
+						fruits->name = "Mango";
+						fruits->addModelComponent(RL.mangoModel);
+						break;
+					}
+					sm->activeScene->addObject(fruits);
+				}
+				fruitPool.erase(fruitPool.begin()+fruitIndex);
 			}
 
 			sm->activeScene->addObject(planeSector);
@@ -508,7 +544,7 @@ int main() {
 
 	AudioManager* audioManager = new AudioManager();
 	audioManager->loadSound("jungle_music", "../../../../res/media/jungle_music.wav");
-	//audioManager->playSound("jungle_music",true);
+	audioManager->playSound("jungle_music",true);
 	audioManager->loadSound("test", "../../../../res/media/test.wav",true);
 	audioManager->setSoundPosition("test", 10, 0, 0);
 
@@ -567,9 +603,9 @@ int main() {
 	skydomeModel = std::make_shared<Model>(meshSphere);
 
 	//Fruit
-	Mesh* meshFruit = new Mesh();
-	meshFruit->createSphere(20, 20, 50);
-	auto FruitModel = std::make_shared<Model>(meshFruit);
+	RL.mangoModel->SetShader(RL.diffuseShader);
+	RL.mangoModel->AddTexture("../../../../res/textures/mango.jpg", "diffuseMap");
+	
 	//drzewa
 	RL.treelog->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	RL.treetrunk->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");

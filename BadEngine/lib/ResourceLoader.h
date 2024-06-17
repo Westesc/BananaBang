@@ -31,6 +31,7 @@ public:
 	std::shared_ptr<Model> enemyWeaponmodel;
 	std::shared_ptr<Model> treetrunklow;
 	std::shared_ptr<Model> treeloglow;
+	std::shared_ptr<Model> mangoModel;
 
 	void load() {
 		animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
@@ -58,6 +59,7 @@ public:
 		enemyWeaponmodel = std::make_shared<Model>(const_cast<char*>("../../../../res/axe.obj"), false);
 		treetrunklow = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk_l.obj"), false);
 		treeloglow = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log_l.obj"), false);
+		mangoModel  = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/mango.obj"), false);
 	}
 };
 #endif

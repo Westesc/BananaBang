@@ -70,10 +70,10 @@ float boxSpeed = 3.f;
 glm::vec3 lightPos(0.5f, 20.0f, 0.3f);
 float scale = 5.f;
 int sectors = 1;
-int sectorsPom = 1;
+int sectorsPom = 4;
 std::vector fruits = { 2,3 }; //{bananas,mango}
-int a = 0;
-int b = 0;
+int a = 4;
+int b = 6;
 bool buttonPressed;
 unsigned int maxEnemies = 5;
 unsigned int spawnedEnemies = 0;
@@ -114,10 +114,10 @@ bool Lost = false;
 
 void generate() {
 	std::cout << "przycisk generate" << std::endl;
-	playButton->uiComponent->pressed = true;
+	playButton->uiComponent->pressed = true;/*
 	sectorsPom = 4;
 	a = 4;
-	b = 6;
+	b = 6;*/
 	std::vector<int> fruitPool;
 	GameObject* loading = new GameObject("loading");
 	UI* loadingui = new UI(plane);
@@ -666,6 +666,9 @@ int main() {
 
 	const TimePoint tpStart = Clock::now();
 
+	glm::mat4 V(1.f);
+	glm::mat4 P;
+	std::array<Plane, 6> frustumPlanes;
 	setupImGui(window);
 
 	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/bialy.png", "diffuseMap");
@@ -836,7 +839,6 @@ int main() {
 
 
 		tm->setTime(deltaTime);
-		glm::mat4 V(1.f);
 		if (gameMode.getMode() == GameMode::Game) {
 			pm->ManagePlayer(deltaTime2, deltaTime);
 			V = camera->getViewMatrixPlayer();
@@ -852,8 +854,8 @@ int main() {
 		//animPlayer->UpdateAnimation(deltaTime);
 		
 
-		glm::mat4 P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 5000.f);
-		std::array<Plane, 6> frustumPlanes = Plane::calculateFrustumPlanes(glm::perspective(glm::radians(120.f), static_cast<float>(Window::windowWidth) / Window::windowHeight, 0.1f, 500.f) * V);
+		P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 5000.f);
+		frustumPlanes = Plane::calculateFrustumPlanes(glm::perspective(glm::radians(120.f), static_cast<float>(Window::windowWidth) / Window::windowHeight, 0.1f, 500.f) * V);
 
 		if (input->checkAnyKey())
 		{
@@ -873,8 +875,14 @@ int main() {
 			{
 				gameMode.setMode(GameMode::Menu);
 			}
-		}
 
+			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+				a = 1;
+				b = 1;
+				generate();
+			}
+		}
+		
 		if (gameMode.getMode() == GameMode::Game) {
 			pm->ManagePlayer(deltaTime2, deltaTime);
 		}
@@ -1063,8 +1071,8 @@ int main() {
 		if (sm->getActiveScene()->findByName("player")) {
 			PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
 		}
-		GameObject* lowTree = nullptr;
-		GameObject* lowLog = nullptr;
+		lowTree = nullptr;
+		lowLog = nullptr;
 		for (auto object : sm->getActiveScene()->gameObjects) {
 			if (object->name.starts_with("sector")) {
 				for (auto tree : object->children) {
@@ -1170,230 +1178,7 @@ int main() {
 				camera->updateCamera(dpos);
 			}
 		}
-		if (buttonPressed) {
-			for (auto go : sm->getActiveScene()->gameObjects) {
-				delete go;
-			}
-			for (auto sect : cm.sections) {
-				sect->staticObjects.clear();
-				sect->objects.clear();
-			}
-			pbd->objects.clear();
-			sm->getActiveScene()->gameObjects.clear();
-			enemyManager->enemies.clear();
-			pathfinder->trees.clear();
-			spawnedEnemies = 0;
-			int sectorcounter = 1;
-			for (int i = 0; i < sectorsPom; i++) {
-				for (int j = 0; j < sectorsPom; j++) {
-					GameObject* planeSector = new GameObject("sector"+std::to_string(sectorcounter));
-					planeSector->localTransform->localScale = glm::vec3(2.f, 2.f, 2.f);
-					planeSector->addModelComponent(RL.planeSectormodel);
-					planeSector->localTransform->localPosition = glm::vec3(i * 20* planeSector->localTransform->localScale.x, 0.f, j * 20*planeSector->localTransform->localScale.z);
-					int treeCount = losujLiczbe(a, b);
-					for (int k = 0; k < treeCount; k++) {
-							int treeX = losujLiczbe2()* planeSector->localTransform->localScale.x;
-							int treeZ = losujLiczbe2()* planeSector->localTransform->localScale.z;
-							/*for (int m = 0; m < planeSector->children.size(); m++) {
-								if (!checkLocations(planeSector->children.at(m)->localTransform->getLocalPosition().x, (planeSector->children.at(m)->localTransform->getLocalPosition().z), planeSector->localTransform->localPosition.x + treeX, planeSector->localTransform->localPosition.z + treeZ, 8))
-								{
-									treeX = losujLiczbe2() * planeSector->localTransform->localScale.x; treeZ = losujLiczbe2() * planeSector->localTransform->localScale.z;
-								}
-							}*/
-						Tree* tree = new Tree("tree_"+std::to_string(k), 100.0f);
-						tree->isInstanced = true;
-						tree->addModelComponent(RL.treetrunk);
-						tree->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX ;
-						tree->localTransform->localPosition.z = planeSector->localTransform->localPosition.z +treeZ;
-						tree->addColider(1);
-						GameObject* log = new GameObject("log"+std::to_string(k));
-						log->isInstanced = true;
-						log->addModelComponent(RL.treelog);
-						log->localTransform->localPosition.x = planeSector->localTransform->localPosition.x +treeX;
-						log->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
-						log->localTransform->localPosition.y = planeSector->localTransform->localPosition.y+ 1.2;
-						log->localTransform->localRotation.y = losujLiczbe(0, 360);
-						log->addColider(1);
-						tree->addChild(log);
-						planeSector->addChild(tree);
-						int branchCount = losujLiczbe(3, 8);
-						for (int m = 0; m < branchCount; m++) {
-							GameObject* branch = new GameObject("branch" + std::to_string(m));
-							branch->isInstanced = true;
-							branch->addModelComponent(RL.treebranch1);
-							branch->localTransform->localPosition.x = planeSector->localTransform->localPosition.x + treeX;
-							branch->localTransform->localPosition.y = float(losujLiczbe((m * 13 / branchCount)+5, ((m + 1) * 13 / branchCount)+5));
-							branch->localTransform->localScale.x = 6 / branch->localTransform->localPosition.y;
-							branch->localTransform->localScale.y = 6 / branch->localTransform->localPosition.y;
-							branch->localTransform->localScale.z = 6 / branch->localTransform->localPosition.y;
-							branch->localTransform->localPosition.z = planeSector->localTransform->localPosition.z + treeZ;
-							branch->localTransform->localRotation.y = float(losujLiczbe(m * 360 / branchCount, (m + 1) * 360 / branchCount));
-							//branch->localTransform->localRotation.x =losujLiczbe(10,45) ;
-							//branch->localTransform->localRotation.z = losujLiczbe(0, 360);
-							branch->addColider(1);
-							glm::vec3 bpos = branch->localTransform->localPosition;
-							glm::vec3 bscale = branch->localTransform->localScale;
-							branch->boundingBox = new BoundingBox(glm::vec3(1.1f, 0.0f ,1.1f),
-								glm::vec3(3.0f, 0.0f, 3.0f), 0.0f, true);
-							//std::cout << branch->localTransform->localRotation.x << std::endl;
-							log->addChild(branch);
-						}
-					}
-
-					sm->activeScene->addObject(planeSector);
-					for(auto ch : planeSector->children)
-					{
-						pathfinder->trees.push_back(std::make_pair(sectorcounter, ch->getAsActualType<Tree>()));
-					}
-					transformsBranch.clear();
-					transformsLog.clear();
-					transformsTree.clear();
-					for (auto tree : pathfinder->trees) {
-						transformsTree.push_back(tree.second->getTransform());
-						transformsLog.push_back(tree.second->children.at(0)->getTransform());
-						for (auto ch : tree.second->children.at(0)->children)
-						{
-							transformsBranch.push_back(ch->getTransform());
-						}
-					}
-					if (pathfinder->trees.size() > 0) {
-						pathfinder->trees.at(0).second->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
-						pathfinder->trees.at(0).second->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
-						pathfinder->trees.at(0).second->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
-						pathfinder->sortTrees();
-					}
-					sectorcounter++;
-				}
-				loaded = true;
-				spawnerTime = 0;
-				sectorSelector->selectSector(1);
-				sectorSelectorTime = 0;
-			}
-			
-				//sm->saveScene("first");
-			buttonPressed = false;
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
-				for (auto go : sm->getActiveScene()->gameObjects.at(i)->children)
-				{
-					cm.addStaticObject(go);
-					cm.addStaticObject(go->children.at(0));
-					for (auto ch : go->children.at(0)->children)
-					{
-						cm.addStaticObject(ch);
-					}
-				}
-				sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
-
-			}
-			
-			buttonPressed = false;
-			gameMode.setMode(GameMode::Game);
-			delete tutorial1;
-			delete tutorial2;
-			delete tutorial3;
-			GameObject* Button = new GameObject("Button");
-			UI* ui = new UI(button);
-			Shader* UIShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
-			ui->addShader(UIShader);
-			ui->setTexture("../../../../res/chmury.png");
-			Button->localTransform->localPosition = glm::vec3(25.f);
-			ui->input = input;
-			//ui->onClick = std::bind(&typKlasy::nazwafunkcji,&stworzonaKalsa);
-			ui->setText("Ala ma kota");
-			Button->uiComponent = ui;
-
-			GameObject* HPcount = new GameObject("HPcount");
-			UI* ui2 = new UI(plane);
-			ui2->addShader(UIShader);
-			ui2->setTexture("../../../../res/serce5.png");
-			HPcount->localTransform->localPosition = glm::vec3(0, Window::windowHeight - 100.0f, 0.f);
-			ui->input = input;
-			HPcount->uiComponent = ui2;
-
-			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
-				for (auto go : sm->getActiveScene()->gameObjects.at(i)->children)
-				{
-					cm.addStaticObject(go);
-					cm.addStaticObject(go->children.at(0));
-					for (auto ch : go->children.at(0)->children)
-					{
-						cm.addStaticObject(ch);
-					}
-				}
-				sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
-				sm->getActiveScene()->gameObjects.at(i)->shadowSetting(lightSpaceMatrix);
-			}
-			
-			GameObject* anim = new GameObject("player");
-			//animodel->SetShader(shaderAnimation);
-			anim->addModelComponent(RL.animodel);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.4f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.5f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching2.dae"), "attack2", 1.5f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Standing Melee Punch.dae"), "attack3", 1.5f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Up Wall.dae"), "climbing up", 1.3f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Down Wall.dae"), "climbing down", 1.3f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Jump Attack.dae"), "tree attack", 0.7f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Crouch To Standing.dae"), "leave banana up", 1.4f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Standing To Crouch.dae"), "leave banana down", 1.4f);
-			anim->addAnimation(const_cast<char*>("../../../../res/animations/Sprint.dae"), "sprint", 1.f);
-
-			anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
-			pbd->objects.push_back(anim);
-			if (sm->getActiveScene()->findByName("player") == nullptr) {
-				sm->getActiveScene()->addObject(anim);
-				cm.addObject(anim);
-			}
-			sm->getActiveScene()->addObject(anim);
-			sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, 2.f, 0.f));
-			sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
-			pm->setGroundPosition(sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition().y);
-			enemyManager->player = anim;
-			anim->hp = 5;
-			GameObject* fist = new GameObject("fist");
-			anim->addChild(fist);
-			fist->capsuleCollider = new CapsuleCollider(fist->localTransform->localPosition, 3.0f, 3.0f, 1.0f, true);
-			fist->capsuleCollider->isTriggerOnly = true;
-			fist->active = false;
-
-
-			GameObject* skydome = new GameObject("skydome");
-			skydome->addModelComponent(skydomeModel);
-			skydome->getTransform()->localScale = glm::vec3(100.f);
-			sm->getActiveScene()->addObject(skydome);
-			sm->getActiveScene()->findByName("skydome")->timeSetting(gameTime / 7, glm::vec2(10, 10));
-
-			GameObject* bananaObj = new GameObject("banana");
-
-			bananaObj->addModelComponent(RL.bananaModel);
-			bananaObj->getTransform()->localPosition = glm::vec3(0.f, 1.f, -1.f);
-			bananaObj->getTransform()->localScale = glm::vec3(0.1f);
-			sm->getActiveScene()->addObject(bananaObj);
-
-
-			/*GameObject* outlineObj = new GameObject("outline");
-			auto outlinemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/Lumberjack.obj"), false);
-
-			outlinemodel->SetShader(shaderTree);
-			outlinemodel->SetOutlineShader(outlineShader);
-			outlinemodel->SetFillingShader(fillingShader);
-
-			outlineObj->addModelComponent(outlinemodel);
-			sm->getActiveScene()->addObject(outlineObj);
-
-			sm->getActiveScene()->findByName("outline")->getTransform()->localPosition = glm::vec3(0.f, 0.f, 0.f);
-			sm->getActiveScene()->findByName("outline")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
-			sm->getActiveScene()->findByName("outline")->getTransform()->localRotation = glm::vec3(0.f, 0.f, 0.f);*/
-
-			sm->getActiveScene()->addObject(Button);
-			sm->getActiveScene()->addObject(HPcount);
-
-		}
+		
 		while (input->IsKeobarodAction(window)) {
 			input->getMessage(key, action);
 
@@ -1436,33 +1221,6 @@ int main() {
 				}
 			}
 		}
-		/*for (auto object : sm->getActiveScene()->gameObjects) {
-			if (object->name.starts_with("sector")) {
-				for (auto ch : object->children) {
-					if (glm::distance(ch->getTransform()->localPosition, camera->transform->localPosition) > 100.f) {
-						if (ch->modelComponent != box2model) {
-							ch->modelComponent = box2model;
-							ch->children.at(0)->modelComponent = box2model;
-							//for (auto branch : ch->children.at(0)->children)
-							//{
-							//	branch->modelComponent = nullptr;
-							//}
-						}
-					}
-					else {
-						if (ch->modelComponent != treetrunk)
-						{
-							ch->modelComponent = treetrunk;
-							ch->children.at(0)->modelComponent = treelog;
-							for (auto branch : ch->children.at(0)->children)
-							{
-								branch->modelComponent = treebranch1;
-							}
-						}
-					}
-				}
-			}
-		}*/
 		int pom = 0;
 		if (sectorSelectorTime > 30.0f) {
 			bool selected = false;

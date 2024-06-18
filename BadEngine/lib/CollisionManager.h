@@ -251,8 +251,16 @@ public:
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
 		bool resolved = false;
 		if (second->name.starts_with("branch")) {
-			//first->localTransform->predictedPosition.y = first->localTransform->localPosition.y;
-			//resolved = true;
+			if (pm->getState() == PlayerState::climbing) {
+				if ((first->getTransform()->getLocalPosition().y - second->getTransform()->getLocalPosition().y) > 1.9f) {
+					pm->changeState(PlayerState::walking);
+					resolved = true;
+				}
+			}
+			else {
+				first->localTransform->predictedPosition.y = first->localTransform->localPosition.y;
+				resolved = true;
+			}
 		}
 		/*else if (first->velocity.y > 0 && second->name.starts_with("tree")) {
 			first->localTransform->predictedPosition = first->localTransform->localPosition;

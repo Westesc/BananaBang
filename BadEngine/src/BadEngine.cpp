@@ -207,8 +207,8 @@ void generate() {
 					branch->addColider(1);
 					glm::vec3 bpos = branch->localTransform->localPosition;
 					glm::vec3 bscale = branch->localTransform->localScale;
-					branch->boundingBox = new BoundingBox(glm::vec3(1.1f, 0.0f, 1.1f),
-						glm::vec3(3.0f, 1.0f, 3.0f), 0.0f, true);
+					branch->boundingBox = new BoundingBox(glm::vec3(1.1f, 0.0f, 0.0f),
+						glm::vec3(1.1f, 0.2f, 8.0f), 0.0f, true);
 					GameObject* leafs = new GameObject("leafs");
 					leafs->isInstanced = true;
 					leafs->localTransform->localPosition = branch->localTransform->localPosition;

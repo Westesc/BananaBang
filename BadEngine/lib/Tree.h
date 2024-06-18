@@ -51,6 +51,7 @@ public:
         children[0]->getTransform()->localPosition.y -= moveDown;
         for (auto branch : children[0]->children) {
             branch->getTransform()->localPosition.y -= moveDown;
+            branch->children.at(0)->getTransform()->localPosition.y -= moveDown;
         }
     }
 };

@@ -91,6 +91,7 @@ std::vector<Transform*> transformsEnemy;
 std::vector<Transform*> transformsEnemyWeapon;
 std::vector<Transform*> transformsTreeLow;
 std::vector<Transform*> transformsLogLow;
+std::vector<Transform*> transformsLeaves;
 GameObject* lowTree;
 GameObject* lowLog;
 float spawnerTime = 0;
@@ -207,13 +208,15 @@ void generate() {
 					glm::vec3 bpos = branch->localTransform->localPosition;
 					glm::vec3 bscale = branch->localTransform->localScale;
 					branch->boundingBox = new BoundingBox(glm::vec3(1.1f, 0.0f, 1.1f),
-						glm::vec3(3.0f, 0.0f, 3.0f), 0.0f, true);
+						glm::vec3(3.0f, 1.0f, 3.0f), 0.0f, true);
 					GameObject* leafs = new GameObject("leafs");
 					leafs->isInstanced = true;
 					leafs->localTransform->localPosition = branch->localTransform->localPosition;
 					leafs->localTransform->localPosition.x += branch->localTransform->localScale.x * 12.0f * sinf(glm::radians(branch->localTransform->localRotation.y));
 					leafs->localTransform->localPosition.z += branch->localTransform->localScale.x * 12.0f * cosf(glm::radians(branch->localTransform->localRotation.y));
+					leafs->localTransform->localPosition.y -= 10.0f;
 					leafs->addModelComponent(RL.leafModel);
+					leafs->localTransform->localScale = glm::vec3(0.4f);
 					branch->addChild(leafs);
 					//std::cout << branch->localTransform->localRotation.x << std::endl;
 					log->addChild(branch);
@@ -253,18 +256,21 @@ void generate() {
 	transformsBranch.clear();
 	transformsLog.clear();
 	transformsTree.clear();
+	transformsLeaves.clear();
 	for (auto tree : pathfinder->trees) {
 		transformsTree.push_back(tree.second->getTransform());
 		transformsLog.push_back(tree.second->children.at(0)->getTransform());
 		for (auto ch : tree.second->children.at(0)->children)
 		{
 			transformsBranch.push_back(ch->getTransform());
+			transformsLeaves.push_back(ch->children.at(0)->getTransform());
 		}
 	}
 	if (pathfinder->trees.size() > 0) {
 		pathfinder->trees.at(0).second->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
 		pathfinder->trees.at(0).second->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
 		pathfinder->trees.at(0).second->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
+		pathfinder->trees.at(0).second->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLeaves);
 		pathfinder->sortTrees();
 	}
 		
@@ -499,8 +505,8 @@ int main() {
 	AudioManager* audioManager = new AudioManager();
 	audioManager->loadSound("jungle_music", "../../../../res/media/jungle_music.wav");
 	audioManager->playSound("jungle_music",true);
-	audioManager->loadSound("test", "../../../../res/media/test.wav",true);
-	audioManager->setSoundPosition("test", 10, 0, 0);
+	//audioManager->loadSound("test", "../../../../res/media/test.wav",true);
+	//audioManager->setSoundPosition("test", 10, 0, 0);
 
 
 	GameObject* logo = new GameObject("logo");
@@ -593,7 +599,7 @@ int main() {
 	skydomeModel->SetShader(RL.skydomeShader);
 	RL.enemyWeaponmodel.get()->SetShader(RL.phongInstancedShader);
 
-	RL.leafModel->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	RL.leafModel->AddTexture("../../../../res/textures/nic.jpg", "diffuseMap");
 	RL.leafModel->SetShader(RL.phongInstancedShader);
 
 	skydome->addModelComponent(skydomeModel);
@@ -729,7 +735,7 @@ int main() {
 	acknowledgmentsButton->uiComponent = acknowledgmentsButtonui;
 	sm->getActiveScene()->addObject(acknowledgmentsButton);*/
 
-	audioManager->playSound("test", true);
+	//audioManager->playSound("test", true);
 	BoundingBox* frustum = new BoundingBox(glm::vec3(-10.0f, -25.0f, -2.0f), glm::vec3(10.0f, 25.0f, 200.0f), 0.0f, true);
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
@@ -975,6 +981,7 @@ int main() {
 		transformsTree.clear();
 		transformsLogLow.clear();
 		transformsTreeLow.clear();
+		transformsLeaves.clear();
 		glm::vec2 PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
 		GameObject* lowTree = nullptr;
 		GameObject* lowLog = nullptr;
@@ -1000,6 +1007,7 @@ int main() {
 							lowTree->modelComponent = RL.treetrunklow;
 							lowLog->modelComponent = RL.treeloglow;
 						}
+						transformsLeaves.push_back(tree->children.at(0)->children.at(0)->children.at(0)->getTransform());
 					}
 				}
 			}
@@ -1023,6 +1031,8 @@ int main() {
 				sector->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
 				sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
 				sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
+				sector->children.at(0)->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLeaves);
+				sector->children.at(0)->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
 				if (lowTree) {
 					lowTree->getModelComponent().get()->getFirstMesh()->initInstances(transformsTreeLow);
 					lowTree->getModelComponent().get()->drawInstances();

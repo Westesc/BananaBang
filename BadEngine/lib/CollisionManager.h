@@ -258,7 +258,12 @@ public:
 			first->localTransform->predictedPosition = first->localTransform->localPosition;
 			resolved = true;
 		}*/
-		else /*if (!(/*second->name.starts_with("tree") || second->name.starts_with("branch")))*/ {
+		else if (second->name.starts_with("wall")) {
+			first->localTransform->predictedPosition.x = first->localTransform->localPosition.x;
+			first->localTransform->predictedPosition.z = first->localTransform->localPosition.z;
+			resolved = true;
+		}
+		else if (!(second->name.starts_with("branch"))) {
 			if (first->name.starts_with("player") && pm->getInput()->checkKey(GLFW_KEY_R)) {
 				if (second->name.starts_with("tree") || second->name.starts_with("log")) {
 					pm->changeState(PlayerState::climbing);

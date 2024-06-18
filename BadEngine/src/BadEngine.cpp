@@ -253,6 +253,46 @@ void generate() {
 			sectorcounter++;
 		}
 	}
+	GameObject* wall1 = new GameObject("wall1");
+	wall1->boundingBox = new BoundingBox(glm::vec3(-8.0f, 0.0f, -8.0f), glm::vec3(152.0f, 100.0f, -8.5f), 0.0f, true);
+	GameObject* wall2 = new GameObject("wall2");
+	wall2->boundingBox = new BoundingBox(glm::vec3(-8.0f, 0.0f, -8.0f), glm::vec3(-8.5f, 100.0f, 152.0f), 0.0f, true);
+	GameObject* wall3 = new GameObject("wall3");
+	wall3->boundingBox = new BoundingBox(glm::vec3(152.0f, 0.0f, -8.0f), glm::vec3(151.5f, 100.0f, 152.0f), 0.0f, true);
+	GameObject* wall4 = new GameObject("wall4");
+	wall4->boundingBox = new BoundingBox(glm::vec3(-8.0f, 0.0f, 152.0f),glm::vec3(152.0f, 100.0f, 151.5f), 0.0f, true);
+	GameObject* planeWall1 = new GameObject("planeWall1");
+	planeWall1->addModelComponent(RL.planeModel);
+	planeWall1->getTransform()->localRotation.y = 180.0f;
+	planeWall1->getTransform()->localRotation.x = -90.0f;
+	planeWall1->getTransform()->localScale = glm::vec3(10.0f, 4.0f, 1.0f);
+	planeWall1->getTransform()->localPosition = glm::vec3(100.0f, 0.0f, -8.0f);
+	GameObject* planeWall2 = new GameObject("planeWall2");
+	planeWall2->addModelComponent(RL.planeModel);
+	planeWall2->getTransform()->localRotation.y = 270.0f;
+	planeWall2->getTransform()->localRotation.x = -90.f;
+	planeWall2->getTransform()->localScale = glm::vec3(10.0f, 4.0f, 1.0f);
+	planeWall2->getTransform()->localPosition = glm::vec3(-8.0f, 0.0f, 0.0f);
+	GameObject* planeWall3 = new GameObject("planeWall3");
+	planeWall3->addModelComponent(RL.planeModel);
+	planeWall3->getTransform()->localRotation.y = 0.0f;
+	planeWall3->getTransform()->localRotation.x = -90.0f;
+	planeWall3->getTransform()->localScale = glm::vec3(10.0f, 4.0f, 1.0f);
+	planeWall3->getTransform()->localPosition = glm::vec3(40.0f, 0.0f, 152.0f);
+	GameObject* planeWall4 = new GameObject("planeWall4");
+	planeWall4->addModelComponent(RL.planeModel);
+	planeWall4->getTransform()->localRotation.y = 90.0f;
+	planeWall4->getTransform()->localRotation.x = -90.0f;
+	planeWall4->getTransform()->localScale = glm::vec3(10.0f, 4.0f, 1.0f);
+	planeWall4->getTransform()->localPosition = glm::vec3(100.0f, 0.0f, 78.0f);
+	sm->getActiveScene()->addObject(wall1);
+	sm->getActiveScene()->addObject(wall2);
+	sm->getActiveScene()->addObject(wall3);
+	sm->getActiveScene()->addObject(wall4);
+	sm->getActiveScene()->addObject(planeWall1);
+	sm->getActiveScene()->addObject(planeWall2);
+	sm->getActiveScene()->addObject(planeWall3);
+	sm->getActiveScene()->addObject(planeWall4);
 	transformsBranch.clear();
 	transformsLog.clear();
 	transformsTree.clear();
@@ -293,7 +333,9 @@ void generate() {
 			}
 		}
 		sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
-
+		if (sm->getActiveScene()->gameObjects.at(i)->name.starts_with("wall")) {
+			cm.addStaticObject(sm->getActiveScene()->gameObjects.at(i));
+		}
 	}
 
 	buttonPressed = false;
@@ -356,7 +398,7 @@ void generate() {
 		cm.addObject(anim);
 	}
 	sm->getActiveScene()->addObject(anim);
-	anim->Move(glm::vec3(0.f, 2.f, 0.f));
+	anim->Move(glm::vec3(3.0f, 2.0f, 3.0f));
 	anim->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
 	pm->setGroundPosition(anim->getTransform()->getLocalPosition().y);
 	enemyManager->player = anim;
@@ -601,6 +643,9 @@ int main() {
 
 	RL.leafModel->AddTexture("../../../../res/textures/nic.jpg", "diffuseMap");
 	RL.leafModel->SetShader(RL.phongInstancedShader);
+
+	RL.planeModel.get()->AddTexture("../../../../res/junglewall.jpg", "diffuseMap");
+	RL.planeModel.get()->SetShader(RL.diffuseShader);
 
 	skydome->addModelComponent(skydomeModel);
 
@@ -886,7 +931,9 @@ int main() {
 		
 		sm->getActiveScene()->Update(V, P, deltaTime);
 
-
+		RL.diffuseShader->use();
+		RL.diffuseShader->setMat4("view", V);
+		RL.diffuseShader->setMat4("projection", P);
 		//generating shadows
 
 		glm::mat4 lightProjection, lightView;

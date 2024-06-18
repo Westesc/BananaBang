@@ -33,6 +33,7 @@ public:
 	std::shared_ptr<Model> treeloglow;
 	std::shared_ptr<Model> mangoModel;
 	std::shared_ptr<Model> leafModel;
+	std::shared_ptr<Model> planeModel;
 
 	void load() {
 		animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/Walking.dae"), true);
@@ -62,6 +63,7 @@ public:
 		treeloglow = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log_l.obj"), false);
 		mangoModel  = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/mango.obj"), false);
 		leafModel = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/leafes.obj"), false);
+		planeModel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"), false);
 	}
 };
 #endif

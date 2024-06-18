@@ -110,6 +110,7 @@ GameObject* tutorialButton;
 GameObject* acknowledgmentsButton;
 GameObject* backButton;
 GameObject* acknowledgments;
+bool Lost = false;
 
 void generate() {
 	std::cout << "przycisk generate" << std::endl;
@@ -230,14 +231,17 @@ void generate() {
 					fruits->localTransform->localPosition.z += log->children.at(branchIndex)->localTransform->localScale.x * 12.0f * cosf(glm::radians(log->children.at(branchIndex)->localTransform->localRotation.y));
 					switch (fruitPool.at(fruitIndex)) {
 					case 0:
-						fruits->name = "Banana";
+						fruits->name = "FruitBanana";
 						fruits->addModelComponent(RL.bananaModel);
 						fruits->localTransform->localScale = glm::vec3(0.1f);
-						
+						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 10.0f, 10.0f, 1.0f, true);
+						fruits->capsuleCollider->isTriggerOnly = true;
 						break;
 					case 1:
-						fruits->name = "Mango";
+						fruits->name = "FruitMango";
 						fruits->addModelComponent(RL.mangoModel);
+						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 1.0f, 1.0f, 1.0f, true);
+						fruits->capsuleCollider->isTriggerOnly = true;
 						break;
 					}
 					sm->activeScene->addObject(fruits);
@@ -330,6 +334,10 @@ void generate() {
 			for (auto ch : go->children.at(0)->children)
 			{
 				cm.addStaticObject(ch);
+				for (auto fruit : ch->children)
+				{
+					cm.addStaticObject(fruit);
+				}
 			}
 		}
 		sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
@@ -781,7 +789,25 @@ int main() {
 	sm->getActiveScene()->addObject(acknowledgmentsButton);*/
 
 	//audioManager->playSound("test", true);
-	BoundingBox* frustum = new BoundingBox(glm::vec3(-10.0f, -25.0f, -2.0f), glm::vec3(10.0f, 25.0f, 200.0f), 0.0f, true);
+	Scene* LoseScene = new Scene("LoseScreen");
+	GameObject* loseScreen = new GameObject("loseScreen");
+	UI* loseScreenUI = new UI(writing);
+	loseScreenUI->addShader(LogoShader);
+	loseScreenUI->setText("Nie udało ci się powstrzymać wycinki lasu");
+	loseScreen->uiComponent = loseScreenUI;
+	loseScreen->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight * 0.5f, 0.0f);
+	LoseScene->addObject(loseScreen);
+	GameObject* returnButton = new GameObject("returnButton");
+	UI* returnButtonUI = new UI(button);
+	returnButtonUI->addShader(LogoShader);
+	returnButtonUI->setTexture("../../../../res/button.png");
+	returnButtonUI->setSize(glm::vec2(150.0f, 60.f));
+	returnButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 100.0f, 0.0f);
+	returnButtonUI->input = input;
+	returnButtonUI->onClick = []() { sm->activeScene = sm->scenes.at(0); };
+	returnButtonUI->setText("RETURN");
+	returnButton->uiComponent = returnButtonUI;
+	LoseScene->addObject(returnButton);
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -813,6 +839,7 @@ int main() {
 		if (gameMode.getMode() == GameMode::Game) {
 			pm->ManagePlayer(deltaTime2, deltaTime);
 			V = camera->getViewMatrixPlayer();
+			sm->getActiveScene()->findByName("skydome")->timeSetting(gameTime / 7, glm::vec2(10, 10));
 		}
 		else if (gameMode.getMode() != GameMode::Game) {
 
@@ -822,7 +849,7 @@ int main() {
 		audioManager->setListenerOrientation(V);
 		//animacje
 		//animPlayer->UpdateAnimation(deltaTime);
-		sm->getActiveScene()->findByName("skydome")->timeSetting(gameTime / 7, glm::vec2(10, 10));
+		
 
 		glm::mat4 P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 5000.f);
 		std::array<Plane, 6> frustumPlanes = Plane::calculateFrustumPlanes(glm::perspective(glm::radians(120.f), static_cast<float>(Window::windowWidth) / Window::windowHeight, 0.1f, 500.f) * V);
@@ -971,6 +998,7 @@ int main() {
 				}
 				else {
 					sm->getActiveScene()->findByName("HPcount")->uiComponent->setTexture("../../../../res/serce0.png");
+					Lost = true;
 				}
 			}
 			cm.addObject(sm->getActiveScene()->findByName("player"));
@@ -1029,7 +1057,10 @@ int main() {
 		transformsLogLow.clear();
 		transformsTreeLow.clear();
 		transformsLeaves.clear();
-		glm::vec2 PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
+		glm::vec2 PlayerPosv2 = glm::vec2(0.f, 0.f);
+		if (sm->getActiveScene()->findByName("player")) {
+			PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
+		}
 		GameObject* lowTree = nullptr;
 		GameObject* lowLog = nullptr;
 		for (auto object : sm->getActiveScene()->gameObjects) {
@@ -1498,6 +1529,11 @@ int main() {
 				enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
 				enemy->isInstanced = true;
 			}
+		}
+		if (Lost) {
+			sm->activeScene = LoseScene;
+			gameMode.setMode(GameMode::Debug);
+			Lost = false;
 		}
 		renderImGui();
 		glfwSwapBuffers(window);

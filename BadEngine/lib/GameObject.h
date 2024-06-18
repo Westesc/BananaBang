@@ -40,6 +40,7 @@ public:
 	int hp = 0;
 	bool isInstanced = false;
 	bool useGravity = true;
+	bool markedForDeletion = false;
 
 	void setParent(GameObject* Parent);
 	void addChild(GameObject* Child);

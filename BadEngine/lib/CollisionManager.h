@@ -251,7 +251,7 @@ public:
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
 		bool resolved = false;
 		if (second->name.starts_with("branch")) {
-			if (pm->getState() == PlayerState::climbing) {
+			if (pm->getState() == PlayerState::climbing || pm->getState() == PlayerState::air || pm->getState() == PlayerState::jump_up) {
 				if ((first->getTransform()->getLocalPosition().y - second->getTransform()->getLocalPosition().y) > 1.9f) {
 					pm->changeState(PlayerState::walking);
 					resolved = true;
@@ -472,6 +472,10 @@ public:
 				for (int j = 0; j < section->staticObjects.size(); j++) {
 					if (checkCollisionPBDStatic(section->objects.at(i), section->staticObjects.at(j))) {
 						//separateStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
+						if (section->objects.at(i)->name == "player" && section->staticObjects.at(j)->name.starts_with("Fruit")) {
+							std::cout << "Fruit" << std::endl;
+							resolveFruits(section->objects.at(i), section->staticObjects.at(j));
+						}
 						resolveCollisionStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
 					}
 				}
@@ -498,6 +502,16 @@ public:
 					}
 				}
 			}
+			section->staticObjects.erase(
+				std::remove_if(section->staticObjects.begin(), section->staticObjects.end(), [](GameObject* obj) {
+					if (obj->markedForDeletion) {
+						delete obj;
+						return true;
+					}
+					return false;
+					}),
+				section->staticObjects.end()
+			);
 		}
 	}
 
@@ -721,6 +735,13 @@ public:
 		}
 		if (hit) {
 			trigger->active = false;
+		}
+	}
+
+	void resolveFruits(GameObject* player, GameObject* fruit) {
+		if (player->hp < 5) {
+			player->hp += 1;
+			fruit->markedForDeletion = true;
 		}
 	}
 };

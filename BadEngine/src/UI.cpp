@@ -298,11 +298,14 @@ void UI::update(Transform* transform) {
 		glm::vec2 mousePosition = input->getMousePositionOnScreen();
 		mousePosition.y = Window::windowHeight - mousePosition.y;
 		//printf("x: %.f	y: %.f", mousePosition.x, mousePosition.y);
-		if(input->getPressKey()!=-1)
-		if(mousePosition.x>transform->getLocalPosition().x && mousePosition.x < transform->getLocalPosition().x + size.x * transform->getLocalScale().x)
-			if (mousePosition.y > transform->getLocalPosition().y && mousePosition.y < transform->getLocalPosition().y + size.y * transform->getLocalScale().y) {
-				printf("przycisk dzia³a\n");
-				onClick();
+		if (input->checkKey(0)) {
+			if (mousePosition.x > transform->getLocalPosition().x && mousePosition.x < transform->getLocalPosition().x + size.x * transform->getLocalScale().x) {
+				if (mousePosition.y > transform->getLocalPosition().y && mousePosition.y < transform->getLocalPosition().y + size.y * transform->getLocalScale().y) {
+					printf("przycisk dzia³a\n");
+					onClick();
+				}
 			}
+		}
+		
 	}
 }

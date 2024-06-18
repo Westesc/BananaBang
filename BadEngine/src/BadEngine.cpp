@@ -116,8 +116,8 @@ void generate() {
 	std::cout << "przycisk generate" << std::endl;
 	playButton->uiComponent->pressed = true;
 	sectorsPom = 4;
-	a = 5;
-	b = 10;
+	a = 4;
+	b = 6;
 	std::vector<int> fruitPool;
 	GameObject* loading = new GameObject("loading");
 	UI* loadingui = new UI(plane);
@@ -240,6 +240,7 @@ void generate() {
 					case 1:
 						fruits->name = "FruitMango";
 						fruits->addModelComponent(RL.mangoModel);
+						fruits->localTransform->localScale = glm::vec3(2.f);
 						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 1.0f, 1.0f, 1.0f, true);
 						fruits->capsuleCollider->isTriggerOnly = true;
 						break;
@@ -626,11 +627,11 @@ int main() {
 	RL.treebranch1->AddTexture("../../../../res/textures/Tree3_normal.png", "normalMap");
 
 	RL.treebranch1->SetShader(RL.phongInstancedShader);
-	RL.planeSectormodel->AddTexture("../../../../res/drewno.png", "diffuseMap");
-	RL.planeSectormodel->AddTexture("../../../../res/normal.png", "normalMap");
+	RL.planeSectormodel->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	RL.planeSectormodel->AddTexture("../../../../res/floor_texture.jpg", "diffuseMap2");
 	RL.treetrunk->SetShader(RL.phongInstancedShader);
 	RL.treelog->SetShader(RL.phongInstancedShader);
-	RL.planeSectormodel->SetShader(RL.phongShader);
+	RL.planeSectormodel->SetShader(RL.groundShader);
 	RL.treetrunk.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	RL.treelog.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
 	RL.phongInstancedShader->use();
@@ -962,7 +963,8 @@ int main() {
 		RL.diffuseShader->setMat4("view", V);
 		RL.diffuseShader->setMat4("projection", P);
 		//generating shadows
-
+		//if(sm->activeScene->findByName("player"))
+			//lightPos = sm->activeScene->findByName("player")->localTransform->localPosition + glm::vec3(0.5f, 20.0f, 0.3f);
 		glm::mat4 lightProjection, lightView;
 		float near_plane = 1.0f, far_plane = 100.f;
 		lightProjection = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, near_plane, far_plane);
@@ -1102,7 +1104,7 @@ int main() {
 			}
 		}
 		for (auto sector : sm->getActiveScene()->gameObjects) {
-			if (sector->name.starts_with("sector") && transformsTree.size() > 0) {
+			if (sector->name.starts_with("sector") && transformsTree.size() > 0 && sector->children.size()>0) {
 				sector->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
 				sector->children.at(0)->getModelComponent().get()->drawInstances();
 				sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);

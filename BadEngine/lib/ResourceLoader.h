@@ -16,6 +16,7 @@ public:
 	Shader* shaderTree;
 	Shader* enemyShader;
 	Shader* diffuseShader;
+	Shader* groundShader;
 	std::shared_ptr<Model> enemyModel;
 	std::shared_ptr<Model> outlinemodel;
 	std::shared_ptr<Model> bananaModel;
@@ -46,6 +47,7 @@ public:
 		shaderTree = new Shader("../../../../src/shaders/vsTree.vert", "../../../../src/shaders/fsTree.frag");
 		enemyShader = new Shader("../../../../src/shaders/enemy.vert", "../../../../src/shaders/enemy.frag");
 		diffuseShader = new Shader("../../../../src/shaders/diffuse.vert", "../../../../src/shaders/diffuse.frag");
+		groundShader = new Shader("../../../../src/shaders/ground.vert", "../../../../src/shaders/ground.frag");
 		enemyModel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"), false);
 		outlinemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/Lumberjack.obj"), false);
 		bananaModel = std::make_shared<Model>(const_cast<char*>("../../../../res/banana.obj"), false);

@@ -26,7 +26,7 @@ private:
     glm::mat4* Transform;
     glm::mat4* prevTransform = new glm::mat4(1.f);
     std::vector<Texture> textures_loaded;
-    std::vector<Mesh*> meshes;
+    
     std::string directory;
     Shader* shader;
     Shader* outlineShader = nullptr;
@@ -319,6 +319,7 @@ public:
     bool rotating;
     bool isBlue, iswhite;
     bool isAnim = false;
+    std::vector<Mesh*> meshes;
 
     bool checkAnim() {
         return isAnim;
@@ -490,8 +491,14 @@ public:
         }
     }
 
-    void drawInstances() {
+    /*void drawInstances() {
         getFirstMesh()->drawInstances(shader, textures_loaded);
+    }*/
+
+    void drawInstances() {
+        for (auto mesh : meshes) {
+			mesh->drawInstances(shader, textures_loaded);
+		}
     }
 
     void DrawBoundingBox(const BoundingBox& bbox) {

@@ -92,6 +92,8 @@ std::vector<Transform*> transformsEnemyWeapon;
 std::vector<Transform*> transformsTreeLow;
 std::vector<Transform*> transformsLogLow;
 std::vector<Transform*> transformsLeaves;
+std::vector<Transform*> transformsBanana;
+std::vector<Transform*> transformsMango;
 GameObject* lowTree;
 GameObject* lowLog;
 float spawnerTime = 0;
@@ -234,18 +236,20 @@ void generate() {
 						fruits->name = "FruitBanana";
 						fruits->addModelComponent(RL.bananaModel);
 						fruits->localTransform->localScale = glm::vec3(0.1f);
-						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 10.0f, 10.0f, 1.0f, true);
+						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 2.0f, 2.0f, 1.0f, true);
 						fruits->capsuleCollider->isTriggerOnly = true;
 						break;
 					case 1:
 						fruits->name = "FruitMango";
 						fruits->addModelComponent(RL.mangoModel);
 						fruits->localTransform->localScale = glm::vec3(2.f);
-						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 1.0f, 1.0f, 1.0f, true);
+						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 2.0f, 2.0f, 1.0f, true);
 						fruits->capsuleCollider->isTriggerOnly = true;
 						break;
 					}
-					sm->activeScene->addObject(fruits);
+					fruits->isInstanced = true;
+					log->children.at(branchIndex)->addChild(fruits);
+					//sm->activeScene->addObject(fruits);
 				}
 				fruitPool.erase(fruitPool.begin()+fruitIndex);
 			}
@@ -302,6 +306,8 @@ void generate() {
 	transformsLog.clear();
 	transformsTree.clear();
 	transformsLeaves.clear();
+	transformsBanana.clear();
+	transformsMango.clear();
 	for (auto tree : pathfinder->trees) {
 		transformsTree.push_back(tree.second->getTransform());
 		transformsLog.push_back(tree.second->children.at(0)->getTransform());
@@ -316,6 +322,14 @@ void generate() {
 		pathfinder->trees.at(0).second->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
 		pathfinder->trees.at(0).second->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
 		pathfinder->trees.at(0).second->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLeaves);
+		for (auto fruit :pathfinder->trees.at(0).second->children.at(0)->children.at(0)->children) {
+			if (fruit->name == "FruitBanana") {
+				transformsBanana.push_back(fruit->getTransform());
+			}
+			else if (fruit->name == "FruitMango") {
+				transformsMango.push_back(fruit->getTransform());
+			}
+		}
 		pathfinder->sortTrees();
 	}
 		
@@ -335,9 +349,8 @@ void generate() {
 			for (auto ch : go->children.at(0)->children)
 			{
 				cm.addStaticObject(ch);
-				for (auto fruit : ch->children)
-				{
-					cm.addStaticObject(fruit);
+				if (ch->children.size() > 1) {
+					cm.addStaticObject(ch->children.at(1));
 				}
 			}
 		}
@@ -430,7 +443,7 @@ void generate() {
 	bananaObj->addModelComponent(RL.bananaModel);
 	bananaObj->getTransform()->localPosition = glm::vec3(0.f, 1.f, -1.f);
 	bananaObj->getTransform()->localScale = glm::vec3(0.1f);
-	sm->getActiveScene()->addObject(bananaObj);
+	//sm->getActiveScene()->addObject(bananaObj);
 
 	sm->getActiveScene()->addObject(Button);
 	sm->getActiveScene()->addObject(HPcount);
@@ -594,7 +607,7 @@ int main() {
 	GameObject* outlineObj = new GameObject("outline");
 
 	RL.bananaModel->AddTexture("../../../../res/textures/Banana.png", "diffuseMap");
-	RL.bananaModel->SetShader(RL.diffuseShader);
+	RL.bananaModel->SetShader(RL.diffuseInstancedShader);
 
 	RL.outlinemodel->SetShader(RL.shaderTree);
 	RL.outlinemodel->SetOutlineShader(RL.outlineShader);
@@ -614,7 +627,7 @@ int main() {
 	skydomeModel = std::make_shared<Model>(meshSphere);
 
 	//Fruit
-	RL.mangoModel->SetShader(RL.diffuseShader);
+	RL.mangoModel->SetShader(RL.diffuseInstancedShader);
 	RL.mangoModel->AddTexture("../../../../res/textures/mango.jpg", "diffuseMap");
 	
 	//drzewa
@@ -812,6 +825,8 @@ int main() {
 	returnButtonUI->setText("RETURN");
 	returnButton->uiComponent = returnButtonUI;
 	LoseScene->addObject(returnButton);
+
+	bool fruitsrenderd = false;
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -943,6 +958,9 @@ int main() {
 							for (auto ch : tree->children.at(0)->children)
 							{
 								sect->staticObjects.erase(std::remove(sect->staticObjects.begin(), sect->staticObjects.end(), ch), sect->staticObjects.end());
+								if (ch->children.size() > 1) {
+									sect->staticObjects.erase(std::remove(sect->staticObjects.begin(), sect->staticObjects.end(), ch->children.at(1)), sect->staticObjects.end());
+								}
 							}
 						}
 						pathfinder->trees.erase(std::remove_if(pathfinder->trees.begin(), pathfinder->trees.end(), [treeActual](std::pair<int, Tree*> pair) {return pair.second == treeActual; }), pathfinder->trees.end());
@@ -970,6 +988,9 @@ int main() {
 		RL.diffuseShader->use();
 		RL.diffuseShader->setMat4("view", V);
 		RL.diffuseShader->setMat4("projection", P);
+		RL.diffuseInstancedShader->use();
+		RL.diffuseInstancedShader->setMat4("view", V);
+		RL.diffuseInstancedShader->setMat4("projection", P);
 		//generating shadows
 		//if(sm->activeScene->findByName("player"))
 			//lightPos = sm->activeScene->findByName("player")->localTransform->localPosition + glm::vec3(0.5f, 20.0f, 0.3f);
@@ -1067,6 +1088,8 @@ int main() {
 		transformsLogLow.clear();
 		transformsTreeLow.clear();
 		transformsLeaves.clear();
+		transformsBanana.clear();
+		transformsMango.clear();
 		glm::vec2 PlayerPosv2 = glm::vec2(0.f, 0.f);
 		if (sm->getActiveScene()->findByName("player")) {
 			PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
@@ -1096,6 +1119,14 @@ int main() {
 							lowLog->modelComponent = RL.treeloglow;
 						}
 						transformsLeaves.push_back(tree->children.at(0)->children.at(0)->children.at(0)->getTransform());
+						if (tree->children.at(0)->children.at(0)->children.size() > 1) {
+							if (tree->children.at(0)->children.at(0)->children.at(1)->name.ends_with("Banana")) {
+								transformsBanana.push_back(tree->children.at(0)->children.at(0)->children.at(1)->getTransform());
+							}
+							else if (tree->children.at(0)->children.at(0)->children.at(1)->name.ends_with("Mango")) {
+								transformsMango.push_back(tree->children.at(0)->children.at(0)->children.at(1)->getTransform());
+							}
+						}
 					}
 				}
 			}
@@ -1113,13 +1144,21 @@ int main() {
 		}
 		for (auto sector : sm->getActiveScene()->gameObjects) {
 			if (sector->name.starts_with("sector") && transformsTree.size() > 0 && sector->children.size()>0) {
-				sector->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
+				for (auto mesh : sector->children.at(0)->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsTree);
+				}
 				sector->children.at(0)->getModelComponent().get()->drawInstances();
-				sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
+				for (auto mesh : sector->children.at(0)->children.at(0)->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsLog);
+				}
 				sector->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
-				sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
+				for (auto mesh : sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsBranch);
+				}
 				sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
-				sector->children.at(0)->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLeaves);
+				for (auto mesh : sector->children.at(0)->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsLeaves);
+				}
 				sector->children.at(0)->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
 				if (lowTree) {
 					lowTree->getModelComponent().get()->getFirstMesh()->initInstances(transformsTreeLow);
@@ -1127,6 +1166,38 @@ int main() {
 					lowLog->getModelComponent().get()->getFirstMesh()->initInstances(transformsLogLow);
 					lowLog->getModelComponent().get()->drawInstances();
 				}
+				break;
+			}
+		}
+		for (auto tree : pathfinder->trees) {
+			for (auto fruit : tree.second->children.at(0)->children.at(0)->children) {
+				if (fruit->name == "FruitBanana" && transformsBanana.size() > 0) {
+					for (auto mesh : fruit->getModelComponent().get()->meshes) {
+						mesh->initInstances(transformsBanana);
+					}
+					fruit->getModelComponent().get()->drawInstances();
+					fruitsrenderd = true;
+					break;
+				}
+			}
+			if (fruitsrenderd) {
+				fruitsrenderd = false;
+				break;
+			}
+		}
+		for (auto tree : pathfinder->trees) {
+			for (auto fruit : tree.second->children.at(0)->children.at(0)->children) {
+				if (fruit->name == "FruitMango" && transformsMango.size() > 0) {
+					for (auto mesh : fruit->getModelComponent().get()->meshes) {
+						mesh->initInstances(transformsMango);
+					}
+					fruit->getModelComponent().get()->drawInstances();
+					fruitsrenderd = true;
+					break;
+				}
+			}
+			if (fruitsrenderd) {
+				fruitsrenderd = false;
 				break;
 			}
 		}
@@ -1146,13 +1217,17 @@ int main() {
 			RL.enemyShader->use();
 			RL.enemyShader->setMat4("view", V);
 			RL.enemyShader->setMat4("projection", P);
-			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
+			for (auto mesh : enemyManager->enemies.at(0)->getModelComponent().get()->meshes) {
+				mesh->initInstances(transformsEnemy);
+			}
 			enemyManager->enemies.at(0)->getModelComponent().get()->drawInstances();
 			enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->GetShader()->use();
 			enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->GetShader()->setMat4("view", V);
 			enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->GetShader()->setMat4("projection", P);
 			if (transformsEnemyWeapon.size() > 0) {
-				enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemyWeapon);
+				for (auto mesh : enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsEnemyWeapon);
+				}
 				enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
 			}
 		}

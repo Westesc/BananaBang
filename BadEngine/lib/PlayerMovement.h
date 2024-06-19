@@ -147,7 +147,7 @@ private:
         float z = treePosition.z + radius * std::sin(angle);
 
         glm::vec3 newPosition = glm::vec3(x, player->getTransform()->getLocalPosition().y, z);
-        //player->getTransform()->localPosition = newPosition;
+        player->getTransform()->localPosition = newPosition;
     }
 
     void MovePlayer(float deltaTime) {
@@ -205,11 +205,11 @@ private:
 
         glm::vec3 finalPosition = player->getTransform()->getLocalPosition();
         float jumpDistance = glm::length(finalPosition.y - initialPosition.y);
-        /*if (jumpDistance == 0.0f) {
+        if (jumpDistance == 0.0f) {
             state = PlayerState::walking;
             rb->upwardsSpeed = 0.f;
             sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("walking");
-        }*/
+        }
         if (jumpDistance > limitJump) {
             state = PlayerState::air;
             rb->upwardsSpeed = 0.f;

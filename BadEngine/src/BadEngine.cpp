@@ -435,7 +435,7 @@ void generate() {
 	}
 	glm::vec3 capsuleCenter = anim->getTransform()->getLocalPosition();
 	capsuleCenter.y += 0.5f;
-	anim->capsuleCollider = new CapsuleCollider(capsuleCenter, 0.03f, 0.5f, 1.0f, true);
+	anim->capsuleCollider = new CapsuleCollider(capsuleCenter, 0.03f, 0.1f, 1.0f, true);
 	anim->getTransform()->localScale = glm::vec3(40.f);
 	anim->getTransform()->localPosition = glm::vec3(3.0f, 2.0f, 3.0f);
 
@@ -1679,6 +1679,15 @@ void renderImGui() {
 		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", enemy->localTransform->localPosition.x, enemy->localTransform->localPosition.y, enemy->localTransform->localPosition.z);
 		glm::vec3 transformedCenter = glm::vec3(enemy->localTransform->getMatrix() * glm::vec4((enemy->boundingBox->max + enemy->boundingBox->min) * 0.5f, 1.0f));
 		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", transformedCenter.x, transformedCenter.y, transformedCenter.z);
+	}*/
+	/*if (sm->getActiveScene()->findByName("player")) {
+		PlayerState state = pm->getState();
+		if (state == PlayerState::walking) {
+			ImGui::Text("Stan: Chodzenie");
+		}
+		if (state == PlayerState::air) {
+			ImGui::Text("Stan: powietrze");
+		}
 	}*/
 	ImGui::SliderFloat("light x", &lightPos.x, -100, 100); 
 	ImGui::SliderFloat("light y", &lightPos.y, -100, 100);

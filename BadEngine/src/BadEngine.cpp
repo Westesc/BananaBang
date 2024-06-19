@@ -752,6 +752,7 @@ int main() {
 	glm::mat4 V(1.f);
 	glm::mat4 P;
 	std::array<Plane, 6> frustumPlanes;
+	glm::mat4 lightProjection, lightView;
 	setupImGui(window);
 
 	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/bialy.png", "diffuseMap");
@@ -1119,9 +1120,16 @@ int main() {
 		RL.diffuseInstancedShader->setMat4("view", V);
 		RL.diffuseInstancedShader->setMat4("projection", P);
 		//generating shadows
-		//if(sm->activeScene->findByName("player"))
-			//lightPos = sm->activeScene->findByName("player")->localTransform->localPosition + glm::vec3(0.5f, 20.0f, 0.3f);
-		glm::mat4 lightProjection, lightView;
+		if (sm->activeScene->findByName("player")) {
+			lightPos = sm->activeScene->findByName("player")->localTransform->localPosition + glm::vec3(10.f, 80.0f, 0.f);
+			lightPos.y = 80.f;
+
+			lightView = glm::lookAt(lightPos, sm->activeScene->findByName("player")->localTransform->localPosition, glm::vec3(0.0, 1.0, 0.0));
+		}
+		else {
+
+			lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		}
 		float near_plane = 1.0f, far_plane = 100.f;
 		lightProjection = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, near_plane, far_plane);
 		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));

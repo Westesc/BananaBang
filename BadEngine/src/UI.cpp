@@ -199,7 +199,7 @@ void UI::Draw(Transform* transform) {
 			for (c = text.begin(); c != text.end(); c++)
 			{
 				Character ch = Characters[*c];
-				textSizeX += ch.Size.x * transform->localScale.x;
+				textSizeX += (ch.Size.x + ch.Bearing.x) * transform->localScale.x;
 				textSizeY = ch.Size.y * transform->localScale.y;
 			}
 

@@ -18,6 +18,7 @@ public:
 	Shader* diffuseShader;
 	Shader* groundShader;
 	std::shared_ptr<Model> enemyModel;
+	std::shared_ptr<Model> enemyModel2;
 	std::shared_ptr<Model> outlinemodel;
 	std::shared_ptr<Model> bananaModel;
 	Shader* depthShader;
@@ -50,7 +51,8 @@ public:
 		enemyShader = new Shader("../../../../src/shaders/enemy.vert", "../../../../src/shaders/enemy.frag");
 		diffuseShader = new Shader("../../../../src/shaders/diffuse.vert", "../../../../src/shaders/diffuse.frag");
 		groundShader = new Shader("../../../../src/shaders/ground.vert", "../../../../src/shaders/ground.frag");
-		enemyModel = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"), false);
+		enemyModel = std::make_shared<Model>(const_cast<char*>("../../../../res/Lumberjack.obj"), false);
+		enemyModel2 = std::make_shared<Model>(const_cast<char*>("../../../../res/capsule.obj"), false);
 		outlinemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/Lumberjack.obj"), false);
 		bananaModel = std::make_shared<Model>(const_cast<char*>("../../../../res/banana.obj"), false);
 		depthShader = new Shader("../../../../src/shaders/depthShader.vert", "../../../../src/shaders/depthShader.frag");

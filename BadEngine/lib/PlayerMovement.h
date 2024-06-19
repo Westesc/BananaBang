@@ -60,7 +60,7 @@ private:
     //climbing
     float climbingSpeed = 0.2f;
     float currentClimbingSpeed = 4.f;
-    float groundPosition;
+    float groundPosition = 0.0f;
     glm::vec3 treePosition;
     float direction = 0.0f;
 
@@ -205,6 +205,7 @@ private:
 
         glm::vec3 finalPosition = player->getTransform()->getLocalPosition();
         float jumpDistance = glm::length(finalPosition.y - initialPosition.y);
+        std::cout << jumpDistance << std::endl;
         if (jumpDistance == 0.0f) {
             //state = PlayerState::walking;
             //rb->upwardsSpeed = 0.f;
@@ -321,7 +322,7 @@ private:
             currentClimbingSpeed = -0.02f;
             isMove = false;
         }
-        if (glm::distance(player->getTransform()->getLocalPosition().y, groundPosition) < 0.5f && state == PlayerState::air) {
+        if (glm::distance(player->getTransform()->getLocalPosition().y, groundPosition) < 0.1f && state == PlayerState::air) {
             state = PlayerState::walking;
             player->getAnimateBody()->setActiveAnimation("standing");
             player->getTransform()->localPosition.y = initialPosition.y;

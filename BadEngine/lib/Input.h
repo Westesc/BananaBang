@@ -4,9 +4,10 @@
 #include "Component.h"
 #include <string>
 #include "Axis.h"
-#include <imgui_impl/imgui_impl_glfw.h>
+//#include <imgui_impl/imgui_impl_glfw.h>
 #include <glm/ext/vector_float2.hpp>
 #include <queue>
+#include <GLFW/glfw3.h>
 
 
 class Input : public Component {

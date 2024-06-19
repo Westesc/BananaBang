@@ -510,6 +510,11 @@ public:
 			mesh->drawInstances(shader, textures_loaded);
 		}
     }
+    void drawInstances(Shader * shader) {
+        for (auto mesh : meshes) {
+            mesh->drawInstances(shader, textures_loaded);
+        }
+    }
 
     void DrawBoundingBox(const BoundingBox& bbox) {
         glm::vec3 vertices[] = {

@@ -1126,11 +1126,150 @@ int main() {
 			RL.depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 			RL.depthAnimationShader->use();
 			RL.depthAnimationShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
+			RL.depthInstancedShader->use();
+			RL.depthInstancedShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 
 
 			glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 			glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
 			glClear(GL_DEPTH_BUFFER_BIT);
+
+			transformsBranch.clear();
+			transformsLog.clear();
+			transformsTree.clear();
+			transformsLogLow.clear();
+			transformsTreeLow.clear();
+			transformsLeaves.clear();
+			transformsBanana.clear();
+			transformsMango.clear();
+			glm::vec2 PlayerPosv2 = glm::vec2(0.f, 0.f);
+			if (sm->getActiveScene()->findByName("player")) {
+				PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
+			}
+			lowTree = nullptr;
+			lowLog = nullptr;
+			for (auto object : sm->getActiveScene()->gameObjects) {
+				if (object->name.starts_with("sector")) {
+					for (auto tree : object->children) {
+						if (tree->name.starts_with("tree") && tree->isVisible) {
+							if (glm::distance(PlayerPosv2, glm::vec2(tree->getTransform()->localPosition.x, tree->getTransform()->localPosition.z)) < 75.0f) {
+								transformsTree.push_back(tree->getTransform());
+								transformsLog.push_back(tree->children.at(0)->getTransform());
+								tree->modelComponent = RL.treetrunk;
+								tree->children.at(0)->modelComponent = RL.treelog;
+								for (auto ch : tree->children.at(0)->children)
+								{
+									transformsBranch.push_back(ch->getTransform());
+								}
+							}
+							else {
+								transformsTreeLow.push_back(tree->getTransform());
+								transformsLogLow.push_back(tree->children.at(0)->getTransform());
+								lowTree = tree;
+								lowLog = tree->children.at(0);
+								lowTree->modelComponent = RL.treetrunklow;
+								lowLog->modelComponent = RL.treeloglow;
+							}
+							transformsLeaves.push_back(tree->children.at(0)->children.at(0)->children.at(0)->getTransform());
+							if (tree->children.at(0)->children.at(0)->children.size() > 1) {
+								if (tree->children.at(0)->children.at(0)->children.at(1)->name.ends_with("Banana")) {
+									transformsBanana.push_back(tree->children.at(0)->children.at(0)->children.at(1)->getTransform());
+								}
+								else if (tree->children.at(0)->children.at(0)->children.at(1)->name.ends_with("Mango")) {
+									transformsMango.push_back(tree->children.at(0)->children.at(0)->children.at(1)->getTransform());
+								}
+							}
+						}
+					}
+				}
+			}
+
+			for (auto sector : sm->getActiveScene()->gameObjects) {
+				if (sector->name.starts_with("sector") && transformsTree.size() > 0 && sector->children.size() > 0) {
+					for (auto mesh : sector->children.at(0)->getModelComponent().get()->meshes) {
+						mesh->initInstances(transformsTree);
+					}
+					sector->children.at(0)->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
+					for (auto mesh : sector->children.at(0)->children.at(0)->getModelComponent().get()->meshes) {
+						mesh->initInstances(transformsLog);
+					}
+					sector->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
+					for (auto mesh : sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->meshes) {
+						mesh->initInstances(transformsBranch);
+					}
+					sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
+					for (auto mesh : sector->children.at(0)->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->meshes) {
+						mesh->initInstances(transformsLeaves);
+					}
+					sector->children.at(0)->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
+					if (lowTree) {
+						lowTree->getModelComponent().get()->getFirstMesh()->initInstances(transformsTreeLow);
+						lowTree->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
+						lowLog->getModelComponent().get()->getFirstMesh()->initInstances(transformsLogLow);
+						lowLog->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
+					}
+					break;
+				}
+			}
+			for (auto tree : pathfinder->trees) {
+				for (auto fruit : tree.second->children.at(0)->children.at(0)->children) {
+					if (fruit->name == "FruitBanana" && transformsBanana.size() > 0) {
+						for (auto mesh : fruit->getModelComponent().get()->meshes) {
+							mesh->initInstances(transformsBanana);
+						}
+						fruit->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
+						fruitsrenderd = true;
+						break;
+					}
+				}
+				if (fruitsrenderd) {
+					fruitsrenderd = false;
+					break;
+				}
+			}
+			for (auto tree : pathfinder->trees) {
+				for (auto fruit : tree.second->children.at(0)->children.at(0)->children) {
+					if (fruit->name == "FruitMango" && transformsMango.size() > 0) {
+						for (auto mesh : fruit->getModelComponent().get()->meshes) {
+							mesh->initInstances(transformsMango);
+						}
+						fruit->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
+						fruitsrenderd = true;
+						break;
+					}
+				}
+				if (fruitsrenderd) {
+					fruitsrenderd = false;
+					break;
+				}
+			}
+			transformsEnemy.clear();
+			for (auto enemy : enemyManager->enemies) {
+				if (enemy->isVisible) {
+					transformsEnemy.push_back(enemy->getTransform());
+				}
+			}
+			transformsEnemyWeapon.clear();
+			for (auto enemy : enemyManager->enemies) {
+				if (enemy->children.at(0)->active && enemy->isVisible) {
+					transformsEnemyWeapon.push_back(enemy->children.at(0)->getTransform());
+				}
+			}
+			if (transformsEnemy.size() > 0) {
+				for (auto mesh : enemyManager->enemies.at(0)->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsEnemy);
+				}
+				enemyManager->enemies.at(0)->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
+				if (transformsEnemyWeapon.size() > 0) {
+					for (auto mesh : enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->meshes) {
+						mesh->initInstances(transformsEnemyWeapon);
+					}
+					enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
+				}
+			}
+
+
+
 			sm->getActiveScene()->Draw(RL.depthShader, RL.depthAnimationShader);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, Window::windowWidth, Window::windowHeight);

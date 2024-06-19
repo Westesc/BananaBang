@@ -36,6 +36,7 @@ public:
 	std::shared_ptr<Model> leafModel;
 	std::shared_ptr<Model> planeModel;
 	Shader* diffuseInstancedShader;
+	Shader* depthInstancedShader;
 
 	void load() {
 		animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/monkey_idle.dae"), true);
@@ -53,7 +54,7 @@ public:
 		outlinemodel = std::make_shared<Model>(const_cast<char*>("../../../../res/Lumberjack.obj"), false);
 		bananaModel = std::make_shared<Model>(const_cast<char*>("../../../../res/banana.obj"), false);
 		depthShader = new Shader("../../../../src/shaders/depthShader.vert", "../../../../src/shaders/depthShader.frag");
-		depthAnimationShader = new Shader("../../../../src/shaders/depthAnimationShader.vert", "../../../../src/shaders/depthAnimationShader.frag");
+		depthAnimationShader = new Shader("../../../../src/shaders/depthAnimationShader.vert", "../../../../src/shaders/depthShader.frag");
 		box2model = std::make_shared<Model>(const_cast<char*>("../../../../res/tree.obj"), false);
 		treelog = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_log_l.obj"), false);
 		treetrunk = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/trees/tree_trunk.obj"), false);
@@ -68,6 +69,7 @@ public:
 		leafModel = std::make_shared<Model>(const_cast<char*>("../../../../res/objects/leafes.obj"), false);
 		planeModel = std::make_shared<Model>(const_cast<char*>("../../../../res/plane.obj"), false);
 		diffuseInstancedShader = new Shader("../../../../src/shaders/diffuseinstanced.vert", "../../../../src/shaders/diffuse.frag");
+		depthInstancedShader = new Shader("../../../../src/shaders/depthInstanceShader.vert", "../../../../src/shaders/depthShader.frag");
 	}
 };
 #endif

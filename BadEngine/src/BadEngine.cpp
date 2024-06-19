@@ -130,6 +130,10 @@ void addAnimation(GameObject* anim, char* path, const char* name, float duration
 	anim->addAnimation(path, name, duration);
 }
 
+void delay(int milliseconds) {
+	std::this_thread::sleep_for(std::chrono::milliseconds(milliseconds));
+}
+
 void generate() {
 	std::cout << "przycisk generate" << std::endl;
 	playButton->uiComponent->pressed = true;/*
@@ -440,7 +444,9 @@ void generate() {
 	for (auto& thread : threads) {
 		thread.join();
 	}
-	anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.03f, 0.5f, 1.0f, true);
+	glm::vec3 capsuleCenter = anim->getTransform()->getLocalPosition();
+	capsuleCenter.y += 0.5f;
+	anim->capsuleCollider = new CapsuleCollider(capsuleCenter, 0.03f, 0.5f, 1.0f, true);
 	anim->getTransform()->localScale = glm::vec3(40.f);
 	anim->getTransform()->localPosition = glm::vec3(3.0f, 2.0f, 3.0f);
 
@@ -510,7 +516,7 @@ void showMain() {
 	sm->getActiveScene()->addObject(tutorialButton);
 	sm->getActiveScene()->addObject(acknowledgmentsButton);
 	playButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f, 0.0f);
-
+	delay(100);
 }
 
 void showAcknowledgments() {
@@ -925,7 +931,7 @@ int main() {
 	UI* returnButtonUI = new UI(button);
 	returnButtonUI->addShader(LogoShader);
 	returnButtonUI->setTexture("../../../../res/button.png");
-	returnButtonUI->setSize(glm::vec2(150.0f, 60.f));
+	returnButtonUI->setSize(glm::vec2(200.0f, 60.f));
 	returnButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 100.0f, 0.0f);
 	returnButtonUI->input = input;
 	returnButtonUI->onClick = showMain;
@@ -1460,7 +1466,17 @@ int main() {
 				enemy->addModelComponent(RL.enemyModel);
 				pbd->objects.push_back(enemy);
 				enemy->addColider(2);
-				enemy->capsuleCollider = new CapsuleCollider(enemy->capsuleCollider->center, enemy->capsuleCollider->radius * 0.8f, enemy->capsuleCollider->height, 1.0f, true);
+				enemy->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), enemy->capsuleCollider->radius * 0.8f, enemy->capsuleCollider->height, 1.0f, true);
+				/*glm::vec3 min = glm::vec3(0.0f);
+				min.x += enemy->capsuleCollider->radius;
+				min.z += enemy->capsuleCollider->radius;
+				glm::vec3 max = glm::vec3(0.0f);
+				max.x -= enemy->capsuleCollider->radius;
+				max.z -= enemy->capsuleCollider->radius;
+				max.y += enemy->capsuleCollider->height;
+				enemy->boundingBox = new BoundingBox(min, max, 1.0f, true);
+				enemy->capsuleCollider = nullptr;*/
+				enemy->capsuleCollider->center.y += enemy->capsuleCollider->height * 0.5f;
 				sm->getActiveScene()->addObject(enemy);
 				cm.addObject(enemy);
 				spawnedEnemies++;
@@ -1551,15 +1567,12 @@ void renderImGui() {
 			ImGui::Text("x: %.2f, y: %.2f, z: %.2f", obj->localTransform->localPosition.x, obj->localTransform->localPosition.y, obj->localTransform->localPosition.z);
 		}
 	}*/
-	if (sm->getActiveScene()->findByName("player")) {
-		ImGui::Text("Player");
-		GameObject* player = sm->getActiveScene()->findByName("player");
-		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", player->localTransform->localPosition.x, player->localTransform->localPosition.y, player->localTransform->localPosition.z);
-		if (player->capsuleCollider) {
-			glm::vec3 transformedCenter = player->localTransform->getMatrix() * glm::vec4(player->capsuleCollider->center, 1.0f);
-			ImGui::Text("x: %.2f, y: %.2f, z: %.2f", transformedCenter.x, transformedCenter.y, transformedCenter.z);
-		}
-	}
+	/*for (auto enemy : enemyManager->enemies) {
+		ImGui::Text(enemy->name.c_str());
+		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", enemy->localTransform->localPosition.x, enemy->localTransform->localPosition.y, enemy->localTransform->localPosition.z);
+		glm::vec3 transformedCenter = glm::vec3(enemy->localTransform->getMatrix() * glm::vec4((enemy->boundingBox->max + enemy->boundingBox->min) * 0.5f, 1.0f));
+		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", transformedCenter.x, transformedCenter.y, transformedCenter.z);
+	}*/
 	ImGui::SliderFloat("light x", &lightPos.x, -100, 100); 
 	ImGui::SliderFloat("light y", &lightPos.y, -100, 100);
 	ImGui::SliderFloat("light z", &lightPos.z, -100, 100);

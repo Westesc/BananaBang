@@ -411,23 +411,23 @@ void generate() {
 		thread.join();
 	}
 
-	//anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
-	//pbd->objects.push_back(anim);
-	//if (sm->getActiveScene()->findByName("player") == nullptr) {
-	//	sm->getActiveScene()->addObject(anim);
-	//	cm.addObject(anim);
-	//}
+	anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
+	pbd->objects.push_back(anim);
+	if (sm->getActiveScene()->findByName("player") == nullptr) {
+		sm->getActiveScene()->addObject(anim);
+		cm.addObject(anim);
+	}
 	sm->getActiveScene()->addObject(anim);
 	anim->Move(glm::vec3(3.0f, 100.0f, 3.0f));
 	anim->getTransform()->localScale = glm::vec3(100.f);
 	pm->setGroundPosition(anim->getTransform()->getLocalPosition().y);
 	enemyManager->player = anim;
 	anim->hp = 5;
-	//GameObject* fist = new GameObject("fist");
-	//anim->addChild(fist);
-	//fist->capsuleCollider = new CapsuleCollider(fist->localTransform->localPosition, 3.0f, 3.0f, 1.0f, true);
-	//fist->capsuleCollider->isTriggerOnly = true;
-	//fist->active = false;
+	GameObject* fist = new GameObject("fist");
+	anim->addChild(fist);
+	fist->capsuleCollider = new CapsuleCollider(fist->localTransform->localPosition, 3.0f, 3.0f, 1.0f, true);
+	fist->capsuleCollider->isTriggerOnly = true;
+	fist->active = false;
 
 
 	GameObject* skydome = new GameObject("skydome");

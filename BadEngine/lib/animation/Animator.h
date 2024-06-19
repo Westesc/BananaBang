@@ -232,16 +232,16 @@ public:
                 position.x = globalTransformation[3][0];
                 position.y = globalTransformation[3][1];
                 position.z = globalTransformation[3][2];
-
-                if (abs(position.x - lastPosition.x) < 0.5f) {
+                if (abs(position.x - lastPosition.x) < 0.1f) {
                     deltaPostion.x = position.x - lastPosition.x;
                 }
-                if (abs(position.y - lastPosition.y) < 0.5f) {
+                if (abs(position.y - lastPosition.y) < 0.1f) {
                     deltaPostion.y = position.y - lastPosition.y;
                 }
-                if (abs(position.z - lastPosition.z) < 0.5f) {
+                if (abs(position.z - lastPosition.z) < 0.1f) {
                     deltaPostion.z = position.z - lastPosition.z;
                 }
+                std::cout << glm::to_string(deltaPostion) << std::endl;
                 lastPosition = position;
                 if (changeAnim == true) {
                     deltaPostion = glm::vec3(0.f, 0.f, 0.f);

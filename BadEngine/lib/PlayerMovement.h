@@ -111,14 +111,15 @@ private:
             float dx = player->getTransform()->getLocalScale().x * player->getAnimateBody()->getPosition().z * sinRotate + player->getAnimateBody()->getPosition().x * cosRotate;
             float dz = player->getTransform()->getLocalScale().z * player->getAnimateBody()->getPosition().z * cosRotate - player->getAnimateBody()->getPosition().x * sinRotate;
 
-            std::cout << dx << ", " << dz << std::endl;
+            //std::cout << dx << ", " << dz << std::endl;
 
             // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
             glm::vec3 vel = glm::vec3(dx, 0.f, dz) * deltaTime;
             player->Move(10.f * vel);
-            std::cout << glm::to_string(player->getTransform()->getMatrix())<<std::endl;
+            //std::cout << glm::to_string(player->getTransform()->getMatrix())<<std::endl;
         }
     }
+
 
     void moveInAir(float speed, float deltaTime) {
         getRotate(true);
@@ -232,7 +233,7 @@ private:
             animCount = 0;
         }
         if (input->checkAnyKey()) {
-            /*if (state == PlayerState::attack1) {
+            if (state == PlayerState::attack1) {
                 if (input->checkKey(GLFW_KEY_W) || input->checkKey(GLFW_KEY_A) || input->checkKey(GLFW_KEY_S) || input->checkKey(GLFW_KEY_D))
                 {
                     attackState = PlayerStateAttack::walking;
@@ -243,77 +244,77 @@ private:
                 else if (attackState != PlayerStateAttack::none) {
                     attackState = PlayerStateAttack::none;
                 }
-            }*/
-            //if (state == PlayerState::climbing) {
-            //    player->getTransform()->getLocalPosition().y;
-            //    if (input->checkKey(GLFW_KEY_A)) {
-            //        direction = 0.3f;
-            //        currentClimbingSpeed = 0.0f;
-            //    }
-            //    else if (input->checkKey(GLFW_KEY_D)) {
-            //        direction = -0.3f;
-            //        currentClimbingSpeed = 0.0;
-            //    }
-            //    else {
-            //        direction = 0.f;
-            //    }
+            }
+            if (state == PlayerState::climbing) {
+                player->getTransform()->getLocalPosition().y;
+                if (input->checkKey(GLFW_KEY_A)) {
+                    direction = 0.3f;
+                    currentClimbingSpeed = 0.0f;
+                }
+                else if (input->checkKey(GLFW_KEY_D)) {
+                    direction = -0.3f;
+                    currentClimbingSpeed = 0.0;
+                }
+                else {
+                    direction = 0.f;
+                }
 
-            //    if (input->checkKey(GLFW_KEY_W)) {
-            //        currentClimbingSpeed = climbingSpeed;
-            //    }
-            //    else if (input->checkKey(GLFW_KEY_S)) {
-            //        currentClimbingSpeed = -climbingSpeed;
-            //    }
-            //    else if (input->checkKey(GLFW_KEY_E))
-            //    {
-            //        state = PlayerState::tree_attack;
-            //    }
-            //    else if (input->checkKey(GLFW_KEY_SPACE))
-            //    {
-            //        state = PlayerState::air;
-            //    }
-            //}
-            //else if (state != PlayerState::air && state != PlayerState::jump_up && state != PlayerState::climbing) {
-            //    if (input->getPressKey() == GLFW_MOUSE_BUTTON_LEFT) {
-            //        if (queueAnim.size() < 3) {
-            //            queueAnim.push("attack" + queueAnim.size() + 1);
-            //        }
-            //        state = PlayerState::attack1;
-            //        player->children.at(0)->active = true;
-            //        player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
-            //    }
-            //    if (input->checkKey(GLFW_KEY_E) && state == PlayerState::walking) {
-            //        state = PlayerState::leave_banana;
-            //    }
-            //    else if (input->checkKey(GLFW_MOUSE_BUTTON_RIGHT))
-            //    {
-            //        state = PlayerState::dodge;
-            //    }
-            //    else if (input->checkKey(GLFW_KEY_SPACE) && !wasSpacePressed) {
-            //        player->getAnimateBody()->setActiveAnimationWithY("jumping up", true);
-            //        state = PlayerState::jump_up;
-            //        initialPosition = player->getTransform()->getLocalPosition();
-            //    }
-            //    else if(input->checkKey(GLFW_KEY_LEFT_SHIFT)) {
-            //        if (state != PlayerState::attack1) {
-            //            state = PlayerState::sprint;
-            //        }
-            //    }
-            //    else if (state == PlayerState::sprint) {
-            //        state = PlayerState::walking;
-            //    }
-            //    else if (input->checkKey(GLFW_KEY_Z) /* && state != PlayerState::dashing*/) {
-            //        state = PlayerState::dashing;
-            //        currentDashTime = 0.f;
-            //    }
-            //    else if (state == PlayerState::dashing){
-            //        state = PlayerState::walking;
-            //    }
-            //}
-            //else {
-            //    input->getPressKey();
-            //    isMove = false;
-            //}
+                if (input->checkKey(GLFW_KEY_W)) {
+                    currentClimbingSpeed = climbingSpeed;
+                }
+                else if (input->checkKey(GLFW_KEY_S)) {
+                    currentClimbingSpeed = -climbingSpeed;
+                }
+                else if (input->checkKey(GLFW_KEY_E))
+                {
+                    state = PlayerState::tree_attack;
+                }
+                else if (input->checkKey(GLFW_KEY_SPACE))
+                {
+                    state = PlayerState::air;
+                }
+            }
+            else if (state != PlayerState::air && state != PlayerState::jump_up && state != PlayerState::climbing) {
+                if (input->getPressKey() == GLFW_MOUSE_BUTTON_LEFT) {
+                    if (queueAnim.size() < 3) {
+                        queueAnim.push("attack" + queueAnim.size() + 1);
+                    }
+                    state = PlayerState::attack1;
+                    player->children.at(0)->active = true;
+                    player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
+                }
+                if (input->checkKey(GLFW_KEY_E) && state == PlayerState::walking) {
+                    state = PlayerState::leave_banana;
+                }
+                else if (input->checkKey(GLFW_MOUSE_BUTTON_RIGHT))
+                {
+                    state = PlayerState::dodge;
+                }
+                else if (input->checkKey(GLFW_KEY_SPACE) && !wasSpacePressed) {
+                    player->getAnimateBody()->setActiveAnimationWithY("jumping up", true);
+                    state = PlayerState::jump_up;
+                    initialPosition = player->getTransform()->getLocalPosition();
+                }
+                else if(input->checkKey(GLFW_KEY_LEFT_SHIFT)) {
+                    if (state != PlayerState::attack1) {
+                        state = PlayerState::sprint;
+                    }
+                }
+                else if (state == PlayerState::sprint) {
+                    state = PlayerState::walking;
+                }
+                else if (input->checkKey(GLFW_KEY_Z) /* && state != PlayerState::dashing*/) {
+                    state = PlayerState::dashing;
+                    currentDashTime = 0.f;
+                }
+                else if (state == PlayerState::dashing){
+                    state = PlayerState::walking;
+                }
+            }
+            else {
+                input->getPressKey();
+                isMove = false;
+            }
         }
         else if (state == PlayerState::walking) {
             player->getAnimateBody()->setActiveAnimation("standing");
@@ -333,9 +334,9 @@ private:
             player->getAnimateBody()->removeLegAnimation();
         }
         wasSpacePressed = input->checkKey(GLFW_KEY_SPACE);
-        //if (!(state == PlayerState::attack1 || state == PlayerState::tree_attack)) {
-        //    player->children.at(0)->active = false;
-        //}
+        if (!(state == PlayerState::attack1 || state == PlayerState::tree_attack)) {
+            player->children.at(0)->active = false;
+        }
     }
 
 public:
@@ -360,146 +361,146 @@ public:
             MovePlayer(deltaTime);
             // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         }
-        //else if (state == PlayerState::sprint) {
-        //    player->getAnimateBody()->setActiveAnimation("sprint");
-        //    MovePlayer(deltaTime);
-        //}
-        //else if (state == PlayerState::attack1) {
-        //    if (attackState == PlayerStateAttack::walking) {
-        //        player->getAnimateBody()->addLegAnimation("walking");
-        //    }
-        //    else if (attackState == PlayerStateAttack::sprint){
-        //        player->getAnimateBody()->addLegAnimation("sprint");
-        //    }
-        //    else {
-        //        player->getAnimateBody()->removeLegAnimation();
-        //    }
-        //    if (animCount == 0 && queueAnim.size() != 0 
-        //        && (player->getAnimateBody()->getActiveAnimation() != "attack3" || player->getAnimateBody()->isPlay() == false)) {
-        //        animCount++;
-        //        player->getAnimateBody()->setActiveAnimation("attack1");
-        //    }
-        //    MovePlayer(deltaTime);
-        //    if (player->getAnimateBody()->isPlay() == false) {
-        //        if (queueAnim.size() > 1 && animCount == 1) {
-        //            player->getAnimateBody()->setActiveAnimation("attack2");
-        //            animCount++;
-        //        }
-        //        else if (queueAnim.size() > 2 && animCount == 2) {
-        //            animCount = 0;
-        //            while (!queueAnim.empty()) {
-        //                queueAnim.pop();
-        //            }
-        //            player->getAnimateBody()->setActiveAnimation("attack3");
-        //        }
-        //        else {
-        //            state = PlayerState::walking;
-        //        }
-        //    }
-        //}
-        //else if (state == PlayerState::dodge) {
-        //    player->getAnimateBody()->setActiveAnimation("dodge");
-        //    //currentTurn = 180.f;
-        //    move(deltaTime, false);
-        //    if (player->getAnimateBody()->isPlay() == false) {
-        //        state = PlayerState::walking;
-        //    }
-        //}
-        //else if (state == PlayerState::climbing)
-        //{
-        //    player->useGravity = false;
-        //    climbMove(deltaTime);
-        //    if (currentClimbingSpeed > 0) {
-        //        player->getAnimateBody()->setActiveAnimationWithY("climbing up");
-        //        if (currentClimbingSpeed == -0.02f) {
-        //            player->getAnimateBody()->changeAnimationSpeed("climbing up", 0.6f);
-        //        }
-        //        else {
-        //            player->getAnimateBody()->changeAnimationSpeed("climbing up", 1.3f);
-        //        }
-        //    }
-        //    else if (currentClimbingSpeed < -0.02f) {
-        //        player->getAnimateBody()->setActiveAnimationWithY("climbing down");
-        //        if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
-        //            state = PlayerState::walking;
-        //        }
-        //    }
+        else if (state == PlayerState::sprint) {
+            player->getAnimateBody()->setActiveAnimation("sprint");
+            MovePlayer(deltaTime);
+        }
+        else if (state == PlayerState::attack1) {
+            if (attackState == PlayerStateAttack::walking) {
+                player->getAnimateBody()->addLegAnimation("walking");
+            }
+            else if (attackState == PlayerStateAttack::sprint){
+                player->getAnimateBody()->addLegAnimation("sprint");
+            }
+            else {
+                player->getAnimateBody()->removeLegAnimation();
+            }
+            if (animCount == 0 && queueAnim.size() != 0 
+                && (player->getAnimateBody()->getActiveAnimation() != "attack3" || player->getAnimateBody()->isPlay() == false)) {
+                animCount++;
+                player->getAnimateBody()->setActiveAnimation("attack1");
+            }
+            MovePlayer(deltaTime);
+            if (player->getAnimateBody()->isPlay() == false) {
+                if (queueAnim.size() > 1 && animCount == 1) {
+                    player->getAnimateBody()->setActiveAnimation("attack2");
+                    animCount++;
+                }
+                else if (queueAnim.size() > 2 && animCount == 2) {
+                    animCount = 0;
+                    while (!queueAnim.empty()) {
+                        queueAnim.pop();
+                    }
+                    player->getAnimateBody()->setActiveAnimation("attack3");
+                }
+                else {
+                    state = PlayerState::walking;
+                }
+            }
+        }
+        else if (state == PlayerState::dodge) {
+            player->getAnimateBody()->setActiveAnimation("dodge");
+            //currentTurn = 180.f;
+            move(deltaTime, false);
+            if (player->getAnimateBody()->isPlay() == false) {
+                state = PlayerState::walking;
+            }
+        }
+        else if (state == PlayerState::climbing)
+        {
+            player->useGravity = false;
+            climbMove(deltaTime);
+            if (currentClimbingSpeed > 0) {
+                player->getAnimateBody()->setActiveAnimationWithY("climbing up");
+                if (currentClimbingSpeed == -0.02f) {
+                    player->getAnimateBody()->changeAnimationSpeed("climbing up", 0.6f);
+                }
+                else {
+                    player->getAnimateBody()->changeAnimationSpeed("climbing up", 1.3f);
+                }
+            }
+            else if (currentClimbingSpeed < -0.02f) {
+                player->getAnimateBody()->setActiveAnimationWithY("climbing down");
+                if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
+                    state = PlayerState::walking;
+                }
+            }
 
-        //    //float climbingY = abs(currentClimbingSpeed) * player->getTransform()->getLocalScale().y * player->getAnimateBody()->getPosition().y;
-        //    //std::cout << climbingY << std::endl;
-        //    player->velocity.y = currentClimbingSpeed / deltaTime;
-        //}
-        //else if (state == PlayerState::tree_attack) {
-        //    //Jakiœ warunek co bêdzie sprawdza³ czy œcie¿ka jest git
-        //    if (closestEnemy != nullptr) {
-        //        player->useGravity = false;
-        //        rotatePlayerTowards(closestEnemy->getTransform()->getLocalPosition());
+            //float climbingY = abs(currentClimbingSpeed) * player->getTransform()->getLocalScale().y * player->getAnimateBody()->getPosition().y;
+            //std::cout << climbingY << std::endl;
+            player->velocity.y = currentClimbingSpeed / deltaTime;
+        }
+        else if (state == PlayerState::tree_attack) {
+            //Jakiœ warunek co bêdzie sprawdza³ czy œcie¿ka jest git
+            if (closestEnemy != nullptr) {
+                player->useGravity = false;
+                rotatePlayerTowards(closestEnemy->getTransform()->getLocalPosition());
 
-        //        player->getAnimateBody()->setActiveAnimation("tree attack");
+                player->getAnimateBody()->setActiveAnimation("tree attack");
 
-        //        glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
-        //        glm::vec3 direction = glm::normalize(closestEnemy->getTransform()->getLocalPosition() - currentPosition);
+                glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
+                glm::vec3 direction = glm::normalize(closestEnemy->getTransform()->getLocalPosition() - currentPosition);
 
-        //        float speed = 1.5f;
-        //        direction.y -= 0.05;
-        //        glm::vec3 velocity = direction * speed;
+                float speed = 1.5f;
+                direction.y -= 0.05;
+                glm::vec3 velocity = direction * speed;
 
-        //        player->velocity = velocity / deltaTime;
-        //        player->children.at(0)->active = true;
-        //        player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
+                player->velocity = velocity / deltaTime;
+                player->children.at(0)->active = true;
+                player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
 
-        //        if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
-        //            state = PlayerState::walking;
-        //            player->children.at(0)->active = false;
-        //        }
-        //    }
-        //    else {
-        //        state = PlayerState::climbing;
-        //    }
-        //}
-        //else if (state == PlayerState::jump_up) {
-        //    jump(deltaTime);
-        //}
-        //else if (state == PlayerState::air) {
-        //    MovePlayer(deltaTime);
-        //    rb->upwardsSpeed = -7.f;
-        //    rb->useGravity();
-        //}
-        //else if (state == PlayerState::leave_banana) {
-        //    //dodaæ zostawianie banana w miejscu gdzie stoi ma³pa
-        //    if (player->getAnimateBody()->getActiveAnimation() != "leave banana up") {
-        //        player->getAnimateBody()->setActiveAnimation("leave banana down", true);
-        //    }
-        //    if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana down") {
-        //        sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
-        //        player->getAnimateBody()->setActiveAnimation("leave banana up", true);
-        //    }
-        //    else if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana up") {
-        //        state = PlayerState::walking;
-        //    }
-        //}
-        //else if (state == PlayerState::dashing) {
-        //    if (currentDashTime < dashDuration) {
-        //        MovePlayer(deltaTime);
-        //        float rotate = glm::radians(player->getTransform()->getLocalRotation().y);
-        //        glm::vec3 dashDirection;
-        //        dashDirection.x = sin(rotate);
-        //        dashDirection.z = cos(rotate);
-        //        dashDirection.y = 0;
-        //        currentDashTime += deltaTime;
-        //        //std::cout << "dush" << std::endl;
-        //        player->velocity = glm::normalize(dashDirection) * dashSpeed;
-        //    }
-        //    else {
-        //        //std::cout << "nie dush" << std::endl;
-        //        state = PlayerState::walking;
-        //    }
-        //}
-        //if (state != PlayerState::attack1) {
-     /*       while (!queueAnim.empty()) {
+                if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
+                    state = PlayerState::walking;
+                    player->children.at(0)->active = false;
+                }
+            }
+            else {
+                state = PlayerState::climbing;
+            }
+        }
+        else if (state == PlayerState::jump_up) {
+            jump(deltaTime);
+        }
+        else if (state == PlayerState::air) {
+            MovePlayer(deltaTime);
+            rb->upwardsSpeed = -7.f;
+            rb->useGravity();
+        }
+        else if (state == PlayerState::leave_banana) {
+            //dodaæ zostawianie banana w miejscu gdzie stoi ma³pa
+            if (player->getAnimateBody()->getActiveAnimation() != "leave banana up") {
+                player->getAnimateBody()->setActiveAnimation("leave banana down", true);
+            }
+            if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana down") {
+                sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
+                player->getAnimateBody()->setActiveAnimation("leave banana up", true);
+            }
+            else if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana up") {
+                state = PlayerState::walking;
+            }
+        }
+        else if (state == PlayerState::dashing) {
+            if (currentDashTime < dashDuration) {
+                MovePlayer(deltaTime);
+                float rotate = glm::radians(player->getTransform()->getLocalRotation().y);
+                glm::vec3 dashDirection;
+                dashDirection.x = sin(rotate);
+                dashDirection.z = cos(rotate);
+                dashDirection.y = 0;
+                currentDashTime += deltaTime;
+                //std::cout << "dush" << std::endl;
+                player->velocity = glm::normalize(dashDirection) * dashSpeed;
+            }
+            else {
+                //std::cout << "nie dush" << std::endl;
+                state = PlayerState::walking;
+            }
+        }
+        if (state != PlayerState::attack1) {
+            while (!queueAnim.empty()) {
                 queueAnim.pop();
-            }*/
-        //}
+            }
+        }
     }
 
     void setTreePosition(glm::vec3 treePos) {

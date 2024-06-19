@@ -188,8 +188,8 @@ void Input::mouse_button_callback(GLFWwindow* window, int button, int action, in
 void Input::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	Zoom -= (float)yoffset;
-	if (Zoom < 30.0f)
-		Zoom = 30.0f;
-	if (Zoom > 90.0f)
-		Zoom = 90.0f;
+	if (Zoom < 0.0f)
+		Zoom = 0.0f;
+	if (Zoom > 100.0f)
+		Zoom = 100.0f;
 }

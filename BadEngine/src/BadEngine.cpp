@@ -1570,10 +1570,10 @@ int main() {
 				Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies), sm->getActiveScene()->findByName("sector" + std::to_string(sector))->localTransform->localPosition, glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
 				enemy->Move(glm::vec3(5.0f));
 				enemy->sector = sector;
-				enemy->addModelComponent(RL.enemyModel);
+				enemy->addModelComponent(RL.enemyModel2);
 				pbd->objects.push_back(enemy);
 				enemy->addColider(2);
-				enemy->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), enemy->capsuleCollider->radius * 0.8f, enemy->capsuleCollider->height, 1.0f, true);
+				enemy->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), enemy->capsuleCollider->radius * 0.8f * 0.35f, enemy->capsuleCollider->height * 0.35f, 1.0f, true);
 				/*glm::vec3 min = glm::vec3(0.0f);
 				min.x += enemy->capsuleCollider->radius;
 				min.z += enemy->capsuleCollider->radius;
@@ -1584,6 +1584,9 @@ int main() {
 				enemy->boundingBox = new BoundingBox(min, max, 1.0f, true);
 				enemy->capsuleCollider = nullptr;*/
 				enemy->capsuleCollider->center.y += enemy->capsuleCollider->height * 0.5f;
+				enemy->modelComponent = RL.enemyModel;
+				enemy->modelComponent.get()->capsuleCollider = enemy->capsuleCollider;
+				enemy->getTransform()->localScale = glm::vec3(3.0f);
 				sm->getActiveScene()->addObject(enemy);
 				cm.addObject(enemy);
 				spawnedEnemies++;
@@ -1680,7 +1683,7 @@ void renderImGui() {
 		glm::vec3 transformedCenter = glm::vec3(enemy->localTransform->getMatrix() * glm::vec4((enemy->boundingBox->max + enemy->boundingBox->min) * 0.5f, 1.0f));
 		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", transformedCenter.x, transformedCenter.y, transformedCenter.z);
 	}*/
-	/*if (sm->getActiveScene()->findByName("player")) {
+	if (sm->getActiveScene()->findByName("player")) {
 		PlayerState state = pm->getState();
 		if (state == PlayerState::walking) {
 			ImGui::Text("Stan: Chodzenie");
@@ -1688,7 +1691,10 @@ void renderImGui() {
 		if (state == PlayerState::air) {
 			ImGui::Text("Stan: powietrze");
 		}
-	}*/
+		if (state == PlayerState::jump_up) {
+			ImGui::Text("Stan: skok w gore");
+		}
+	}
 	ImGui::SliderFloat("light x", &lightPos.x, -100, 100); 
 	ImGui::SliderFloat("light y", &lightPos.y, -100, 100);
 	ImGui::SliderFloat("light z", &lightPos.z, -100, 100);

@@ -102,6 +102,10 @@ private:
                 enemy->getTransform()->localPosition = glm::vec3(5.0f);
             }
             cm->addObject(enemy);
+            if (enemy->velocity != glm::vec3(0.0f)) {
+				float angle = glm::atan(enemy->velocity.z, enemy->velocity.x);
+				enemy->getTransform()->localRotation.y = angle;
+			}
             enemy->timeSpentWalking += deltaTime;
             if (enemy->timeSpentWalking > 15.f) {
                 std::pair<glm::vec3, Tree*> tree = pathfinder->decideInitalDestination(enemy->sector);
@@ -158,6 +162,10 @@ private:
                     enemy->getTransform()->localPosition = glm::vec3(5.0f);
                 }
                 cm->addObject(enemy);
+                if (enemy->velocity != glm::vec3(0.0f)) {
+                    float angle = glm::atan(enemy->velocity.z, enemy->velocity.x);
+                    enemy->getTransform()->localRotation.y = angle;
+                }
             }
             else {
                 enemy->velocity = glm::vec3(0.0f);

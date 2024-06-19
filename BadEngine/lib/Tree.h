@@ -52,6 +52,9 @@ public:
         for (auto branch : children[0]->children) {
             branch->getTransform()->localPosition.y -= moveDown;
             branch->children.at(0)->getTransform()->localPosition.y -= moveDown;
+            if (branch->children.size() > 1) {
+				branch->children.at(1)->getTransform()->localPosition.y -= moveDown;
+			}
         }
     }
 };

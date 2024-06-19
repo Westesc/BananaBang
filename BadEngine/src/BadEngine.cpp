@@ -76,8 +76,9 @@ std::vector fruits = { 2,3 }; //{bananas,mango}
 int a = 4;
 int b = 6;
 bool buttonPressed;
-unsigned int maxEnemies = 5;
+unsigned int maxEnemies = 15;
 unsigned int spawnedEnemies = 0;
+unsigned int reqEnemies = 10;
 bool loaded = false;
 bool playerAtention = false;
 CollisionManager cm = CollisionManager(200, 40);
@@ -93,6 +94,8 @@ std::vector<Transform*> transformsEnemyWeapon;
 std::vector<Transform*> transformsTreeLow;
 std::vector<Transform*> transformsLogLow;
 std::vector<Transform*> transformsLeaves;
+std::vector<Transform*> transformsBanana;
+std::vector<Transform*> transformsMango;
 GameObject* lowTree;
 GameObject* lowLog;
 float spawnerTime = 0;
@@ -102,6 +105,10 @@ SectorSelector* sectorSelector;
 GameObject* tutorial1;
 GameObject* tutorial2;
 GameObject* tutorial3;
+GameObject* tutorial4;
+GameObject* tutorial5;
+GameObject* tutorial6;
+GameObject* tutorial7;
 glm::mat4 lightSpaceMatrix;
 std::shared_ptr<Model> skydomeModel;
 float gameTime = 0;
@@ -111,7 +118,13 @@ GameObject* tutorialButton;
 GameObject* acknowledgmentsButton;
 GameObject* backButton;
 GameObject* acknowledgments;
+GameObject* acknowledgments2;
+GameObject* acknowledgments3;
+GameObject* acknowledgments4;
+GameObject* acknowledgments5;
 bool Lost = false;
+bool Won = false;
+Shader* LogoShader;
 
 void addAnimation(GameObject* anim, char* path, const char* name, float duration) {
 	anim->addAnimation(path, name, duration);
@@ -239,18 +252,20 @@ void generate() {
 						fruits->name = "FruitBanana";
 						fruits->addModelComponent(RL.bananaModel);
 						fruits->localTransform->localScale = glm::vec3(0.1f);
-						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 10.0f, 10.0f, 1.0f, true);
+						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 2.0f, 2.0f, 1.0f, true);
 						fruits->capsuleCollider->isTriggerOnly = true;
 						break;
 					case 1:
 						fruits->name = "FruitMango";
 						fruits->addModelComponent(RL.mangoModel);
 						fruits->localTransform->localScale = glm::vec3(2.f);
-						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 1.0f, 1.0f, 1.0f, true);
+						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 2.0f, 2.0f, 1.0f, true);
 						fruits->capsuleCollider->isTriggerOnly = true;
 						break;
 					}
-					sm->activeScene->addObject(fruits);
+					fruits->isInstanced = true;
+					log->children.at(branchIndex)->addChild(fruits);
+					//sm->activeScene->addObject(fruits);
 				}
 				fruitPool.erase(fruitPool.begin()+fruitIndex);
 			}
@@ -294,7 +309,7 @@ void generate() {
 	planeWall4->getTransform()->localRotation.y = 90.0f;
 	planeWall4->getTransform()->localRotation.x = -90.0f;
 	planeWall4->getTransform()->localScale = glm::vec3(10.0f, 4.0f, 1.0f);
-	planeWall4->getTransform()->localPosition = glm::vec3(100.0f, 0.0f, 78.0f);
+	planeWall4->getTransform()->localPosition = glm::vec3(148.0f, 0.0f, 112.0f);
 	sm->getActiveScene()->addObject(wall1);
 	sm->getActiveScene()->addObject(wall2);
 	sm->getActiveScene()->addObject(wall3);
@@ -307,6 +322,8 @@ void generate() {
 	transformsLog.clear();
 	transformsTree.clear();
 	transformsLeaves.clear();
+	transformsBanana.clear();
+	transformsMango.clear();
 	for (auto tree : pathfinder->trees) {
 		transformsTree.push_back(tree.second->getTransform());
 		transformsLog.push_back(tree.second->children.at(0)->getTransform());
@@ -321,6 +338,14 @@ void generate() {
 		pathfinder->trees.at(0).second->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
 		pathfinder->trees.at(0).second->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
 		pathfinder->trees.at(0).second->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLeaves);
+		for (auto fruit :pathfinder->trees.at(0).second->children.at(0)->children.at(0)->children) {
+			if (fruit->name == "FruitBanana") {
+				transformsBanana.push_back(fruit->getTransform());
+			}
+			else if (fruit->name == "FruitMango") {
+				transformsMango.push_back(fruit->getTransform());
+			}
+		}
 		pathfinder->sortTrees();
 	}
 		
@@ -340,9 +365,8 @@ void generate() {
 			for (auto ch : go->children.at(0)->children)
 			{
 				cm.addStaticObject(ch);
-				for (auto fruit : ch->children)
-				{
-					cm.addStaticObject(fruit);
+				if (ch->children.size() > 1) {
+					cm.addStaticObject(ch->children.at(1));
 				}
 			}
 		}
@@ -370,8 +394,14 @@ void generate() {
 	ui2->addShader(UIShader);
 	ui2->setTexture("../../../../res/serce5.png");
 	HPcount->localTransform->localPosition = glm::vec3(0, Window::windowHeight - 100.0f, 0.f);
-	ui->input = input;
 	HPcount->uiComponent = ui2;
+
+	GameObject* enemyCount = new GameObject("Enemycount");
+	UI* uiCount = new UI(writing);
+	uiCount->addShader(UIShader);
+	uiCount->setText("Pozostali drwale : " + std::to_string(reqEnemies));
+	enemyCount->localTransform->localPosition = glm::vec3(0, Window::windowHeight - 300.0f, 0.f);
+	enemyCount->uiComponent = uiCount;
 
 	for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 		for (auto go : sm->getActiveScene()->gameObjects.at(i)->children)
@@ -443,10 +473,11 @@ void generate() {
 	bananaObj->addModelComponent(RL.bananaModel);
 	bananaObj->getTransform()->localPosition = glm::vec3(0.f, 1.f, -1.f);
 	bananaObj->getTransform()->localScale = glm::vec3(0.1f);
-	sm->getActiveScene()->addObject(bananaObj);
+	//sm->getActiveScene()->addObject(bananaObj);
 
 	sm->getActiveScene()->addObject(Button);
 	sm->getActiveScene()->addObject(HPcount);
+	sm->getActiveScene()->addObject(enemyCount);
 	loaded = true;
 	spawnerTime = 0;
 	sectorSelectorTime = 0;
@@ -462,6 +493,13 @@ void showTutorial() {
 	sm->getActiveScene()->addObject(tutorial1);
 	sm->getActiveScene()->addObject(tutorial2);
 	sm->getActiveScene()->addObject(tutorial3);
+	sm->getActiveScene()->addObject(tutorial4);
+	sm->getActiveScene()->addObject(tutorial5);
+	sm->getActiveScene()->addObject(tutorial6);
+	sm->getActiveScene()->addObject(tutorial7);
+	sm->getActiveScene()->addObject(backButton);
+	playButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 300.0f, 0.0f);
+	backButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 200.0f, 0.0f);
 }
 
 void showMain() {
@@ -470,31 +508,54 @@ void showMain() {
 	sm->getActiveScene()->addObject(playButton);
 	sm->getActiveScene()->addObject(tutorialButton);
 	sm->getActiveScene()->addObject(acknowledgmentsButton);
+	playButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f, 0.0f);
 
 }
 
 void showAcknowledgments() {
 	sm->getActiveScene()->gameObjects.clear();
 	sm->getActiveScene()->addObject(titlescreen);
-	backButton = new GameObject("backButton");
-	UI* backbuttonui = new UI(button);
-	backbuttonui->addShader(RL.shaders);
-	backbuttonui->setTexture("../../../../res/button.png");
-	backbuttonui->setSize(glm::vec2(250.0f, 60.f));
-	backButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 100.0f, 0.0f);
-	backbuttonui->input = input;
-	backbuttonui->onClick = showMain;
-	backbuttonui->setText("BACK");
-	backButton->uiComponent = backbuttonui;
-	sm->getActiveScene()->addObject(backButton);
 
 	acknowledgments = new GameObject("acknowledgments");
 	UI* acknowledgmentsui = new UI(writing);
-	acknowledgmentsui->addShader(RL.shaders);
-	acknowledgmentsui->setText("Splash screen image was sourced from https://www.aipromptsdirectory.com/wp-content/uploads/2023/11/hard_drive_white_background_simple_colored_sketch_-_7c0b4171-90ce-4a92-8351-cb652420715b_0.webp");
+	acknowledgmentsui->addShader(LogoShader);
+	acknowledgmentsui->setText("Splash screen na podstawie obrazu ze zrodla");
 	acknowledgments->localTransform->localPosition = glm::vec3(100.0f, Window::windowHeight - 100.0f, 0.0f);
 	acknowledgments->uiComponent = acknowledgmentsui;
 	sm->getActiveScene()->addObject(acknowledgments);
+
+	acknowledgments2 = new GameObject("acknowledgments");
+	UI* acknowledgmentsui2 = new UI(writing);
+	acknowledgmentsui2->addShader(LogoShader);
+	acknowledgmentsui2->setText("www.aipromptsdirectory.com/wp-content/uploads/2023/11/");
+	acknowledgments2->localTransform->localPosition = glm::vec3(100.0f, Window::windowHeight - 150.0f, 0.0f);
+	acknowledgments2->uiComponent = acknowledgmentsui2;
+	sm->getActiveScene()->addObject(acknowledgments2);
+
+	acknowledgments3 = new GameObject("acknowledgments");
+	UI* acknowledgmentsui3 = new UI(writing);
+	acknowledgmentsui3->addShader(LogoShader);
+	acknowledgmentsui3->setText("hard_drive_white_background_simple_colored_sketch_-_7c0b4171-90ce");
+	acknowledgments3->localTransform->localPosition = glm::vec3(70.0f, Window::windowHeight - 200.0f, 0.0f);
+	acknowledgments3->uiComponent = acknowledgmentsui3;
+	sm->getActiveScene()->addObject(acknowledgments3);
+
+	acknowledgments4 = new GameObject("acknowledgments");
+	UI* acknowledgmentsui4 = new UI(writing);
+	acknowledgmentsui4->addShader(LogoShader);
+	acknowledgmentsui4->setText("-4a92-8351-cb652420715b_0.webp");
+	acknowledgments4->localTransform->localPosition = glm::vec3(100.0f, Window::windowHeight - 250.0f, 0.0f);
+	acknowledgments4->uiComponent = acknowledgmentsui4;
+	sm->getActiveScene()->addObject(acknowledgments4);
+
+	acknowledgments5 = new GameObject("acknowledgments");
+	UI* acknowledgmentsui5 = new UI(writing);
+	acknowledgmentsui5->addShader(LogoShader);
+	acknowledgmentsui5->setText("tlo ekranu głownego wygenerowano korzystajac z deepai.org");
+	acknowledgments5->localTransform->localPosition = glm::vec3(20.0f, Window::windowHeight - 300.0f, 0.0f);
+	acknowledgments5->uiComponent = acknowledgmentsui5;
+	sm->getActiveScene()->addObject(acknowledgments5);
+	sm->getActiveScene()->addObject(backButton);
 }
 
 void Start() {
@@ -576,7 +637,7 @@ int main() {
 	GameObject* logo = new GameObject("logo");
 	UI* logoui = new UI(plane);
 	logoui->setTexture("../../../../res/logo.png");
-	Shader* LogoShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
+	LogoShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
 	logoui->addShader(LogoShader);
 	logoui->input = input;
 	logo->uiComponent = logoui;
@@ -609,7 +670,7 @@ int main() {
 	GameObject* outlineObj = new GameObject("outline");
 
 	RL.bananaModel->AddTexture("../../../../res/textures/Banana.png", "diffuseMap");
-	RL.bananaModel->SetShader(RL.diffuseShader);
+	RL.bananaModel->SetShader(RL.diffuseInstancedShader);
 
 	RL.outlinemodel->SetShader(RL.shaderTree);
 	RL.outlinemodel->SetOutlineShader(RL.outlineShader);
@@ -629,7 +690,7 @@ int main() {
 	skydomeModel = std::make_shared<Model>(meshSphere);
 
 	//Fruit
-	RL.mangoModel->SetShader(RL.diffuseShader);
+	RL.mangoModel->SetShader(RL.diffuseInstancedShader);
 	RL.mangoModel->AddTexture("../../../../res/textures/mango.jpg", "diffuseMap");
 	
 	//drzewa
@@ -668,7 +729,7 @@ int main() {
 	RL.leafModel->AddTexture("../../../../res/textures/nic.jpg", "diffuseMap");
 	RL.leafModel->SetShader(RL.phongInstancedShader);
 
-	RL.planeModel.get()->AddTexture("../../../../res/junglewall.jpg", "diffuseMap");
+	RL.planeModel.get()->AddTexture("../../../../res/junglewall.png", "diffuseMap");
 	RL.planeModel.get()->SetShader(RL.diffuseShader);
 
 	skydome->addModelComponent(skydomeModel);
@@ -742,7 +803,7 @@ int main() {
 	tutorial1 = new GameObject("tutorial1");
 	UI* tutorialui1 = new UI(writing);
 	tutorialui1->addShader(LogoShader);
-	tutorial1->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight - 100.f, 0.0f);
+	tutorial1->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 100.f, 0.0f);
 	tutorialui1->setText("WASD - ruch");
 	tutorial1->uiComponent = tutorialui1;
 	sm->getActiveScene()->addObject(tutorial1);
@@ -750,7 +811,7 @@ int main() {
 	tutorial2 = new GameObject("tutorial2");
 	UI* tutorialui2 = new UI(writing);
 	tutorialui2->addShader(LogoShader);
-	tutorial2->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight - 150.f, 0.0f);
+	tutorial2->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 150.f, 0.0f);
 	tutorialui2->setText("spacja - skok");
 	tutorial2->uiComponent = tutorialui2;
 	sm->getActiveScene()->addObject(tutorial2);
@@ -758,10 +819,42 @@ int main() {
 	tutorial3 = new GameObject("tutorial3");
 	UI* tutorialui3 = new UI(writing);
 	tutorialui3->addShader(LogoShader);
-	tutorial3->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight - 200.f, 0.0f);
+	tutorial3->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 200.f, 0.0f);
 	tutorialui3->setText("lewy przycisk myszy - atak");
 	tutorial3->uiComponent = tutorialui3;
 	sm->getActiveScene()->addObject(tutorial3);
+
+	tutorial4 = new GameObject("tutorial4");
+	UI* tutorialui4 = new UI(writing);
+	tutorialui4->addShader(LogoShader);
+	tutorial4->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 250.f, 0.0f);
+	tutorialui4->setText("R przy drzewie - wspinaczka");
+	tutorial4->uiComponent = tutorialui4;
+	sm->getActiveScene()->addObject(tutorial4);
+
+	tutorial5 = new GameObject("tutorial5");
+	UI* tutorialui5 = new UI(writing);
+	tutorialui5->addShader(LogoShader);
+	tutorial5->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 300.f, 0.0f);
+	tutorialui5->setText("T przy drwalach - prowokacja");
+	tutorial5->uiComponent = tutorialui5;
+	sm->getActiveScene()->addObject(tutorial5);
+
+	tutorial6 = new GameObject("tutorial6");
+	UI* tutorialui6 = new UI(writing);
+	tutorialui6->addShader(LogoShader);
+	tutorial6->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 350.f, 0.0f);
+	tutorialui6->setText("Pokonuj drwali dopoki nie uciekna!");
+	tutorial6->uiComponent = tutorialui6;
+	sm->getActiveScene()->addObject(tutorial6);
+
+	tutorial7 = new GameObject("tutorial7");
+	UI* tutorialui7 = new UI(writing);
+	tutorialui7->addShader(LogoShader);
+	tutorial7->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 400.f, 0.0f);
+	tutorialui7->setText("Korzystaj z drzew, aby zyskac przewage!");
+	tutorial7->uiComponent = tutorialui7;
+	sm->getActiveScene()->addObject(tutorial7);
 
 	titlescreen = new GameObject("titlescreen");
 	UI* titleui = new UI(plane);
@@ -790,12 +883,23 @@ int main() {
 	tutorialbuttonui->setSize(glm::vec2(260.0f, 60.f));
 	tutorialButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 100.0f, 0.0f);
 	tutorialbuttonui->input = input;
-	tutorialbuttonui->onClick = []() { std::cout << "Test button clicked!" << std::endl; };//showTutorial;
+	tutorialbuttonui->onClick = showTutorial;
 	tutorialbuttonui->setText("TUTORIAL");
 	tutorialButton->uiComponent = tutorialbuttonui;
 	sm->getActiveScene()->addObject(tutorialButton);
 
-	/*acknowledgmentsButton = new GameObject("acknowledgmentsButton");
+	backButton = new GameObject("backButton");
+	UI* backbuttonui = new UI(button);
+	backbuttonui->addShader(LogoShader);
+	backbuttonui->setTexture("../../../../res/button.png");
+	backbuttonui->setSize(glm::vec2(250.0f, 60.f));
+	backButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 100.0f, 0.0f);
+	backbuttonui->input = input;
+	backbuttonui->onClick = showMain;
+	backbuttonui->setText("BACK");
+	backButton->uiComponent = backbuttonui;
+
+	acknowledgmentsButton = new GameObject("acknowledgmentsButton");
 	UI* acknowledgmentsButtonui = new UI(button);
 	acknowledgmentsButtonui->addShader(LogoShader);
 	acknowledgmentsButtonui->setTexture("../../../../res/button.png");
@@ -805,7 +909,7 @@ int main() {
 	acknowledgmentsButtonui->onClick = showAcknowledgments;
 	acknowledgmentsButtonui->setText("ACKNOWLEDGMENTS");
 	acknowledgmentsButton->uiComponent = acknowledgmentsButtonui;
-	sm->getActiveScene()->addObject(acknowledgmentsButton);*/
+	sm->getActiveScene()->addObject(acknowledgmentsButton);
 
 	//audioManager->playSound("test", true);
 	Scene* LoseScene = new Scene("LoseScreen");
@@ -814,7 +918,7 @@ int main() {
 	loseScreenUI->addShader(LogoShader);
 	loseScreenUI->setText("Nie udało ci się powstrzymać wycinki lasu");
 	loseScreen->uiComponent = loseScreenUI;
-	loseScreen->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight * 0.5f, 0.0f);
+	loseScreen->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 100.0f, Window::windowHeight * 0.5f, 0.0f);
 	LoseScene->addObject(loseScreen);
 	GameObject* returnButton = new GameObject("returnButton");
 	UI* returnButtonUI = new UI(button);
@@ -827,6 +931,18 @@ int main() {
 	returnButtonUI->setText("RETURN");
 	returnButton->uiComponent = returnButtonUI;
 	LoseScene->addObject(returnButton);
+
+	Scene* WinScene = new Scene("WinScreen");
+	GameObject* winScreen = new GameObject("winScreen");
+	UI* winScreenUI = new UI(writing);
+	winScreenUI->addShader(LogoShader);
+	winScreenUI->setText("Drwale pokonani");
+	winScreen->uiComponent = winScreenUI;
+	winScreen->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 100.0f, Window::windowHeight * 0.5f, 0.0f);
+	WinScene->addObject(winScreen);
+	WinScene->addObject(returnButton);
+
+	bool fruitsrenderd = false;
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -959,6 +1075,9 @@ int main() {
 							for (auto ch : tree->children.at(0)->children)
 							{
 								sect->staticObjects.erase(std::remove(sect->staticObjects.begin(), sect->staticObjects.end(), ch), sect->staticObjects.end());
+								if (ch->children.size() > 1) {
+									sect->staticObjects.erase(std::remove(sect->staticObjects.begin(), sect->staticObjects.end(), ch->children.at(1)), sect->staticObjects.end());
+								}
 							}
 						}
 						pathfinder->trees.erase(std::remove_if(pathfinder->trees.begin(), pathfinder->trees.end(), [treeActual](std::pair<int, Tree*> pair) {return pair.second == treeActual; }), pathfinder->trees.end());
@@ -989,6 +1108,9 @@ int main() {
 		RL.diffuseShader->use();
 		RL.diffuseShader->setMat4("view", V);
 		RL.diffuseShader->setMat4("projection", P);
+		RL.diffuseInstancedShader->use();
+		RL.diffuseInstancedShader->setMat4("view", V);
+		RL.diffuseInstancedShader->setMat4("projection", P);
 		//generating shadows
 		//if(sm->activeScene->findByName("player"))
 			//lightPos = sm->activeScene->findByName("player")->localTransform->localPosition + glm::vec3(0.5f, 20.0f, 0.3f);
@@ -1051,6 +1173,11 @@ int main() {
 					}
 					enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
 				}*/
+				reqEnemies--;
+				if (reqEnemies < 1) {
+					Won = true;
+				}
+				sm->getActiveScene()->findByName("Enemycount")->uiComponent->setText("Enemies: " + std::to_string(reqEnemies));
 				delete enemy;
 			}
 			else {
@@ -1079,13 +1206,15 @@ int main() {
 		if (sm->getActiveScene()->findByName("skydome")) {
 			sm->getActiveScene()->findByName("skydome")->getTransform()->localPosition = camera->transform->localPosition;
 		}
-		sm->getActiveScene()->Draw(V, P);
+		//sm->getActiveScene()->Draw(V, P);
 		transformsBranch.clear();
 		transformsLog.clear();
 		transformsTree.clear();
 		transformsLogLow.clear();
 		transformsTreeLow.clear();
 		transformsLeaves.clear();
+		transformsBanana.clear();
+		transformsMango.clear();
 		glm::vec2 PlayerPosv2 = glm::vec2(0.f, 0.f);
 		if (sm->getActiveScene()->findByName("player")) {
 			PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
@@ -1115,6 +1244,14 @@ int main() {
 							lowLog->modelComponent = RL.treeloglow;
 						}
 						transformsLeaves.push_back(tree->children.at(0)->children.at(0)->children.at(0)->getTransform());
+						if (tree->children.at(0)->children.at(0)->children.size() > 1) {
+							if (tree->children.at(0)->children.at(0)->children.at(1)->name.ends_with("Banana")) {
+								transformsBanana.push_back(tree->children.at(0)->children.at(0)->children.at(1)->getTransform());
+							}
+							else if (tree->children.at(0)->children.at(0)->children.at(1)->name.ends_with("Mango")) {
+								transformsMango.push_back(tree->children.at(0)->children.at(0)->children.at(1)->getTransform());
+							}
+						}
 					}
 				}
 			}
@@ -1132,13 +1269,21 @@ int main() {
 		}
 		for (auto sector : sm->getActiveScene()->gameObjects) {
 			if (sector->name.starts_with("sector") && transformsTree.size() > 0 && sector->children.size()>0) {
-				sector->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsTree);
+				for (auto mesh : sector->children.at(0)->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsTree);
+				}
 				sector->children.at(0)->getModelComponent().get()->drawInstances();
-				sector->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
+				for (auto mesh : sector->children.at(0)->children.at(0)->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsLog);
+				}
 				sector->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
-				sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
+				for (auto mesh : sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsBranch);
+				}
 				sector->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
-				sector->children.at(0)->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLeaves);
+				for (auto mesh : sector->children.at(0)->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsLeaves);
+				}
 				sector->children.at(0)->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
 				if (lowTree) {
 					lowTree->getModelComponent().get()->getFirstMesh()->initInstances(transformsTreeLow);
@@ -1146,6 +1291,38 @@ int main() {
 					lowLog->getModelComponent().get()->getFirstMesh()->initInstances(transformsLogLow);
 					lowLog->getModelComponent().get()->drawInstances();
 				}
+				break;
+			}
+		}
+		for (auto tree : pathfinder->trees) {
+			for (auto fruit : tree.second->children.at(0)->children.at(0)->children) {
+				if (fruit->name == "FruitBanana" && transformsBanana.size() > 0) {
+					for (auto mesh : fruit->getModelComponent().get()->meshes) {
+						mesh->initInstances(transformsBanana);
+					}
+					fruit->getModelComponent().get()->drawInstances();
+					fruitsrenderd = true;
+					break;
+				}
+			}
+			if (fruitsrenderd) {
+				fruitsrenderd = false;
+				break;
+			}
+		}
+		for (auto tree : pathfinder->trees) {
+			for (auto fruit : tree.second->children.at(0)->children.at(0)->children) {
+				if (fruit->name == "FruitMango" && transformsMango.size() > 0) {
+					for (auto mesh : fruit->getModelComponent().get()->meshes) {
+						mesh->initInstances(transformsMango);
+					}
+					fruit->getModelComponent().get()->drawInstances();
+					fruitsrenderd = true;
+					break;
+				}
+			}
+			if (fruitsrenderd) {
+				fruitsrenderd = false;
 				break;
 			}
 		}
@@ -1165,13 +1342,17 @@ int main() {
 			RL.enemyShader->use();
 			RL.enemyShader->setMat4("view", V);
 			RL.enemyShader->setMat4("projection", P);
-			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
+			for (auto mesh : enemyManager->enemies.at(0)->getModelComponent().get()->meshes) {
+				mesh->initInstances(transformsEnemy);
+			}
 			enemyManager->enemies.at(0)->getModelComponent().get()->drawInstances();
 			enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->GetShader()->use();
 			enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->GetShader()->setMat4("view", V);
 			enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->GetShader()->setMat4("projection", P);
 			if (transformsEnemyWeapon.size() > 0) {
-				enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemyWeapon);
+				for (auto mesh : enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsEnemyWeapon);
+				}
 				enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
 			}
 		}
@@ -1186,6 +1367,7 @@ int main() {
 			}
 			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
 		}*/
+		sm->getActiveScene()->Draw(V, P);
 
 		RL.shaderTree->use();
 		RL.shaderTree->setMat4("view", V);
@@ -1312,7 +1494,14 @@ int main() {
 		if (Lost) {
 			sm->activeScene = LoseScene;
 			gameMode.setMode(GameMode::Debug);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			Lost = false;
+		}
+		if (Won) {
+			sm->activeScene = WinScene;
+			gameMode.setMode(GameMode::Debug);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			Won = false;
 		}
 		renderImGui();
 		glfwSwapBuffers(window);
@@ -1341,7 +1530,7 @@ void renderImGui() {
 	if (ImGui::Button("Generate")) {
 		buttonPressed = true;
 	}
-	for (auto go : sm->getActiveScene()->gameObjects) {
+	/*for (auto go : sm->getActiveScene()->gameObjects) {
 		if (go->isVisible && !(go->name.starts_with("sector") || go->name.starts_with("Banana") || go->name.starts_with("Mango"))) {
 			ImGui::Text(go->name.c_str());
 			ImGui::Text("x: %.2f, y: %.2f, z: %.2f", go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);
@@ -1353,6 +1542,12 @@ void renderImGui() {
 					ImGui::Text("x: %.2f, y: %.2f, z: %.2f", ch->localTransform->localPosition.x, ch->localTransform->localPosition.y, ch->localTransform->localPosition.z);
 				}
 			}
+		}
+	}*/
+	for (auto section : cm.sections) {
+		for (auto obj : section->objects) {
+			ImGui::Text(obj->name.c_str());
+			ImGui::Text("x: %.2f, y: %.2f, z: %.2f", obj->localTransform->localPosition.x, obj->localTransform->localPosition.y, obj->localTransform->localPosition.z);
 		}
 	}
 	ImGui::SliderFloat("light x", &lightPos.x, -100, 100); 

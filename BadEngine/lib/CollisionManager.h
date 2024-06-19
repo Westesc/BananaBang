@@ -331,6 +331,15 @@ public:
 				first->localTransform->predictedPosition = first->localTransform->localPosition;
 			}
 		}
+		else if (second->name == "player" && first->name.starts_with("enemy")) {
+			if ((first->getTransform()->localPosition - second->getTransform()->localPosition).y < 0.0f) {
+				second->getTransform()->predictedPosition.x += 10.0f * deltaTime;
+				second->getTransform()->predictedPosition.z += 10.0f * deltaTime;
+			}
+			else {
+				second->localTransform->predictedPosition = second->localTransform->localPosition;
+			}
+		}
 		else {
 			glm::vec3 displacement = calculateCollisionResponse(first, second);
 			displacement.y = 0.0f;
@@ -678,6 +687,9 @@ public:
 		if (!(glm::any(glm::isnan(separation)) || glm::any(glm::isinf(separation)))) {
 			if (first->name == "player") {
 				first->localTransform->predictedPosition += separation * 0.5f;
+			}
+			else if (second->name == "player") {
+				second->localTransform->predictedPosition -= separation * 0.5f;
 			}
 			else {
 				first->localTransform->predictedPosition += separation * 0.5f;

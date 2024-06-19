@@ -54,7 +54,7 @@ void main()
     vec3 ambient = ambientStrength * lightColor;
   	
     // diffuse 
-    vec3 lightDir = normalize(TangentLightPos  - TangentFragPos);
+    vec3 lightDir = normalize(vec3(1.0f,0.8f,0.f));
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
     

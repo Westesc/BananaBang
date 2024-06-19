@@ -26,7 +26,7 @@ private:
     glm::mat4* Transform;
     glm::mat4* prevTransform = new glm::mat4(1.f);
     std::vector<Texture> textures_loaded;
-    std::vector<Mesh*> meshes;
+    
     std::string directory;
     Shader* shader;
     Shader* outlineShader = nullptr;
@@ -319,6 +319,7 @@ public:
     bool rotating;
     bool isBlue, iswhite;
     bool isAnim = false;
+    std::vector<Mesh*> meshes;
 
     bool checkAnim() {
         return isAnim;
@@ -350,6 +351,16 @@ public:
         texture.type = typeName;
         texture.path = filename;
         textures_loaded.push_back(texture);
+    }
+
+    unsigned int getTextureID(const std::string& typeName) const {
+        for (const auto& texture : textures_loaded) {
+            if (texture.type == typeName) {
+                return texture.id;
+            }
+        }
+        std::cerr << "Texture not found: " << typeName << std::endl;
+        return 0;
     }
 
     void AddTexture(unsigned int id, std::string typeName, std::string filename = "")
@@ -490,8 +501,14 @@ public:
         }
     }
 
-    void drawInstances() {
+    /*void drawInstances() {
         getFirstMesh()->drawInstances(shader, textures_loaded);
+    }*/
+
+    void drawInstances() {
+        for (auto mesh : meshes) {
+			mesh->drawInstances(shader, textures_loaded);
+		}
     }
 
     void DrawBoundingBox(const BoundingBox& bbox) {

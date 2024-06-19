@@ -250,6 +250,11 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
                 modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
                 modelComponent->GetShader()->setMat4("view", view);
                 modelComponent->GetShader()->setMat4("projection", perspective);
+
+                if (name.starts_with("plane")) {
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, modelComponent->getTextureID("diffuseMap"));
+                }
                 modelComponent->Draw();
             }
             if (modelComponent != nullptr) {

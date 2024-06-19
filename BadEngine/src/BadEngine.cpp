@@ -268,8 +268,8 @@ void generate() {
 						break;
 					}
 					fruits->isInstanced = true;
-					log->children.at(branchIndex)->addChild(fruits);
-					//sm->activeScene->addObject(fruits);
+					//log->children.at(branchIndex)->addChild(fruits);
+					sm->activeScene->addObject(fruits);
 				}
 				fruitPool.erase(fruitPool.begin()+fruitIndex);
 			}
@@ -342,14 +342,6 @@ void generate() {
 		pathfinder->trees.at(0).second->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLog);
 		pathfinder->trees.at(0).second->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsBranch);
 		pathfinder->trees.at(0).second->children.at(0)->children.at(0)->children.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsLeaves);
-		for (auto fruit :pathfinder->trees.at(0).second->children.at(0)->children.at(0)->children) {
-			if (fruit->name == "FruitBanana") {
-				transformsBanana.push_back(fruit->getTransform());
-			}
-			else if (fruit->name == "FruitMango") {
-				transformsMango.push_back(fruit->getTransform());
-			}
-		}
 		pathfinder->sortTrees();
 	}
 		
@@ -369,13 +361,10 @@ void generate() {
 			for (auto ch : go->children.at(0)->children)
 			{
 				cm.addStaticObject(ch);
-				if (ch->children.size() > 1) {
-					cm.addStaticObject(ch->children.at(1));
-				}
 			}
 		}
 		sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
-		if (sm->getActiveScene()->gameObjects.at(i)->name.starts_with("wall")) {
+		if (sm->getActiveScene()->gameObjects.at(i)->name.starts_with("wall") || sm->getActiveScene()->gameObjects.at(i)->name.starts_with("Fruit")) {
 			cm.addStaticObject(sm->getActiveScene()->gameObjects.at(i));
 		}
 	}
@@ -803,7 +792,7 @@ int main() {
 	sm->loadScene("first");
 	sm->activeScene = sm->scenes.at(0);
 	sm->getActiveScene()->addObject(anim);
-	enemyManager = new EnemyStateManager(pathfinder, &cm, pm);
+	enemyManager = new EnemyStateManager(pathfinder, &cm, pm, sectorSelector);
 	bool regenInstances = false;
 	bool regenInstancesEnemy = false;
 	bool regenInstancesEnemyWeapon = false;
@@ -1083,9 +1072,6 @@ int main() {
 							for (auto ch : tree->children.at(0)->children)
 							{
 								sect->staticObjects.erase(std::remove(sect->staticObjects.begin(), sect->staticObjects.end(), ch), sect->staticObjects.end());
-								if (ch->children.size() > 1) {
-									sect->staticObjects.erase(std::remove(sect->staticObjects.begin(), sect->staticObjects.end(), ch->children.at(1)), sect->staticObjects.end());
-								}
 							}
 						}
 						pathfinder->trees.erase(std::remove_if(pathfinder->trees.begin(), pathfinder->trees.end(), [treeActual](std::pair<int, Tree*> pair) {return pair.second == treeActual; }), pathfinder->trees.end());
@@ -1106,6 +1092,10 @@ int main() {
 					}
 				}
 			}
+		}
+		if (loaded && pathfinder->trees.size() == 0) {
+			loaded = false;
+			Lost = true;
 		}
 		//std::cout << glm::to_string(sm->getActiveScene()->findByName("player")->getTransform()->getMatrix()) << std::endl;
 		//sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(3.0f, 2.0f, 3.0f);
@@ -1185,15 +1175,15 @@ int main() {
 								lowLog->modelComponent = RL.treeloglow;
 							}
 							transformsLeaves.push_back(tree->children.at(0)->children.at(0)->children.at(0)->getTransform());
-							if (tree->children.at(0)->children.at(0)->children.size() > 1) {
-								if (tree->children.at(0)->children.at(0)->children.at(1)->name.ends_with("Banana")) {
-									transformsBanana.push_back(tree->children.at(0)->children.at(0)->children.at(1)->getTransform());
-								}
-								else if (tree->children.at(0)->children.at(0)->children.at(1)->name.ends_with("Mango")) {
-									transformsMango.push_back(tree->children.at(0)->children.at(0)->children.at(1)->getTransform());
-								}
-							}
 						}
+					}
+				}
+				else if (object->name.starts_with("Fruit")) {
+					if (object->name.ends_with("Banana")) {
+						transformsBanana.push_back(object->getTransform());
+					}
+					else if (object->name.ends_with("Mango")) {
+						transformsMango.push_back(object->getTransform());
 					}
 				}
 			}
@@ -1225,35 +1215,23 @@ int main() {
 					break;
 				}
 			}
-			for (auto tree : pathfinder->trees) {
-				for (auto fruit : tree.second->children.at(0)->children.at(0)->children) {
-					if (fruit->name == "FruitBanana" && transformsBanana.size() > 0) {
-						for (auto mesh : fruit->getModelComponent().get()->meshes) {
-							mesh->initInstances(transformsBanana);
-						}
-						fruit->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
-						fruitsrenderd = true;
-						break;
+			for (auto fruit : sm->getActiveScene()->gameObjects) {
+				if (fruit->name == "FruitBanana" && transformsBanana.size() > 0) {
+					for (auto mesh : fruit->getModelComponent().get()->meshes) {
+						mesh->initInstances(transformsBanana);
 					}
-				}
-				if (fruitsrenderd) {
-					fruitsrenderd = false;
+					fruit->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
+					fruitsrenderd = true;
 					break;
 				}
 			}
-			for (auto tree : pathfinder->trees) {
-				for (auto fruit : tree.second->children.at(0)->children.at(0)->children) {
-					if (fruit->name == "FruitMango" && transformsMango.size() > 0) {
-						for (auto mesh : fruit->getModelComponent().get()->meshes) {
-							mesh->initInstances(transformsMango);
-						}
-						fruit->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
-						fruitsrenderd = true;
-						break;
+			for (auto fruit : sm->getActiveScene()->gameObjects) {
+				if (fruit->name == "FruitMango" && transformsMango.size() > 0) {
+					for (auto mesh : fruit->getModelComponent().get()->meshes) {
+						mesh->initInstances(transformsMango);
 					}
-				}
-				if (fruitsrenderd) {
-					fruitsrenderd = false;
+					fruit->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
+					fruitsrenderd = true;
 					break;
 				}
 			}
@@ -1317,7 +1295,9 @@ int main() {
 				sm->getActiveScene()->gameObjects.erase(std::remove(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), enemy), sm->getActiveScene()->gameObjects.end());
 				enemyManager->enemies.erase(std::remove(enemyManager->enemies.begin(), enemyManager->enemies.end(), enemy), enemyManager->enemies.end());
 				if (enemy->chosenTree) {
-					enemy->chosenTree->getAsActualType<Tree>()->removeChopper(enemy);
+					if (enemy->chosenTree->getAsActualType<Tree>()) {
+						enemy->chosenTree->getAsActualType<Tree>()->removeChopper(enemy);
+					}
 				}
 				regenInstancesEnemy = true;
 				/*if (enemyManager->enemies.size() > 0) {
@@ -1398,14 +1378,6 @@ int main() {
 							lowLog->modelComponent = RL.treeloglow;
 						}
 						transformsLeaves.push_back(tree->children.at(0)->children.at(0)->children.at(0)->getTransform());
-						if (tree->children.at(0)->children.at(0)->children.size() > 1) {
-							if (tree->children.at(0)->children.at(0)->children.at(1)->name.ends_with("Banana")) {
-								transformsBanana.push_back(tree->children.at(0)->children.at(0)->children.at(1)->getTransform());
-							}
-							else if (tree->children.at(0)->children.at(0)->children.at(1)->name.ends_with("Mango")) {
-								transformsMango.push_back(tree->children.at(0)->children.at(0)->children.at(1)->getTransform());
-							}
-						}
 					}
 				}
 			}
@@ -1448,35 +1420,23 @@ int main() {
 				break;
 			}
 		}
-		for (auto tree : pathfinder->trees) {
-			for (auto fruit : tree.second->children.at(0)->children.at(0)->children) {
-				if (fruit->name == "FruitBanana" && transformsBanana.size() > 0) {
-					for (auto mesh : fruit->getModelComponent().get()->meshes) {
-						mesh->initInstances(transformsBanana);
-					}
-					fruit->getModelComponent().get()->drawInstances();
-					fruitsrenderd = true;
-					break;
+		for (auto fruit : sm->getActiveScene()->gameObjects) {
+			if (fruit->name == "FruitBanana" && transformsBanana.size() > 0) {
+				for (auto mesh : fruit->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsBanana);
 				}
-			}
-			if (fruitsrenderd) {
-				fruitsrenderd = false;
+				fruit->getModelComponent().get()->drawInstances();
+				fruitsrenderd = true;
 				break;
 			}
 		}
-		for (auto tree : pathfinder->trees) {
-			for (auto fruit : tree.second->children.at(0)->children.at(0)->children) {
-				if (fruit->name == "FruitMango" && transformsMango.size() > 0) {
-					for (auto mesh : fruit->getModelComponent().get()->meshes) {
-						mesh->initInstances(transformsMango);
-					}
-					fruit->getModelComponent().get()->drawInstances();
-					fruitsrenderd = true;
-					break;
+		for (auto fruit : sm->getActiveScene()->gameObjects) {
+			if (fruit->name == "FruitMango" && transformsMango.size() > 0) {
+				for (auto mesh : fruit->getModelComponent().get()->meshes) {
+					mesh->initInstances(transformsMango);
 				}
-			}
-			if (fruitsrenderd) {
-				fruitsrenderd = false;
+				fruit->getModelComponent().get()->drawInstances();
+				fruitsrenderd = true;
 				break;
 			}
 		}

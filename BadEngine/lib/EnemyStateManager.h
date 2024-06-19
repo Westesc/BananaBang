@@ -3,13 +3,15 @@
 
 #include "Pathfinder.h"
 #include "CollisionManager.h"
+#include "sectorSelector.h"
 
 class EnemyStateManager {
 public:
-    EnemyStateManager(Pathfinder* pathfinder, CollisionManager* cm, PlayerMovement* pm) {
+    EnemyStateManager(Pathfinder* pathfinder, CollisionManager* cm, PlayerMovement* pm, SectorSelector* ss) {
         this->pathfinder = pathfinder;
         this->cm = cm;
         this->pm = pm;
+        this->ss = ss;
     }
 
     std::vector<Enemy*> enemies;
@@ -18,6 +20,7 @@ public:
     GameObject* player = nullptr;
     PlayerMovement* pm = nullptr;
     float multipierDistance = 4.5f;
+    SectorSelector* ss;
 
     void update(float deltaTime, bool playerAtention) {
         if (pm->getState() == PlayerState::climbing) {
@@ -76,6 +79,10 @@ private:
         if (tree.second != nullptr) {
             enemy->chosenTreePos = tree.first;
             enemy->chosenTree = tree.second;
+            enemy->state = EnemyState::Walking;
+        }
+        else {
+            enemy->sector = ss->selectedSector;
             enemy->state = EnemyState::Walking;
         }
     }

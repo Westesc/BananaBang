@@ -741,7 +741,7 @@ public:
 				if (checkCollision(trigger, section->objects.at(i))) {
 					section->objects.at(i)->hp -= 10;
 					hit = true;
-					std::cout << "hit" << std::endl;
+					section->objects.at(i)->getAsActualType<Enemy>()->state = EnemyState::Attacking;
 				}
 			}
 		}

@@ -165,6 +165,8 @@ public:
         float m_PrevTime = m_PrevTimeArm;
         std::string nodeName = node->name;
 
+        //std::cout << nodeName << std::endl;
+
         float m_CurrentTime = m_CurrentTimeArm;
 
         glm::mat4 nodeTransform = node->transformation;
@@ -225,8 +227,8 @@ public:
             int index = boneInfoMap[nodeName].id;
             glm::mat4 offset = boneInfoMap[nodeName].offset;
             m_FinalBoneMatrices[index] = globalTransformation * offset;
-
             if (nodeName == "mixamorig_Hips") {
+                //std::cout << "jestem tutaj";
                 position.x = globalTransformation[3][0];
                 position.y = globalTransformation[3][1];
                 position.z = globalTransformation[3][2];

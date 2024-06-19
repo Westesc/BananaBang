@@ -7,6 +7,7 @@
 #include <string>
 #include<fstream>
 #include <iostream>
+#include <thread>
 #include <chrono>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -111,6 +112,10 @@ GameObject* acknowledgmentsButton;
 GameObject* backButton;
 GameObject* acknowledgments;
 bool Lost = false;
+
+void addAnimation(GameObject* anim, char* path, const char* name, float duration) {
+	anim->addAnimation(path, name, duration);
+}
 
 void generate() {
 	std::cout << "przycisk generate" << std::endl;
@@ -385,38 +390,44 @@ void generate() {
 	GameObject* anim = new GameObject("player");
 	//animodel->SetShader(shaderAnimation);
 	anim->addModelComponent(RL.animodel);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.4f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.5f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching2.dae"), "attack2", 1.5f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Standing Melee Punch.dae"), "attack3", 1.5f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Up Wall.dae"), "climbing up", 1.3f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Climbing Down Wall.dae"), "climbing down", 1.3f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Jump Attack.dae"), "tree attack", 0.7f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Crouch To Standing.dae"), "leave banana up", 1.4f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Standing To Crouch.dae"), "leave banana down", 1.4f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Sprint.dae"), "sprint", 1.f);
+	std::vector<std::thread> threads;
 
-	anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
-	pbd->objects.push_back(anim);
-	if (sm->getActiveScene()->findByName("player") == nullptr) {
-		sm->getActiveScene()->addObject(anim);
-		cm.addObject(anim);
+	// Dodawanie animacji w osobnych wątkach
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_walk.dae"), "walking", 1.4f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "standing", 1.f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "jumping up", 0.9f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "jumping down", 0.2f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_hit.dae"), "attack1", 1.5f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_hit.dae"), "attack2", 1.5f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_hit.dae"), "attack3", 1.5f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "dodge", 1.f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkry_climb.dae"), "climbing up", 1.3f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkry_climb.dae"), "climbing down", 1.3f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "tree attack", 0.7f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_sprint.dae"), "sprint", 1.f));
+
+	// Łączenie wątków
+	for (auto& thread : threads) {
+		thread.join();
 	}
+
+	//anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
+	//pbd->objects.push_back(anim);
+	//if (sm->getActiveScene()->findByName("player") == nullptr) {
+	//	sm->getActiveScene()->addObject(anim);
+	//	cm.addObject(anim);
+	//}
 	sm->getActiveScene()->addObject(anim);
-	anim->Move(glm::vec3(3.0f, 2.0f, 3.0f));
-	anim->getTransform()->localScale = glm::vec3(2.f, 2.f, 2.f);
+	anim->Move(glm::vec3(3.0f, 100.0f, 3.0f));
+	anim->getTransform()->localScale = glm::vec3(100.f);
 	pm->setGroundPosition(anim->getTransform()->getLocalPosition().y);
 	enemyManager->player = anim;
 	anim->hp = 5;
-	GameObject* fist = new GameObject("fist");
-	anim->addChild(fist);
-	fist->capsuleCollider = new CapsuleCollider(fist->localTransform->localPosition, 3.0f, 3.0f, 1.0f, true);
-	fist->capsuleCollider->isTriggerOnly = true;
-	fist->active = false;
+	//GameObject* fist = new GameObject("fist");
+	//anim->addChild(fist);
+	//fist->capsuleCollider = new CapsuleCollider(fist->localTransform->localPosition, 3.0f, 3.0f, 1.0f, true);
+	//fist->capsuleCollider->isTriggerOnly = true;
+	//fist->active = false;
 
 
 	GameObject* skydome = new GameObject("skydome");
@@ -580,14 +591,16 @@ int main() {
 
 	GameObject* anim = new GameObject("player");
 	RL.animodel ->SetShader(RL.shaderAnimation);
-	RL.animodel->SetOutlineShader(RL.outlineShader);
+	//RL.animodel->SetOutlineShader(RL.outlineShader);
 	anim->addModelComponent(RL.animodel);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
+	anim->addAnimation(const_cast<char*>("../../../../res/animations/monkey_walk.dae"), "walking", 1.4f);
+	anim->addAnimation(const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "standing", 1.f);
+	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
+	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
+	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
+	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
+	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
+	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
 	sm->getActiveScene()->addObject(anim);
 	RL.enemyModel->SetShader(RL.enemyShader);
 	
@@ -673,7 +686,7 @@ int main() {
 
 	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/bialy.png", "diffuseMap");
 	sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(7.f, 1.f, 1.f);
-	sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
+	//sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
 
 	sm->getActiveScene()->findByName("skydome")->getModelComponent()->AddTexture("../../../../res/chmury1.png","diffuseMap");
 
@@ -842,6 +855,7 @@ int main() {
 		if (gameMode.getMode() == GameMode::Game) {
 			pm->ManagePlayer(deltaTime2, deltaTime);
 			V = camera->getViewMatrixPlayer();
+			//V = glm::scale(V, glm::vec3(30.f));
 			sm->getActiveScene()->findByName("skydome")->timeSetting(gameTime / 7, glm::vec2(10, 10));
 		}
 		else if (gameMode.getMode() != GameMode::Game) {

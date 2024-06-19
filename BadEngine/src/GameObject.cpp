@@ -254,13 +254,13 @@ void GameObject::Draw(glm::mat4 view, glm::mat4 perspective) {
             }
             if (modelComponent != nullptr) {
                 if (modelComponent->isAnim) {
-                    //animPlayer->UpdateAnimation(deltaTime / 2);
+                    animPlayer->UpdateAnimation(deltaTime / 2);
 
-                    //modelComponent->GetShader()->use();
-                    //modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
-                    //modelComponent->GetShader()->setMat4("view", view);
-                   // modelComponent->GetShader()->setMat4("projection", perspective);
-                    //modelComponent->Draw();
+                    modelComponent->GetShader()->use();
+                    modelComponent->GetShader()->setMat4("M", *modelComponent->getTransform());
+                    modelComponent->GetShader()->setMat4("view", view);
+                    modelComponent->GetShader()->setMat4("projection", perspective);
+                    modelComponent->Draw();
                 }
             }
             /*if (modelComponent->boundingBox != nullptr) {

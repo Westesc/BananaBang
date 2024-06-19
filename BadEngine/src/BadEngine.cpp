@@ -550,7 +550,7 @@ void showAcknowledgments() {
 	acknowledgmentsui5->setText("tlo ekranu głownego wygenerowano korzystajac z deepai.org");
 	acknowledgments5->localTransform->localPosition = glm::vec3(20.0f, Window::windowHeight - 300.0f, 0.0f);
 	acknowledgments5->uiComponent = acknowledgmentsui5;
-	sm->getActiveScene()->addObject(acknowledgments5);
+	//sm->getActiveScene()->addObject(acknowledgments5);
 	sm->getActiveScene()->addObject(backButton);
 }
 
@@ -856,7 +856,7 @@ int main() {
 	titlescreen = new GameObject("titlescreen");
 	UI* titleui = new UI(plane);
 	titleui->addShader(LogoShader);
-	titleui->setTexture("../../../../res/titlescreen.png");
+	titleui->setTexture("../../../../res/junglewall.png");
 	titlescreen->uiComponent = titleui;
 	titlescreen->localTransform->localScale = glm::vec3(18.f, 10.f, 1.f);
 	sm->getActiveScene()->addObject(titlescreen);
@@ -1156,7 +1156,7 @@ int main() {
 				if (object->name.starts_with("sector")) {
 					for (auto tree : object->children) {
 						if (tree->name.starts_with("tree") && tree->isVisible) {
-							if (glm::distance(PlayerPosv2, glm::vec2(tree->getTransform()->localPosition.x, tree->getTransform()->localPosition.z)) < 75.0f) {
+							if (glm::distance(PlayerPosv2, glm::vec2(tree->getTransform()->localPosition.x, tree->getTransform()->localPosition.z)) < 150.0f) {
 								transformsTree.push_back(tree->getTransform());
 								transformsLog.push_back(tree->children.at(0)->getTransform());
 								tree->modelComponent = RL.treetrunk;

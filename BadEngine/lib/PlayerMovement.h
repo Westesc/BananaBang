@@ -431,21 +431,22 @@ public:
             //Jakiœ warunek co bêdzie sprawdza³ czy œcie¿ka jest git
             if (closestEnemy != nullptr) {
                 player->useGravity = false;
-                rotatePlayerTowards(closestEnemy->getTransform()->getLocalPosition());
+                if (closestEnemy->getTransform()) {
+                    rotatePlayerTowards(closestEnemy->getTransform()->getLocalPosition());
 
-                //player->getAnimateBody()->setActiveAnimation("tree attack");
+                    //player->getAnimateBody()->setActiveAnimation("tree attack");
 
-                glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
-                glm::vec3 direction = glm::normalize(closestEnemy->getTransform()->getLocalPosition() - currentPosition);
+                    glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
+                    glm::vec3 direction = glm::normalize(closestEnemy->getTransform()->getLocalPosition() - currentPosition);
 
-                float speed = 1.5f;
-                direction.y -= 0.05;
-                glm::vec3 velocity = direction * speed;
+                    float speed = 1.5f;
+                    direction.y -= 0.05;
+                    glm::vec3 velocity = direction * speed;
 
-                player->velocity = velocity / deltaTime;
-                player->children.at(0)->active = true;
-                player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
-
+                    player->velocity = velocity / deltaTime;
+                    player->children.at(0)->active = true;
+                    player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
+                }
                 if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
                     state = PlayerState::walking;
                     player->children.at(0)->active = false;
@@ -465,7 +466,7 @@ public:
         }
         else if (state == PlayerState::leave_banana) {
 
-            sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
+            //sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
             state = PlayerState::walking;
             //if (player->getAnimateBody()->getActiveAnimation() != "leave banana up") {
             //    player->getAnimateBody()->setActiveAnimation("leave banana down", true);

@@ -440,10 +440,11 @@ void generate() {
 	for (auto& thread : threads) {
 		thread.join();
 	}
+	anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.03f, 0.5f, 1.0f, true);
 	anim->getTransform()->localScale = glm::vec3(40.f);
 	anim->getTransform()->localPosition = glm::vec3(3.0f, 2.0f, 3.0f);
 
-	anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.1f, 0.1f, 1.0f, true);
+	
 	pbd->objects.push_back(anim);
 	if (sm->getActiveScene()->findByName("player") == nullptr) {
 		sm->getActiveScene()->addObject(anim);
@@ -927,7 +928,7 @@ int main() {
 	returnButtonUI->setSize(glm::vec2(150.0f, 60.f));
 	returnButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 100.0f, 0.0f);
 	returnButtonUI->input = input;
-	returnButtonUI->onClick = []() { sm->activeScene = sm->scenes.at(0); };
+	returnButtonUI->onClick = showMain;
 	returnButtonUI->setText("RETURN");
 	returnButton->uiComponent = returnButtonUI;
 	LoseScene->addObject(returnButton);
@@ -1544,10 +1545,19 @@ void renderImGui() {
 			}
 		}
 	}*/
-	for (auto section : cm.sections) {
+	/*for (auto section : cm.sections) {
 		for (auto obj : section->objects) {
 			ImGui::Text(obj->name.c_str());
 			ImGui::Text("x: %.2f, y: %.2f, z: %.2f", obj->localTransform->localPosition.x, obj->localTransform->localPosition.y, obj->localTransform->localPosition.z);
+		}
+	}*/
+	if (sm->getActiveScene()->findByName("player")) {
+		ImGui::Text("Player");
+		GameObject* player = sm->getActiveScene()->findByName("player");
+		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", player->localTransform->localPosition.x, player->localTransform->localPosition.y, player->localTransform->localPosition.z);
+		if (player->capsuleCollider) {
+			glm::vec3 transformedCenter = player->localTransform->getMatrix() * glm::vec4(player->capsuleCollider->center, 1.0f);
+			ImGui::Text("x: %.2f, y: %.2f, z: %.2f", transformedCenter.x, transformedCenter.y, transformedCenter.z);
 		}
 	}
 	ImGui::SliderFloat("light x", &lightPos.x, -100, 100); 

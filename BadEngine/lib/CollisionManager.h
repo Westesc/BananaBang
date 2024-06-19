@@ -237,7 +237,7 @@ public:
 		glm::vec3 penetration = bestA - bestB;
 		float len = glm::length(penetration);
 		penetration = glm::normalize(penetration);
-		float penetrationDepth = radius1 + radius2 - len;
+		float penetrationDepth = radius1 + radius2 - len; //TODO: test skali
 		return penetrationDepth > 0.0f;
 	}
 

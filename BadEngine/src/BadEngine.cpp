@@ -75,8 +75,9 @@ std::vector fruits = { 2,3 }; //{bananas,mango}
 int a = 4;
 int b = 6;
 bool buttonPressed;
-unsigned int maxEnemies = 5;
+unsigned int maxEnemies = 15;
 unsigned int spawnedEnemies = 0;
+unsigned int reqEnemies = 10;
 bool loaded = false;
 bool playerAtention = false;
 CollisionManager cm = CollisionManager(200, 40);
@@ -121,6 +122,7 @@ GameObject* acknowledgments3;
 GameObject* acknowledgments4;
 GameObject* acknowledgments5;
 bool Lost = false;
+bool Won = false;
 Shader* LogoShader;
 
 void generate() {
@@ -387,8 +389,14 @@ void generate() {
 	ui2->addShader(UIShader);
 	ui2->setTexture("../../../../res/serce5.png");
 	HPcount->localTransform->localPosition = glm::vec3(0, Window::windowHeight - 100.0f, 0.f);
-	ui->input = input;
 	HPcount->uiComponent = ui2;
+
+	GameObject* enemyCount = new GameObject("Enemycount");
+	UI* uiCount = new UI(writing);
+	uiCount->addShader(UIShader);
+	uiCount->setText("Pozostali drwale : " + std::to_string(reqEnemies));
+	enemyCount->localTransform->localPosition = glm::vec3(0, Window::windowHeight - 300.0f, 0.f);
+	enemyCount->uiComponent = uiCount;
 
 	for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 		for (auto go : sm->getActiveScene()->gameObjects.at(i)->children)
@@ -456,6 +464,7 @@ void generate() {
 
 	sm->getActiveScene()->addObject(Button);
 	sm->getActiveScene()->addObject(HPcount);
+	sm->getActiveScene()->addObject(enemyCount);
 	loaded = true;
 	spawnerTime = 0;
 	sectorSelectorTime = 0;
@@ -894,7 +903,7 @@ int main() {
 	loseScreenUI->addShader(LogoShader);
 	loseScreenUI->setText("Nie udało ci się powstrzymać wycinki lasu");
 	loseScreen->uiComponent = loseScreenUI;
-	loseScreen->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight * 0.5f, 0.0f);
+	loseScreen->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 100.0f, Window::windowHeight * 0.5f, 0.0f);
 	LoseScene->addObject(loseScreen);
 	GameObject* returnButton = new GameObject("returnButton");
 	UI* returnButtonUI = new UI(button);
@@ -907,6 +916,16 @@ int main() {
 	returnButtonUI->setText("RETURN");
 	returnButton->uiComponent = returnButtonUI;
 	LoseScene->addObject(returnButton);
+
+	Scene* WinScene = new Scene("WinScreen");
+	GameObject* winScreen = new GameObject("winScreen");
+	UI* winScreenUI = new UI(writing);
+	winScreenUI->addShader(LogoShader);
+	winScreenUI->setText("Drwale pokonani");
+	winScreen->uiComponent = winScreenUI;
+	winScreen->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 100.0f, Window::windowHeight * 0.5f, 0.0f);
+	WinScene->addObject(winScreen);
+	WinScene->addObject(returnButton);
 
 	bool fruitsrenderd = false;
 	while (!glfwWindowShouldClose(window)) {
@@ -1135,6 +1154,11 @@ int main() {
 					}
 					enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
 				}*/
+				reqEnemies--;
+				if (reqEnemies < 1) {
+					Won = true;
+				}
+				sm->getActiveScene()->findByName("Enemycount")->uiComponent->setText("Enemies: " + std::to_string(reqEnemies));
 				delete enemy;
 			}
 			else {
@@ -1163,7 +1187,7 @@ int main() {
 		if (sm->getActiveScene()->findByName("skydome")) {
 			sm->getActiveScene()->findByName("skydome")->getTransform()->localPosition = camera->transform->localPosition;
 		}
-		sm->getActiveScene()->Draw(V, P);
+		//sm->getActiveScene()->Draw(V, P);
 		transformsBranch.clear();
 		transformsLog.clear();
 		transformsTree.clear();
@@ -1324,6 +1348,7 @@ int main() {
 			}
 			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
 		}*/
+		sm->getActiveScene()->Draw(V, P);
 
 		RL.shaderTree->use();
 		RL.shaderTree->setMat4("view", V);
@@ -1450,7 +1475,14 @@ int main() {
 		if (Lost) {
 			sm->activeScene = LoseScene;
 			gameMode.setMode(GameMode::Debug);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			Lost = false;
+		}
+		if (Won) {
+			sm->activeScene = WinScene;
+			gameMode.setMode(GameMode::Debug);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			Won = false;
 		}
 		renderImGui();
 		glfwSwapBuffers(window);
@@ -1479,7 +1511,7 @@ void renderImGui() {
 	if (ImGui::Button("Generate")) {
 		buttonPressed = true;
 	}
-	for (auto go : sm->getActiveScene()->gameObjects) {
+	/*for (auto go : sm->getActiveScene()->gameObjects) {
 		if (go->isVisible && !(go->name.starts_with("sector") || go->name.starts_with("Banana") || go->name.starts_with("Mango"))) {
 			ImGui::Text(go->name.c_str());
 			ImGui::Text("x: %.2f, y: %.2f, z: %.2f", go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);
@@ -1491,6 +1523,12 @@ void renderImGui() {
 					ImGui::Text("x: %.2f, y: %.2f, z: %.2f", ch->localTransform->localPosition.x, ch->localTransform->localPosition.y, ch->localTransform->localPosition.z);
 				}
 			}
+		}
+	}*/
+	for (auto section : cm.sections) {
+		for (auto obj : section->objects) {
+			ImGui::Text(obj->name.c_str());
+			ImGui::Text("x: %.2f, y: %.2f, z: %.2f", obj->localTransform->localPosition.x, obj->localTransform->localPosition.y, obj->localTransform->localPosition.z);
 		}
 	}
 	ImGui::SliderFloat("light x", &lightPos.x, -100, 100); 

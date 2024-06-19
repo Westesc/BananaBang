@@ -15,7 +15,7 @@ RigidBody::~RigidBody()
 void RigidBody::useGravity()
 {
 	upwardsSpeed += gravity * tm->getFramePerSeconds();
-	sm->getActiveScene()->findByName(tag)->velocity = glm::vec3(0.0f, upwardsSpeed * tm->getFramePerSeconds(), 0.0f)/tm->getFramePerSeconds();
+	sm->getActiveScene()->findByName(tag)->velocity.y = upwardsSpeed / tm->getFramePerSeconds();
 }
 
 bool RigidBody::checkCollision()

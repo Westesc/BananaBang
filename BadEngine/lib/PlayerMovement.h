@@ -52,8 +52,8 @@ private:
     float rotateAngle = 0.f;
 
     //jumping
-    float limitJump = 7.f;
-    float jumpPower = 7.f;
+    float limitJump = 4.f;
+    float jumpPower = 0.3f;
     glm::vec3 initialPosition;
     float airSpeed = 6.f;
 
@@ -199,20 +199,20 @@ private:
     }
 
     void jump(float deltaTime) {
-        rb->upwardsSpeed = jumpPower;
+        player->useGravity = false;
         rb->useGravity();
         MovePlayer(deltaTime);
 
         glm::vec3 finalPosition = player->getTransform()->getLocalPosition();
         float jumpDistance = glm::length(finalPosition.y - initialPosition.y);
         if (jumpDistance == 0.0f) {
-            state = PlayerState::walking;
-            rb->upwardsSpeed = 0.f;
-            sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("walking");
+            //state = PlayerState::walking;
+            //rb->upwardsSpeed = 0.f;
+            //sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("walking");
         }
         if (jumpDistance > limitJump) {
             state = PlayerState::air;
-            rb->upwardsSpeed = 0.f;
+            rb->upwardsSpeed = -0.0001f;
             //player->getAnimateBody()->setActiveAnimationWithY("jumping down", true);
         }
     }
@@ -288,6 +288,7 @@ private:
                 }
                 else if (input->checkKey(GLFW_KEY_SPACE) && !wasSpacePressed) {
                     //player->getAnimateBody()->setActiveAnimationWithY("jumping up", true);
+                    rb->upwardsSpeed = jumpPower;
                     state = PlayerState::jump_up;
                     initialPosition = player->getTransform()->getLocalPosition();
                 }
@@ -354,6 +355,8 @@ public:
         PlayerState prevState = state;
         checkState();
         if (state == PlayerState::walking) {
+            //std::cout << "stading"<<std::endl;
+           // std::cout << player->getAnimateBody()->getActiveAnimation()<<std::endl;
             MovePlayer(deltaTime);
             // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         }
@@ -457,11 +460,13 @@ public:
             }
         }
         else if (state == PlayerState::jump_up) {
+            player->getAnimateBody()->setActiveAnimation("standing");
             jump(deltaTime);
         }
         else if (state == PlayerState::air) {
+            player->useGravity = false;
             MovePlayer(deltaTime);
-            rb->upwardsSpeed = -7.f;
+           // rb->upwardsSpeed = 1.f;
             rb->useGravity();
         }
         else if (state == PlayerState::leave_banana) {

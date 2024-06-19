@@ -16,7 +16,7 @@ public:
 	RigidBody(std::string tag, SceneManager* sm, TimeManager* tm);
 	~RigidBody();
 
-	float gravity = -20.f;
+	float gravity = -0.12f;
 	float mass;
 	float upwardsSpeed = 0.f;
 

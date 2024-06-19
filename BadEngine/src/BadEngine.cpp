@@ -471,7 +471,7 @@ void generate() {
 	bananaObj->getTransform()->localScale = glm::vec3(0.1f);
 	//sm->getActiveScene()->addObject(bananaObj);
 
-	sm->getActiveScene()->addObject(Button);
+	//sm->getActiveScene()->addObject(Button);
 	sm->getActiveScene()->addObject(HPcount);
 	sm->getActiveScene()->addObject(enemyCount);
 	loaded = true;
@@ -1632,7 +1632,7 @@ int main() {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			Won = false;
 		}
-		renderImGui();
+		//renderImGui();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		if (test) {

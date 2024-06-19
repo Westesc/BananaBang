@@ -69,6 +69,7 @@ public:
 	void update(Transform* transform);
 	void addShader(Shader* shader);
 	std::string getText();
+	std::vector<std::string> splitTextIntoLines(const std::string& text, float maxWidth, Transform* transform);
 };
 
 #endif

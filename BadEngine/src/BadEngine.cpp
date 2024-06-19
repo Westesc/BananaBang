@@ -103,6 +103,10 @@ SectorSelector* sectorSelector;
 GameObject* tutorial1;
 GameObject* tutorial2;
 GameObject* tutorial3;
+GameObject* tutorial4;
+GameObject* tutorial5;
+GameObject* tutorial6;
+GameObject* tutorial7;
 glm::mat4 lightSpaceMatrix;
 std::shared_ptr<Model> skydomeModel;
 float gameTime = 0;
@@ -112,7 +116,12 @@ GameObject* tutorialButton;
 GameObject* acknowledgmentsButton;
 GameObject* backButton;
 GameObject* acknowledgments;
+GameObject* acknowledgments2;
+GameObject* acknowledgments3;
+GameObject* acknowledgments4;
+GameObject* acknowledgments5;
 bool Lost = false;
+Shader* LogoShader;
 
 void generate() {
 	std::cout << "przycisk generate" << std::endl;
@@ -293,7 +302,7 @@ void generate() {
 	planeWall4->getTransform()->localRotation.y = 90.0f;
 	planeWall4->getTransform()->localRotation.x = -90.0f;
 	planeWall4->getTransform()->localScale = glm::vec3(10.0f, 4.0f, 1.0f);
-	planeWall4->getTransform()->localPosition = glm::vec3(100.0f, 0.0f, 78.0f);
+	planeWall4->getTransform()->localPosition = glm::vec3(148.0f, 0.0f, 112.0f);
 	sm->getActiveScene()->addObject(wall1);
 	sm->getActiveScene()->addObject(wall2);
 	sm->getActiveScene()->addObject(wall3);
@@ -462,6 +471,13 @@ void showTutorial() {
 	sm->getActiveScene()->addObject(tutorial1);
 	sm->getActiveScene()->addObject(tutorial2);
 	sm->getActiveScene()->addObject(tutorial3);
+	sm->getActiveScene()->addObject(tutorial4);
+	sm->getActiveScene()->addObject(tutorial5);
+	sm->getActiveScene()->addObject(tutorial6);
+	sm->getActiveScene()->addObject(tutorial7);
+	sm->getActiveScene()->addObject(backButton);
+	playButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 300.0f, 0.0f);
+	backButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 200.0f, 0.0f);
 }
 
 void showMain() {
@@ -470,31 +486,54 @@ void showMain() {
 	sm->getActiveScene()->addObject(playButton);
 	sm->getActiveScene()->addObject(tutorialButton);
 	sm->getActiveScene()->addObject(acknowledgmentsButton);
+	playButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f, 0.0f);
 
 }
 
 void showAcknowledgments() {
 	sm->getActiveScene()->gameObjects.clear();
 	sm->getActiveScene()->addObject(titlescreen);
-	backButton = new GameObject("backButton");
-	UI* backbuttonui = new UI(button);
-	backbuttonui->addShader(RL.shaders);
-	backbuttonui->setTexture("../../../../res/button.png");
-	backbuttonui->setSize(glm::vec2(250.0f, 60.f));
-	backButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 100.0f, 0.0f);
-	backbuttonui->input = input;
-	backbuttonui->onClick = showMain;
-	backbuttonui->setText("BACK");
-	backButton->uiComponent = backbuttonui;
-	sm->getActiveScene()->addObject(backButton);
 
 	acknowledgments = new GameObject("acknowledgments");
 	UI* acknowledgmentsui = new UI(writing);
-	acknowledgmentsui->addShader(RL.shaders);
-	acknowledgmentsui->setText("Splash screen image was sourced from https://www.aipromptsdirectory.com/wp-content/uploads/2023/11/hard_drive_white_background_simple_colored_sketch_-_7c0b4171-90ce-4a92-8351-cb652420715b_0.webp");
+	acknowledgmentsui->addShader(LogoShader);
+	acknowledgmentsui->setText("Splash screen na podstawie obrazu ze zrodla");
 	acknowledgments->localTransform->localPosition = glm::vec3(100.0f, Window::windowHeight - 100.0f, 0.0f);
 	acknowledgments->uiComponent = acknowledgmentsui;
 	sm->getActiveScene()->addObject(acknowledgments);
+
+	acknowledgments2 = new GameObject("acknowledgments");
+	UI* acknowledgmentsui2 = new UI(writing);
+	acknowledgmentsui2->addShader(LogoShader);
+	acknowledgmentsui2->setText("www.aipromptsdirectory.com/wp-content/uploads/2023/11/");
+	acknowledgments2->localTransform->localPosition = glm::vec3(100.0f, Window::windowHeight - 150.0f, 0.0f);
+	acknowledgments2->uiComponent = acknowledgmentsui2;
+	sm->getActiveScene()->addObject(acknowledgments2);
+
+	acknowledgments3 = new GameObject("acknowledgments");
+	UI* acknowledgmentsui3 = new UI(writing);
+	acknowledgmentsui3->addShader(LogoShader);
+	acknowledgmentsui3->setText("hard_drive_white_background_simple_colored_sketch_-_7c0b4171-90ce");
+	acknowledgments3->localTransform->localPosition = glm::vec3(70.0f, Window::windowHeight - 200.0f, 0.0f);
+	acknowledgments3->uiComponent = acknowledgmentsui3;
+	sm->getActiveScene()->addObject(acknowledgments3);
+
+	acknowledgments4 = new GameObject("acknowledgments");
+	UI* acknowledgmentsui4 = new UI(writing);
+	acknowledgmentsui4->addShader(LogoShader);
+	acknowledgmentsui4->setText("-4a92-8351-cb652420715b_0.webp");
+	acknowledgments4->localTransform->localPosition = glm::vec3(100.0f, Window::windowHeight - 250.0f, 0.0f);
+	acknowledgments4->uiComponent = acknowledgmentsui4;
+	sm->getActiveScene()->addObject(acknowledgments4);
+
+	acknowledgments5 = new GameObject("acknowledgments");
+	UI* acknowledgmentsui5 = new UI(writing);
+	acknowledgmentsui5->addShader(LogoShader);
+	acknowledgmentsui5->setText("tlo ekranu głownego i bariery swiata wygenerowano korzystajac z deepai.org");
+	acknowledgments5->localTransform->localPosition = glm::vec3(20.0f, Window::windowHeight - 300.0f, 0.0f);
+	acknowledgments5->uiComponent = acknowledgmentsui5;
+	sm->getActiveScene()->addObject(acknowledgments5);
+	sm->getActiveScene()->addObject(backButton);
 }
 
 void Start() {
@@ -576,7 +615,7 @@ int main() {
 	GameObject* logo = new GameObject("logo");
 	UI* logoui = new UI(plane);
 	logoui->setTexture("../../../../res/logo.png");
-	Shader* LogoShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
+	LogoShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
 	logoui->addShader(LogoShader);
 	logoui->input = input;
 	logo->uiComponent = logoui;
@@ -666,7 +705,7 @@ int main() {
 	RL.leafModel->AddTexture("../../../../res/textures/nic.jpg", "diffuseMap");
 	RL.leafModel->SetShader(RL.phongInstancedShader);
 
-	RL.planeModel.get()->AddTexture("../../../../res/junglewall.jpg", "diffuseMap");
+	RL.planeModel.get()->AddTexture("../../../../res/junglewall.png", "diffuseMap");
 	RL.planeModel.get()->SetShader(RL.diffuseShader);
 
 	skydome->addModelComponent(skydomeModel);
@@ -740,7 +779,7 @@ int main() {
 	tutorial1 = new GameObject("tutorial1");
 	UI* tutorialui1 = new UI(writing);
 	tutorialui1->addShader(LogoShader);
-	tutorial1->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight - 100.f, 0.0f);
+	tutorial1->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 100.f, 0.0f);
 	tutorialui1->setText("WASD - ruch");
 	tutorial1->uiComponent = tutorialui1;
 	sm->getActiveScene()->addObject(tutorial1);
@@ -748,7 +787,7 @@ int main() {
 	tutorial2 = new GameObject("tutorial2");
 	UI* tutorialui2 = new UI(writing);
 	tutorialui2->addShader(LogoShader);
-	tutorial2->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight - 150.f, 0.0f);
+	tutorial2->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 150.f, 0.0f);
 	tutorialui2->setText("spacja - skok");
 	tutorial2->uiComponent = tutorialui2;
 	sm->getActiveScene()->addObject(tutorial2);
@@ -756,10 +795,42 @@ int main() {
 	tutorial3 = new GameObject("tutorial3");
 	UI* tutorialui3 = new UI(writing);
 	tutorialui3->addShader(LogoShader);
-	tutorial3->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, Window::windowHeight - 200.f, 0.0f);
+	tutorial3->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 200.f, 0.0f);
 	tutorialui3->setText("lewy przycisk myszy - atak");
 	tutorial3->uiComponent = tutorialui3;
 	sm->getActiveScene()->addObject(tutorial3);
+
+	tutorial4 = new GameObject("tutorial4");
+	UI* tutorialui4 = new UI(writing);
+	tutorialui4->addShader(LogoShader);
+	tutorial4->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 250.f, 0.0f);
+	tutorialui4->setText("R przy drzewie - wspinaczka");
+	tutorial4->uiComponent = tutorialui4;
+	sm->getActiveScene()->addObject(tutorial4);
+
+	tutorial5 = new GameObject("tutorial5");
+	UI* tutorialui5 = new UI(writing);
+	tutorialui5->addShader(LogoShader);
+	tutorial5->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 300.f, 0.0f);
+	tutorialui5->setText("T przy drwalach - prowokacja");
+	tutorial5->uiComponent = tutorialui5;
+	sm->getActiveScene()->addObject(tutorial5);
+
+	tutorial6 = new GameObject("tutorial6");
+	UI* tutorialui6 = new UI(writing);
+	tutorialui6->addShader(LogoShader);
+	tutorial6->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 350.f, 0.0f);
+	tutorialui6->setText("Pokonuj drwali dopoki nie uciekna!");
+	tutorial6->uiComponent = tutorialui6;
+	sm->getActiveScene()->addObject(tutorial6);
+
+	tutorial7 = new GameObject("tutorial7");
+	UI* tutorialui7 = new UI(writing);
+	tutorialui7->addShader(LogoShader);
+	tutorial7->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 400.f, 0.0f);
+	tutorialui7->setText("Korzystaj z drzew, aby zyskac przewage!");
+	tutorial7->uiComponent = tutorialui7;
+	sm->getActiveScene()->addObject(tutorial7);
 
 	titlescreen = new GameObject("titlescreen");
 	UI* titleui = new UI(plane);
@@ -788,12 +859,23 @@ int main() {
 	tutorialbuttonui->setSize(glm::vec2(260.0f, 60.f));
 	tutorialButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 100.0f, 0.0f);
 	tutorialbuttonui->input = input;
-	tutorialbuttonui->onClick = []() { std::cout << "Test button clicked!" << std::endl; };//showTutorial;
+	tutorialbuttonui->onClick = showTutorial;
 	tutorialbuttonui->setText("TUTORIAL");
 	tutorialButton->uiComponent = tutorialbuttonui;
 	sm->getActiveScene()->addObject(tutorialButton);
 
-	/*acknowledgmentsButton = new GameObject("acknowledgmentsButton");
+	backButton = new GameObject("backButton");
+	UI* backbuttonui = new UI(button);
+	backbuttonui->addShader(LogoShader);
+	backbuttonui->setTexture("../../../../res/button.png");
+	backbuttonui->setSize(glm::vec2(250.0f, 60.f));
+	backButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 100.0f, 0.0f);
+	backbuttonui->input = input;
+	backbuttonui->onClick = showMain;
+	backbuttonui->setText("BACK");
+	backButton->uiComponent = backbuttonui;
+
+	acknowledgmentsButton = new GameObject("acknowledgmentsButton");
 	UI* acknowledgmentsButtonui = new UI(button);
 	acknowledgmentsButtonui->addShader(LogoShader);
 	acknowledgmentsButtonui->setTexture("../../../../res/button.png");
@@ -803,7 +885,7 @@ int main() {
 	acknowledgmentsButtonui->onClick = showAcknowledgments;
 	acknowledgmentsButtonui->setText("ACKNOWLEDGMENTS");
 	acknowledgmentsButton->uiComponent = acknowledgmentsButtonui;
-	sm->getActiveScene()->addObject(acknowledgmentsButton);*/
+	sm->getActiveScene()->addObject(acknowledgmentsButton);
 
 	//audioManager->playSound("test", true);
 	Scene* LoseScene = new Scene("LoseScreen");

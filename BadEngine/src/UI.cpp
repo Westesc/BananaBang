@@ -222,8 +222,8 @@ void UI::Draw(Transform* transform) {
 		{
 			Character ch = Characters[*c];
 
-			float xpos = x + ch.Bearing.x * transform->localScale.x +xShift;
-			float ypos = transform->localPosition.y - (ch.Size.y - ch.Bearing.y) * transform->localScale.y +yShift;
+			float xpos = x + ch.Bearing.x * transform->localScale.x + xShift;
+			float ypos = transform->localPosition.y - (ch.Size.y - ch.Bearing.y) * transform->localScale.y + yShift;
 
 			float w = ch.Size.x * transform->localScale.x;
 			float h = ch.Size.y * transform->localScale.y;
@@ -308,4 +308,42 @@ void UI::update(Transform* transform) {
 		}
 		
 	}
+}
+
+std::vector<std::string> UI::splitTextIntoLines(const std::string& text, float maxWidth, Transform* transform) {
+	std::vector<std::string> lines;
+	std::istringstream stream(text);
+	std::string word;
+	std::string line;
+	float lineWidth = 0.0f;
+
+	while (stream >> word) {
+		if (word == "\n") {
+			lines.push_back(line);
+			line.clear();
+			lineWidth = 0.0f;
+			continue;
+		}
+
+		float wordWidth = 0.0f;
+		for (char c : word) {
+			Character ch = Characters[c];
+			wordWidth += (ch.Advance >> 6) * transform->localScale.x;
+		}
+
+		if (lineWidth + wordWidth > maxWidth*8) {
+			lines.push_back(line);
+			line.clear();
+			lineWidth = 0.0f;
+		}
+
+		line += word + " ";
+		lineWidth += wordWidth;
+	}
+
+	if (!line.empty()) {
+		lines.push_back(line);
+	}
+
+	return lines;
 }

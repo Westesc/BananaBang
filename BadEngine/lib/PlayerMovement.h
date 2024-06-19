@@ -147,7 +147,7 @@ private:
         float z = treePosition.z + radius * std::sin(angle);
 
         glm::vec3 newPosition = glm::vec3(x, player->getTransform()->getLocalPosition().y, z);
-        player->getTransform()->localPosition = newPosition;
+        //player->getTransform()->localPosition = newPosition;
     }
 
     void MovePlayer(float deltaTime) {
@@ -213,7 +213,7 @@ private:
         if (jumpDistance > limitJump) {
             state = PlayerState::air;
             rb->upwardsSpeed = 0.f;
-            player->getAnimateBody()->setActiveAnimationWithY("jumping down", true);
+            //player->getAnimateBody()->setActiveAnimationWithY("jumping down", true);
         }
     }
 
@@ -287,7 +287,7 @@ private:
                     state = PlayerState::dodge;
                 }
                 else if (input->checkKey(GLFW_KEY_SPACE) && !wasSpacePressed) {
-                    player->getAnimateBody()->setActiveAnimationWithY("jumping up", true);
+                    //player->getAnimateBody()->setActiveAnimationWithY("jumping up", true);
                     state = PlayerState::jump_up;
                     initialPosition = player->getTransform()->getLocalPosition();
                 }
@@ -424,6 +424,7 @@ public:
 
             //float climbingY = abs(currentClimbingSpeed) * player->getTransform()->getLocalScale().y * player->getAnimateBody()->getPosition().y;
             //std::cout << climbingY << std::endl;
+            //player->Move(glm::vec3(0.f, currentClimbingSpeed * deltaTime, 0.f));
             player->velocity.y = currentClimbingSpeed / deltaTime;
         }
         else if (state == PlayerState::tree_attack) {
@@ -432,7 +433,7 @@ public:
                 player->useGravity = false;
                 rotatePlayerTowards(closestEnemy->getTransform()->getLocalPosition());
 
-                player->getAnimateBody()->setActiveAnimation("tree attack");
+                //player->getAnimateBody()->setActiveAnimation("tree attack");
 
                 glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
                 glm::vec3 direction = glm::normalize(closestEnemy->getTransform()->getLocalPosition() - currentPosition);
@@ -463,17 +464,19 @@ public:
             rb->useGravity();
         }
         else if (state == PlayerState::leave_banana) {
-            //dodaæ zostawianie banana w miejscu gdzie stoi ma³pa
-            if (player->getAnimateBody()->getActiveAnimation() != "leave banana up") {
-                player->getAnimateBody()->setActiveAnimation("leave banana down", true);
-            }
-            if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana down") {
-                sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
-                player->getAnimateBody()->setActiveAnimation("leave banana up", true);
-            }
-            else if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana up") {
-                state = PlayerState::walking;
-            }
+
+            sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
+            state = PlayerState::walking;
+            //if (player->getAnimateBody()->getActiveAnimation() != "leave banana up") {
+            //    player->getAnimateBody()->setActiveAnimation("leave banana down", true);
+            //}
+            //if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana down") {
+            //    sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
+            //    player->getAnimateBody()->setActiveAnimation("leave banana up", true);
+            //}
+            //else if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana up") {
+            //    state = PlayerState::walking;
+            //}
         }
         else if (state == PlayerState::dashing) {
             if (currentDashTime < dashDuration) {

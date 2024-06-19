@@ -250,7 +250,8 @@ public:
                 }
                 m_FinalBoneMatrices[index][3][0] -= position.x;
                 if (!isAnimY) {
-                    //m_FinalBoneMatrices[index][3][1] -= position.y;
+                    position.y -= 0.06f;
+                    m_FinalBoneMatrices[index][3][1] -= position.y;
                 }
                 else {
                    // m_FinalBoneMatrices[index][3][1] -= 1.f;
@@ -259,7 +260,7 @@ public:
 
                 globalTransformation[3][0] -= position.x;
                 if (!isAnimY) {
-                    //globalTransformation[3][1] -= position.y;
+                    globalTransformation[3][1] -= position.y;
                 }
                 else {
                     //globalTransformation[3][1] -= 1.f;

@@ -1,31 +1,32 @@
 # 3ds Max Wavefront OBJ Exporter v0.99 - (c)2007 guruware
-# File Created: 05.06.2024 11:08:10
+# File Created: 19.06.2024 16:53:00
 
 mtllib low_plane.mtl
 
 #
-# object Plane001
+# object low_plane
 #
 
-v  -5.0833 0.0000 -3.5449
 v  -5.0833 0.0000 16.4551
 v  14.9167 0.0000 16.4551
 v  14.9167 0.0000 -3.5449
+v  -5.0833 0.0000 -3.5449
 # 4 vertices
 
 vn 0.0000 1.0000 -0.0000
 # 1 vertex normals
 
-vt 0.0000 1.0000 0.0000
-vt 0.0000 0.0000 0.0000
-vt 1.0000 0.0000 0.0000
-vt 1.0000 1.0000 0.0000
+vt -0.0000 0.0000 0.5000
+vt 1.0000 0.0000 0.5000
+vt 1.0000 1.0000 0.5000
+vt 0.0000 1.0000 0.5000
 # 4 texture coords
 
-o Plane001
-g Plane001
+o low_plane
+g low_plane
 usemtl wire_061135006
 s 1
-f 1/1/1 2/2/1 3/3/1 4/4/1 
-# 1 polygons
+f 1/1/1 2/2/1 3/3/1 
+f 3/3/1 4/4/1 1/1/1 
+# 2 faces
 

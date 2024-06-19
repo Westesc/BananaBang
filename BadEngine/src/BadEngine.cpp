@@ -538,7 +538,7 @@ void showAcknowledgments() {
 	acknowledgments5 = new GameObject("acknowledgments");
 	UI* acknowledgmentsui5 = new UI(writing);
 	acknowledgmentsui5->addShader(LogoShader);
-	acknowledgmentsui5->setText("tlo ekranu głownego i bariery swiata wygenerowano korzystajac z deepai.org");
+	acknowledgmentsui5->setText("tlo ekranu głownego wygenerowano korzystajac z deepai.org");
 	acknowledgments5->localTransform->localPosition = glm::vec3(20.0f, Window::windowHeight - 300.0f, 0.0f);
 	acknowledgments5->uiComponent = acknowledgmentsui5;
 	sm->getActiveScene()->addObject(acknowledgments5);

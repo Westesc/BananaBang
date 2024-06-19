@@ -353,6 +353,16 @@ public:
         textures_loaded.push_back(texture);
     }
 
+    unsigned int getTextureID(const std::string& typeName) const {
+        for (const auto& texture : textures_loaded) {
+            if (texture.type == typeName) {
+                return texture.id;
+            }
+        }
+        std::cerr << "Texture not found: " << typeName << std::endl;
+        return 0;
+    }
+
     void AddTexture(unsigned int id, std::string typeName, std::string filename = "")
     {
 

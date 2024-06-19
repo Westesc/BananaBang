@@ -661,7 +661,9 @@ int main() {
 	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
 	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
 	sm->getActiveScene()->addObject(anim);
-	RL.enemyModel->SetShader(RL.enemyShader);
+	RL.enemyModel->SetShader(RL.phongInstancedShader);
+	RL.enemyModel.get()->AddTexture("../../../../res/textures/Lumberjack_BaseColor.png", "diffuseMap");
+	RL.enemyModel.get()->AddTexture("../../../../res/textures/Lumberjack_normal.png", "normalMap");
 	
 	GameObject* outlineObj = new GameObject("outline");
 
@@ -744,7 +746,7 @@ int main() {
 	glm::mat4 lightProjection, lightView;
 	setupImGui(window);
 
-	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/bialy.png", "diffuseMap");
+	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/textures/modelMonk_BaseColor.png", "diffuseMap");
 	//sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(7.f, 1.f, 1.f);
 	//sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
 

@@ -397,29 +397,31 @@ void generate() {
 	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "standing", 1.f));
 	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "jumping up", 0.9f));
 	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "jumping down", 0.2f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_hit.dae"), "attack1", 1.5f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_hit.dae"), "attack2", 1.5f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_hit.dae"), "attack3", 1.5f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_hit.dae"), "attack1", 1.5f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_hit.dae"), "attack2", 1.5f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_hit.dae"), "attack3", 1.5f));
 	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "dodge", 1.f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkry_climb.dae"), "climbing up", 1.3f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkry_climb.dae"), "climbing down", 1.3f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkry_climb.dae"), "climbing up", 1.3f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkry_climb.dae"), "climbing down", 1.3f));
 	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "tree attack", 0.7f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_sprint.dae"), "sprint", 1.f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_run.dae"), "sprint", 1.f));
 
 	// Łączenie wątków
 	for (auto& thread : threads) {
 		thread.join();
 	}
+	anim->getTransform()->localScale = glm::vec3(40.f);
+	anim->getTransform()->localPosition = glm::vec3(3.0f, 2.0f, 3.0f);
 
-	anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.5f, 2.0f, 1.0f, true);
+	anim->capsuleCollider = new CapsuleCollider(anim->localTransform->localPosition, 0.1f, 0.1f, 1.0f, true);
 	pbd->objects.push_back(anim);
 	if (sm->getActiveScene()->findByName("player") == nullptr) {
 		sm->getActiveScene()->addObject(anim);
 		cm.addObject(anim);
 	}
 	sm->getActiveScene()->addObject(anim);
-	anim->Move(glm::vec3(3.0f, 100.0f, 3.0f));
-	anim->getTransform()->localScale = glm::vec3(100.f);
+	//anim->Move(glm::vec3(3.0f, 2.0f, 3.0f));
+
 	pm->setGroundPosition(anim->getTransform()->getLocalPosition().y);
 	enemyManager->player = anim;
 	anim->hp = 5;
@@ -685,7 +687,7 @@ int main() {
 	setupImGui(window);
 
 	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/bialy.png", "diffuseMap");
-	sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(7.f, 1.f, 1.f);
+	//sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(7.f, 1.f, 1.f);
 	//sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
 
 	sm->getActiveScene()->findByName("skydome")->getModelComponent()->AddTexture("../../../../res/chmury1.png","diffuseMap");
@@ -978,8 +980,11 @@ int main() {
 				}
 			}
 		}
-		
+		//std::cout << glm::to_string(sm->getActiveScene()->findByName("player")->getTransform()->getMatrix()) << std::endl;
+		//sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(3.0f, 2.0f, 3.0f);
+		//std::cout << glm::to_string(sm->getActiveScene()->findByName("player")->getTransform()->getMatrix()) << std::endl;
 		sm->getActiveScene()->Update(V, P, deltaTime);
+		
 
 		RL.diffuseShader->use();
 		RL.diffuseShader->setMat4("view", V);

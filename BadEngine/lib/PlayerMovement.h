@@ -111,15 +111,11 @@ private:
             float dx = player->getTransform()->getLocalScale().x * player->getAnimateBody()->getPosition().z * sinRotate + player->getAnimateBody()->getPosition().x * cosRotate;
             float dz = player->getTransform()->getLocalScale().z * player->getAnimateBody()->getPosition().z * cosRotate - player->getAnimateBody()->getPosition().x * sinRotate;
 
-            //std::cout << dx << ", " << dz << std::endl;
-
             // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
-            glm::vec3 vel = glm::vec3(dx, 0.f, dz) * deltaTime;
-            player->Move(10.f * vel);
-            //std::cout << glm::to_string(player->getTransform()->getMatrix())<<std::endl;
+            glm::vec3 vel = glm::vec3(dx, 0.f, dz) / deltaTime;
+            player->velocity = vel * 2.0f;
         }
     }
-
 
     void moveInAir(float speed, float deltaTime) {
         getRotate(true);

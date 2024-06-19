@@ -37,7 +37,7 @@ public:
 	std::shared_ptr<Model> planeModel;
 
 	void load() {
-		animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/monkey_walk.dae"), true);
+		animodel = std::make_shared<Model>(const_cast<char*>("../../../../res/animations/monkey_idle.dae"), true);
 		shaderAnimation = new Shader("../../../../src/shaders/vs_animation.vert", "../../../../src/shaders/fs_animation.frag");
 		fillingShader = new Shader("../../../../src/shaders/vs_filling.vert", "../../../../src/shaders/fs_filling.frag");
 		outlineShader = new Shader("../../../../src/shaders/outline_animation.vert", "../../../../src/shaders/outline_animation.frag");

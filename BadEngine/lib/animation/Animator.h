@@ -232,6 +232,7 @@ public:
                 position.x = globalTransformation[3][0];
                 position.y = globalTransformation[3][1];
                 position.z = globalTransformation[3][2];
+                //position /= 40.f;
                 if (abs(position.x - lastPosition.x) < 0.1f) {
                     deltaPostion.x = position.x - lastPosition.x;
                 }
@@ -241,7 +242,7 @@ public:
                 if (abs(position.z - lastPosition.z) < 0.1f) {
                     deltaPostion.z = position.z - lastPosition.z;
                 }
-                std::cout << glm::to_string(deltaPostion) << std::endl;
+               // std::cout << glm::to_string(deltaPostion) << std::endl;
                 lastPosition = position;
                 if (changeAnim == true) {
                     deltaPostion = glm::vec3(0.f, 0.f, 0.f);
@@ -249,19 +250,19 @@ public:
                 }
                 m_FinalBoneMatrices[index][3][0] -= position.x;
                 if (!isAnimY) {
-                    m_FinalBoneMatrices[index][3][1] -= position.y;
+                    //m_FinalBoneMatrices[index][3][1] -= position.y;
                 }
                 else {
-                    m_FinalBoneMatrices[index][3][1] -= 1.f;
+                   // m_FinalBoneMatrices[index][3][1] -= 1.f;
                 }
                 m_FinalBoneMatrices[index][3][2] -= position.z;
 
                 globalTransformation[3][0] -= position.x;
                 if (!isAnimY) {
-                    globalTransformation[3][1] -= position.y;
+                    //globalTransformation[3][1] -= position.y;
                 }
                 else {
-                    globalTransformation[3][1] -= 1.f;
+                    //globalTransformation[3][1] -= 1.f;
                 }
                 globalTransformation[3][2] -= position.z;
             }

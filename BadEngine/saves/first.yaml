@@ -19,13 +19,13 @@ Scenes:
             y: 1
             z: 1
         model:
-          path: ../../../../res/box.obj
+          path: res/box.obj
           textures:
-            - path: ../../../../res/cegla.png
+            - path: res/cegla.png
               type: diffuseMap
-            - path: ../../../../res/specular2.png
+            - path: res/specular2.png
               type: specularMap
-            - path: ../../../../res/normal2.png
+            - path: res/normal2.png
               type: normalMap
           boundingBox:
             min:
@@ -40,8 +40,8 @@ Scenes:
             mass: 1.0
             dampingFactor: 1.0
           shader:
-            vertexShader: ../../../../src/shaders/v_maps.vert
-            fragmentShader: ../../../../src/shaders/f_maps.frag
+            vertexShader: res/shaders/v_maps.vert
+            fragmentShader: res/shaders/f_maps.frag
       - name: box2
         tag: none
         layer: 0
@@ -65,7 +65,7 @@ Scenes:
             y: 1
             z: 1
         model:
-          path: ../../../../res/tree.obj
+          path: res/tree.obj
           boundingBox:
             min:
               x: -6.53091717
@@ -79,8 +79,8 @@ Scenes:
             mass: 1.0
             dampingFactor: 1.0
           shader:
-            vertexShader: ../../../../src/shaders/vsTree.vert
-            fragmentShader: ../../../../src/shaders/fsTree.frag
+            vertexShader: res/shaders/vsTree.vert
+            fragmentShader: res/shaders/fsTree.frag
       - name: capsule
         tag: none
         layer: 0
@@ -104,7 +104,7 @@ Scenes:
             y: 1
             z: 1
         model:
-          path: ../../../../res/capsule.obj
+          path: res/capsule.obj
           capsuleCollider:
             center:
               x: 12.0517015
@@ -150,8 +150,8 @@ Scenes:
               mass: 1
             dampingFactor: 1.0
           shader:
-            vertexShader: ../../../../src/shaders/vs.vert
-            fragmentShader: ../../../../src/shaders/fs.frag
+            vertexShader: res/shaders/vs.vert
+            fragmentShader: res/shaders/fs.frag
       - name: plane
         tag: none
         layer: 0
@@ -175,10 +175,10 @@ Scenes:
             y: 1
             z: 1
         model:
-          path: ../../../../res/plane.obj
+          path: res/plane.obj
           shader:
-            vertexShader: ../../../../src/shaders/vs.vert
-            fragmentShader: ../../../../src/shaders/fs.frag
+            vertexShader: res/shaders/vs.vert
+            fragmentShader: res/shaders/fs.frag
       - name: capsule2
         tag: none
         layer: 0
@@ -197,7 +197,7 @@ Scenes:
             y: 1
             z: 1
         model:
-          path: ../../../../res/capsule.obj
+          path: res/capsule.obj
           capsuleCollider:
             center:
               x: 16
@@ -243,8 +243,8 @@ Scenes:
               mass: 1
             dampingFactor: 1.0
           shader:
-            vertexShader: ../../../../src/shaders/vs.vert
-            fragmentShader: ../../../../src/shaders/fs.frag
+            vertexShader: res/shaders/vs.vert
+            fragmentShader: res/shaders/fs.frag
       - name: skydome
         tag: none
         layer: 0
@@ -274,11 +274,11 @@ Scenes:
               horizontalSegments: 20
               size: 50
           textures:
-            - path: ../../../../res/chmury1.png
+            - path: res/chmury1.png
               type: diffuseMap
           shader:
-            vertexShader: ../../../../src/shaders/vsS.vert
-            fragmentShader: ../../../../src/shaders/fsS.frag
+            vertexShader: res/shaders/vsS.vert
+            fragmentShader: res/shaders/fsS.frag
       - name: rampBox
         tag: none
         layer: 0
@@ -297,10 +297,10 @@ Scenes:
             y: 0.100000001
             z: 0.100000001
         model:
-          path: ../../../../res/box.obj
+          path: res/box.obj
           shader:
-            vertexShader: ../../../../src/shaders/ramp.vert
-            fragmentShader: ../../../../src/shaders/ramp.frag
+            vertexShader: res/shaders/ramp.vert
+            fragmentShader: res/shaders/ramp.frag
   - name: shaderTest
     gameObjects:
       - name: sphere
@@ -332,11 +332,11 @@ Scenes:
               horizontalSegments: 20
               size: 50
           textures:
-            - path: ../../../../res/drewno.png
+            - path: res/drewno.png
               type: diffuseMap
           shader:
-            vertexShader: ../../../../src/shaders/phong.vert
-            fragmentShader: ../../../../src/shaders/phong.frag
+            vertexShader: res/shaders/phong.vert
+            fragmentShader: res/shaders/phong.frag
   - name: trees
     gameObjects:
       - name: tree_1
@@ -357,10 +357,10 @@ Scenes:
             y: 1
             z: 1
         model:
-          path: ../../../../res/objects/trees/tree_trunk.obj
+          path: res/objects/trees/tree_trunk.obj
           shader:
-            vertexShader: ../../../../src/shaders/phong.vert
-            fragmentShader: ../../../../src/shaders/phong.frag
+            vertexShader: res/shaders/phong.vert
+            fragmentShader: res/shaders/phong.frag
         children:
           - name: log
             tag: none
@@ -380,10 +380,10 @@ Scenes:
                 y: 1
                 z: 1
             model:
-              path: ../../../../res/objects/trees/tree_log.obj
+              path: res/objects/trees/tree_log.obj
               shader:
-                vertexShader: ../../../../src/shaders/phong.vert
-                fragmentShader: ../../../../src/shaders/phong.frag
+                vertexShader: res/shaders/phong.vert
+                fragmentShader: res/shaders/phong.frag
             children:
               - name: branch1
                 tag: none
@@ -403,10 +403,10 @@ Scenes:
                     y: 1
                     z: 1
                 model:
-                  path: ../../../../res/objects/trees/tree_branch_1.obj
+                  path: res/objects/trees/tree_branch_1.obj
                   shader:
-                    vertexShader: ../../../../src/shaders/phong.vert
-                    fragmentShader: ../../../../src/shaders/phong.frag
+                    vertexShader: res/shaders/phong.vert
+                    fragmentShader: res/shaders/phong.frag
       - name: skydome
         tag: none
         layer: 0
@@ -436,8 +436,8 @@ Scenes:
               horizontalSegments: 20
               size: 50
           textures:
-            - path: ../../../../res/chmury1.png
+            - path: res/chmury1.png
               type: diffuseMap
           shader:
-            vertexShader: ../../../../src/shaders/vsS.vert
-            fragmentShader: ../../../../src/shaders/fsS.frag
+            vertexShader: res/shaders/vsS.vert
+            fragmentShader: res/shaders/fsS.frag

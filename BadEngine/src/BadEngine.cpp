@@ -143,8 +143,8 @@ void generate() {
 	std::vector<int> fruitPool;
 	GameObject* loading = new GameObject("loading");
 	UI* loadingui = new UI(plane);
-	loadingui->setTexture("../../../../res/loading.png");
-	Shader* LogoShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
+	loadingui->setTexture("res/loading.png");
+	Shader* LogoShader = new Shader("res/shaders/font.vert", "res/shaders/font.frag");
 	loadingui->addShader(LogoShader);
 	loadingui->input = input;
 	loading->uiComponent = loadingui;
@@ -373,9 +373,9 @@ void generate() {
 	gameMode.setMode(GameMode::Game);
 	GameObject* Button = new GameObject("Button");
 	UI* ui = new UI(button);
-	Shader* UIShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
+	Shader* UIShader = new Shader("res/shaders/font.vert", "res/shaders/font.frag");
 	ui->addShader(UIShader);
-	ui->setTexture("../../../../res/chmury.png");
+	ui->setTexture("res/chmury.png");
 	Button->localTransform->localPosition = glm::vec3(25.f);
 	ui->input = input;
 	//ui->onClick = std::bind(&typKlasy::nazwafunkcji,&stworzonaKalsa);
@@ -385,7 +385,7 @@ void generate() {
 	GameObject* HPcount = new GameObject("HPcount");
 	UI* ui2 = new UI(plane);
 	ui2->addShader(UIShader);
-	ui2->setTexture("../../../../res/serce5.png");
+	ui2->setTexture("res/serce5.png");
 	HPcount->localTransform->localPosition = glm::vec3(0, Window::windowHeight - 100.0f, 0.f);
 	HPcount->uiComponent = ui2;
 
@@ -416,18 +416,18 @@ void generate() {
 	std::vector<std::thread> threads;
 
 	// Dodawanie animacji w osobnych wątkach
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_walk.dae"), "walking", 1.4f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "standing", 1.f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "jumping up", 0.9f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "jumping down", 0.2f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_hit.dae"), "attack1", 1.5f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_hit.dae"), "attack2", 1.5f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_hit.dae"), "attack3", 1.5f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "dodge", 1.f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkry_climb.dae"), "climbing up", 1.3f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkry_climb.dae"), "climbing down", 1.3f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "tree attack", 0.7f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("../../../../res/animations/monkey_run.dae"), "sprint", 1.f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_walk.dae"), "walking", 1.4f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "standing", 1.f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "jumping up", 0.9f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "jumping down", 0.2f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_hit.dae"), "attack1", 1.5f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_hit.dae"), "attack2", 1.5f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_hit.dae"), "attack3", 1.5f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "dodge", 1.f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkry_climb.dae"), "climbing up", 1.3f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkry_climb.dae"), "climbing down", 1.3f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "tree attack", 0.7f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_run.dae"), "sprint", 1.f));
 
 	// Łączenie wątków
 	for (auto& thread : threads) {
@@ -624,16 +624,16 @@ int main() {
 
 
 	AudioManager* audioManager = new AudioManager();
-	audioManager->loadSound("jungle_music", "../../../../res/media/jungle_music.wav");
+	audioManager->loadSound("jungle_music", "res/media/jungle_music.wav");
 	audioManager->playSound("jungle_music",true);
-	//audioManager->loadSound("test", "../../../../res/media/test.wav",true);
+	//audioManager->loadSound("test", "res/media/test.wav",true);
 	//audioManager->setSoundPosition("test", 10, 0, 0);
 
 
 	GameObject* logo = new GameObject("logo");
 	UI* logoui = new UI(plane);
-	logoui->setTexture("../../../../res/logo.png");
-	LogoShader = new Shader("../../../../src/shaders/font.vert", "../../../../src/shaders/font.frag");
+	logoui->setTexture("res/logo.png");
+	LogoShader = new Shader("res/shaders/font.vert", "res/shaders/font.frag");
 	logoui->addShader(LogoShader);
 	logoui->input = input;
 	logo->uiComponent = logoui;
@@ -652,22 +652,22 @@ int main() {
 	RL.animodel ->SetShader(RL.shaderAnimation);
 	//RL.animodel->SetOutlineShader(RL.outlineShader);
 	anim->addModelComponent(RL.animodel);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/monkey_walk.dae"), "walking", 1.4f);
-	anim->addAnimation(const_cast<char*>("../../../../res/animations/monkey_idle.dae"), "standing", 1.f);
-	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Walking.dae"), "walking", 1.f);
-	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Briefcase Idle.dae"), "standing", 1.f);
-	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Up.dae"), "jumping up", 0.9f);
-	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Jumping Down.dae"), "jumping down", 0.2f);
-	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Punching.dae"), "attack1", 1.f);
-	//anim->addAnimation(const_cast<char*>("../../../../res/animations/Dodge.dae"), "dodge", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/monkey_walk.dae"), "walking", 1.4f);
+	anim->addAnimation(const_cast<char*>("res/animations/monkey_idle.dae"), "standing", 1.f);
+	//anim->addAnimation(const_cast<char*>("res/animations/Walking.dae"), "walking", 1.f);
+	//anim->addAnimation(const_cast<char*>("res/animations/Briefcase Idle.dae"), "standing", 1.f);
+	//anim->addAnimation(const_cast<char*>("res/animations/Jumping Up.dae"), "jumping up", 0.9f);
+	//anim->addAnimation(const_cast<char*>("res/animations/Jumping Down.dae"), "jumping down", 0.2f);
+	//anim->addAnimation(const_cast<char*>("res/animations/Punching.dae"), "attack1", 1.f);
+	//anim->addAnimation(const_cast<char*>("res/animations/Dodge.dae"), "dodge", 1.f);
 	sm->getActiveScene()->addObject(anim);
 	RL.enemyModel->SetShader(RL.phongInstancedShader);
-	RL.enemyModel.get()->AddTexture("../../../../res/textures/Lumberjack_BaseColor.png", "diffuseMap");
-	RL.enemyModel.get()->AddTexture("../../../../res/textures/Lumberjack_normal.png", "normalMap");
+	RL.enemyModel.get()->AddTexture("res/textures/Lumberjack_BaseColor.png", "diffuseMap");
+	RL.enemyModel.get()->AddTexture("res/textures/Lumberjack_normal.png", "normalMap");
 	
 	GameObject* outlineObj = new GameObject("outline");
 
-	RL.bananaModel->AddTexture("../../../../res/textures/Banana.png", "diffuseMap");
+	RL.bananaModel->AddTexture("res/textures/Banana.png", "diffuseMap");
 	RL.bananaModel->SetShader(RL.diffuseInstancedShader);
 
 	RL.outlinemodel->SetShader(RL.shaderTree);
@@ -689,33 +689,33 @@ int main() {
 
 	//Fruit
 	RL.mangoModel->SetShader(RL.diffuseInstancedShader);
-	RL.mangoModel->AddTexture("../../../../res/textures/mango.jpg", "diffuseMap");
+	RL.mangoModel->AddTexture("res/textures/mango.jpg", "diffuseMap");
 	
 	//drzewa
-	RL.treelog->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	RL.treetrunk->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	RL.treebranch1->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	RL.treelog->AddTexture("res/textures/bark.jpg", "diffuseMap");
+	RL.treetrunk->AddTexture("res/textures/bark.jpg", "diffuseMap");
+	RL.treebranch1->AddTexture("res/textures/bark.jpg", "diffuseMap");
 
-	RL.treelog->AddTexture("../../../../res/textures/Tree2_normal.png", "normalMap");
-	RL.treetrunk->AddTexture("../../../../res/textures/Tree1_normal.png", "normalMap");
-	RL.treebranch1->AddTexture("../../../../res/textures/Tree3_normal.png", "normalMap");
+	RL.treelog->AddTexture("res/textures/Tree2_normal.png", "normalMap");
+	RL.treetrunk->AddTexture("res/textures/Tree1_normal.png", "normalMap");
+	RL.treebranch1->AddTexture("res/textures/Tree3_normal.png", "normalMap");
 
 	RL.treebranch1->SetShader(RL.phongInstancedShader);
-	RL.planeSectormodel->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	RL.planeSectormodel->AddTexture("../../../../res/floor_texture.jpg", "diffuseMap2");
+	RL.planeSectormodel->AddTexture("res/textures/bark.jpg", "diffuseMap");
+	RL.planeSectormodel->AddTexture("res/floor_texture.jpg", "diffuseMap2");
 	RL.treetrunk->SetShader(RL.phongInstancedShader);
 	RL.treelog->SetShader(RL.phongInstancedShader);
 	RL.planeSectormodel->SetShader(RL.groundShader);
-	RL.treetrunk.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	RL.treelog.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	RL.treetrunk.get()->AddTexture("res/textures/bark.jpg", "diffuseMap");
+	RL.treelog.get()->AddTexture("res/textures/bark.jpg", "diffuseMap");
 	RL.phongInstancedShader->use();
 	RL.phongInstancedShader->setVec3("lightPos", lightPos);
 
-	RL.treeloglow.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
-	RL.treetrunklow.get()->AddTexture("../../../../res/textures/bark.jpg", "diffuseMap");
+	RL.treeloglow.get()->AddTexture("res/textures/bark.jpg", "diffuseMap");
+	RL.treetrunklow.get()->AddTexture("res/textures/bark.jpg", "diffuseMap");
 
-	RL.treeloglow.get()->AddTexture("../../../../res/textures/Tree2_normal.png", "normalMap");
-	RL.treetrunklow.get()->AddTexture("../../../../res/textures/Tree1_normal.png", "normalMap");
+	RL.treeloglow.get()->AddTexture("res/textures/Tree2_normal.png", "normalMap");
+	RL.treetrunklow.get()->AddTexture("res/textures/Tree1_normal.png", "normalMap");
 
 	RL.treetrunklow.get()->SetShader(RL.phongInstancedShader);
 	RL.treeloglow.get()->SetShader(RL.phongInstancedShader);
@@ -724,10 +724,10 @@ int main() {
 	skydomeModel->SetShader(RL.skydomeShader);
 	RL.enemyWeaponmodel.get()->SetShader(RL.phongInstancedShader);
 
-	RL.leafModel->AddTexture("../../../../res/textures/nic.jpg", "diffuseMap");
+	RL.leafModel->AddTexture("res/textures/nic.jpg", "diffuseMap");
 	RL.leafModel->SetShader(RL.phongInstancedShader);
 
-	RL.planeModel.get()->AddTexture("../../../../res/junglewall.png", "diffuseMap");
+	RL.planeModel.get()->AddTexture("res/junglewall.png", "diffuseMap");
 	RL.planeModel.get()->SetShader(RL.diffuseShader);
 
 	skydome->addModelComponent(skydomeModel);
@@ -746,11 +746,11 @@ int main() {
 	glm::mat4 lightProjection, lightView;
 	setupImGui(window);
 
-	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("../../../../res/textures/modelMonk_BaseColor.png", "diffuseMap");
+	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("res/textures/modelMonk_BaseColor.png", "diffuseMap");
 	//sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(7.f, 1.f, 1.f);
 	//sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
 
-	sm->getActiveScene()->findByName("skydome")->getModelComponent()->AddTexture("../../../../res/chmury1.png","diffuseMap");
+	sm->getActiveScene()->findByName("skydome")->getModelComponent()->AddTexture("res/chmury1.png","diffuseMap");
 
 	
 	//glm::vec3 lightPos(0.5f, 20.0f, 0.3f);
@@ -858,7 +858,7 @@ int main() {
 	titlescreen = new GameObject("titlescreen");
 	UI* titleui = new UI(plane);
 	titleui->addShader(LogoShader);
-	titleui->setTexture("../../../../res/junglewall.png");
+	titleui->setTexture("res/junglewall.png");
 	titlescreen->uiComponent = titleui;
 	titlescreen->localTransform->localScale = glm::vec3(18.f, 10.f, 1.f);
 	sm->getActiveScene()->addObject(titlescreen);
@@ -866,7 +866,7 @@ int main() {
 	playButton = new GameObject("playButton");
 	UI* playui = new UI(button);
 	playui->addShader(LogoShader);
-	playui->setTexture("../../../../res/button.png");
+	playui->setTexture("res/button.png");
 	playui->setSize(glm::vec2(150.0f, 60.f));
 	playButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f, 0.0f);
 	playui->input = input;
@@ -878,7 +878,7 @@ int main() {
 	tutorialButton = new GameObject("tutorialButton");
 	UI* tutorialbuttonui = new UI(button);
 	tutorialbuttonui->addShader(LogoShader);
-	tutorialbuttonui->setTexture("../../../../res/button.png");
+	tutorialbuttonui->setTexture("res/button.png");
 	tutorialbuttonui->setSize(glm::vec2(260.0f, 60.f));
 	tutorialButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 100.0f, 0.0f);
 	tutorialbuttonui->input = input;
@@ -890,7 +890,7 @@ int main() {
 	backButton = new GameObject("backButton");
 	UI* backbuttonui = new UI(button);
 	backbuttonui->addShader(LogoShader);
-	backbuttonui->setTexture("../../../../res/button.png");
+	backbuttonui->setTexture("res/button.png");
 	backbuttonui->setSize(glm::vec2(250.0f, 60.f));
 	backButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 100.0f, 0.0f);
 	backbuttonui->input = input;
@@ -901,7 +901,7 @@ int main() {
 	acknowledgmentsButton = new GameObject("acknowledgmentsButton");
 	UI* acknowledgmentsButtonui = new UI(button);
 	acknowledgmentsButtonui->addShader(LogoShader);
-	acknowledgmentsButtonui->setTexture("../../../../res/button.png");
+	acknowledgmentsButtonui->setTexture("res/button.png");
 	acknowledgmentsButtonui->setSize(glm::vec2(520.0f, 60.f));
 	acknowledgmentsButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 200.0f, 0.0f);
 	acknowledgmentsButtonui->input = input;
@@ -922,7 +922,7 @@ int main() {
 	GameObject* returnButton = new GameObject("returnButton");
 	UI* returnButtonUI = new UI(button);
 	returnButtonUI->addShader(LogoShader);
-	returnButtonUI->setTexture("../../../../res/button.png");
+	returnButtonUI->setTexture("res/button.png");
 	returnButtonUI->setSize(glm::vec2(200.0f, 60.f));
 	returnButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 100.0f, 0.0f);
 	returnButtonUI->input = input;
@@ -1279,10 +1279,10 @@ int main() {
 		if (sm->getActiveScene()->findByName("player")) {
 			if (sm->getActiveScene()->findByName("HPcount")) {
 				if (sm->getActiveScene()->findByName("player")->hp > 0) {
-					sm->getActiveScene()->findByName("HPcount")->uiComponent->setTexture("../../../../res/serce" + std::to_string(sm->getActiveScene()->findByName("player")->hp) + ".png");
+					sm->getActiveScene()->findByName("HPcount")->uiComponent->setTexture("res/serce" + std::to_string(sm->getActiveScene()->findByName("player")->hp) + ".png");
 				}
 				else {
-					sm->getActiveScene()->findByName("HPcount")->uiComponent->setTexture("../../../../res/serce0.png");
+					sm->getActiveScene()->findByName("HPcount")->uiComponent->setTexture("res/serce0.png");
 					Lost = true;
 				}
 			}

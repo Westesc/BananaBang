@@ -21,26 +21,17 @@ target_include_directories(stb_image PRIVATE ${STB_IMAGE_DIR})
 CPMAddPackage("gh:assimp/assimp@5.2.5")
 CPMAddPackage("gh:glfw/glfw#3.3.8")
 CPMAddPackage("gh:g-truc/glm#0.9.9.8")
-CPMAddPackage("gh:ocornut/imgui@1.88")
 CPMAddPackage("gh:gabime/spdlog@1.10.0")
 CPMAddPackage("gh:freetype/freetype#VER-2-13-2")
 CPMAddPackage("gh:jbeder/yaml-cpp#0.8.0")
 CPMAddPackage("gh:kcat/openal-soft#1.23.1")
 
-
-set(imgui_SOURCE_DIR ${imgui_SOURCE_DIR} CACHE INTERNAL "")
-add_library(imgui STATIC ${imgui_SOURCE_DIR}/imgui.cpp
-					     ${imgui_SOURCE_DIR}/imgui_demo.cpp
-					     ${imgui_SOURCE_DIR}/imgui_draw.cpp
-						 ${imgui_SOURCE_DIR}/imgui_tables.cpp
-					     ${imgui_SOURCE_DIR}/imgui_widgets.cpp)
-						 
+					 
 set_target_properties(glad
                       stb_image 
                       assimp 
                       glfw 
                       glm 
-                      imgui 
                       freetype
                       yaml-cpp
                       OpenAL

@@ -12,6 +12,14 @@ file(GLOB_RECURSE HEADER_FILES
 file(GLOB_RECURSE ASSETS_FILES 
 	 ${CMAKE_SOURCE_DIR}/res/*.*)
 
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
+	list(FILTER SOURCE_FILES EXCLUDE REGEX ".*(imgui_impl\/).*")
+	list(FILTER HEADER_FILES EXCLUDE REGEX ".*(imgui_impl\/).*")
+endif()
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	list(FILTER SOURCE_FILES EXCLUDE REGEX ".*(imgui_impl\/).*")
+	list(FILTER HEADER_FILES EXCLUDE REGEX ".*(imgui_impl\/).*")
+endif()
 set_source_files_properties(${ASSETS_FILES} PROPERTIES HEADER_FILE_ONLY TRUE)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES})						   
@@ -27,7 +35,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE LIBRARY_SUFFIX="")
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 												  ${glad_SOURCE_DIR}
 												  ${stb_image_SOURCE_DIR}
-												  ${imgui_SOURCE_DIR}
 												  ${freetype_SOURCE_DIR})
 
 target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES})
@@ -35,7 +42,6 @@ target_link_libraries(${PROJECT_NAME} glad)
 target_link_libraries(${PROJECT_NAME} stb_image)
 target_link_libraries(${PROJECT_NAME} assimp)
 target_link_libraries(${PROJECT_NAME} glfw)
-target_link_libraries(${PROJECT_NAME} imgui)
 target_link_libraries(${PROJECT_NAME} spdlog)
 target_link_libraries(${PROJECT_NAME} glm::glm)
 target_link_libraries(${PROJECT_NAME} freetype)
@@ -50,7 +56,7 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 add_custom_command ( TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     $<TARGET_FILE:OpenAL::OpenAL> $<TARGET_FILE_DIR:${PROJECT_NAME}>
-)
+)  
 if(MSVC)
     target_compile_definitions(${PROJECT_NAME} PUBLIC NOMINMAX)
 endif()

@@ -1,6 +1,4 @@
-﻿#include "imgui.h"
-#include "imgui_impl/imgui_impl_glfw.h"
-#include "imgui_impl/imgui_impl_opengl3.h"
+﻿
 #include <stdio.h>
 #include<GLFW/glfw3.h>
 #include <glad/glad.h>
@@ -51,9 +49,6 @@ int losujLiczbe(int a, int b);
 int losujLiczbe2();
 bool checkLocations(float x1, float y1,float x2,float y2,float distance);
 
-void setupImGui(GLFWwindow* window);
-void renderImGui();
-void cleanupImGui();
 
 using Clock = std::chrono::high_resolution_clock;
 using TimePoint = Clock::time_point;
@@ -744,7 +739,6 @@ int main() {
 	glm::mat4 P;
 	std::array<Plane, 6> frustumPlanes;
 	glm::mat4 lightProjection, lightView;
-	setupImGui(window);
 
 	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("res/textures/modelMonk_BaseColor.png", "diffuseMap");
 	//sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(7.f, 1.f, 1.f);
@@ -1632,7 +1626,6 @@ int main() {
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 			Won = false;
 		}
-		//renderImGui();
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		if (test) {
@@ -1642,87 +1635,11 @@ int main() {
 		}
 	}
 	delete audioManager;
-	cleanupImGui();
 	glfwTerminate();
 	return 0;
 }
 
-void renderImGui() {
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui::NewFrame();
 
-	ImGui::Begin("System Generatywny");
-	ImGui::SliderInt("Sectors", &sectorsPom, 1, 10);
-	ImGui::SliderInt("Min drzew", &a, 0, 10);
-	ImGui::SliderInt("Max drzew", &b, a, 20);
-	if (ImGui::Button("Generate")) {
-		buttonPressed = true;
-	}
-	/*for (auto go : sm->getActiveScene()->gameObjects) {
-		if (go->isVisible && !(go->name.starts_with("sector") || go->name.starts_with("Banana") || go->name.starts_with("Mango"))) {
-			ImGui::Text(go->name.c_str());
-			ImGui::Text("x: %.2f, y: %.2f, z: %.2f", go->localTransform->localPosition.x, go->localTransform->localPosition.y, go->localTransform->localPosition.z);
-		}
-		if (go->name.starts_with("sector")) {
-			for (auto ch : go->children) {
-				if (ch->isVisible) {
-					ImGui::Text(ch->name.c_str());
-					ImGui::Text("x: %.2f, y: %.2f, z: %.2f", ch->localTransform->localPosition.x, ch->localTransform->localPosition.y, ch->localTransform->localPosition.z);
-				}
-			}
-		}
-	}*/
-	/*for (auto section : cm.sections) {
-		for (auto obj : section->objects) {
-			ImGui::Text(obj->name.c_str());
-			ImGui::Text("x: %.2f, y: %.2f, z: %.2f", obj->localTransform->localPosition.x, obj->localTransform->localPosition.y, obj->localTransform->localPosition.z);
-		}
-	}*/
-	/*for (auto enemy : enemyManager->enemies) {
-		ImGui::Text(enemy->name.c_str());
-		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", enemy->localTransform->localPosition.x, enemy->localTransform->localPosition.y, enemy->localTransform->localPosition.z);
-		glm::vec3 transformedCenter = glm::vec3(enemy->localTransform->getMatrix() * glm::vec4((enemy->boundingBox->max + enemy->boundingBox->min) * 0.5f, 1.0f));
-		ImGui::Text("x: %.2f, y: %.2f, z: %.2f", transformedCenter.x, transformedCenter.y, transformedCenter.z);
-	}*/
-	if (sm->getActiveScene()->findByName("player")) {
-		PlayerState state = pm->getState();
-		if (state == PlayerState::walking) {
-			ImGui::Text("Stan: Chodzenie");
-		}
-		if (state == PlayerState::air) {
-			ImGui::Text("Stan: powietrze");
-		}
-		if (state == PlayerState::jump_up) {
-			ImGui::Text("Stan: skok w gore");
-		}
-	}
-	ImGui::SliderFloat("light x", &lightPos.x, -100, 100); 
-	ImGui::SliderFloat("light y", &lightPos.y, -100, 100);
-	ImGui::SliderFloat("light z", &lightPos.z, -100, 100);
-	ImGui::End();
-
-	ImGui::Render();
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-}
-
-void setupImGui(GLFWwindow* window) {
-	// Konfiguracja ImGui
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 130");
-
-	ImGui::StyleColorsDark();
-}
-
-void cleanupImGui() {
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
-}
 
 int losujLiczbe(int a, int b) {
 	return std::rand() % (b - a + 1) + a;

@@ -255,7 +255,7 @@ public:
 		}
 		if (second->name.starts_with("branch")) {
 			if (pm->getState() == PlayerState::climbing || pm->getState() == PlayerState::air || pm->getState() == PlayerState::jump_up || pm->getState() == PlayerState::walking) {
-				if ((first->getTransform()->predictedPosition - second->getTransform()->localPosition).y < 0.0f) {
+				if ((second->getTransform()->localPosition - first->getTransform()->predictedPosition).y <= 0.0f) {
 					std::cout <<"AAAAAAAAAAA" << std::endl;
 					first->getTransform()->predictedPosition.y = second->getTransform()->localPosition.y * second->getTransform()->localScale.y;
 					first->velocity.y = 0.0f;

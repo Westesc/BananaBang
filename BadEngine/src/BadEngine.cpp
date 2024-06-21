@@ -429,8 +429,8 @@ void generate() {
 		thread.join();
 	}
 	glm::vec3 capsuleCenter = anim->getTransform()->getLocalPosition();
-	capsuleCenter.y += 0.5f;
-	anim->capsuleCollider = new CapsuleCollider(capsuleCenter, 0.03f, 0.1f, 1.0f, true);
+	capsuleCenter.y += 0.015f;
+	anim->capsuleCollider = new CapsuleCollider(capsuleCenter, 0.03f, 0.03f, 1.0f, true);
 	anim->getTransform()->localScale = glm::vec3(40.f);
 	anim->getTransform()->localPosition = glm::vec3(3.0f, 2.0f, 3.0f);
 
@@ -1307,7 +1307,7 @@ int main() {
 				if (reqEnemies < 1) {
 					Won = true;
 				}
-				sm->getActiveScene()->findByName("Enemycount")->uiComponent->setText("Enemies: " + std::to_string(reqEnemies));
+				sm->getActiveScene()->findByName("Enemycount")->uiComponent->setText("Pozostali drwale : " + std::to_string(reqEnemies));
 				delete enemy;
 			}
 			else {

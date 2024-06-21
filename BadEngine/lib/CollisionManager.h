@@ -250,9 +250,15 @@ public:
 
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
 		bool resolved = false;
+		if (second->name.starts_with("Fruit")) {
+			return;
+		}
 		if (second->name.starts_with("branch")) {
-			if (pm->getState() == PlayerState::climbing || pm->getState() == PlayerState::air || pm->getState() == PlayerState::jump_up) {
-				if ((first->getTransform()->getLocalPosition().y - second->getTransform()->getLocalPosition().y) > 1.9f) {
+			if (pm->getState() == PlayerState::climbing || pm->getState() == PlayerState::air || pm->getState() == PlayerState::jump_up || pm->getState() == PlayerState::walking) {
+				if ((first->getTransform()->predictedPosition - second->getTransform()->localPosition).y < 0.0f) {
+					std::cout <<"AAAAAAAAAAA" << std::endl;
+					first->getTransform()->predictedPosition.y = second->getTransform()->localPosition.y * second->getTransform()->localScale.y;
+					first->velocity.y = 0.0f;
 					pm->changeState(PlayerState::walking);
 					resolved = true;
 				}
@@ -272,11 +278,15 @@ public:
 			resolved = true;
 		}
 		else if (!(second->name.starts_with("branch"))) {
-			if (first->name.starts_with("player") && pm->getInput()->checkKey(GLFW_KEY_R)) {
+			if (first->name.starts_with("player") && pm->getState() != PlayerState::climbing) {
 				if (second->name.starts_with("tree") || second->name.starts_with("log")) {
+					glm::vec2 toObstacle = glm::vec2(first->getTransform()->localPosition.x, first->getTransform()->localPosition.z) - glm::vec2(second->getTransform()->localPosition.x, second->getTransform()->localPosition.z);
+					//calculate if player is facing the obstacle
+					if (glm::dot(glm::normalize(glm::vec2(first->velocity.x, first->velocity.z)), glm::normalize(-toObstacle)) > 0.5f) {
 					pm->changeState(PlayerState::climbing);
 					pm->setTreePosition(second->getTransform()->getLocalPosition());
 					resolved = true;
+					}
 				}
 			}
 			else if (first->name == "player" && !(pm->getState() == PlayerState::air) || pm->getState() == PlayerState::jump_up) {

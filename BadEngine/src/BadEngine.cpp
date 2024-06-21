@@ -225,8 +225,8 @@ void generate() {
 					branch->addColider(1);
 					glm::vec3 bpos = branch->localTransform->localPosition;
 					glm::vec3 bscale = branch->localTransform->localScale;
-					branch->boundingBox = new BoundingBox(glm::vec3(1.1f, 0.0f, 0.0f),
-						glm::vec3(1.1f, 0.2f, 8.0f), 0.0f, true);
+					branch->boundingBox = new BoundingBox(glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(1.1f, 1.2f, 8.0f), 0.0f, true);
+					branch->modelComponent.get()->boundingBox = branch->boundingBox;
 					GameObject* leafs = new GameObject("leafs");
 					leafs->isInstanced = true;
 					leafs->localTransform->localPosition = branch->localTransform->localPosition;
@@ -484,7 +484,7 @@ void showTutorial() {
 	sm->getActiveScene()->addObject(tutorial1);
 	sm->getActiveScene()->addObject(tutorial2);
 	sm->getActiveScene()->addObject(tutorial3);
-	sm->getActiveScene()->addObject(tutorial4);
+	//sm->getActiveScene()->addObject(tutorial4);
 	sm->getActiveScene()->addObject(tutorial5);
 	sm->getActiveScene()->addObject(tutorial6);
 	sm->getActiveScene()->addObject(tutorial7);
@@ -823,7 +823,7 @@ int main() {
 	tutorial4->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 250.f, 0.0f);
 	tutorialui4->setText("R przy drzewie - wspinaczka");
 	tutorial4->uiComponent = tutorialui4;
-	sm->getActiveScene()->addObject(tutorial4);
+	//sm->getActiveScene()->addObject(tutorial4);
 
 	tutorial5 = new GameObject("tutorial5");
 	UI* tutorialui5 = new UI(writing);

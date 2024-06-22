@@ -19,6 +19,7 @@ public:
 	Shader* groundShader;
 	std::shared_ptr<Model> enemyModel;
 	std::shared_ptr<Model> enemyModel2;
+	std::shared_ptr<Model> animationEnemyModel;
 	std::shared_ptr<Model> outlinemodel;
 	std::shared_ptr<Model> bananaModel;
 	Shader* depthShader;
@@ -51,6 +52,7 @@ public:
 		enemyShader = new Shader("res/shaders/enemy.vert", "res/shaders/enemy.frag");
 		diffuseShader = new Shader("res/shaders/diffuse.vert", "res/shaders/diffuse.frag");
 		groundShader = new Shader("res/shaders/ground.vert", "res/shaders/ground.frag");
+		animationEnemyModel = std::make_shared<Model>(const_cast<char*>("res/animations/Lumberjack/Lumberjack_Idle.dae"), true);
 		enemyModel = std::make_shared<Model>(const_cast<char*>("res/Lumberjack.obj"), false);
 		enemyModel2 = std::make_shared<Model>(const_cast<char*>("res/capsule.obj"), false);
 		outlinemodel = std::make_shared<Model>(const_cast<char*>("res/Lumberjack.obj"), false);

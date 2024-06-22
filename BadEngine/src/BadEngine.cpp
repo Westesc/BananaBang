@@ -428,6 +428,26 @@ void generate() {
 	for (auto& thread : threads) {
 		thread.join();
 	}
+
+	Enemy* basicEnemy = new Enemy("basicEnemy", glm::vec3(2.0f, 2.0f, 3.0f), glm::vec3(120.f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
+	basicEnemy->addModelComponent(RL.animationEnemyModel);
+	basicEnemy->addAnimation(const_cast<char*>("res/animations/Lumberjack/Lumberjack_Idle.dae"), "idle", 1.f);
+	basicEnemy->addAnimation(const_cast<char*>("res/animations/Lumberjack/Lumberjack_Walking.dae"), "walking", 1.f);
+	basicEnemy->addAnimation(const_cast<char*>("res/animations/Lumberjack/Lumberjack_TreeHit.dae"), "hit", 1.f);
+	basicEnemy->addAnimation(const_cast<char*>("res/animations/Lumberjack/Lumberjack_Death.dae"), "death", 1.f);
+
+	//basicEnemy->getTransform()->localScale = glm::vec3(120.f);
+	//basicEnemy->getTransform()->localPosition = glm::vec3(2.0f, 2.0f, 3.0f);
+
+	sm->getActiveScene()->addObject(basicEnemy);
+
+	//Tutaj działa
+	Enemy* basicEnemy2 = new Enemy("basicEnemy", glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(120.f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
+	basicEnemy2->addModelComponent(RL.animationEnemyModel);
+	basicEnemy2->animPlayer = basicEnemy->animPlayer;
+	sm->getActiveScene()->addObject(basicEnemy2);
+
+
 	glm::vec3 capsuleCenter = anim->getTransform()->getLocalPosition();
 	capsuleCenter.y += 0.015f;
 	anim->capsuleCollider = new CapsuleCollider(capsuleCenter, 0.03f, 0.03f, 1.0f, true);
@@ -644,6 +664,7 @@ int main() {
 	RL.load();
 
 	GameObject* anim = new GameObject("player");
+	RL.animationEnemyModel->SetShader(RL.shaderAnimation);
 	RL.animodel ->SetShader(RL.shaderAnimation);
 	//RL.animodel->SetOutlineShader(RL.outlineShader);
 	anim->addModelComponent(RL.animodel);
@@ -659,6 +680,8 @@ int main() {
 	RL.enemyModel->SetShader(RL.phongInstancedShader);
 	RL.enemyModel.get()->AddTexture("res/textures/Lumberjack_BaseColor.png", "diffuseMap");
 	RL.enemyModel.get()->AddTexture("res/textures/Lumberjack_normal.png", "normalMap");
+
+	RL.animationEnemyModel.get()->AddTexture("res/textures/Lumberjack_BaseColor.png", "diffuseMap");
 	
 	GameObject* outlineObj = new GameObject("outline");
 
@@ -740,11 +763,12 @@ int main() {
 	std::array<Plane, 6> frustumPlanes;
 	glm::mat4 lightProjection, lightView;
 
-	sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("res/textures/modelMonk_BaseColor.png", "diffuseMap");
+	RL.animodel.get()->AddTexture("res/textures/modelMonk_BaseColor.png", "diffuseMap");
+	//sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("res/textures/modelMonk_BaseColor.png", "diffuseMap");
 	//sm->getActiveScene()->findByName("player")->getTransform()->localPosition = glm::vec3(7.f, 1.f, 1.f);
 	//sm->getActiveScene()->findByName("player")->getTransform()->localScale = glm::vec3(1.f, 1.f, 1.f);
 
-	sm->getActiveScene()->findByName("skydome")->getModelComponent()->AddTexture("res/chmury1.png","diffuseMap");
+	sm->getActiveScene()->findByName("skydome")->getModelComponent().get()->AddTexture("res/chmury1.png", "diffuseMap");
 
 	
 	//glm::vec3 lightPos(0.5f, 20.0f, 0.3f);
@@ -1580,7 +1604,11 @@ int main() {
 				enemy->boundingBox = new BoundingBox(min, max, 1.0f, true);
 				enemy->capsuleCollider = nullptr;*/
 				enemy->capsuleCollider->center.y += enemy->capsuleCollider->height * 0.5f;
+				
 				enemy->modelComponent = RL.enemyModel;
+				//enemy->modelComponent = RL.animationEnemyModel;
+				//enemy->animPlayer = sm->getActiveScene()->findByName("basicEnemy")->animPlayer;
+
 				enemy->modelComponent.get()->capsuleCollider = enemy->capsuleCollider;
 				enemy->getTransform()->localScale = glm::vec3(3.0f);
 				sm->getActiveScene()->addObject(enemy);

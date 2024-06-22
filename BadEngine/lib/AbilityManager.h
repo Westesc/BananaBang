@@ -12,18 +12,34 @@ public:
 		float timeToRefresh;
 	}; 
 
-	struct AbilityCount
-	{
-		std::string name;
-		int count;
-	};
+	//struct AbilityCount
+	//{
+	//	std::string name;
+	//	int count;
+	//};
 
-	std::vector<AbalityCoolDown> abilityCollDown;
-	std::vector<AbilityCount> AbilityCount;
+    int bananaCount;
+    int limitBanana;
+	std::vector<AbalityCoolDown> abilityCoolDown;
+	//std::vector<AbilityCount> AbilityCount;
 
 	AbilityManager(TimeManeger* tm) {
 		this->tm = tm;
 	};
+
+    void AddBanana() {
+        if ((bananaCount < limitBanana)) {
+            bananaCount++;
+        }
+    }
+
+    bool TryGetBanana() {
+        if (bananaCount > 0) {
+            bananaCount--;
+            return true;
+        }
+        return false;
+    }
 
 	void AddAbility(std::name, int count) {
 		AbilityCount Ac;

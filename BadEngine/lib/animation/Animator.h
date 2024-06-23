@@ -73,10 +73,12 @@ public:
     }
 
     void addLegAnimation(Animation* sAnimation) {
-        m_PreviousAnimationLeg = m_CurrentAnimationLeg;
-        m_CurrentAnimationLeg = sAnimation;
-        m_PrevTimeLeg = m_CurrentTimeLeg;
-        m_CurrentTimeLeg = 0.0f;
+        if (sAnimation != m_CurrentAnimationLeg) {
+            m_PreviousAnimationLeg = m_CurrentAnimationLeg;
+            m_CurrentAnimationLeg = sAnimation;
+            m_PrevTimeLeg = m_CurrentTimeLeg;
+            m_CurrentTimeLeg = 0.0f;
+        }
     }
 
     void removeLegAnimation() {

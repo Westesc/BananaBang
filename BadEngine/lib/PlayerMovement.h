@@ -219,7 +219,7 @@ private:
         if (rb->upwardsSpeed < 0.f) {
             state = PlayerState::air;
             //rb->upwardsSpeed = -0.0001f;
-            //player->getAnimateBody()->setActiveAnimationWithY("jumping down", true);
+            player->getAnimateBody()->setActiveAnimationWithY("jumping down", true);
         }
         else if (rb->upwardsSpeed < 0.02f) {
             rb->upwardsSpeed = -0.02f;
@@ -451,7 +451,7 @@ public:
                 if (closestEnemy->getTransform()) {
                     rotatePlayerTowards(closestEnemy->getTransform()->getLocalPosition());
 
-                    //player->getAnimateBody()->setActiveAnimation("tree attack");
+                    player->getAnimateBody()->setActiveAnimation("tree attack");
 
                     glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
                     glm::vec3 direction = glm::normalize(closestEnemy->getTransform()->getLocalPosition() - currentPosition);
@@ -474,7 +474,7 @@ public:
             }
         }
         else if (state == PlayerState::jump_up) {
-            player->getAnimateBody()->setActiveAnimation("standing");
+            player->getAnimateBody()->setActiveAnimationWithY("jumping up");
             jump(deltaTime);
         }
         else if (state == PlayerState::air) {
@@ -499,8 +499,10 @@ public:
         }
         else if (state == PlayerState::dashing) {
             if (currentDashTime < dashDuration) {
+                player->getAnimateBody()->setActiveAnimation("dash");
                 useGravity();
                 MovePlayer(deltaTime);
+                
                 float rotate = glm::radians(player->getTransform()->getLocalRotation().y);
                 glm::vec3 dashDirection;
                 dashDirection.x = sin(rotate);

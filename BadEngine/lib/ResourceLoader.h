@@ -41,7 +41,7 @@ public:
 	Shader* depthInstancedShader;
 
 	void load() {
-		animodel = std::make_shared<Model>(const_cast<char*>("res/animations/monkey_idle.dae"), true);
+		animodel = std::make_shared<Model>(const_cast<char*>("res/animations/Monkey/monkey_idle.dae"), true);
 		shaderAnimation = new Shader("res/shaders/vs_animation.vert", "res/shaders/fs_animation.frag");
 		fillingShader = new Shader("res/shaders/vs_filling.vert", "res/shaders/fs_filling.frag");
 		outlineShader = new Shader("res/shaders/outline_animation.vert", "res/shaders/outline_animation.frag");

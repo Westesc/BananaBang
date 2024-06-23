@@ -408,26 +408,40 @@ void generate() {
 	GameObject* anim = new GameObject("player");
 	//animodel->SetShader(shaderAnimation);
 	anim->addModelComponent(RL.animodel);
-	std::vector<std::thread> threads;
+	//std::vector<std::thread> threads;
 
 	// Dodawanie animacji w osobnych 
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "standing", 1.f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "jumping up", 0.9f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "jumping down", 0.2f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_hit.dae"), "attack1", 1.5f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_hit.dae"), "attack2", 1.5f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_hit.dae"), "attack3", 1.5f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "dodge", 1.f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkry_climb.dae"), "climbing up", 1.3f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkry_climb.dae"), "climbing down", 1.3f));
-	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "tree attack", 0.7f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_run.dae"), "sprint", 1.f));
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_walk.dae"), "walking", 1.4f));
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/monkey_walk.dae"), "walking", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/Monkey_Hit1.dae"), "attack1", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/Monkey_Hit2.dae"), "attack2", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/Monkey_Hit3.dae"), "attack3", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/monkey_jump_up.dae"), "jumping up", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/monkey_jump_down.dae"), "jumping down", 0.2f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/monkry_climb.dae"), "climbing up", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/monkey_climb_down.dae"), "climbing down", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/Monkey_TreeKick.dae"), "tree attack", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/monkey_run.dae"), "sprint", 2.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/Monkey_Dodge.dae"), "dodge", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/Monkey_Dash.dae"), "dash", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/monkey_idle.dae"), "standing", 1.f);
+
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/Monkey/monkey_idle.dae"), "standing", 1.f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/Monkey/monkey_walk.dae"), "walking", 1.4f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/Monkey/monkey_jump_up.dae"), "jumping up", 0.9f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/Monkey/monkey_jump_down.dae"), "jumping down", 0.2f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/Monkey/Monkey_Hit1.dae"), "attack1", 1.5f));
+	////threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/Monkey/Monkey_Hit2.dae"), "attack2", 1.5f));
+	////threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/Monkey/Monkey_Hit3.dae"), "attack3", 1.5f));
+	////threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/Monkey_Dodge.dae"), "dodge", 1.f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/Monkey/monkry_climb.dae"), "climbing up", 1.3f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/Monkey/monkey_climb_down.dae"), "climbing down", 1.3f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/Monkey/Monkey_TreeKick.dae"), "tree attack", 0.7f));
+	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/Monkey/monkey_run.dae"), "sprint", 1.5f));
 
 	// Łączenie wątków
-	for (auto& thread : threads) {
-		thread.join();
-	}
+	//for (auto& thread : threads) {
+	//	thread.join();
+	//}
 
 	Enemy* basicEnemy = new Enemy("basicEnemy", glm::vec3(2.0f, 2.0f, 3.0f), glm::vec3(120.f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
 	basicEnemy->addModelComponent(RL.animationEnemyModel);
@@ -453,6 +467,7 @@ void generate() {
 	anim->capsuleCollider = new CapsuleCollider(capsuleCenter, 0.03f, 0.03f, 1.0f, true);
 	anim->getTransform()->localScale = glm::vec3(40.f);
 	anim->getTransform()->localPosition = glm::vec3(3.0f, 0.0f, 3.0f);
+	pm->changeState(PlayerState::walking);
 
 	
 	pbd->objects.push_back(anim);

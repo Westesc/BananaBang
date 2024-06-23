@@ -60,13 +60,13 @@ public:
             object->velocity = displacement / deltaTime;
             object->getTransform()->localPosition = object->localTransform->predictedPosition;
             if (object->getTransform()->localPosition.y <= object->capsuleCollider->height * 0.5f * object->localTransform->localScale.y) {
-                if (object->name == "player" && object->velocity.y < 0.0f) {
+                if (object->name == "player" /*&& object->velocity.y < 0.0f*/ && object->getTransform()->getLocalPosition().y < 0.f) {
                     object->getTransform()->localPosition.y = 0.0f;
-                }
+                } 
                 else if (object->name == "player" && object->velocity.y >= 0.0f) {
-					object->getTransform()->localPosition.y += object->capsuleCollider->height * 0.5f;
+					//object->getTransform()->localPosition.y += object->capsuleCollider->height * 0.5f;
 				}
-                else {
+                else if(object->name != "player") {
                     object->getTransform()->localPosition.y = object->capsuleCollider->height * 0.5f * object->localTransform->localScale.y;
                 }
                 object->velocity.y = 0.0f;

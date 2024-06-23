@@ -410,8 +410,7 @@ void generate() {
 	anim->addModelComponent(RL.animodel);
 	std::vector<std::thread> threads;
 
-	// Dodawanie animacji w osobnych wątkach
-	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_walk.dae"), "walking", 1.4f));
+	// Dodawanie animacji w osobnych 
 	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "standing", 1.f));
 	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "jumping up", 0.9f));
 	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "jumping down", 0.2f));
@@ -423,6 +422,7 @@ void generate() {
 	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkry_climb.dae"), "climbing down", 1.3f));
 	//threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_idle.dae"), "tree attack", 0.7f));
 	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_run.dae"), "sprint", 1.f));
+	threads.push_back(std::thread(addAnimation, anim, const_cast<char*>("res/animations/monkey_walk.dae"), "walking", 1.4f));
 
 	// Łączenie wątków
 	for (auto& thread : threads) {
@@ -452,7 +452,7 @@ void generate() {
 	capsuleCenter.y += 0.015f;
 	anim->capsuleCollider = new CapsuleCollider(capsuleCenter, 0.03f, 0.03f, 1.0f, true);
 	anim->getTransform()->localScale = glm::vec3(40.f);
-	anim->getTransform()->localPosition = glm::vec3(3.0f, 2.0f, 3.0f);
+	anim->getTransform()->localPosition = glm::vec3(3.0f, 0.0f, 3.0f);
 
 	
 	pbd->objects.push_back(anim);
@@ -463,7 +463,7 @@ void generate() {
 	sm->getActiveScene()->addObject(anim);
 	//anim->Move(glm::vec3(3.0f, 2.0f, 3.0f));
 
-	pm->setGroundPosition(anim->getTransform()->getLocalPosition().y);
+	//pm->setGroundPosition(anim->getTransform()->getLocalPosition().y);
 	enemyManager->player = anim;
 	anim->hp = 5;
 	GameObject* fist = new GameObject("fist");

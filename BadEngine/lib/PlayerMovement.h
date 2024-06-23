@@ -60,7 +60,7 @@ private:
     //climbing
     float climbingSpeed = 0.2f;
     float currentClimbingSpeed = 4.f;
-    float groundPosition = 0.0f;
+    float groundPosition = -1.0f;
     glm::vec3 treePosition;
     float direction = 0.0f;
 
@@ -79,6 +79,13 @@ private:
     PlayerStateAttack attackState = PlayerStateAttack::none;
 
     bool wasSpacePressed = false;
+
+    void useGravity() {
+        if (player->getTransform()->getLocalPosition().y >  groundPosition) {
+            rb->upwardsSpeed = -0.01f;
+            rb->useGravity();
+        }
+    }
 
     void getRotate(bool isRotate) {
         if (isRotate) {
@@ -199,22 +206,23 @@ private:
     }
 
     void jump(float deltaTime) {
-        player->useGravity = false;
         rb->useGravity();
         MovePlayer(deltaTime);
 
         glm::vec3 finalPosition = player->getTransform()->getLocalPosition();
         float jumpDistance = glm::length(finalPosition.y - initialPosition.y);
-        std::cout << jumpDistance << std::endl;
         if (jumpDistance == 0.0f) {
             //state = PlayerState::walking;
             //rb->upwardsSpeed = 0.f;
             //sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("walking");
         }
-        if (jumpDistance > limitJump) {
+        if (rb->upwardsSpeed < 0.f) {
             state = PlayerState::air;
-            rb->upwardsSpeed = -0.0001f;
+            //rb->upwardsSpeed = -0.0001f;
             //player->getAnimateBody()->setActiveAnimationWithY("jumping down", true);
+        }
+        else if (rb->upwardsSpeed < 0.02f) {
+            rb->upwardsSpeed = -0.02f;
         }
     }
 
@@ -322,10 +330,10 @@ private:
             currentClimbingSpeed = -0.02f;
             isMove = false;
         }
-        if (glm::distance(player->getTransform()->getLocalPosition().y, groundPosition) < 0.1f && state == PlayerState::air) {
+        if (player->getTransform()->getLocalPosition().y < groundPosition + 1.5f && state == PlayerState::air) {
             state = PlayerState::walking;
             player->getAnimateBody()->setActiveAnimation("standing");
-            player->getTransform()->localPosition.y = initialPosition.y;
+            //player->getTransform()->localPosition.y = groundPosition;
         }
         else if (state != PlayerState::attack1)
         {
@@ -350,22 +358,27 @@ public:
 
     void ManagePlayer(float& deltaTime2, float deltaTime) {
         player = sm->getActiveScene()->findByName("player");
-        player->useGravity = true;
+        player->useGravity = false;
         //std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         this->deltaTime2 = deltaTime2;
         PlayerState prevState = state;
         checkState();
         if (state == PlayerState::walking) {
+            useGravity();
             //std::cout << "stading"<<std::endl;
            // std::cout << player->getAnimateBody()->getActiveAnimation()<<std::endl;
             MovePlayer(deltaTime);
             // std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         }
         else if (state == PlayerState::sprint) {
+            useGravity();
+
             player->getAnimateBody()->setActiveAnimation("sprint");
             MovePlayer(deltaTime);
         }
         else if (state == PlayerState::attack1) {
+            useGravity();
+
             if (attackState == PlayerStateAttack::walking) {
                 player->getAnimateBody()->addLegAnimation("walking");
             }
@@ -399,6 +412,8 @@ public:
             }
         }
         else if (state == PlayerState::dodge) {
+            useGravity();
+
             player->getAnimateBody()->setActiveAnimation("dodge");
             //currentTurn = 180.f;
             move(deltaTime, false);
@@ -408,7 +423,6 @@ public:
         }
         else if (state == PlayerState::climbing)
         {
-            player->useGravity = false;
             climbMove(deltaTime);
             if (currentClimbingSpeed > 0) {
                 player->getAnimateBody()->setActiveAnimationWithY("climbing up");
@@ -434,7 +448,6 @@ public:
         else if (state == PlayerState::tree_attack) {
             //Jakiœ warunek co bêdzie sprawdza³ czy œcie¿ka jest git
             if (closestEnemy != nullptr) {
-                player->useGravity = false;
                 if (closestEnemy->getTransform()) {
                     rotatePlayerTowards(closestEnemy->getTransform()->getLocalPosition());
 
@@ -465,12 +478,11 @@ public:
             jump(deltaTime);
         }
         else if (state == PlayerState::air) {
-            player->useGravity = false;
             MovePlayer(deltaTime);
-           // rb->upwardsSpeed = 1.f;
             rb->useGravity();
         }
         else if (state == PlayerState::leave_banana) {
+            useGravity();
 
             //sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
             state = PlayerState::walking;
@@ -487,6 +499,7 @@ public:
         }
         else if (state == PlayerState::dashing) {
             if (currentDashTime < dashDuration) {
+                useGravity();
                 MovePlayer(deltaTime);
                 float rotate = glm::radians(player->getTransform()->getLocalRotation().y);
                 glm::vec3 dashDirection;
@@ -521,9 +534,9 @@ public:
         this->state = state;
     }
 
-    void setGroundPosition(float newGround) {
-        groundPosition = newGround;
-    }
+    //void setGroundPosition(float newGround) {
+    //    groundPosition = newGround;
+    //}
 
     PlayerState getState() {
         return state;

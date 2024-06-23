@@ -82,7 +82,7 @@ private:
 
     void useGravity() {
         if (player->getTransform()->getLocalPosition().y >  groundPosition) {
-            rb->upwardsSpeed = -0.01f;
+            rb->upwardsSpeed = -0.1f;
             rb->useGravity();
         }
     }
@@ -120,7 +120,8 @@ private:
 
             // sm->getActiveScene()->findByName("player")->Move(glm::vec3(0.f, dy, 0.f));
             glm::vec3 vel = glm::vec3(dx, 0.f, dz) / deltaTime;
-            player->velocity = vel * 2.0f;
+            player->velocity.x = vel.x * 2.0f;
+            player->velocity.z = vel.z * 2.0f;
         }
     }
 
@@ -136,12 +137,21 @@ private:
         player->velocity.z = dz / deltaTime;
     }
 
+    void moveWithoutCamera(float speed, float deltaTime) {
+        float distance = speed * tm->getFramePerSeconds();
+        float dx = distance * sin(glm::radians(player->getTransform()->getLocalRotation().y));
+        float dz = distance * cos(glm::radians(player->getTransform()->getLocalRotation().y));
+        //std::cout << "dx: " << dx / deltaTime << "dz: " << dz / deltaTime << std::endl;
+        player->velocity.x = dx / deltaTime;
+        player->velocity.z = dz / deltaTime;
+    }
+
     void climbMove(float deltaTime) {
         static float radius = glm::distance(glm::vec2(player->getTransform()->getLocalPosition().x, player->getTransform()->getLocalPosition().z),
             glm::vec2(treePosition.x, treePosition.z)) - 0.4f;
         static float angle = std::atan2(player->getTransform()->getLocalPosition().z - treePosition.z, player->getTransform()->getLocalPosition().x - treePosition.x);
 
-        float speed = direction * glm::pi<float>() / 2.0f;
+        float speed = direction * glm::pi<float>();
         angle += speed * deltaTime;
 
         if (angle > 2 * glm::pi<float>()) {
@@ -218,8 +228,8 @@ private:
         }
         if (rb->upwardsSpeed < 0.f) {
             state = PlayerState::air;
-            //rb->upwardsSpeed = -0.0001f;
-            player->getAnimateBody()->setActiveAnimationWithY("jumping down", true);
+            rb->upwardsSpeed = -0.2f;
+            //player->getAnimateBody()->setActiveAnimationWithY("jumping down", true);
         }
         else if (rb->upwardsSpeed < 0.02f) {
             rb->upwardsSpeed = -0.02f;
@@ -274,9 +284,11 @@ private:
                 {
                     state = PlayerState::tree_attack;
                 }
-                else if (input->checkKey(GLFW_KEY_SPACE))
+                if (input->checkKey(GLFW_KEY_SPACE))
                 {
+                    moveWithoutCamera(10.f, 0.00001f);
                     state = PlayerState::air;
+                    player->getAnimateBody()->setActiveAnimation("jumping down", false);
                 }
             }
             else if (state != PlayerState::air && state != PlayerState::jump_up && state != PlayerState::climbing) {
@@ -296,7 +308,7 @@ private:
                     state = PlayerState::dodge;
                 }
                 else if (input->checkKey(GLFW_KEY_SPACE) && !wasSpacePressed) {
-                    //player->getAnimateBody()->setActiveAnimationWithY("jumping up", true);
+                    player->getAnimateBody()->setActiveAnimationWithY("jumping up", true);
                     rb->upwardsSpeed = jumpPower;
                     state = PlayerState::jump_up;
                     initialPosition = player->getTransform()->getLocalPosition();
@@ -424,7 +436,7 @@ public:
         else if (state == PlayerState::climbing)
         {
             climbMove(deltaTime);
-            if (currentClimbingSpeed > 0) {
+            if (currentClimbingSpeed >= -0.02f) {
                 player->getAnimateBody()->setActiveAnimationWithY("climbing up");
                 if (currentClimbingSpeed == -0.02f) {
                     player->getAnimateBody()->changeAnimationSpeed("climbing up", 0.6f);
@@ -432,10 +444,14 @@ public:
                 else {
                     player->getAnimateBody()->changeAnimationSpeed("climbing up", 1.3f);
                 }
+                if (player->getTransform()->localPosition.y > 19.f) {
+                    currentClimbingSpeed = 0.f;
+                }
             }
             else if (currentClimbingSpeed < -0.02f) {
                 player->getAnimateBody()->setActiveAnimationWithY("climbing down");
-                if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
+                if (groundPosition + 2.8f > player->getTransform()->getLocalPosition().y) {
+                    moveWithoutCamera(10.f, deltaTime);
                     state = PlayerState::walking;
                 }
             }
@@ -474,7 +490,6 @@ public:
             }
         }
         else if (state == PlayerState::jump_up) {
-            player->getAnimateBody()->setActiveAnimationWithY("jumping up");
             jump(deltaTime);
         }
         else if (state == PlayerState::air) {

@@ -216,6 +216,7 @@ public:
                     glm::mat4 temp = nodeTransform;
                     nodeTransform = bone->GetLocalTransform();
                     nodeTransform[3][0] = temp[3][0];
+                    nodeTransform[3][1] = temp[3][1];
                     nodeTransform[3][2] = temp[3][2];
                 }
             }

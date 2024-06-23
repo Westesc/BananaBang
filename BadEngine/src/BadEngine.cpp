@@ -412,9 +412,9 @@ void generate() {
 
 	// Dodawanie animacji w osobnych 
 	anim->addAnimation(const_cast<char*>("res/animations/Monkey/monkey_walk.dae"), "walking", 1.f);
-	anim->addAnimation(const_cast<char*>("res/animations/Monkey/Monkey_Hit1.dae"), "attack1", 1.f);
-	anim->addAnimation(const_cast<char*>("res/animations/Monkey/Monkey_Hit2.dae"), "attack2", 1.f);
-	anim->addAnimation(const_cast<char*>("res/animations/Monkey/Monkey_Hit3.dae"), "attack3", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/Monkey_Hit1.dae"), "attack3", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/Monkey_Hit2.dae"), "attack1", 1.f);
+	anim->addAnimation(const_cast<char*>("res/animations/Monkey/Monkey_hit.dae"), "attack2", 1.f);
 	anim->addAnimation(const_cast<char*>("res/animations/Monkey/monkey_jump_up.dae"), "jumping up", 1.f);
 	anim->addAnimation(const_cast<char*>("res/animations/Monkey/monkey_jump_down.dae"), "jumping down", 0.2f);
 	anim->addAnimation(const_cast<char*>("res/animations/Monkey/monkry_climb.dae"), "climbing up", 1.f);
@@ -510,6 +510,10 @@ void generate() {
 	std::cout << sectorsPom << std::endl;
 	std::cout << pathfinder->trees.size() << std::endl;
 	//delete playButton;
+
+	if (input->checkAnyKey()) {
+		input->getPressKey();
+	}
 }
 
 void showTutorial() {

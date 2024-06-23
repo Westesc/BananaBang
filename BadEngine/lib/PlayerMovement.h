@@ -263,11 +263,11 @@ private:
             if (state == PlayerState::climbing) {
                 player->getTransform()->getLocalPosition().y;
                 if (input->checkKey(GLFW_KEY_A)) {
-                    direction = 0.3f;
+                    direction = 0.35f;
                     currentClimbingSpeed = 0.0f;
                 }
                 else if (input->checkKey(GLFW_KEY_D)) {
-                    direction = -0.3f;
+                    direction = -0.35f;
                     currentClimbingSpeed = 0.0;
                 }
                 else {
@@ -467,7 +467,7 @@ public:
                 if (closestEnemy->getTransform()) {
                     rotatePlayerTowards(closestEnemy->getTransform()->getLocalPosition());
 
-                    player->getAnimateBody()->setActiveAnimation("tree attack");
+                    player->getAnimateBody()->setActiveAnimation("tree attack", true);
 
                     glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
                     glm::vec3 direction = glm::normalize(closestEnemy->getTransform()->getLocalPosition() - currentPosition);

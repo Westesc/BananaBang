@@ -392,6 +392,13 @@ void generate() {
 	dashTime->localTransform->localPosition = glm::vec3(300.f, 50.f, 0.f);
 	dashTime->uiComponent = uiDash;
 
+	GameObject* bananaPeelCount = new GameObject("bananaPeel");
+	UI* uiBananaPeelCount = new UI(writing);
+	uiBananaPeelCount->addShader(UIShader);
+	uiBananaPeelCount->setText("Banany: 1");
+	bananaPeelCount->localTransform->localPosition = glm::vec3(Window::windowWidth - 650.0f, 50.f, 0.f);
+	bananaPeelCount->uiComponent = uiBananaPeelCount;
+
 	GameObject* treeAttackTime = new GameObject("TreeAttack");
 	UI* uiTreeAttack = new UI(writing);
 	uiTreeAttack->addShader(UIShader);
@@ -421,6 +428,7 @@ void generate() {
 		sm->getActiveScene()->gameObjects.at(i)->shadowSetting(lightSpaceMatrix);
 	}
 
+	ability->ClearAllAbilities();
 	ability->AddAbility("tree attack", 11.f);
 	ability->AddAbility("dash", 11.f);
 
@@ -525,6 +533,7 @@ void generate() {
 	sm->getActiveScene()->addObject(enemyCount);
 	sm->getActiveScene()->addObject(dashTime);
 	sm->getActiveScene()->addObject(treeAttackTime);
+	sm->getActiveScene()->addObject(bananaPeelCount);
 
 	loaded = true;
 	spawnerTime = 0;
@@ -1326,6 +1335,7 @@ int main() {
 			if (sm->getActiveScene()->findByName("DashTime") && sm->getActiveScene()->findByName("TreeAttack")) {
 				sm->getActiveScene()->findByName("DashTime")->uiComponent->setText("Dash: " + std::to_string(ability->getTimeToRefresh("dash")));
 				sm->getActiveScene()->findByName("TreeAttack")->uiComponent->setText("Atak z drzewa: " + std::to_string(ability->getTimeToRefresh("tree attack")));
+				sm->getActiveScene()->findByName("bananaPeel")->uiComponent->setText("Banana: " + std::to_string(ability->bananaCount));
 			}
 
 			sm->getActiveScene()->Draw(RL.depthShader, RL.depthAnimationShader);

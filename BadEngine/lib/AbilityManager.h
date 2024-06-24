@@ -18,7 +18,7 @@ public:
 	//	int count;
 	//};
 
-    int bananaCount = 0;
+    int bananaCount = 1;
     int limitBanana = 4;
 	std::vector<AbalityCoolDown> abilityCoolDown;
 	//std::vector<AbilityCount> AbilityCount;
@@ -31,6 +31,18 @@ public:
         if ((bananaCount < limitBanana)) {
             bananaCount++;
         }
+    }
+
+    void UseBanana() {
+        if (bananaCount > 0) {
+            bananaCount--;
+        }
+    }
+    bool CanUseBanana() {
+        if (bananaCount > 0) {
+            return true;
+        }
+        return false;
     }
 
     bool TryGetBanana() {
@@ -118,6 +130,10 @@ public:
             }
         }
         return -1;
+    }
+
+    void ClearAllAbilities() {
+        abilityCoolDown.clear();
     }
 
     void UpdateTime(float deltaTime) {

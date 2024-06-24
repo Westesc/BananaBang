@@ -534,10 +534,13 @@ public:
             rb->useGravity();
         }
         else if (state == PlayerState::leave_banana) {
-            useGravity();
-
-            //sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
-            state = PlayerState::walking;
+            if (ability->TryGetBanana()) {
+                useGravity();
+            }
+            else {
+                //sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
+                state = PlayerState::walking;
+            }
             //if (player->getAnimateBody()->getActiveAnimation() != "leave banana up") {
             //    player->getAnimateBody()->setActiveAnimation("leave banana down", true);
             //}
@@ -545,6 +548,7 @@ public:
             //    sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
             //    player->getAnimateBody()->setActiveAnimation("leave banana up", true);
             //}
+            // 
             //else if (player->getAnimateBody()->isPlay() == false && player->getAnimateBody()->getActiveAnimation() == "leave banana up") {
             //    state = PlayerState::walking;
             //}
@@ -570,7 +574,6 @@ public:
                 state = PlayerState::walking;
             }
         }
-        std::cout<<ability->getTimeToRefresh("dash")<<std::endl;
 
         if (state != PlayerState::dashing) {
             isUse = false;
@@ -606,7 +609,9 @@ public:
         return input;
     }
 
-    ~PlayerMovement();
+    ~PlayerMovement() {
+        delete rb;
+    }
 };
 
 #endif

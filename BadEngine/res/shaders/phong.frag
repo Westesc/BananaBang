@@ -50,11 +50,11 @@ void main()
     normal = normalize(normal * 2.0 - 1.0);  
 
 // ambient
-    float ambientStrength = 0.1;
+    float ambientStrength = 0.3;
     vec3 ambient = ambientStrength * lightColor;
   	
     // diffuse 
-    vec3 lightDir = normalize(vec3(1.0f,0.8f,0.f));
+    vec3 lightDir = normalize(vec3(1.0,1.0,0.0));
     float diff = max(dot(normal, lightDir), 0.0);
     vec3 diffuse = diff * lightColor;
     
@@ -67,6 +67,7 @@ void main()
         
     //shadow
     float shadow = shadowCal(LSMatrix * vec4(FragPos,1.0));
-    vec3 result = (ambient + (1.0f -shadow) * (diffuse + specular))  ;
+    vec3 result = (ambient + (1.0f -shadow) * 2* (diffuse + specular))  ;
     FragColor = vec4(result.xyz, 1.0f)* texture(diffuseMap, TexCoords);
+    //FragColor = vec4( texture(normalMap, TexCoords).rgb,1.0);
 }

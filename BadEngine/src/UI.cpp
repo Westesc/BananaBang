@@ -347,3 +347,20 @@ std::vector<std::string> UI::splitTextIntoLines(const std::string& text, float m
 
 	return lines;
 }
+
+YAML::Node UI::serialize() {
+	YAML::Node node;
+	/*node["type"] = this->type;
+	if (type == writing|| type == button) {
+		node["text"] = this->text;
+	}
+	if (type == plane || type == button) {
+		YAML::Node nodeVec2;
+		nodeVec2["x"] = size.x;
+		nodeVec2["y"] = size.y;
+		node["size"] = nodeVec2;
+	}*/
+
+
+	return node;
+}

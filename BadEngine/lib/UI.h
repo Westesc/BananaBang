@@ -18,6 +18,7 @@
 #include "Transform.h"
 #include "Input.h"
 #include <stb_image.h>
+#include <yaml-cpp/yaml.h>
 
 enum typeUI {
 	writing,
@@ -70,6 +71,7 @@ public:
 	void addShader(Shader* shader);
 	std::string getText();
 	std::vector<std::string> splitTextIntoLines(const std::string& text, float maxWidth, Transform* transform);
+	YAML::Node serialize();
 };
 
 #endif

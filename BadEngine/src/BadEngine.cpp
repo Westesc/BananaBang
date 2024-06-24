@@ -1447,6 +1447,14 @@ int main() {
 					}
 				}
 			}
+			else if (object->name.starts_with("Fruit")) {
+				if (object->name.ends_with("Banana")) {
+					transformsBanana.push_back(object->getTransform());
+				}
+				else if (object->name.ends_with("Mango")) {
+					transformsMango.push_back(object->getTransform());
+				}
+			}
 		}
 		for (auto sector : sm->getActiveScene()->gameObjects) {
 			if (sector->name.starts_with("sector")) {

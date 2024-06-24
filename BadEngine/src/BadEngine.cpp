@@ -225,7 +225,7 @@ void generate() {
 					branch->addColider(1);
 					glm::vec3 bpos = branch->localTransform->localPosition;
 					glm::vec3 bscale = branch->localTransform->localScale;
-					branch->boundingBox = new BoundingBox(glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(1.1f, 1.2f, 8.0f), 0.0f, true);
+					branch->boundingBox = new BoundingBox(glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(1.1f, 1.2f, 120.0f), 0.0f, true);
 					branch->modelComponent.get()->boundingBox = branch->boundingBox;
 					GameObject* leafs = new GameObject("leafs");
 					leafs->isInstanced = true;
@@ -463,8 +463,8 @@ void generate() {
 
 
 	glm::vec3 capsuleCenter = anim->getTransform()->getLocalPosition();
-	capsuleCenter.y += 0.015f;
-	anim->capsuleCollider = new CapsuleCollider(capsuleCenter, 0.03f, 0.03f, 1.0f, true);
+	capsuleCenter.y += 0.0025f;
+	anim->capsuleCollider = new CapsuleCollider(capsuleCenter, 0.03f, 0.005f, 1.0f, true);
 	anim->getTransform()->localScale = glm::vec3(40.f);
 	anim->getTransform()->localPosition = glm::vec3(3.0f, 0.0f, 3.0f);
 	pm->changeState(PlayerState::walking);

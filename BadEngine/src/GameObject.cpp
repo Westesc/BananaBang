@@ -383,7 +383,7 @@ void GameObject::predictPosition(float deltaTime) {
 
 void GameObject::updateVelocity(float deltaTime) {
     if (useGravity) {
-        velocity += deltaTime * inverseMass * glm::vec3(0.0f, -9.81f, 0.0f);
+        velocity += deltaTime * inverseMass * glm::vec3(0.0f, -28.0f, 0.0f);
     }
 	if (boundingBox) {
 		for (auto& particle : boundingBox->particles) {

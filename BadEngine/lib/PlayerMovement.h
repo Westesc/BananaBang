@@ -146,6 +146,14 @@ private:
         player->velocity.z = dz / deltaTime;
     }
 
+    void moveToTree(glm::vec3 treePos) {
+        glm::vec3 movevec = treePos - player->getTransform()->getLocalPosition();
+        float speed = 15.f;
+        player->velocity.x = movevec.x * speed;
+        player->velocity.z = movevec.z * speed;
+        std::cout << glm::to_string(movevec) << std::endl;
+    }
+
     void climbMove(float deltaTime) {
         static float radius = glm::distance(glm::vec2(player->getTransform()->getLocalPosition().x, player->getTransform()->getLocalPosition().z),
             glm::vec2(treePosition.x, treePosition.z)) - 0.4f;
@@ -286,6 +294,23 @@ private:
                 }
                 if (input->checkKey(GLFW_KEY_SPACE))
                 {
+                    for (auto sector : sm->getActiveScene()->gameObjects) {
+                        if (sector->name.starts_with("sector")) {
+                            for (auto tree : sector->children) {
+                                if (tree->name.starts_with("tree")) {
+                                    GameObject* log = tree->children.at(0);
+                                    if (log->getTransform()->localPosition != treePosition) {
+                                        if (glm::distance(glm::vec2(player->getTransform()->localPosition.x, player->getTransform()->localPosition.z), glm::vec2(log->getTransform()->localPosition.x, log->getTransform()->localPosition.z)) < 10.0f) {
+                                            state = PlayerState::air;
+                                            player->getAnimateBody()->setActiveAnimation("jumping up", true);
+                                            moveToTree(log->getTransform()->localPosition);
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                     moveWithoutCamera(10.f, 0.00001f);
                     state = PlayerState::air;
                     player->getAnimateBody()->setActiveAnimation("jumping down", false);

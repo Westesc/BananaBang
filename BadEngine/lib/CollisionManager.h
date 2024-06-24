@@ -250,14 +250,14 @@ public:
 
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
 		bool resolved = false;
-		if (second->name.starts_with("Fruit")) {
+		if (second->name.starts_with("Fruit") || second->name.starts_with("branch")) {
 			return;
 		}
 		if (second->name.starts_with("branch")) {
 			if (pm->getState() == PlayerState::climbing || pm->getState() == PlayerState::air || pm->getState() == PlayerState::jump_up || pm->getState() == PlayerState::walking) {
 				if ((second->getTransform()->localPosition - first->getTransform()->predictedPosition).y <= 0.0f) {
 					std::cout <<"AAAAAAAAAAA" << std::endl;
-					first->getTransform()->predictedPosition.y = second->getTransform()->localPosition.y * second->getTransform()->localScale.y;
+					first->getTransform()->predictedPosition.y = second->getTransform()->localPosition.y * second->getTransform()->localScale.y + first->capsuleCollider->height * first->getTransform()->localScale.y;
 					first->velocity.y = 0.0f;
 					pm->changeState(PlayerState::walking);
 					resolved = true;
@@ -446,7 +446,7 @@ public:
 				displacement += direction * magnitude;
 			}
 		}
-		std::cout << first->name << ", " << second->name << glm::to_string(displacement) << std::endl;
+		//std::cout << first->name << ", " << second->name << glm::to_string(displacement) << std::endl;
 		return displacement;
 	}
 

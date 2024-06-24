@@ -1020,7 +1020,6 @@ int main() {
 		audioManager->setListenerOrientation(V);
 		//animacje
 		//animPlayer->UpdateAnimation(deltaTime);
-		
 
 		P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 5000.f);
 		frustumPlanes = Plane::calculateFrustumPlanes(glm::perspective(glm::radians(120.f), static_cast<float>(Window::windowWidth) / Window::windowHeight, 0.1f, 500.f) * V);
@@ -1491,7 +1490,7 @@ int main() {
 				transformsEnemyWeapon.push_back(enemy->children.at(0)->getTransform());
 			}
 		}
-		if (transformsEnemy.size() > 0) {
+	/*	if (transformsEnemy.size() > 0) {
 			RL.enemyShader->use();
 			RL.enemyShader->setMat4("view", V);
 			RL.enemyShader->setMat4("projection", P);
@@ -1508,7 +1507,7 @@ int main() {
 				}
 				enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->drawInstances();
 			}
-		}
+		}*/
 
 
 		/*if (enemyManager->enemies.size() > 0) {
@@ -1624,9 +1623,9 @@ int main() {
 				enemy->capsuleCollider = nullptr;*/
 				enemy->capsuleCollider->center.y += enemy->capsuleCollider->height * 0.5f;
 				
-				enemy->modelComponent = RL.enemyModel;
-				//enemy->modelComponent = RL.animationEnemyModel;
-				//enemy->animPlayer = sm->getActiveScene()->findByName("basicEnemy")->animPlayer;
+				//enemy->modelComponent = RL.enemyModel;
+				enemy->modelComponent = RL.animationEnemyModel;
+				enemy->animPlayer = sm->getActiveScene()->findByName("basicEnemy")->animPlayer;
 
 				enemy->modelComponent.get()->capsuleCollider = enemy->capsuleCollider;
 				enemy->getTransform()->localScale = glm::vec3(3.0f);
@@ -1657,8 +1656,8 @@ int main() {
 					transformsEnemy.push_back(enemy->getTransform());
 					transformsEnemyWeapon.push_back(enemy->children.at(0)->getTransform());
 				}
-				enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
-				enemy->isInstanced = true;
+				//enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->initInstances(transformsEnemy);
+				//enemy->isInstanced = true;
 			}
 		}
 		if (Lost) {

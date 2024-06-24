@@ -48,8 +48,9 @@ void AnimateBody::UpdateAnimation(float deltaTime) {
     animator->UpdateAnimation(deltaTime * anim.speedAnimation);
     model->GetShader()->use();
     auto transforms = animator->GetFinalBoneMatrices();
-    for (int i = 0; i < transforms.size(); ++i)
+    for (int i = 0; i < transforms.size(); ++i) {
         model->GetShader()->setMat4("finalBonesMatrices[" + std::to_string(i) + "]", transforms[i]);
+    }
 }
 
 void AnimateBody::UpdateAnimation(float deltaTime, Shader* shader) {

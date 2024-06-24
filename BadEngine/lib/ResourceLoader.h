@@ -22,6 +22,7 @@ public:
 	std::shared_ptr<Model> animationEnemyModel;
 	std::shared_ptr<Model> outlinemodel;
 	std::shared_ptr<Model> bananaModel;
+	std::shared_ptr<Model> bananaModel2;
 	Shader* depthShader;
 	Shader* depthAnimationShader;
 	std::shared_ptr<Model> box2model;
@@ -57,6 +58,7 @@ public:
 		enemyModel2 = std::make_shared<Model>(const_cast<char*>("res/capsule.obj"), false);
 		outlinemodel = std::make_shared<Model>(const_cast<char*>("res/Lumberjack.obj"), false);
 		bananaModel = std::make_shared<Model>(const_cast<char*>("res/banana.obj"), false);
+		bananaModel2 = std::make_shared<Model>(const_cast<char*>("res/banana.obj"), false);
 		depthShader = new Shader("res/shaders/depthShader.vert", "res/shaders/depthShader.frag");
 		depthAnimationShader = new Shader("res/shaders/depthAnimationShader.vert", "res/shaders/depthShader.frag");
 		box2model = std::make_shared<Model>(const_cast<char*>("res/tree.obj"), false);

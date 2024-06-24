@@ -18,7 +18,7 @@ public:
 	//	int count;
 	//};
 
-    int bananaCount = 1;
+    int bananaCount = 4;
     int limitBanana = 4;
 	std::vector<AbalityCoolDown> abilityCoolDown;
 	//std::vector<AbilityCount> AbilityCount;
@@ -137,7 +137,6 @@ public:
     }
 
     void UpdateTime(float deltaTime) {
-        deltaTime *= 2;
         for (auto& ability : abilityCoolDown) {
             if (ability.timeToRefresh > 0) {
                 ability.timeToRefresh -= deltaTime;

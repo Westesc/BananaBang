@@ -77,6 +77,9 @@ private:
     float dashDuration = 2000.f; 
     bool isUse = false;
 
+    //banana
+    bool isPressE = false;
+
     PlayerState state = PlayerState::walking;
     PlayerStateAttack attackState = PlayerStateAttack::none;
 
@@ -302,7 +305,7 @@ private:
                 }
                 else if (input->checkKey(GLFW_KEY_E))
                 {
-                    state = PlayerState::tree_attack;
+                        state = PlayerState::tree_attack;
                 }
                 if (input->checkKey(GLFW_KEY_SPACE))
                 {
@@ -338,7 +341,10 @@ private:
                     player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
                 }
                 if (input->checkKey(GLFW_KEY_E) && state == PlayerState::walking) {
-                    state = PlayerState::leave_banana;
+                    if (!isPressE) {
+                        state = PlayerState::leave_banana;
+                        isPressE = true;
+                    }
                 }
                 else if (input->checkKey(GLFW_MOUSE_BUTTON_RIGHT))
                 {
@@ -369,6 +375,9 @@ private:
                 input->getPressKey();
                 isMove = false;
             }
+            if (!input->checkKey(GLFW_KEY_E)) {
+                isPressE = false;
+            }
         }
         else if (state == PlayerState::walking) {
             player->getAnimateBody()->setActiveAnimation("standing");
@@ -377,6 +386,7 @@ private:
             direction = 0.f;
             currentClimbingSpeed = -0.02f;
             isMove = false;
+            isPressE = false;
         }
         if (player->getTransform()->getLocalPosition().y < groundPosition + 1.5f && state == PlayerState::air) {
             state = PlayerState::walking;
@@ -536,6 +546,8 @@ public:
         else if (state == PlayerState::leave_banana) {
             if (ability->TryGetBanana()) {
                 useGravity();
+                sm->getActiveScene()->findByName("bananaPeelObj")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
+                state = PlayerState::walking;
             }
             else {
                 //sm->getActiveScene()->findByName("banana")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);

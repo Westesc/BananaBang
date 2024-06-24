@@ -521,12 +521,14 @@ void generate() {
 	sm->getActiveScene()->addObject(skydome);
 	sm->getActiveScene()->findByName("skydome")->timeSetting(gameTime / 7, glm::vec2(10, 10));
 
-	GameObject* bananaObj = new GameObject("banana");
 
-	bananaObj->addModelComponent(RL.bananaModel);
-	bananaObj->getTransform()->localPosition = glm::vec3(0.f, 1.f, -1.f);
-	bananaObj->getTransform()->localScale = glm::vec3(0.1f);
-	//sm->getActiveScene()->addObject(bananaObj);
+	GameObject* bananaPeelObj = new GameObject("bananaPeelObj");
+	RL.bananaModel2->SetShader(RL.diffuseShader);
+	bananaPeelObj->addModelComponent(RL.bananaModel2);
+	bananaPeelObj->getTransform()->localPosition = glm::vec3(0.f, -10.f, -1.f);
+	bananaPeelObj->getTransform()->localScale = glm::vec3(0.1f);
+	sm->getActiveScene()->addObject(bananaPeelObj);
+
 
 	//sm->getActiveScene()->addObject(Button);
 	sm->getActiveScene()->addObject(HPcount);
@@ -735,6 +737,9 @@ int main() {
 	RL.animationEnemyModel.get()->AddTexture("res/textures/Lumberjack_BaseColor.png", "diffuseMap");
 	
 	GameObject* outlineObj = new GameObject("outline");
+
+	RL.bananaModel2->SetShader(RL.diffuseShader);
+	RL.bananaModel2->AddTexture("res/textures/Banana.png", "diffuseMap");
 
 	RL.bananaModel->AddTexture("res/textures/Banana.png", "diffuseMap");
 	RL.bananaModel->SetShader(RL.diffuseInstancedShader);
@@ -1330,14 +1335,6 @@ int main() {
 				}
 			}
 
-			//ability
-			ability->UpdateTime(deltaTime);
-			if (sm->getActiveScene()->findByName("DashTime") && sm->getActiveScene()->findByName("TreeAttack")) {
-				sm->getActiveScene()->findByName("DashTime")->uiComponent->setText("Dash: " + std::to_string(ability->getTimeToRefresh("dash")));
-				sm->getActiveScene()->findByName("TreeAttack")->uiComponent->setText("Atak z drzewa: " + std::to_string(ability->getTimeToRefresh("tree attack")));
-				sm->getActiveScene()->findByName("bananaPeel")->uiComponent->setText("Banana: " + std::to_string(ability->bananaCount));
-			}
-
 			sm->getActiveScene()->Draw(RL.depthShader, RL.depthAnimationShader);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, Window::windowWidth, Window::windowHeight);
@@ -1565,6 +1562,15 @@ int main() {
 			}
 			enemyManager->enemies.at(0)->getModelComponent().get()->getFirstMesh()->drawInstances();
 		}*/
+
+		//ability
+		ability->UpdateTime(deltaTime);
+		if (sm->getActiveScene()->findByName("DashTime") && sm->getActiveScene()->findByName("TreeAttack")) {
+			sm->getActiveScene()->findByName("DashTime")->uiComponent->setText("Dash: " + std::to_string(ability->getTimeToRefresh("dash")));
+			sm->getActiveScene()->findByName("TreeAttack")->uiComponent->setText("Atak z drzewa: " + std::to_string(ability->getTimeToRefresh("tree attack")));
+			sm->getActiveScene()->findByName("bananaPeel")->uiComponent->setText("Banana: " + std::to_string(ability->bananaCount));
+		}
+
 		sm->getActiveScene()->Draw(V, P);
 
 		RL.shaderTree->use();

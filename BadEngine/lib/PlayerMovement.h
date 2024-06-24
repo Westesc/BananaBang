@@ -18,7 +18,8 @@ enum class PlayerState {
     tree_attack,
     leave_banana, 
     dashing,
-    sprint
+    sprint,
+    treeJump
 };
 
 class PlayerMovement {
@@ -64,6 +65,7 @@ private:
     float currentClimbingSpeed = 4.f;
     float groundPosition = -1.0f;
     glm::vec3 treePosition;
+    glm::vec3 targetTree;
     float direction = 0.0f;
 
     //attack
@@ -156,7 +158,8 @@ private:
         float speed = 15.f;
         player->velocity.x = movevec.x * speed;
         player->velocity.z = movevec.z * speed;
-        std::cout << glm::to_string(movevec) << std::endl;
+        targetTree = treePos;
+        //std::cout << glm::to_string(movevec) << std::endl;
     }
 
     void climbMove(float deltaTime) {
@@ -316,9 +319,11 @@ private:
                                     GameObject* log = tree->children.at(0);
                                     if (log->getTransform()->localPosition != treePosition) {
                                         if (glm::distance(glm::vec2(player->getTransform()->localPosition.x, player->getTransform()->localPosition.z), glm::vec2(log->getTransform()->localPosition.x, log->getTransform()->localPosition.z)) < 10.0f) {
-                                            state = PlayerState::air;
+                                            state = PlayerState::treeJump;
                                             player->getAnimateBody()->setActiveAnimation("jumping up", true);
                                             moveToTree(log->getTransform()->localPosition);
+                                            //std::cout << glm::to_string(player->getTransform()->localPosition) << std::endl;
+                                            //std::cout << glm::to_string(treePosition) << std::endl;
                                             return;
                                         }
                                     }
@@ -331,7 +336,7 @@ private:
                     player->getAnimateBody()->setActiveAnimation("jumping down", false);
                 }
             }
-            else if (state != PlayerState::air && state != PlayerState::jump_up && state != PlayerState::climbing) {
+            else if (state != PlayerState::air && state != PlayerState::jump_up && state != PlayerState::climbing && state != PlayerState::treeJump) {
                 if (input->getPressKey() == GLFW_MOUSE_BUTTON_LEFT) {
                     if (queueAnim.size() < 3) {
                         queueAnim.push("attack" + queueAnim.size() + 1);
@@ -370,6 +375,9 @@ private:
                 else if (state == PlayerState::dashing){
                     state = PlayerState::walking;
                 }
+            }
+            else if (state == PlayerState::treeJump) {
+                moveToTree(targetTree);
             }
             else {
                 input->getPressKey();
@@ -624,6 +632,10 @@ public:
     ~PlayerMovement() {
         delete rb;
     }
+
+    glm::vec3 getTreePosition() {
+		return treePosition;
+	}
 };
 
 #endif

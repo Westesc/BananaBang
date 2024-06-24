@@ -250,22 +250,12 @@ public:
 
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
 		bool resolved = false;
-		if (second->name.starts_with("Fruit") || second->name.starts_with("branch")) {
+		if (second->name.starts_with("Fruit")) {
 			return;
 		}
 		if (second->name.starts_with("branch")) {
-			if (pm->getState() == PlayerState::climbing || pm->getState() == PlayerState::air || pm->getState() == PlayerState::jump_up || pm->getState() == PlayerState::walking) {
-				if ((second->getTransform()->localPosition - first->getTransform()->predictedPosition).y <= 0.0f) {
-					std::cout <<"AAAAAAAAAAA" << std::endl;
-					first->getTransform()->predictedPosition.y = second->getTransform()->localPosition.y * second->getTransform()->localScale.y + first->capsuleCollider->height * first->getTransform()->localScale.y;
-					first->velocity.y = 0.0f;
-					pm->changeState(PlayerState::walking);
-					resolved = true;
-				}
-			}
-			else {
-				first->localTransform->predictedPosition.y = first->localTransform->localPosition.y;
-				resolved = true;
+			if (first->name == "player" && (pm->getState() == PlayerState::climbing || pm->getState() == PlayerState::tree_attack || pm->getState() == PlayerState::treeJump)) {
+				return;
 			}
 		}
 		/*else if (first->velocity.y > 0 && second->name.starts_with("tree")) {
@@ -280,6 +270,9 @@ public:
 		else if (!(second->name.starts_with("branch"))) {
 			if (first->name.starts_with("player") && pm->getState() != PlayerState::climbing) {
 				if (second->name.starts_with("tree") || second->name.starts_with("log")) {
+					if (pm->getState() == PlayerState::treeJump && pm->getTreePosition() == second->getTransform()->getLocalPosition()) {
+						return;
+					}
 					glm::vec2 toObstacle = glm::vec2(first->getTransform()->localPosition.x, first->getTransform()->localPosition.z) - glm::vec2(second->getTransform()->localPosition.x, second->getTransform()->localPosition.z);
 					//calculate if player is facing the obstacle
 					if (glm::dot(glm::normalize(glm::vec2(first->velocity.x, first->velocity.z)), glm::normalize(-toObstacle)) > 0.5f) {

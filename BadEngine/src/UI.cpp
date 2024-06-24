@@ -151,7 +151,7 @@ void UI::loadPlane()
 
 void UI::addShader(Shader* shader) {
 	this->shader = shader;
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(Window::windowWidth), 0.0f, static_cast<float>(Window::windowHeight), -1.0f, 1.0f);
+	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(windowGlobals.windowWidth), 0.0f, static_cast<float>(windowGlobals.windowHeight), -1.0f, 1.0f);
 	shader->use();
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 }
@@ -296,7 +296,7 @@ void UI::setTexture(std::string path)
 void UI::update(Transform* transform) {
 	if (input != nullptr) {
 		glm::vec2 mousePosition = input->getMousePositionOnScreen();
-		mousePosition.y = Window::windowHeight - mousePosition.y;
+		mousePosition.y = windowGlobals.windowHeight - mousePosition.y;
 		//printf("x: %.f	y: %.f", mousePosition.x, mousePosition.y);
 		if (input->checkKey(0)) {
 			if (mousePosition.x > transform->getLocalPosition().x && mousePosition.x < transform->getLocalPosition().x + size.x * transform->getLocalScale().x) {

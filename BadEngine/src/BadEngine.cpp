@@ -144,11 +144,11 @@ void generate() {
 	loadingui->addShader(LogoShader);
 	loadingui->input = input;
 	loading->uiComponent = loadingui;
-	loading->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.25f, 0.0f / 2, 0.f);
+	loading->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.25f, 0.0f / 2, 0.f);
 	loading->localTransform->localScale = glm::vec3(10.f, 10.f, 1.f);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	loading->Draw(camera->getViewMatrix(), glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 5000.f));
+	loading->Draw(camera->getViewMatrix(), glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(windowGlobals.windowWidth) / windowGlobals.windowHeight, 1.f, 5000.f));
 
 	glfwSwapBuffers(window);
 	glfwPollEvents();
@@ -382,7 +382,7 @@ void generate() {
 	UI* ui2 = new UI(plane);
 	ui2->addShader(UIShader);
 	ui2->setTexture("res/serce5.png");
-	HPcount->localTransform->localPosition = glm::vec3(0, Window::windowHeight - 100.0f, 0.f);
+	HPcount->localTransform->localPosition = glm::vec3(0, windowGlobals.windowHeight - 100.0f, 0.f);
 	HPcount->uiComponent = ui2;
 
 	GameObject* dashTime = new GameObject("DashTime");
@@ -396,7 +396,7 @@ void generate() {
 	UI* uiBananaPeelCount = new UI(writing);
 	uiBananaPeelCount->addShader(UIShader);
 	uiBananaPeelCount->setText("Banany: 1");
-	bananaPeelCount->localTransform->localPosition = glm::vec3(Window::windowWidth - 650.0f, 50.f, 0.f);
+	bananaPeelCount->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth - 650.0f, 50.f, 0.f);
 	bananaPeelCount->uiComponent = uiBananaPeelCount;
 
 	GameObject* treeAttackTime = new GameObject("TreeAttack");
@@ -411,7 +411,7 @@ void generate() {
 	UI* uiCount = new UI(writing);
 	uiCount->addShader(UIShader);
 	uiCount->setText("Pozostali drwale : " + std::to_string(reqEnemies));
-	enemyCount->localTransform->localPosition = glm::vec3(0, Window::windowHeight - 300.0f, 0.f);
+	enemyCount->localTransform->localPosition = glm::vec3(0, windowGlobals.windowHeight - 300.0f, 0.f);
 	enemyCount->uiComponent = uiCount;
 
 	for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
@@ -561,8 +561,8 @@ void showTutorial() {
 	sm->getActiveScene()->addObject(tutorial6);
 	sm->getActiveScene()->addObject(tutorial7);
 	sm->getActiveScene()->addObject(backButton);
-	playButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 300.0f, 0.0f);
-	backButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 200.0f, 0.0f);
+	playButton->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f, 300.0f, 0.0f);
+	backButton->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f, 200.0f, 0.0f);
 }
 
 void showMain() {
@@ -571,7 +571,7 @@ void showMain() {
 	sm->getActiveScene()->addObject(playButton);
 	sm->getActiveScene()->addObject(tutorialButton);
 	sm->getActiveScene()->addObject(acknowledgmentsButton);
-	playButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f, 0.0f);
+	playButton->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight * 0.5f, 0.0f);
 	delay(100);
 }
 
@@ -583,7 +583,7 @@ void showAcknowledgments() {
 	UI* acknowledgmentsui = new UI(writing);
 	acknowledgmentsui->addShader(LogoShader);
 	acknowledgmentsui->setText("Splash screen na podstawie obrazu ze zrodla");
-	acknowledgments->localTransform->localPosition = glm::vec3(100.0f, Window::windowHeight - 100.0f, 0.0f);
+	acknowledgments->localTransform->localPosition = glm::vec3(100.0f, windowGlobals.windowHeight - 100.0f, 0.0f);
 	acknowledgments->uiComponent = acknowledgmentsui;
 	sm->getActiveScene()->addObject(acknowledgments);
 
@@ -591,7 +591,7 @@ void showAcknowledgments() {
 	UI* acknowledgmentsui2 = new UI(writing);
 	acknowledgmentsui2->addShader(LogoShader);
 	acknowledgmentsui2->setText("www.aipromptsdirectory.com/wp-content/uploads/2023/11/");
-	acknowledgments2->localTransform->localPosition = glm::vec3(100.0f, Window::windowHeight - 150.0f, 0.0f);
+	acknowledgments2->localTransform->localPosition = glm::vec3(100.0f, windowGlobals.windowHeight - 150.0f, 0.0f);
 	acknowledgments2->uiComponent = acknowledgmentsui2;
 	sm->getActiveScene()->addObject(acknowledgments2);
 
@@ -599,7 +599,7 @@ void showAcknowledgments() {
 	UI* acknowledgmentsui3 = new UI(writing);
 	acknowledgmentsui3->addShader(LogoShader);
 	acknowledgmentsui3->setText("hard_drive_white_background_simple_colored_sketch_-_7c0b4171-90ce");
-	acknowledgments3->localTransform->localPosition = glm::vec3(70.0f, Window::windowHeight - 200.0f, 0.0f);
+	acknowledgments3->localTransform->localPosition = glm::vec3(70.0f, windowGlobals.windowHeight - 200.0f, 0.0f);
 	acknowledgments3->uiComponent = acknowledgmentsui3;
 	sm->getActiveScene()->addObject(acknowledgments3);
 
@@ -607,7 +607,7 @@ void showAcknowledgments() {
 	UI* acknowledgmentsui4 = new UI(writing);
 	acknowledgmentsui4->addShader(LogoShader);
 	acknowledgmentsui4->setText("-4a92-8351-cb652420715b_0.webp");
-	acknowledgments4->localTransform->localPosition = glm::vec3(100.0f, Window::windowHeight - 250.0f, 0.0f);
+	acknowledgments4->localTransform->localPosition = glm::vec3(100.0f, windowGlobals.windowHeight - 250.0f, 0.0f);
 	acknowledgments4->uiComponent = acknowledgmentsui4;
 	sm->getActiveScene()->addObject(acknowledgments4);
 
@@ -615,7 +615,7 @@ void showAcknowledgments() {
 	UI* acknowledgmentsui5 = new UI(writing);
 	acknowledgmentsui5->addShader(LogoShader);
 	acknowledgmentsui5->setText("tlo ekranu głownego wygenerowano korzystajac z deepai.org");
-	acknowledgments5->localTransform->localPosition = glm::vec3(20.0f, Window::windowHeight - 300.0f, 0.0f);
+	acknowledgments5->localTransform->localPosition = glm::vec3(20.0f, windowGlobals.windowHeight - 300.0f, 0.0f);
 	acknowledgments5->uiComponent = acknowledgmentsui5;
 	//sm->getActiveScene()->addObject(acknowledgments5);
 	sm->getActiveScene()->addObject(backButton);
@@ -627,8 +627,12 @@ void Start() {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	windowGlobals.windowHeight = mode->height;
+	windowGlobals.windowWidth = mode->width;
 
-	window = glfwCreateWindow(Window::windowWidth, Window::windowHeight, "Primal Guardian", nullptr, nullptr);
+	window = glfwCreateWindow(windowGlobals.windowWidth, windowGlobals.windowHeight, "Primal Guardian", monitor, nullptr);
 	if (!window) exit(1);
 
 	glfwMakeContextCurrent(window);
@@ -705,11 +709,11 @@ int main() {
 	logoui->addShader(LogoShader);
 	logoui->input = input;
 	logo->uiComponent = logoui;
-	logo->localTransform->localPosition = glm::vec3(Window::windowWidth *0.25f, 0.0f / 2, 0.f);
+	logo->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth *0.25f, 0.0f / 2, 0.f);
 	logo->localTransform->localScale = glm::vec3(10.f, 10.f, 1.f);
 	glClearColor(1.0f, 1.0f, 1.0f, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	logo->Draw(camera->getViewMatrix(), glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 5000.f));
+	logo->Draw(camera->getViewMatrix(), glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(windowGlobals.windowWidth) / windowGlobals.windowHeight, 1.f, 5000.f));
 	
 	glfwSwapBuffers(window);
 	glfwPollEvents();
@@ -876,7 +880,7 @@ int main() {
 	tutorial1 = new GameObject("tutorial1");
 	UI* tutorialui1 = new UI(writing);
 	tutorialui1->addShader(LogoShader);
-	tutorial1->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 100.f, 0.0f);
+	tutorial1->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight - 100.f, 0.0f);
 	tutorialui1->setText("WASD - ruch");
 	tutorial1->uiComponent = tutorialui1;
 	sm->getActiveScene()->addObject(tutorial1);
@@ -884,7 +888,7 @@ int main() {
 	tutorial2 = new GameObject("tutorial2");
 	UI* tutorialui2 = new UI(writing);
 	tutorialui2->addShader(LogoShader);
-	tutorial2->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 150.f, 0.0f);
+	tutorial2->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight - 150.f, 0.0f);
 	tutorialui2->setText("spacja - skok");
 	tutorial2->uiComponent = tutorialui2;
 	sm->getActiveScene()->addObject(tutorial2);
@@ -892,7 +896,7 @@ int main() {
 	tutorial3 = new GameObject("tutorial3");
 	UI* tutorialui3 = new UI(writing);
 	tutorialui3->addShader(LogoShader);
-	tutorial3->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 200.f, 0.0f);
+	tutorial3->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight - 200.f, 0.0f);
 	tutorialui3->setText("lewy przycisk myszy - atak");
 	tutorial3->uiComponent = tutorialui3;
 	sm->getActiveScene()->addObject(tutorial3);
@@ -900,7 +904,7 @@ int main() {
 	tutorial4 = new GameObject("tutorial4");
 	UI* tutorialui4 = new UI(writing);
 	tutorialui4->addShader(LogoShader);
-	tutorial4->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 250.f, 0.0f);
+	tutorial4->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight - 250.f, 0.0f);
 	tutorialui4->setText("R przy drzewie - wspinaczka");
 	tutorial4->uiComponent = tutorialui4;
 	//sm->getActiveScene()->addObject(tutorial4);
@@ -908,7 +912,7 @@ int main() {
 	tutorial5 = new GameObject("tutorial5");
 	UI* tutorialui5 = new UI(writing);
 	tutorialui5->addShader(LogoShader);
-	tutorial5->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 300.f, 0.0f);
+	tutorial5->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight - 300.f, 0.0f);
 	tutorialui5->setText("T przy drwalach - prowokacja");
 	tutorial5->uiComponent = tutorialui5;
 	sm->getActiveScene()->addObject(tutorial5);
@@ -916,7 +920,7 @@ int main() {
 	tutorial6 = new GameObject("tutorial6");
 	UI* tutorialui6 = new UI(writing);
 	tutorialui6->addShader(LogoShader);
-	tutorial6->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 350.f, 0.0f);
+	tutorial6->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight - 350.f, 0.0f);
 	tutorialui6->setText("Pokonuj drwali dopoki nie uciekna!");
 	tutorial6->uiComponent = tutorialui6;
 	sm->getActiveScene()->addObject(tutorial6);
@@ -924,7 +928,7 @@ int main() {
 	tutorial7 = new GameObject("tutorial7");
 	UI* tutorialui7 = new UI(writing);
 	tutorialui7->addShader(LogoShader);
-	tutorial7->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight - 400.f, 0.0f);
+	tutorial7->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight - 400.f, 0.0f);
 	tutorialui7->setText("Korzystaj z drzew, aby zyskac przewage!");
 	tutorial7->uiComponent = tutorialui7;
 	sm->getActiveScene()->addObject(tutorial7);
@@ -942,7 +946,7 @@ int main() {
 	playui->addShader(LogoShader);
 	playui->setTexture("res/button.png");
 	playui->setSize(glm::vec2(150.0f, 60.f));
-	playButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f, 0.0f);
+	playButton->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight * 0.5f, 0.0f);
 	playui->input = input;
 	playui->onClick = generate;
 	playui->setText("PLAY");
@@ -954,7 +958,7 @@ int main() {
 	tutorialbuttonui->addShader(LogoShader);
 	tutorialbuttonui->setTexture("res/button.png");
 	tutorialbuttonui->setSize(glm::vec2(260.0f, 60.f));
-	tutorialButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 100.0f, 0.0f);
+	tutorialButton->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight * 0.5f - 100.0f, 0.0f);
 	tutorialbuttonui->input = input;
 	tutorialbuttonui->onClick = showTutorial;
 	tutorialbuttonui->setText("TUTORIAL");
@@ -966,7 +970,7 @@ int main() {
 	backbuttonui->addShader(LogoShader);
 	backbuttonui->setTexture("res/button.png");
 	backbuttonui->setSize(glm::vec2(250.0f, 60.f));
-	backButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f, 100.0f, 0.0f);
+	backButton->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f, 100.0f, 0.0f);
 	backbuttonui->input = input;
 	backbuttonui->onClick = showMain;
 	backbuttonui->setText("BACK");
@@ -977,7 +981,7 @@ int main() {
 	acknowledgmentsButtonui->addShader(LogoShader);
 	acknowledgmentsButtonui->setTexture("res/button.png");
 	acknowledgmentsButtonui->setSize(glm::vec2(520.0f, 60.f));
-	acknowledgmentsButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 200.0f, 0.0f);
+	acknowledgmentsButton->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight * 0.5f - 200.0f, 0.0f);
 	acknowledgmentsButtonui->input = input;
 	acknowledgmentsButtonui->onClick = showAcknowledgments;
 	acknowledgmentsButtonui->setText("ACKNOWLEDGMENTS");
@@ -991,14 +995,14 @@ int main() {
 	loseScreenUI->addShader(LogoShader);
 	loseScreenUI->setText("Nie udało ci się powstrzymać wycinki lasu");
 	loseScreen->uiComponent = loseScreenUI;
-	loseScreen->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 100.0f, Window::windowHeight * 0.5f, 0.0f);
+	loseScreen->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.0f, windowGlobals.windowHeight * 0.5f, 0.0f);
 	LoseScene->addObject(loseScreen);
 	GameObject* returnButton = new GameObject("returnButton");
 	UI* returnButtonUI = new UI(button);
 	returnButtonUI->addShader(LogoShader);
 	returnButtonUI->setTexture("res/button.png");
 	returnButtonUI->setSize(glm::vec2(200.0f, 60.f));
-	returnButton->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 200.0f, Window::windowHeight * 0.5f - 100.0f, 0.0f);
+	returnButton->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight * 0.5f - 100.0f, 0.0f);
 	returnButtonUI->input = input;
 	returnButtonUI->onClick = showMain;
 	returnButtonUI->setText("RETURN");
@@ -1011,7 +1015,7 @@ int main() {
 	winScreenUI->addShader(LogoShader);
 	winScreenUI->setText("Drwale pokonani");
 	winScreen->uiComponent = winScreenUI;
-	winScreen->localTransform->localPosition = glm::vec3(Window::windowWidth * 0.5f - 100.0f, Window::windowHeight * 0.5f, 0.0f);
+	winScreen->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.0f, windowGlobals.windowHeight * 0.5f, 0.0f);
 	WinScene->addObject(winScreen);
 	WinScene->addObject(returnButton);
 
@@ -1058,8 +1062,8 @@ int main() {
 		//animacje
 		//animPlayer->UpdateAnimation(deltaTime);
 
-		P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(Window::windowWidth) / Window::windowHeight, 1.f, 5000.f);
-		frustumPlanes = Plane::calculateFrustumPlanes(glm::perspective(glm::radians(120.f), static_cast<float>(Window::windowWidth) / Window::windowHeight, 0.1f, 500.f) * V);
+		P = glm::perspective(glm::radians(input->GetZoom()), static_cast<float>(windowGlobals.windowWidth) / windowGlobals.windowHeight, 1.f, 5000.f);
+		frustumPlanes = Plane::calculateFrustumPlanes(glm::perspective(glm::radians(120.f), static_cast<float>(windowGlobals.windowWidth) / windowGlobals.windowHeight, 0.1f, 500.f) * V);
 
 		if (input->checkAnyKey())
 		{
@@ -1201,6 +1205,7 @@ int main() {
 		lightSpaceMatrix = lightProjection * lightView;
 		// render scene from light's point of view
 		if (shadowsFrameCounter % 2 == 0) {
+			shadowsFrameCounter = 0;
 			RL.depthShader->use();
 			RL.depthShader->setMat4("lightSpaceMatrix", lightSpaceMatrix);
 			RL.depthAnimationShader->use();
@@ -1337,7 +1342,7 @@ int main() {
 
 			sm->getActiveScene()->Draw(RL.depthShader, RL.depthAnimationShader);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glViewport(0, 0, Window::windowWidth, Window::windowHeight);
+			glViewport(0, 0, windowGlobals.windowWidth, windowGlobals.windowHeight);
 			RL.planeSectormodel->AddTexture(depthMap, "depthMap");
 			RL.treetrunk.get()->AddTexture(depthMap, "depthMap");
 			RL.treelog.get()->AddTexture(depthMap, "depthMap");

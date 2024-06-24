@@ -157,7 +157,14 @@ private:
     void climbMove(float deltaTime) {
         static float radius = glm::distance(glm::vec2(player->getTransform()->getLocalPosition().x, player->getTransform()->getLocalPosition().z),
             glm::vec2(treePosition.x, treePosition.z)) - 0.4f;
-        static float angle = std::atan2(player->getTransform()->getLocalPosition().z - treePosition.z, player->getTransform()->getLocalPosition().x - treePosition.x);
+
+        static float angle;
+            glm::vec2 playerTreeVector = glm::normalize(glm::vec2(player->getTransform()->getLocalPosition().x - treePosition.x,
+                player->getTransform()->getLocalPosition().z - treePosition.z));
+            glm::vec2 initialDirection = glm::vec2(1.0f, 0.0f); // Assuming the initial direction is along the x-axis
+
+            angle = std::atan2(playerTreeVector.y, playerTreeVector.x) - std::atan2(initialDirection.y, initialDirection.x);
+        
 
         float speed = direction * glm::pi<float>();
         angle += speed * deltaTime;
@@ -165,7 +172,10 @@ private:
         if (angle > 2 * glm::pi<float>()) {
             angle -= 2 * glm::pi<float>();
         }
-        //std::cout << angle << std::endl;
+        else if (angle < -2 * glm::pi<float>()) {
+            angle += 2 * glm::pi<float>();
+        }
+
         player->getTransform()->localRotation.y = -angle * (180.0 / M_PI) - 90.f;
 
         float x = treePosition.x + radius * std::cos(angle);

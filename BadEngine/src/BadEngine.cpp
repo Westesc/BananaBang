@@ -1,5 +1,4 @@
-﻿
-#include <stdio.h>
+﻿#include <stdio.h>
 #include<GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <string>
@@ -42,6 +41,7 @@
 #include "../lib/AudioManager.h"
 #include "../lib/ResourceLoader.h"
 #include "../lib/Frustum.h"
+#include "../lib/AbilityManager.h"
 
 bool test = false;
 bool frustumTest = false;
@@ -80,6 +80,7 @@ CollisionManager cm = CollisionManager(200, 40);
 Pathfinder* pathfinder = new Pathfinder();
 PBDManager* pbd = new PBDManager(10);
 EnemyStateManager* enemyManager;
+AbilityManager* ability;
 ResourceLoader RL;
 std::vector<Transform*> transformsTree;
 std::vector<Transform*> transformsLog;
@@ -384,6 +385,21 @@ void generate() {
 	HPcount->localTransform->localPosition = glm::vec3(0, Window::windowHeight - 100.0f, 0.f);
 	HPcount->uiComponent = ui2;
 
+	GameObject* dashTime = new GameObject("DashTime");
+	UI* uiDash = new UI(writing);
+	uiDash->addShader(UIShader);
+	uiDash->setText("Dash: 0");
+	dashTime->localTransform->localPosition = glm::vec3(300.f, 50.f, 0.f);
+	dashTime->uiComponent = uiDash;
+
+	GameObject* treeAttackTime = new GameObject("TreeAttack");
+	UI* uiTreeAttack = new UI(writing);
+	uiTreeAttack->addShader(UIShader);
+	uiTreeAttack->setText("Atak z drzewa: 0");
+	treeAttackTime->localTransform->localPosition = glm::vec3(550.f, 50.f, 0.f);
+	treeAttackTime->uiComponent = uiTreeAttack;
+
+
 	GameObject* enemyCount = new GameObject("Enemycount");
 	UI* uiCount = new UI(writing);
 	uiCount->addShader(UIShader);
@@ -404,6 +420,9 @@ void generate() {
 		sm->getActiveScene()->gameObjects.at(i)->lightSetting(camera->transform->getLocalPosition(), lightPos, glm::vec3(1.0f));
 		sm->getActiveScene()->gameObjects.at(i)->shadowSetting(lightSpaceMatrix);
 	}
+
+	ability->AddAbility("tree attack", 11.f);
+	ability->AddAbility("dash", 11.f);
 
 	GameObject* anim = new GameObject("player");
 	//animodel->SetShader(shaderAnimation);
@@ -504,6 +523,9 @@ void generate() {
 	//sm->getActiveScene()->addObject(Button);
 	sm->getActiveScene()->addObject(HPcount);
 	sm->getActiveScene()->addObject(enemyCount);
+	sm->getActiveScene()->addObject(dashTime);
+	sm->getActiveScene()->addObject(treeAttackTime);
+
 	loaded = true;
 	spawnerTime = 0;
 	sectorSelectorTime = 0;
@@ -618,7 +640,8 @@ void Start() {
 	sm->activeScene = sm->scenes.at(0);
 	input = new Input(window);
 	camera = new Camera(sm);
-	pm = new PlayerMovement(sm, input, camera, tm);
+	ability = new AbilityManager(tm);
+	pm = new PlayerMovement(sm, input, camera, tm, ability);
 }
 
 bool CheckFrustumCollision(const std::array<Plane, 6>& planes, BoundingBox* box) {
@@ -1298,7 +1321,12 @@ int main() {
 				}
 			}
 
-
+			//ability
+			ability->UpdateTime(deltaTime);
+			if (sm->getActiveScene()->findByName("DashTime") && sm->getActiveScene()->findByName("TreeAttack")) {
+				sm->getActiveScene()->findByName("DashTime")->uiComponent->setText("Dash: " + std::to_string(ability->getTimeToRefresh("dash")));
+				sm->getActiveScene()->findByName("TreeAttack")->uiComponent->setText("Atak z drzewa: " + std::to_string(ability->getTimeToRefresh("tree attack")));
+			}
 
 			sm->getActiveScene()->Draw(RL.depthShader, RL.depthAnimationShader);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);

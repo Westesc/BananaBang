@@ -3,6 +3,7 @@
 #include <cmath>
 #include "Transform.h"
 #include "TimeManager.h"
+#include "AbilityManager.h"
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -37,6 +38,7 @@ private:
     RigidBody* rb;
     GameObject* player;
     PlayerMovement* pm = nullptr;
+    AbilityManager* ability;
 
     //animation
     std::queue < std::string > queueAnim;
@@ -73,7 +75,7 @@ private:
     //dash
     float dashSpeed = 25.f;
     float dashDuration = 2000.f; 
-    float currentDashTime = 0.f; 
+    bool isUse = false;
 
     PlayerState state = PlayerState::walking;
     PlayerStateAttack attackState = PlayerStateAttack::none;
@@ -161,7 +163,7 @@ private:
         static float angle;
             glm::vec2 playerTreeVector = glm::normalize(glm::vec2(player->getTransform()->getLocalPosition().x - treePosition.x,
                 player->getTransform()->getLocalPosition().z - treePosition.z));
-            glm::vec2 initialDirection = glm::vec2(1.0f, 0.0f); // Assuming the initial direction is along the x-axis
+            glm::vec2 initialDirection = glm::vec2(1.0f, 0.0f);
 
             angle = std::atan2(playerTreeVector.y, playerTreeVector.x) - std::atan2(initialDirection.y, initialDirection.x);
         
@@ -358,7 +360,6 @@ private:
                 }
                 else if (input->checkKey(GLFW_KEY_Z) /* && state != PlayerState::dashing*/) {
                     state = PlayerState::dashing;
-                    currentDashTime = 0.f;
                 }
                 else if (state == PlayerState::dashing){
                     state = PlayerState::walking;
@@ -394,11 +395,12 @@ private:
 
 public:
 
-    PlayerMovement(SceneManager* sm, Input* input, Camera* camera, TimeManager* tm) {
+    PlayerMovement(SceneManager* sm, Input* input, Camera* camera, TimeManager* tm, AbilityManager* ab) {
         this->sm = sm;
         this->input = input;
         this->camera = camera;
         this->tm = tm;
+        this->ability = ab;
         rb = new RigidBody("player", sm, tm);
         player = sm->getActiveScene()->findByName("player");
     }
@@ -498,7 +500,7 @@ public:
         }
         else if (state == PlayerState::tree_attack) {
             //Jakiœ warunek co bêdzie sprawdza³ czy œcie¿ka jest git
-            if (closestEnemy != nullptr) {
+            if (closestEnemy != nullptr && ability->CheckUseCoolDown("tree attack")) {
                 if (closestEnemy->getTransform()) {
                     rotatePlayerTowards(closestEnemy->getTransform()->getLocalPosition());
 
@@ -548,7 +550,7 @@ public:
             //}
         }
         else if (state == PlayerState::dashing) {
-            if (currentDashTime < dashDuration) {
+            if (ability->CheckUseCoolDown("dash", isUse) || isUse) {
                 player->getAnimateBody()->setActiveAnimation("dash");
                 useGravity();
                 MovePlayer(deltaTime);
@@ -558,14 +560,20 @@ public:
                 dashDirection.x = sin(rotate);
                 dashDirection.z = cos(rotate);
                 dashDirection.y = 0;
-                currentDashTime += deltaTime;
                 //std::cout << "dush" << std::endl;
                 player->velocity = glm::normalize(dashDirection) * dashSpeed;
+                isUse = true;
             }
             else {
+                isUse = false;
                 //std::cout << "nie dush" << std::endl;
                 state = PlayerState::walking;
             }
+        }
+        std::cout<<ability->getTimeToRefresh("dash")<<std::endl;
+
+        if (state != PlayerState::dashing) {
+            isUse = false;
         }
         if (state != PlayerState::attack1) {
             while (!queueAnim.empty()) {

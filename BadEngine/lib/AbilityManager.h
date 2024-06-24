@@ -18,12 +18,12 @@ public:
 	//	int count;
 	//};
 
-    int bananaCount;
-    int limitBanana;
+    int bananaCount = 0;
+    int limitBanana = 4;
 	std::vector<AbalityCoolDown> abilityCoolDown;
 	//std::vector<AbilityCount> AbilityCount;
 
-	AbilityManager(TimeManeger* tm) {
+	AbilityManager(TimeManager* tm) {
 		this->tm = tm;
 	};
 
@@ -41,32 +41,32 @@ public:
         return false;
     }
 
-	void AddAbility(std::name, int count) {
-		AbilityCount Ac;
-		Ac.name = name;
-		Ac.count = count;
-		abilityCounts.push_back(ac);
-	}
+	//void AddAbility(std::string name, int count) {
+	//	AbilityCount Ac;
+	//	Ac.name = name;
+	//	Ac.count = count;
+	//	abilityCounts.push_back(ac);
+	//}
 
-	void AddAbility(std::name,float coolDownTime) {
+	void AddAbility(std::string name,float coolDownTime) {
 		AbalityCoolDown Acd;
 		Acd.name = name;
 		Acd.coolDownTime = coolDownTime;
 		Acd.timeToRefresh = 0.f;
-		abilityCoolDowns.push_back(acd);
+        abilityCoolDown.push_back(Acd);
 	}
 
-    void AddCount(const std::string& name, int count) {
-        for (auto& ability : abilityCounts) {
-            if (ability.name == name) {
-                ability.count += count;
-                return;
-            }
-        }
-    }
+    //void AddCount(const std::string& name, int count) {
+    //    for (auto& ability : abilityCounts) {
+    //        if (ability.name == name) {
+    //            ability.count += count;
+    //            return;
+    //        }
+    //    }
+    //}
 
     void UseCoolDownAbility(const std::string& name, float time) {
-        for (auto& ability : abilityCoolDowns) {
+        for (auto& ability : abilityCoolDown) {
             if (ability.name == name) {
                 if (ability.timeToRefresh <= 0) {
                     ability.timeToRefresh = ability.coolDownTime;
@@ -76,19 +76,58 @@ public:
         }
     }
 
-    int GetCount(const std::string& name) {
-        for (const auto& ability : abilityCounts) {
+    bool CheckUseCoolDown(std::string name) {
+        for (auto& ability : abilityCoolDown) {
             if (ability.name == name) {
-                return ability.count;
+                if (ability.timeToRefresh <= 0) {
+                    ability.timeToRefresh = ability.coolDownTime;
+                    return true;
+                }
+                return false;
             }
         }
-        return 0; 
+        return false;
     }
 
-    void UpdateTime() {
-        for (auto& ability : abilityCoolDowns) {
+    bool CheckUseCoolDown(std::string name, bool isUse) {
+        for (auto& ability : abilityCoolDown) {
+            if (ability.name == name) {
+                if (ability.timeToRefresh <= 0 || isUse) {
+                    ability.timeToRefresh = ability.coolDownTime;
+                    return true;
+                }
+                return false;
+            }
+        }
+        return false;
+    }
+
+    //int GetCount(const std::string& name) {
+    //    for (const auto& ability : abilityCounts) {
+    //        if (ability.name == name) {
+    //            return ability.count;
+    //        }
+    //    }
+    //    return 0; 
+    //}
+
+    int getTimeToRefresh(std::string name) {
+        for (auto& ability : abilityCoolDown) {
+            if (ability.name == name) {
+                return static_cast<int>(ability.timeToRefresh);
+            }
+        }
+        return -1;
+    }
+
+    void UpdateTime(float deltaTime) {
+        deltaTime *= 2;
+        for (auto& ability : abilityCoolDown) {
             if (ability.timeToRefresh > 0) {
-                ability.timeToRefresh -= tm->getFramePerSeconds();
+                ability.timeToRefresh -= deltaTime;
+            }
+            else if (ability.timeToRefresh < 0) {
+                ability.timeToRefresh = 0.f;
             }
         }
     }

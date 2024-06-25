@@ -632,7 +632,8 @@ void Start() {
 	windowGlobals.windowHeight = mode->height;
 	windowGlobals.windowWidth = mode->width;
 
-	window = glfwCreateWindow(windowGlobals.windowWidth, windowGlobals.windowHeight, "Primal Guardian", monitor, nullptr);
+	//window = glfwCreateWindow(windowGlobals.windowWidth, windowGlobals.windowHeight, "Primal Guardian", monitor, nullptr);
+	window = glfwCreateWindow(windowGlobals.windowWidth, windowGlobals.windowHeight, "Primal Guardian", NULL, nullptr);
 	if (!window) exit(1);
 
 	glfwMakeContextCurrent(window);
@@ -938,7 +939,7 @@ int main() {
 	titleui->addShader(LogoShader);
 	titleui->setTexture("res/junglewall.png");
 	titlescreen->uiComponent = titleui;
-	titlescreen->localTransform->localScale = glm::vec3(18.f, 10.f, 1.f);
+	titlescreen->localTransform->localScale = glm::vec3(22.f, 12.f, 1.f);
 	sm->getActiveScene()->addObject(titlescreen);
 
 	playButton = new GameObject("playButton");

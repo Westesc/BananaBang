@@ -87,6 +87,9 @@ private:
 
     bool wasSpacePressed = false;
 
+    float treeJumpCD = 1.0f;
+    float treeJumpTime = 1.0f;
+
     void useGravity() {
         if (player->getTransform()->getLocalPosition().y >  groundPosition) {
             rb->upwardsSpeed = -0.1f;
@@ -155,7 +158,7 @@ private:
 
     void moveToTree(glm::vec3 treePos) {
         glm::vec3 movevec = treePos - player->getTransform()->getLocalPosition();
-        float speed = 15.f;
+        float speed = 10.f;
         player->velocity.x = movevec.x * speed;
         player->velocity.z = movevec.z * speed;
         targetTree = treePos;
@@ -318,10 +321,11 @@ private:
                                 if (tree->name.starts_with("tree")) {
                                     GameObject* log = tree->children.at(0);
                                     if (log->getTransform()->localPosition != treePosition) {
-                                        if (glm::distance(glm::vec2(player->getTransform()->localPosition.x, player->getTransform()->localPosition.z), glm::vec2(log->getTransform()->localPosition.x, log->getTransform()->localPosition.z)) < 10.0f) {
+                                        if (glm::distance(glm::vec2(player->getTransform()->localPosition.x, player->getTransform()->localPosition.z), glm::vec2(log->getTransform()->localPosition.x, log->getTransform()->localPosition.z)) < 15.0f && treeJumpTime >= treeJumpCD) {
                                             state = PlayerState::treeJump;
                                             player->getAnimateBody()->setActiveAnimation("jumping up", true);
                                             moveToTree(log->getTransform()->localPosition);
+                                            treeJumpTime = 0.0f;
                                             //std::cout << glm::to_string(player->getTransform()->localPosition) << std::endl;
                                             //std::cout << glm::to_string(treePosition) << std::endl;
                                             return;
@@ -396,7 +400,7 @@ private:
             isMove = false;
             isPressE = false;
         }
-        if (player->getTransform()->getLocalPosition().y < groundPosition + 1.5f && state == PlayerState::air) {
+        if (player->getTransform()->getLocalPosition().y < groundPosition + 1.5f && (state == PlayerState::air || state == PlayerState::treeJump)) {
             state = PlayerState::walking;
             player->getAnimateBody()->setActiveAnimation("standing");
             //player->getTransform()->localPosition.y = groundPosition;
@@ -429,6 +433,7 @@ public:
         //std::cout << sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y << std::endl;
         this->deltaTime2 = deltaTime2;
         PlayerState prevState = state;
+        treeJumpTime += deltaTime;
         checkState();
         if (state == PlayerState::walking) {
             useGravity();

@@ -18,7 +18,7 @@ public:
 	//	int count;
 	//};
 
-    int bananaCount = 4;
+    int bananaCount = 1;
     int limitBanana = 4;
 	std::vector<AbalityCoolDown> abilityCoolDown;
 	//std::vector<AbilityCount> AbilityCount;
@@ -91,7 +91,10 @@ public:
     bool CheckCoolDown(std::string name) {
         for (auto& ability : abilityCoolDown) {
             if (ability.name == name) {
-                 return true;
+                if (ability.timeToRefresh <= 0) {
+                    return true;
+                }
+                return false;
             }
         }
         return false;

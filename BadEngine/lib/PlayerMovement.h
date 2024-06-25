@@ -535,16 +535,19 @@ public:
                     enemyPosition.y += 1.0f;
                     glm::vec3 direction = glm::normalize(enemyPosition - currentPosition);
 
-                    float speed = 1.5f;
-                    direction.y -= 0.05f;
+                    float speed = 1.0f;
                     glm::vec3 velocity = direction * speed;
 
                     player->velocity = velocity / deltaTime;
                     player->children.at(0)->active = true;
                     player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
+                    if (glm::distance(enemyPosition, currentPosition) < 0.05) {
+                        ability->UseCoolDownAbility("tree attack");
+                        state = PlayerState::walking;
+                        player->children.at(0)->active = false;
+                    }
                 }
                 if (groundPosition + 3.5f > player->getTransform()->getLocalPosition().y || player->getAnimateBody()->isPlay() == false) {
-                    std::cout << "tutaj";
                     ability->UseCoolDownAbility("tree attack");
                     state = PlayerState::walking;
                     player->children.at(0)->active = false;

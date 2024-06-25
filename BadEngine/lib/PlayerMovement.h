@@ -75,9 +75,13 @@ private:
     Enemy* closestEnemy;
 
     //dash
-    float dashSpeed = 25.f;
+    float dashSpeed = 7.f;
     float dashDuration = 2000.f; 
     bool isUse = false;
+    bool initialPhase = true;
+    bool finalPhase = false;
+    float dashStartTime = 0.0f;
+    float elapsedTime = 0.0f;
 
     //banana
     bool isPressE = false;
@@ -374,8 +378,11 @@ private:
                 else if (state == PlayerState::sprint) {
                     state = PlayerState::walking;
                 }
-                else if (input->checkKey(GLFW_KEY_Z) /* && state != PlayerState::dashing*/) {
-                    state = PlayerState::dashing;
+                else if (input->checkKey(GLFW_KEY_Z)) {
+                    if (ability->CheckUseCoolDown("dash", isUse)) {
+                        state = PlayerState::dashing;
+                        isUse = true;
+                    }
                 }
                 else if (state == PlayerState::dashing){
                     state = PlayerState::walking;
@@ -595,24 +602,64 @@ public:
             //}
         }
         else if (state == PlayerState::dashing) {
-            if (ability->CheckUseCoolDown("dash", isUse) || isUse) {
-                player->getAnimateBody()->setActiveAnimation("dash");
-                useGravity();
-                MovePlayer(deltaTime);
-                
-                float rotate = glm::radians(player->getTransform()->getLocalRotation().y);
-                glm::vec3 dashDirection;
-                dashDirection.x = sin(rotate);
-                dashDirection.z = cos(rotate);
-                dashDirection.y = 0;
-                //std::cout << "dush" << std::endl;
-                player->velocity = glm::normalize(dashDirection) * dashSpeed;
+            if (isUse) {
+                elapsedTime += deltaTime;
+
+                if (initialPhase) {
+                    player->getAnimateBody()->setActiveAnimation("dash");
+                    useGravity();
+                    MovePlayer(deltaTime);
+
+                    float rotate = glm::radians(player->getTransform()->getLocalRotation().y);
+                    glm::vec3 dashDirection;
+                    dashDirection.x = sin(rotate);
+                    dashDirection.z = cos(rotate);
+                    dashDirection.y = 0;
+
+                    player->velocity = glm::normalize(dashDirection) * (dashSpeed * 0.5f) / deltaTime; 
+
+                    if (elapsedTime > 0.3f) {
+                        initialPhase = false;
+                        finalPhase = false;
+                    }
+                }
+                else if (!finalPhase) {
+                    glm::vec3 startPosition = player->getTransform()->getLocalPosition();
+                    float rotate = glm::radians(player->getTransform()->getLocalRotation().y);
+                    glm::vec3 dashDirection;
+                    dashDirection.x = sin(rotate);
+                    dashDirection.z = cos(rotate);
+                    dashDirection.y = 0;
+                    glm::vec3 targetPosition = startPosition + glm::normalize(dashDirection) * dashSpeed;
+
+                    player->getTransform()->localPosition = targetPosition;
+
+                    finalPhase = true;
+                }
+                else {
+ 
+                    player->getAnimateBody()->setActiveAnimation("dash");
+                    useGravity();
+                    MovePlayer(deltaTime);
+
+                    float rotate = glm::radians(player->getTransform()->getLocalRotation().y);
+                    glm::vec3 dashDirection;
+                    dashDirection.x = sin(rotate);
+                    dashDirection.z = cos(rotate);
+                    dashDirection.y = 0;
+
+                    player->velocity = glm::normalize(dashDirection) * (dashSpeed * 0.5f) / deltaTime;
+
+                    if (elapsedTime > 0.3f) {
+                        player->getAnimateBody()->setActiveAnimation("standing");
+                        state = PlayerState::walking;
+                        isUse = false;
+                        initialPhase = true; 
+                        finalPhase = false; 
+                        elapsedTime = 0.0f;
+                    }
+                }
                 isUse = true;
-            }
-            else {
-                isUse = false;
-                //std::cout << "nie dush" << std::endl;
-                state = PlayerState::walking;
             }
         }
 

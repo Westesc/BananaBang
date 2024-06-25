@@ -1020,6 +1020,16 @@ int main() {
 	WinScene->addObject(winScreen);
 	WinScene->addObject(returnButton);
 
+	Scene* menuScene = new Scene("menuScene");
+	GameObject* menu = new GameObject("menu");
+	UI* menuUi = new UI(writing);
+	menuUi->addShader(LogoShader);
+	menuUi->setText("To jest menu, xd");
+	menu->uiComponent = menuUi;
+	menu->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.0f, windowGlobals.windowHeight * 0.5f, 0.0f);
+	menuScene->addObject(menu);
+	menuScene->addObject(returnButton);
+
 	bool fruitsrenderd = false;
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
@@ -1068,6 +1078,17 @@ int main() {
 
 		if (input->checkAnyKey())
 		{
+			if (input->checkKey(GLFW_KEY_ESCAPE)) {
+				if (gameMode.getMode() == GameMode::Game) {
+					//sm->saveScene("mainLoop");
+					sm->activeScene = menuScene;
+					gameMode.setMode(GameMode::Menu);
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				}
+				else if(gameMode.getMode() == GameMode::Menu){
+					//sm->loadScene("mainLoop");
+				}
+			}
 			if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_1))
 			{
 				gameMode.setMode(GameMode::Debug);

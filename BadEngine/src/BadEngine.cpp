@@ -245,8 +245,8 @@ void generate() {
 					GameObject* fruits = new GameObject("fruit");
 					int branchIndex = losujLiczbe(0, log->children.size()-1);
 					fruits->localTransform->localPosition = log->children.at(branchIndex)->localTransform->localPosition;
-					fruits->localTransform->localPosition.x += log->children.at(branchIndex)->localTransform->localScale.x* 12.0f* sinf(glm::radians(log->children.at(branchIndex)->localTransform->localRotation.y));
-					fruits->localTransform->localPosition.z += log->children.at(branchIndex)->localTransform->localScale.x * 12.0f * cosf(glm::radians(log->children.at(branchIndex)->localTransform->localRotation.y));
+					fruits->localTransform->localPosition.x += log->children.at(branchIndex)->localTransform->localScale.x* 4.0f* sinf(glm::radians(log->children.at(branchIndex)->localTransform->localRotation.y));
+					fruits->localTransform->localPosition.z += log->children.at(branchIndex)->localTransform->localScale.x * 4.0f * cosf(glm::radians(log->children.at(branchIndex)->localTransform->localRotation.y));
 					switch (fruitPool.at(fruitIndex)) {
 					case 0:
 						fruits->name = "FruitBanana";

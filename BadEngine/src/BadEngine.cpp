@@ -521,13 +521,13 @@ void generate() {
 	sm->getActiveScene()->addObject(skydome);
 	sm->getActiveScene()->findByName("skydome")->timeSetting(gameTime / 7, glm::vec2(10, 10));
 
-
-	GameObject* bananaPeelObj = new GameObject("bananaPeelObj");
-	RL.bananaModel2->SetShader(RL.diffuseShader);
-	bananaPeelObj->addModelComponent(RL.bananaModel2);
-	bananaPeelObj->getTransform()->localPosition = glm::vec3(0.f, -10.f, -1.f);
-	bananaPeelObj->getTransform()->localScale = glm::vec3(0.1f);
-	sm->getActiveScene()->addObject(bananaPeelObj);
+	pm->bananaModel = RL.bananaModel2;
+	//GameObject* bananaPeelObj = new GameObject("bananaPeelObj");
+	//RL.bananaModel2->SetShader(RL.diffuseShader);
+	//bananaPeelObj->addModelComponent(RL.bananaModel2);
+	//bananaPeelObj->getTransform()->localPosition = glm::vec3(0.f, -10.f, -1.f);
+	//bananaPeelObj->getTransform()->localScale = glm::vec3(0.1f);
+	//sm->getActiveScene()->addObject(bananaPeelObj);
 
 
 	//sm->getActiveScene()->addObject(Button);

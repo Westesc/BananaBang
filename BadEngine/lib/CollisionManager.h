@@ -268,7 +268,7 @@ public:
 			resolved = true;
 		}
 		else if (!(second->name.starts_with("branch"))) {
-			if (first->name.starts_with("player") && pm->getState() != PlayerState::climbing) {
+			if (first->name.starts_with("player") && pm->getState() != PlayerState::climbing && pm->getState() != PlayerState::tree_attack) {
 				if (second->name.starts_with("tree") || second->name.starts_with("log")) {
 					if (pm->getState() == PlayerState::treeJump && pm->getTreePosition() == second->getTransform()->getLocalPosition()) {
 						return;

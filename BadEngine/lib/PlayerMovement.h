@@ -81,6 +81,7 @@ private:
 
     //banana
     bool isPressE = false;
+    int bananaCount = 0;
 
     PlayerState state = PlayerState::walking;
     PlayerStateAttack attackState = PlayerStateAttack::none;
@@ -523,24 +524,28 @@ public:
         }
         else if (state == PlayerState::tree_attack) {
             //Jakiœ warunek co bêdzie sprawdza³ czy œcie¿ka jest git
-            if (closestEnemy != nullptr && ability->CheckUseCoolDown("tree attack")) {
+            if (closestEnemy != nullptr && ability->CheckCoolDown("tree attack")) {
                 if (closestEnemy->getTransform()) {
                     rotatePlayerTowards(closestEnemy->getTransform()->getLocalPosition());
 
                     player->getAnimateBody()->setActiveAnimation("tree attack", true);
 
                     glm::vec3 currentPosition = player->getTransform()->getLocalPosition();
-                    glm::vec3 direction = glm::normalize(closestEnemy->getTransform()->getLocalPosition() - currentPosition);
+                    glm::vec3 enemyPosition = closestEnemy->getTransform()->getLocalPosition();
+                    enemyPosition.y += 1.0f;
+                    glm::vec3 direction = glm::normalize(enemyPosition - currentPosition);
 
                     float speed = 1.5f;
-                    direction.y -= 0.05;
+                    direction.y -= 0.05f;
                     glm::vec3 velocity = direction * speed;
 
                     player->velocity = velocity / deltaTime;
                     player->children.at(0)->active = true;
                     player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
                 }
-                if (groundPosition + 0.05 > player->getTransform()->getLocalPosition().y) {
+                if (groundPosition + 3.5f > player->getTransform()->getLocalPosition().y || player->getAnimateBody()->isPlay() == false) {
+                    std::cout << "tutaj";
+                    ability->UseCoolDownAbility("tree attack");
                     state = PlayerState::walking;
                     player->children.at(0)->active = false;
                 }
@@ -559,7 +564,15 @@ public:
         else if (state == PlayerState::leave_banana) {
             if (ability->TryGetBanana()) {
                 useGravity();
-                sm->getActiveScene()->findByName("bananaPeelObj")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
+
+                GameObject* bananaPeelObj = new GameObject("bananaPeelObj" + std::to_string(bananaCount));
+                bananaPeelObj->addModelComponent(bananaModel);
+                bananaPeelObj->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.1f, player->getTransform()->getLocalPosition().z);
+                bananaPeelObj->getTransform()->localScale = glm::vec3(0.1f);
+                sm->getActiveScene()->addObject(bananaPeelObj);
+                bananaCount++;
+
+                //sm->getActiveScene()->findByName("bananaPeelObj")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
                 state = PlayerState::walking;
             }
             else {
@@ -609,6 +622,8 @@ public:
             }
         }
     }
+
+    std::shared_ptr<Model> bananaModel;
 
     void setTreePosition(glm::vec3 treePos) {
         treePosition = treePos;

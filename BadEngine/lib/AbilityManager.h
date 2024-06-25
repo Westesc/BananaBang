@@ -77,7 +77,7 @@ public:
     //    }
     //}
 
-    void UseCoolDownAbility(const std::string& name, float time) {
+    void UseCoolDownAbility(const std::string& name) {
         for (auto& ability : abilityCoolDown) {
             if (ability.name == name) {
                 if (ability.timeToRefresh <= 0) {
@@ -86,6 +86,15 @@ public:
                 return;
             }
         }
+    }
+
+    bool CheckCoolDown(std::string name) {
+        for (auto& ability : abilityCoolDown) {
+            if (ability.name == name) {
+                 return true;
+            }
+        }
+        return false;
     }
 
     bool CheckUseCoolDown(std::string name) {

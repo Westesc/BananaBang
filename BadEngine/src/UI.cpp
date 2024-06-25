@@ -156,6 +156,8 @@ void UI::addShader(Shader* shader) {
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 }
 void UI::Draw(Transform* transform) {
+	shader->use();
+	shader->setMat4("model", transform->getMatrix());
 	glDisable(GL_DEPTH_TEST);
 	if (type == plane || type == button) {
 		shader->use();
@@ -165,13 +167,13 @@ void UI::Draw(Transform* transform) {
 		glBindVertexArray(VAO);
 		
 		float vertices[6][4] = {
-				{ transform->localPosition.x,								 transform->localPosition.y + size.y * transform->localScale.y,    0.0f, 0.0f },
-				{ transform->localPosition.x,								 transform->localPosition.y,									0.0f, 1.0f },
-				{ transform->localPosition.x + size.x* transform->localScale.x, transform->localPosition.y,									1.0f, 1.0f },
+				{ 0.f,		 0.f + size.y,  0.0f, 0.0f },
+				{ 0.f,		 0.f,			0.0f, 1.0f },
+				{ 0 + size.x, 0.f,			1.0f, 1.0f },
 
-				{ transform->localPosition.x,								  transform->localPosition.y + size.y * transform->localScale.y,   0.0f, 0.0f },
-				{ transform->localPosition.x + size.x * transform->localScale.x, transform->localPosition.y,									1.0f, 1.0f },
-				{ transform->localPosition.x + size.x * transform->localScale.x, transform->localPosition.y + size.y * transform->localScale.y,   1.0f, 0.0f }
+				{  0.f,			   0.f + size.y,   0.0f, 0.0f },
+				{  0.f + size.x ,  0.f,     		1.0f, 1.0f },
+				{  0.f + size.x ,  0.f + size.y,   1.0f, 0.0f }
 		};
 		glBindTexture(GL_TEXTURE_2D, planeTexture);
 		// update content of VBO memory
@@ -188,7 +190,7 @@ void UI::Draw(Transform* transform) {
 		glUniform3f(glGetUniformLocation(shader->ID, "color"), color.x, color.y, color.z);
 		glActiveTexture(GL_TEXTURE0);
 		glBindVertexArray(VAO);
-		float x = transform->localPosition.x;
+		float x = 0;
 		// iterate through all characters
 		std::string::const_iterator c;
 		float xShift = 0.f;
@@ -222,11 +224,11 @@ void UI::Draw(Transform* transform) {
 		{
 			Character ch = Characters[*c];
 
-			float xpos = x + ch.Bearing.x * transform->localScale.x + xShift;
-			float ypos = transform->localPosition.y - (ch.Size.y - ch.Bearing.y) * transform->localScale.y + yShift;
+			float xpos = x + ch.Bearing.x + xShift;
+			float ypos = 0.f - (ch.Size.y - ch.Bearing.y) + yShift;
 
-			float w = ch.Size.x * transform->localScale.x;
-			float h = ch.Size.y * transform->localScale.y;
+			float w = ch.Size.x ;
+			float h = ch.Size.y ;
 			// update VBO for each character
 			float vertices[6][4] = {
 				{ xpos,     ypos + h,   0.0f, 0.0f },

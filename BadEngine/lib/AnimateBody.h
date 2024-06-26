@@ -39,6 +39,14 @@ class AnimateBody : Component {
 	}
 
 public:
+	AnimateBody* clone(Model *m) {
+		AnimateBody* newAnimateBody = new AnimateBody(m);
+		newAnimateBody->allAnimation = this->allAnimation;
+		newAnimateBody->activeAnimation = this->activeAnimation;
+		Animator* animatorModel = new Animator(allAnimation.back().animation);
+		newAnimateBody->animator = animatorModel;
+		return newAnimateBody;
+	}
 	AnimateBody(Model* m);
 	~AnimateBody();
 

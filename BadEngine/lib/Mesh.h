@@ -376,15 +376,21 @@ public:
     }
     std::vector<glm::mat4> instanceMatrices;
     unsigned int instanceVBO;
+    std::size_t currentBufferSize = 0;
 
     void initInstances(std::vector<Transform*> transforms) {
+        if (glIsBuffer(instanceVBO)) {
+            glDeleteBuffers(1, &instanceVBO);
+        }
         instanceMatrices.clear();
         for (Transform* transform : transforms) {
             instanceMatrices.push_back(transform->getMatrix());
         }
         glGenBuffers(1, &instanceVBO);
         glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+
         glBufferData(GL_ARRAY_BUFFER, instanceMatrices.size() * sizeof(glm::mat4), &instanceMatrices[0], GL_STATIC_DRAW);
+
         glBindVertexArray(VAO);
         std::size_t vec4Size = sizeof(glm::vec4);
         glEnableVertexAttribArray(3);

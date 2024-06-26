@@ -40,6 +40,7 @@ public:
 	std::shared_ptr<Model> planeModel;
 	Shader* diffuseInstancedShader;
 	Shader* depthInstancedShader;
+	Shader* postProcessingShader;
 
 	void load() {
 		animodel = std::make_shared<Model>(const_cast<char*>("res/animations/Monkey/monkey_idle.dae"), true);
@@ -76,6 +77,7 @@ public:
 		planeModel = std::make_shared<Model>(const_cast<char*>("res/plane.obj"), false);
 		diffuseInstancedShader = new Shader("res/shaders/diffuseinstanced.vert", "res/shaders/diffuse.frag");
 		depthInstancedShader = new Shader("res/shaders/depthInstanceShader.vert", "res/shaders/depthShader.frag");
+		postProcessingShader = new Shader("res/shaders/PlayerHit.vert", "res/shaders/PlayerHit.frag");
 	}
 };
 #endif

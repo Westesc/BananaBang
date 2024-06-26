@@ -42,6 +42,7 @@
 #include "../lib/ResourceLoader.h"
 #include "../lib/Frustum.h"
 #include "../lib/AbilityManager.h"
+#include "../lib/ParticleSystem.h"
 
 bool test = false;
 bool frustumTest = false;
@@ -127,6 +128,7 @@ GameObject* sectorpointer;
 GameObject* sectorpointer2;
 float radius = 300.0f;
 AudioManager* audioManager;
+float timeSinceHit = 1.0f;
 
 void addAnimation(GameObject* anim, char* path, const char* name, float duration) {
 	anim->addAnimation(path, name, duration);
@@ -918,7 +920,7 @@ int main() {
 	sm->loadScene("first");
 	sm->activeScene = sm->scenes.at(0);
 	sm->getActiveScene()->addObject(anim);
-	enemyManager = new EnemyStateManager(pathfinder, &cm, pm, sectorSelector);
+	enemyManager = new EnemyStateManager(pathfinder, &cm, pm, sectorSelector, &timeSinceHit);
 	bool regenInstances = false;
 	bool regenInstancesEnemy = false;
 	bool regenInstancesEnemyWeapon = false;
@@ -1077,12 +1079,94 @@ int main() {
 
 	bool fruitsrenderd = false;
 	glm::vec2 playerPos = glm::vec2(0.f);
+	ParticleSystem* ps = new ParticleSystem(10);
+	cm.addParticleSystem(ps);
+
+	unsigned int framebuffer;
+	glGenFramebuffers(1, &framebuffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+	unsigned int textureColorBuffer;
+	glGenTextures(1, &textureColorBuffer);
+	glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, windowGlobals.windowWidth, windowGlobals.windowHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorBuffer, 0);
+
+	unsigned int rbo;
+	glGenRenderbuffers(1, &rbo);
+	glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowGlobals.windowWidth, windowGlobals.windowHeight);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	unsigned int quadVAO, quadVBO;
+	float quadVertices[] = {
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+	};
+	glGenVertexArrays(1, &quadVAO);
+	glGenBuffers(1, &quadVBO);
+	glBindVertexArray(quadVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+	glBindVertexArray(0);
+
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+
+	int width, height, nrComponents;
+	unsigned char* data = stbi_load(std::string("res/playerhit.png").c_str(), &width, &height, &nrComponents, 0);
+	if (data)
+	{
+		GLenum format;
+		if (nrComponents == 1)
+			format = GL_RED;
+		else if (nrComponents == 3)
+			format = GL_RGB;
+		else if (nrComponents == 4)
+			format = GL_RGBA;
+
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		stbi_image_free(data);
+	}
+	else
+	{
+		std::cout << "hit texture not loaded" << std::endl;
+		stbi_image_free(data);
+	}
+	RL.postProcessingShader->use();
+	RL.postProcessingShader->setInt("screenTexture", 0);
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
 			glfwSetWindowShouldClose(window, 1);
 		}
 		glClearColor(0.2f, 0.3f, 0.7f, 1.f);
+		//glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 		gameTime = std::chrono::duration_cast<Duration>(Clock::now() - tpStart).count();
 		shadowsFrameCounter++;
@@ -1093,7 +1177,7 @@ int main() {
 		staticUpdateTime += deltaTime;
 		sectorSelectorTime += deltaTime;
 		//std::cout << "Delta time: " << deltaTime << std::endl;
-
+		timeSinceHit += deltaTime;
 
 		RL.phongShader->use();
 		//RL.phongShader->setVec3("lightPos", lightPos);
@@ -1457,6 +1541,7 @@ int main() {
 		if (sm->getActiveScene()->findByName("player")) {
 			sm->getActiveScene()->findByName("player")->isVisible = true;
 		}
+		ps->update(deltaTime);
 		sm->getActiveScene()->gameObjects.erase(std::remove_if(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), [](GameObject* obj) {return obj == nullptr; }), sm->getActiveScene()->gameObjects.end());
 		sm->getActiveScene()->gameObjects.erase(std::remove_if(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), [](GameObject* obj) {return obj->markedForDeletion; }), sm->getActiveScene()->gameObjects.end());
 		if (sectorSelector) {
@@ -1662,7 +1747,23 @@ int main() {
 		}
 
 		sm->getActiveScene()->Draw(V, P);
+		ps->render(V, P);
 
+		/*glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		if (timeSinceHit < 1.0f) {
+			glClearColor(0.0f, 0.0f, 0.0f, 1.f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			RL.postProcessingShader->use();
+			RL.postProcessingShader->setFloat("timeSinceHit", timeSinceHit);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
+			glBindVertexArray(quadVAO);
+			glDisable(GL_DEPTH_TEST);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+			glBindVertexArray(0);
+			glEnable(GL_DEPTH_TEST);
+		}*/
 		RL.shaderTree->use();
 		RL.shaderTree->setMat4("view", V);
 		RL.shaderTree->setMat4("projection", P);
@@ -1749,7 +1850,7 @@ int main() {
 			if (sm->getActiveScene()->findByName("sector" + std::to_string(sector))) {
 				Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies), sm->getActiveScene()->findByName("sector" + std::to_string(sector))->localTransform->localPosition, glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 6.f)); 
 				AudioSource* audio;
-				enemy->Move(glm::vec3(5.0f));
+				//enemy->Move(glm::vec3(5.0f));
 				enemy->sector = sector;
 				enemy->addModelComponent(RL.enemyModel2);
 				pbd->objects.push_back(enemy);
@@ -1782,15 +1883,15 @@ int main() {
 				enemy->hp = 30;
 				GameObject* enemyWeapon = new GameObject("enemyWeapon" + std::to_string(spawnedEnemies));
 				enemyWeapon->addModelComponent(RL.box2model);
-				enemyWeapon->getTransform()->localScale = glm::vec3(0.3f);
+				enemyWeapon->getTransform()->localScale = glm::vec3(1.0f);
 				enemyWeapon->active = false;
 				enemy->addChild(enemyWeapon);
 				enemyWeapon->addColider(1);
 				enemyWeapon->boundingBox->isTriggerOnly = true;
 				enemyWeapon->colliders.push_back(enemyWeapon->boundingBox);
-				enemyWeapon->isInstanced = true;
+				//enemyWeapon->isInstanced = true;
 				enemyWeapon->modelComponent = RL.enemyWeaponmodel;
-				enemyWeapon = nullptr;
+				//enemyWeapon = nullptr;
 				transformsEnemy.clear();
 				transformsEnemyWeapon.clear();
 				for (auto enemy : enemyManager->enemies) {

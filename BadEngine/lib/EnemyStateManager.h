@@ -7,11 +7,12 @@
 
 class EnemyStateManager {
 public:
-    EnemyStateManager(Pathfinder* pathfinder, CollisionManager* cm, PlayerMovement* pm, SectorSelector* ss) {
+    EnemyStateManager(Pathfinder* pathfinder, CollisionManager* cm, PlayerMovement* pm, SectorSelector* ss, float* timeSinceHit) {
         this->pathfinder = pathfinder;
         this->cm = cm;
         this->pm = pm;
         this->ss = ss;
+        this->timeSinceHit = timeSinceHit;
     }
 
     std::vector<Enemy*> enemies;
@@ -21,6 +22,7 @@ public:
     PlayerMovement* pm = nullptr;
     float multipierDistance = 4.5f;
     SectorSelector* ss;
+    float* timeSinceHit;
 
     void update(float deltaTime, bool playerAtention) {
         if (pm->getState() == PlayerState::climbing) {
@@ -234,6 +236,7 @@ private:
                         if (player->hp > 0) {
                             player->hp -= 1;
                         }
+                        *timeSinceHit = 0.0f;
                     }
 				}
             }

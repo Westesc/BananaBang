@@ -16,13 +16,14 @@ glm::mat4 Camera::getViewMatrix() {
 
 glm::mat4 Camera::getViewMatrixPlayer() {
 	glm::vec3 playerPosition = sm->getActiveScene()->findByName("player")->getTransform()->getLocalPosition();
+	playerPosition.y += 3;
 	float r = 10.f * cos(glm::radians(Pitch));
 	transform->localPosition.x = playerPosition.x + r * cos(glm::radians(Yaw));
 	transform->localPosition.y = playerPosition.y + 10.f * sin(glm::radians(Pitch));
 	if (transform->localPosition.y < 1.0f)
 		transform->localPosition.y = 1.0f;
 	transform->localPosition.z = playerPosition.z + r * sin(glm::radians(Yaw));
-
+	
 	return glm::lookAt(transform->localPosition, playerPosition, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 

@@ -1128,7 +1128,7 @@ int main() {
 			//	else if(gameMode.getMode() == GameMode::Menu){
 			//		//sm->loadScene("mainLoop");
 			//	}
-			}
+			//}
 			if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_1))
 			{
 				gameMode.setMode(GameMode::Debug);

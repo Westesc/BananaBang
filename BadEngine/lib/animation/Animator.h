@@ -236,13 +236,14 @@ public:
                 position.y = globalTransformation[3][1];
                 position.z = globalTransformation[3][2];
                 //position /= 40.f;
-                if (abs(position.x - lastPosition.x) < 0.1f) {
+
+                if (abs(position.x - lastPosition.x) < 0.01f) {
                     deltaPostion.x = position.x - lastPosition.x;
                 }
-                if (abs(position.y - lastPosition.y) < 0.1f) {
+                if (abs(position.y - lastPosition.y) < 0.01f) {
                     deltaPostion.y = position.y - lastPosition.y;
                 }
-                if (abs(position.z - lastPosition.z) < 0.1f) {
+                if (abs(position.z - lastPosition.z) < 0.01f) {
                     deltaPostion.z = position.z - lastPosition.z;
                 }
                // std::cout << glm::to_string(deltaPostion) << std::endl;

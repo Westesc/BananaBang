@@ -76,6 +76,7 @@ unsigned int spawnedEnemies = 0;
 unsigned int reqEnemies = 10;
 bool loaded = false;
 bool playerAtention = false;
+bool wycinka = false;
 CollisionManager cm = CollisionManager(200, 40);
 Pathfinder* pathfinder = new Pathfinder();
 PBDManager* pbd = new PBDManager(10);
@@ -401,7 +402,7 @@ void generate() {
 	UI* uiBananaPeelCount = new UI(writing);
 	uiBananaPeelCount->addShader(UIShader);
 	uiBananaPeelCount->setText("Banany: 1");
-	bananaPeelCount->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth - 650.0f, 50.f, 0.f);
+	bananaPeelCount->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth - 950.0f, 50.f, 0.f);
 	bananaPeelCount->uiComponent = uiBananaPeelCount;
 
 	GameObject* treeAttackTime = new GameObject("TreeAttack");
@@ -418,6 +419,13 @@ void generate() {
 	uiCount->setText("Pozostali drwale : " + std::to_string(reqEnemies));
 	enemyCount->localTransform->localPosition = glm::vec3(0, windowGlobals.windowHeight - 300.0f, 0.f);
 	enemyCount->uiComponent = uiCount;
+
+	GameObject* EnemyTime = new GameObject("EnemyTime");
+	UI* uiEnemyTime = new UI(writing);
+	uiEnemyTime->addShader(UIShader);
+	uiEnemyTime->setText("Czas do wycinki sektora : " + std::to_string(sectorSelectorTime));
+	EnemyTime->localTransform->localPosition = glm::vec3(0, windowGlobals.windowHeight - 200.0f, 0.f);
+	EnemyTime->uiComponent = uiEnemyTime;
 
 	for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
 		for (auto go : sm->getActiveScene()->gameObjects.at(i)->children)
@@ -541,6 +549,7 @@ void generate() {
 	sm->getActiveScene()->addObject(dashTime);
 	sm->getActiveScene()->addObject(treeAttackTime);
 	sm->getActiveScene()->addObject(bananaPeelCount);
+	sm->getActiveScene()->addObject(EnemyTime);
 
 	sectorpointer = new GameObject("sectorpointer");
 	UI* sectorpointerui = new UI(plane);
@@ -1652,6 +1661,13 @@ int main() {
 			sm->getActiveScene()->findByName("DashTime")->uiComponent->setText("Dash: " + std::to_string(ability->getTimeToRefresh("dash")));
 			sm->getActiveScene()->findByName("TreeAttack")->uiComponent->setText("Atak z drzewa: " + std::to_string(ability->getTimeToRefresh("tree attack")));
 			sm->getActiveScene()->findByName("bananaPeel")->uiComponent->setText("Banana: " + std::to_string(ability->bananaCount));
+			if (sectorSelectorTime < 30) {
+				wycinka = true;
+				sm->getActiveScene()->findByName("EnemyTime")->uiComponent->setText("Czas do wycinki nowego sektora : " + std::to_string(30 - static_cast<int>(sectorSelectorTime)));
+			}
+			else {
+				sm->getActiveScene()->findByName("EnemyTime")->uiComponent->setText("Drwale pojawili sie w jednym z sektorow");
+			}
 		}
 
 		sm->getActiveScene()->Draw(V, P);

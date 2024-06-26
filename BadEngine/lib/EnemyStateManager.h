@@ -65,6 +65,7 @@ public:
                 break;
             case EnemyState::Attacking:
                 updateAttackingState(enemy, deltaTime);
+                rotateEnemyTowards(enemy, player->getTransform()->localPosition);
                 enemy->getAnimateBody()->setActiveAnimation("hit");
                 break;
             }
@@ -121,13 +122,13 @@ private:
                     enemy->timeSpentWalking = 0.f;
                 }
             }
-            rotatePlayerTowards(enemy, enemy->chosenTreePos);
+            rotateEnemyTowards(enemy, enemy->chosenTreePos);
         }
         else {
             enemy->state = EnemyState::Chopping;
         }
     }
-    void rotatePlayerTowards(Enemy* enemy, glm::vec3 targetPosition) {
+    void rotateEnemyTowards(Enemy* enemy, glm::vec3 targetPosition) {
         glm::vec3 enemyPosition = enemy->getTransform()->getLocalPosition();
         glm::vec3 direction = glm::normalize(targetPosition - enemyPosition);
         float angle = atan2(direction.x, direction.z);

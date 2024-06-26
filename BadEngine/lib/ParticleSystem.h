@@ -23,7 +23,7 @@ public:
 
     ParticleSystem(unsigned int maxParticles) : maxParticles(maxParticles), lastUsedParticle(0) {
         particles.resize(maxParticles);
-        particleShader = new Shader("res/shaders/particle.vs", "res/shaders/particle.fs");
+        particleShader = new Shader("res/shaders/particle.vert", "res/shaders/particle.frag");
         particleShader->use();
         unsigned int textureID;
         glGenTextures(1, &textureID);
@@ -76,6 +76,7 @@ public:
         particleShader->use();
         particleShader->setMat4("view", view);
         particleShader->setMat4("projection", projection);
+        particleShader->setInt("particleTexture", 0);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, textureID);
 

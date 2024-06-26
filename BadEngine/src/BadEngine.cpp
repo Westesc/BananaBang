@@ -127,6 +127,7 @@ GameObject* sectorpointer;
 GameObject* sectorpointer2;
 float radius = 300.0f;
 
+
 void addAnimation(GameObject* anim, char* path, const char* name, float duration) {
 	anim->addAnimation(path, name, duration);
 }
@@ -1285,6 +1286,7 @@ int main() {
 			transformsLeaves.clear();
 			transformsBanana.clear();
 			transformsMango.clear();
+			
 			glm::vec2 PlayerPosv2 = glm::vec2(0.f, 0.f);
 			if (sm->getActiveScene()->findByName("player")) {
 				PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
@@ -1423,7 +1425,7 @@ int main() {
 			}
 			cm.addObject(sm->getActiveScene()->findByName("player"));
 		}
-		for (Enemy* enemy : enemyManager->enemies) {
+		for (auto enemy : enemyManager->enemies) {
 			if (enemy->hp <= 0) {
 				pbd->objects.erase(std::remove(pbd->objects.begin(), pbd->objects.end(), enemy), pbd->objects.end());
 				for (auto sect : cm.sections) {
@@ -1474,33 +1476,37 @@ int main() {
 			}
 		}
 		if (sectorSelector) {
-			if (sectorSelector->selectedSector != 0) {
-				playerPos = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
-				if (glm::distance(playerPos, sectorCenters[sectorSelector->selectedSector - 1]) > 35.0f) {
-					sectorpointer->isVisible = true;
-					glm::vec2 direction = glm::normalize(sectorCenters[sectorSelector->selectedSector - 1] - playerPos);
-					glm::vec2 cameraFront = glm::normalize(glm::vec2(camera->getFront().x, camera->getFront().z));
-					float angle = glm::atan(direction.y, direction.x) - glm::atan(cameraFront.y, cameraFront.x);
-					sectorpointer->getTransform()->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.f + radius * cos(angle), windowGlobals.windowHeight * 0.5f - radius * sin(angle), 0.0f);
-					sectorpointer->getTransform()->localRotation = glm::vec3(0.0f, 0.0f, -glm::degrees(angle));
-				}
-				else {
-					sectorpointer->isVisible = false;
+			if(sectorpointer){
+				if (sectorSelector->selectedSector != 0) {
+					playerPos = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
+					if (glm::distance(playerPos, sectorCenters[sectorSelector->selectedSector - 1]) > 35.0f) {
+						sectorpointer->isVisible = true;
+						glm::vec2 direction = glm::normalize(sectorCenters[sectorSelector->selectedSector - 1] - playerPos);
+						glm::vec2 cameraFront = glm::normalize(glm::vec2(camera->getFront().x, camera->getFront().z));
+						float angle = glm::atan(direction.y, direction.x) - glm::atan(cameraFront.y, cameraFront.x);
+						sectorpointer->getTransform()->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.f + radius * cos(angle), windowGlobals.windowHeight * 0.5f - radius * sin(angle), 0.0f);
+						sectorpointer->getTransform()->localRotation = glm::vec3(0.0f, 0.0f, -glm::degrees(angle));
+					}
+					else {
+						sectorpointer->isVisible = false;
+					}
 				}
 			}
-			if (sectorSelector->selectedSector2 != 0) {
-				playerPos = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
-				if (glm::distance(playerPos, sectorCenters[sectorSelector->selectedSector2 - 1]) > 35.0f) {
-					sectorpointer2->isVisible = true;
-					glm::vec2 direction = glm::normalize(sectorCenters[sectorSelector->selectedSector2 - 1] - playerPos);
-					glm::vec2 cameraFront = glm::normalize(glm::vec2(camera->getFront().x, camera->getFront().z));
-					float angle = glm::atan(direction.y, direction.x) - glm::atan(cameraFront.y, cameraFront.x);
-					sectorpointer2->getTransform()->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.f + radius * cos(angle), windowGlobals.windowHeight * 0.5f - radius * sin(angle), 0.0f);
-					angle = atan2(direction.y, direction.x) - atan2(camera->getFront().z, camera->getFront().x);
-					sectorpointer2->getTransform()->localRotation = glm::vec3(0.0f, 0.0f, glm::degrees(angle));
-				}
-				else {
-					sectorpointer2->isVisible = false;
+			if (sectorpointer2) {
+				if (sectorSelector->selectedSector2 != 0) {
+					playerPos = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
+					if (glm::distance(playerPos, sectorCenters[sectorSelector->selectedSector2 - 1]) > 35.0f) {
+						sectorpointer2->isVisible = true;
+						glm::vec2 direction = glm::normalize(sectorCenters[sectorSelector->selectedSector2 - 1] - playerPos);
+						glm::vec2 cameraFront = glm::normalize(glm::vec2(camera->getFront().x, camera->getFront().z));
+						float angle = glm::atan(direction.y, direction.x) - glm::atan(cameraFront.y, cameraFront.x);
+						sectorpointer2->getTransform()->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.f + radius * cos(angle), windowGlobals.windowHeight * 0.5f - radius * sin(angle), 0.0f);
+						angle = atan2(direction.y, direction.x) - atan2(camera->getFront().z, camera->getFront().x);
+						sectorpointer2->getTransform()->localRotation = glm::vec3(0.0f, 0.0f, glm::degrees(angle));
+					}
+					else {
+						sectorpointer2->isVisible = false;
+					}
 				}
 			}
 		}

@@ -10,10 +10,12 @@
 class AudioSource : Component {
 private:
 	ALuint source;
-	bool p_LoopSound = false;
+	std::string name;
 public:
-	AudioSource(ALuint source);
+	bool p_LoopSound = false;
+	AudioSource(std::string name, ALuint source);
 	~AudioSource();
+
 
 	void play();
 	void stop();

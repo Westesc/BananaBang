@@ -46,6 +46,15 @@ void AudioManager::loadSound(std::string name, std::string path, bool is3D) {
 	sounds[name] = { buffer,source };
 }
 
+void AudioManager::load()
+{
+    loadSound("monkey_scream", "res/media/monkey_scream.wav");
+    loadSound("running", "res/media/running.wav",true);
+    loadSound("jungle_birds", "res/media/jungle_birds.wav",true);
+    loadSound("jungle_sounds", "res/media/jungle_sounds.wav");
+    loadSound("axe_attack", "res/media/axe_attack.wav",true);
+}
+
 
 bool AudioManager::loadWAV(std::string& path, ALuint& buffer,bool is3D) {
     WAVHeader header;

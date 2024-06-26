@@ -1,7 +1,8 @@
 #include "../lib/AudioSource.h"
 
-AudioSource::AudioSource(ALuint source) 
+AudioSource::AudioSource(std::string name, ALuint source)
 {
+	this->name = name;
 	this->source = source;
 
 }

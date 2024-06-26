@@ -126,7 +126,7 @@ std::array<glm::vec2, 16> sectorCenters;
 GameObject* sectorpointer;
 GameObject* sectorpointer2;
 float radius = 300.0f;
-
+AudioManager* audioManager;
 
 void addAnimation(GameObject* anim, char* path, const char* name, float duration) {
 	anim->addAnimation(path, name, duration);
@@ -137,7 +137,6 @@ void delay(int milliseconds) {
 }
 
 void generate() {
-	std::cout << "przycisk generate" << std::endl;
 	playButton->uiComponent->pressed = true;/*
 	sectorsPom = 4;
 	a = 4;
@@ -222,7 +221,7 @@ void generate() {
 					branch->isInstanced = true;
 					branch->addModelComponent(RL.treebranch1);
 					branch->localTransform->localPosition.x = planeSector->localTransform->localPosition.x + treeX;
-					branch->localTransform->localPosition.y = float(losujLiczbe((m * 13 / branchCount) + 5, ((m + 1) * 13 / branchCount) + 5));
+					branch->localTransform->localPosition.y = float(losujLiczbe((m * 13 / branchCount) + 8, ((m + 1) * 13 / branchCount) + 8));
 					branch->localTransform->localScale.x = 6 / branch->localTransform->localPosition.y;
 					branch->localTransform->localScale.y = 6 / branch->localTransform->localPosition.y;
 					branch->localTransform->localScale.z = 6 / branch->localTransform->localPosition.y;
@@ -245,6 +244,7 @@ void generate() {
 					leafs->addModelComponent(RL.leafModel);
 					leafs->localTransform->localScale = glm::vec3(2.f);
 					branch->addChild(leafs);
+
 					//std::cout << branch->localTransform->localRotation.x << std::endl;
 					log->addChild(branch);
 				}
@@ -255,6 +255,7 @@ void generate() {
 					fruits->localTransform->localPosition = log->children.at(branchIndex)->localTransform->localPosition;
 					fruits->localTransform->localPosition.x += log->children.at(branchIndex)->localTransform->localScale.x* 4.0f* sinf(glm::radians(log->children.at(branchIndex)->localTransform->localRotation.y));
 					fruits->localTransform->localPosition.z += log->children.at(branchIndex)->localTransform->localScale.x * 4.0f * cosf(glm::radians(log->children.at(branchIndex)->localTransform->localRotation.y));
+					fruits->localTransform->localPosition.y += 1.f;
 					switch (fruitPool.at(fruitIndex)) {
 					case 0:
 						fruits->name = "FruitBanana";
@@ -586,6 +587,8 @@ void generate() {
 	if (input->checkAnyKey()) {
 		input->getPressKey();
 	}
+	audioManager->stopSound("jungle_music");
+	audioManager->playSound("jungle_sounds");
 }
 
 void showTutorial() {
@@ -735,9 +738,10 @@ int main() {
 	std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
 
-	AudioManager* audioManager = new AudioManager();
+	audioManager = new AudioManager();
 	audioManager->loadSound("jungle_music", "res/media/jungle_music.wav");
 	audioManager->playSound("jungle_music",true);
+	
 	//audioManager->loadSound("test", "res/media/test.wav",true);
 	//audioManager->setSoundPosition("test", 10, 0, 0);
 
@@ -758,6 +762,7 @@ int main() {
 	glfwSwapBuffers(window);
 	glfwPollEvents();
 
+	audioManager->load();
 	RL.load();
 
 	GameObject* anim = new GameObject("player");

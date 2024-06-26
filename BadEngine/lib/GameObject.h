@@ -6,6 +6,7 @@
 #include "Model.h"
 #include "UI.h"
 #include "AnimateBody.h"
+#include "AudioSource.h"
 
 class GameObject {
 public:
@@ -29,6 +30,7 @@ public:
 	float rotateSpeed;
 	glm::vec3 rotateAxis;
 	bool isVisible = true;
+	std::vector<AudioSource*> audios;
 	BoundingBox* boundingBox = nullptr;
 	CapsuleCollider* capsuleCollider = nullptr;
 	std::vector<Collider*> colliders;

@@ -141,7 +141,9 @@ void GameObject::Update(glm::mat4 view, glm::mat4 perspective, float time) {
         if (uiComponent != nullptr) {
             uiComponent->update(this->localTransform);
         }
-
+        for (auto audio : audios) {
+            audio->update(getTransform());
+        }
         for (auto ch : children) {
             ch->Update(view, perspective, time);
         }

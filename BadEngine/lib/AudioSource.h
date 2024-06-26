@@ -10,14 +10,15 @@
 class AudioSource : Component {
 private:
 	ALuint source;
-	std::string name;
 public:
 	bool p_LoopSound = false;
+	std::string name;
 	AudioSource(std::string name, ALuint source);
 	~AudioSource();
 
 
 	void play();
+	void playConst();
 	void stop();
 	void setVolume(float volume);
 	void update(Transform* transform);

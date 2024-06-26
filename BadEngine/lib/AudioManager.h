@@ -61,6 +61,7 @@ public:
     void load();
     void loadSound(std::string name, std::string path, bool is3D=false);
     void playSound(std::string name, bool loop = true);
+    void playSoundContinue(std::string name, bool loop = true);
     void stopSound(std::string name);
     void changeVolume(std::string name, float volume);
     void setSoundPosition(std::string, float x, float y, float z);

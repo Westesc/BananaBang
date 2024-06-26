@@ -53,6 +53,7 @@ void AudioManager::load()
     loadSound("jungle_birds", "res/media/jungle_birds.wav",true);
     loadSound("jungle_sounds", "res/media/jungle_sounds.wav");
     loadSound("axe_attack", "res/media/axe_attack.wav",true);
+    changeVolume("jungle_sounds", 0.5f);
 }
 
 
@@ -184,6 +185,21 @@ void AudioManager::setRollofFactor(std::string name, float value) {
     auto it = sounds.find(name);
     if (it != sounds.end()) {
         alSourcef(it->second.source, AL_ROLLOFF_FACTOR, value);
+    }
+    else {
+        std::cerr << "Sound " << name << " not found!" << std::endl;
+    }
+}
+
+void AudioManager::playSoundContinue(std::string name, bool loop) {
+    auto it = sounds.find(name);
+    if (it != sounds.end()) {
+        ALint source_state;
+        alGetSourcei(it->second.source, AL_SOURCE_STATE, &source_state);
+        if (source_state != AL_PLAYING) {
+            alSourcei(it->second.source, AL_LOOPING, loop);
+            alSourcePlay(it->second.source);
+        }
     }
     else {
         std::cerr << "Sound " << name << " not found!" << std::endl;

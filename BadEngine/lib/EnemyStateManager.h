@@ -58,15 +58,42 @@ public:
                     enemy->getAnimateBody()->setActiveAnimation("idle");
                     break;
                 case EnemyState::Walking:
+                    for (auto audio : enemy->audios) {
+                        if (audio->name == "running") {
+                            audio->playConst();
+                        }
+                        else {
+                            audio->stop();
+                        }
+                    }
                     updateWalkingState(enemy, deltaTime);
                     enemy->getAnimateBody()->setActiveAnimation("walking");
+                   
                     break;
                 case EnemyState::Chopping:
+                    for (auto audio : enemy->audios) {
+                        if (audio->name == "axe_attack") {
+                            audio->playC();
+                        }
+                        else {
+                            audio->stop();
+                        }
+                    }
                     updateChoppingState(enemy, deltaTime);
+
                     break;
                 case EnemyState::Attacking:
+                    for (auto audio : enemy->audios) {
+                        if (audio->name == "axe_attack") {
+                            audio->play();
+                        }
+                        else {
+                            audio->stop();
+                        }
+                    }
                     updateAttackingState(enemy, deltaTime);
                     rotateEnemyTowards(enemy, player->getTransform()->localPosition);
+                   
                     break;
                 }
             }

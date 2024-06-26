@@ -19,6 +19,16 @@ void AudioSource::play()
 	alSourcePlay(this->source);
 
 }
+
+void AudioSource::playConst() {
+	ALint source_state;
+	alGetSourcei(this->source, AL_SOURCE_STATE, &source_state);
+	if (source_state != AL_PLAYING) {
+		alSourcei(this->source, AL_LOOPING, p_LoopSound);
+		alSourcePlay(this->source);
+	}
+}
+
 void AudioSource::stop()
 {
 	alSourceStop(this->source);

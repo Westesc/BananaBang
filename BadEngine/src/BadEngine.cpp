@@ -1174,6 +1174,7 @@ int main() {
 			if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
 				staticUpdateTime = 0;
 				playerAtention = true;
+				audioManager->playSound("monkey_scream", false);
 			}
 		}
 		if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
@@ -1746,7 +1747,8 @@ int main() {
 			}
 			std::cout << sectorSelector->selectedSector << ", " << sectorSelector->selectedSector2 << std::endl;
 			if (sm->getActiveScene()->findByName("sector" + std::to_string(sector))) {
-				Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies), sm->getActiveScene()->findByName("sector" + std::to_string(sector))->localTransform->localPosition, glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
+				Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies), sm->getActiveScene()->findByName("sector" + std::to_string(sector))->localTransform->localPosition, glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 6.f)); 
+				AudioSource* audio;
 				enemy->Move(glm::vec3(5.0f));
 				enemy->sector = sector;
 				enemy->addModelComponent(RL.enemyModel2);
@@ -1754,6 +1756,13 @@ int main() {
 				enemy->addColider(2);
 				enemy->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), enemy->capsuleCollider->radius * 0.004f, enemy->capsuleCollider->height * 0.0007f, 1.0f, true);
 				enemy->capsuleCollider->center.y += enemy->capsuleCollider->height * 0.5f;
+				audio = new AudioSource("axe_attack", audioManager->getSource("axe_attack"));
+				audio->setVolume(2.f);
+				enemy->audios.push_back(audio);
+				audio = new AudioSource("running", audioManager->getSource("running"));
+				audio->p_LoopSound = true;
+				audio->setVolume(4.f);
+				enemy->audios.push_back(audio);
 				
 				//enemy->modelComponent = RL.enemyModel;
 				enemy->modelComponent = RL.animationEnemyModel;

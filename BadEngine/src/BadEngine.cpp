@@ -42,6 +42,7 @@
 #include "../lib/ResourceLoader.h"
 #include "../lib/Frustum.h"
 #include "../lib/AbilityManager.h"
+#include "../lib/ParticleSystem.h"
 
 bool test = false;
 bool frustumTest = false;
@@ -1077,6 +1078,8 @@ int main() {
 
 	bool fruitsrenderd = false;
 	glm::vec2 playerPos = glm::vec2(0.f);
+	ParticleSystem* ps = new ParticleSystem(10);
+	cm.addParticleSystem(ps);
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -1456,6 +1459,7 @@ int main() {
 		if (sm->getActiveScene()->findByName("player")) {
 			sm->getActiveScene()->findByName("player")->isVisible = true;
 		}
+		ps->update(deltaTime);
 		sm->getActiveScene()->gameObjects.erase(std::remove_if(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), [](GameObject* obj) {return obj == nullptr; }), sm->getActiveScene()->gameObjects.end());
 		sm->getActiveScene()->gameObjects.erase(std::remove_if(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), [](GameObject* obj) {return obj->markedForDeletion; }), sm->getActiveScene()->gameObjects.end());
 		if (sectorSelector) {
@@ -1661,6 +1665,7 @@ int main() {
 		}
 
 		sm->getActiveScene()->Draw(V, P);
+		ps->render(V, P);
 
 		RL.shaderTree->use();
 		RL.shaderTree->setMat4("view", V);
@@ -1747,7 +1752,7 @@ int main() {
 			std::cout << sectorSelector->selectedSector << ", " << sectorSelector->selectedSector2 << std::endl;
 			if (sm->getActiveScene()->findByName("sector" + std::to_string(sector))) {
 				Enemy* enemy = new Enemy("enemy" + std::to_string(spawnedEnemies), sm->getActiveScene()->findByName("sector" + std::to_string(sector))->localTransform->localPosition, glm::vec3(0.1f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
-				enemy->Move(glm::vec3(5.0f));
+				//enemy->Move(glm::vec3(5.0f));
 				enemy->sector = sector;
 				enemy->addModelComponent(RL.enemyModel2);
 				pbd->objects.push_back(enemy);

@@ -7,12 +7,14 @@
 #include "Enemy.h"
 #include "PBD.h"
 #include "PlayerMovement.h"
+#include "ParticleSystem.h"
 
 class CollisionManager {
 public:
 	std::vector<Section*> sections;
 	float sectionSize;
 	PlayerMovement* pm;
+	ParticleSystem* ps;
 
 	CollisionManager(float worldSize, float sectionSize) : sectionSize(sectionSize) {
 		int numSections = worldSize / sectionSize;
@@ -30,6 +32,10 @@ public:
 		for (auto section : sections) {
 			delete section;
 		}
+	}
+
+	void addParticleSystem(ParticleSystem* ps) {
+		this->ps = ps;
 	}
 
 	void addObject(GameObject* go) {
@@ -742,6 +748,14 @@ public:
 				if (checkCollision(trigger, section->objects.at(i))) {
 					section->objects.at(i)->hp -= 10;
 					hit = true;
+					glm::vec3 velocity = glm::vec3(0.0f, 1.0f, 0.0f);
+					glm::vec4 color = glm::vec4(1.0f, 0.5f, 0.0f, 1.0f);
+					glm::vec3 middle = (trigger->getTransform()->predictedPosition + section->objects.at(i)->getTransform()->predictedPosition) * 0.5f;
+
+					for (int i = 0; i < 10; ++i) {
+						glm::vec3 randomVel = velocity + glm::vec3((rand() % 10) / 10.0f - 0.5f, (rand() % 10) / 10.0f - 0.5f, (rand() % 10) / 10.0f - 0.5f);
+						ps->spawnParticle(middle, randomVel, color);
+					}
 					section->objects.at(i)->getAsActualType<Enemy>()->state = EnemyState::Attacking;
 				}
 			}

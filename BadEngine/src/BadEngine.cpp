@@ -860,6 +860,7 @@ int main() {
 	glm::mat4 P;
 	std::array<Plane, 6> frustumPlanes;
 	glm::mat4 lightProjection, lightView;
+	glm::vec2 PlayerPosv2;
 
 	RL.animodel.get()->AddTexture("res/textures/modelMonk_BaseColor.png", "diffuseMap");
 	//sm->getActiveScene()->findByName("player")->getModelComponent()->AddTexture("res/textures/modelMonk_BaseColor.png", "diffuseMap");
@@ -1144,11 +1145,6 @@ int main() {
 				gameMode.setMode(GameMode::Menu);
 			}
 
-			if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
-				a = 1;
-				b = 1;
-				generate();
-			}
 		}
 		
 		if (gameMode.getMode() == GameMode::Game) {
@@ -1287,7 +1283,7 @@ int main() {
 			transformsBanana.clear();
 			transformsMango.clear();
 			
-			glm::vec2 PlayerPosv2 = glm::vec2(0.f, 0.f);
+			PlayerPosv2 = glm::vec2(0.f, 0.f);
 			if (sm->getActiveScene()->findByName("player")) {
 				PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
 			}
@@ -1522,7 +1518,7 @@ int main() {
 		transformsLeaves.clear();
 		transformsBanana.clear();
 		transformsMango.clear();
-		glm::vec2 PlayerPosv2 = glm::vec2(0.f, 0.f);
+		PlayerPosv2 = glm::vec2(0.f, 0.f);
 		if (sm->getActiveScene()->findByName("player")) {
 			PlayerPosv2 = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
 		}

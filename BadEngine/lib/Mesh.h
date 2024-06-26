@@ -383,7 +383,13 @@ public:
             glDeleteBuffers(1, &instanceVBO);
         }
         instanceMatrices.clear();
-        for (Transform* transform : transforms) {
+        if (instanceVBO) {
+            glDeleteBuffers(1, &instanceVBO);
+        }
+        if (VAO) {
+            glDeleteVertexArrays(1, &VAO);
+        }
+        for (auto transform : transforms) {
             instanceMatrices.push_back(transform->getMatrix());
         }
         glGenBuffers(1, &instanceVBO);

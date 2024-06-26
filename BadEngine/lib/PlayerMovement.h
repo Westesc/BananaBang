@@ -58,7 +58,7 @@ private:
     float limitJump = 4.f;
     float jumpPower = 0.3f;
     glm::vec3 initialPosition;
-    float airSpeed = 6.f;
+    float airSpeed = 12.f;
 
     //climbing
     float climbingSpeed = 0.2f;
@@ -260,13 +260,13 @@ private:
             //rb->upwardsSpeed = 0.f;
             //sm->getActiveScene()->findByName("player")->getAnimateBody()->setActiveAnimation("walking");
         }
-        if (rb->upwardsSpeed < 0.f) {
+        if (rb->upwardsSpeed < 0.01f) {
             state = PlayerState::air;
-            rb->upwardsSpeed = -0.2f;
+            //rb->upwardsSpeed = -0.01f;
             //player->getAnimateBody()->setActiveAnimationWithY("jumping down", true);
         }
-        else if (rb->upwardsSpeed < 0.02f) {
-            rb->upwardsSpeed = -0.02f;
+        else if (rb->upwardsSpeed < 0.01f) {
+            rb->upwardsSpeed = -0.01f;
         }
     }
 

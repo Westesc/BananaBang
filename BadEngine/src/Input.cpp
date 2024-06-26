@@ -22,7 +22,7 @@ std::queue<InputMessageMouse> mouseQueue;
 std::unordered_set<int> pressedKeys;
 int lastKey;
 
-float Zoom = 50.0f;
+float Zoom = 60.0f;
 
 Input::Input(GLFWwindow* _window)
 {

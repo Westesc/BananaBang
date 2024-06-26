@@ -498,7 +498,8 @@ void generate() {
 	//Tutaj działa
 	Enemy* basicEnemy2 = new Enemy("basicEnemy", glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(120.f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
 	basicEnemy2->addModelComponent(RL.animationEnemyModel);
-	basicEnemy2->animPlayer = basicEnemy->animPlayer;
+	*basicEnemy2->animPlayer = *basicEnemy->animPlayer;
+	basicEnemy2->getAnimateBody()->setActiveAnimation("hit");
 	sm->getActiveScene()->addObject(basicEnemy2);
 
 

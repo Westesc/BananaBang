@@ -18,6 +18,10 @@ void AudioSource::play()
 	alSourcePlay(this->source);
 
 }
+void AudioSource::stop()
+{
+	alSourceStop(this->source);
+}
 
 void AudioSource::update(Transform* transform) 
 {

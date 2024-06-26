@@ -16,6 +16,7 @@ public:
 	~AudioSource();
 
 	void play();
+	void stop();
 	void setVolume(float volume);
 	void update(Transform* transform);
 };

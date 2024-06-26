@@ -240,9 +240,10 @@ void generate() {
 					leafs->localTransform->localPosition = branch->localTransform->localPosition;
 					leafs->localTransform->localPosition.x += branch->localTransform->localScale.x * 12.0f * sinf(glm::radians(branch->localTransform->localRotation.y));
 					leafs->localTransform->localPosition.z += branch->localTransform->localScale.x * 12.0f * cosf(glm::radians(branch->localTransform->localRotation.y));
-					leafs->localTransform->localPosition.y -= 10.0f;
+					leafs->localTransform->localPosition.y -= 2.0f;
+					leafs->localTransform->localRotation = branch->localTransform->localRotation;
 					leafs->addModelComponent(RL.leafModel);
-					leafs->localTransform->localScale = glm::vec3(0.4f);
+					leafs->localTransform->localScale = glm::vec3(2.f);
 					branch->addChild(leafs);
 					//std::cout << branch->localTransform->localRotation.x << std::endl;
 					log->addChild(branch);

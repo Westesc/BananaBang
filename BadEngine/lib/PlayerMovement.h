@@ -580,7 +580,7 @@ public:
                 bananaPeelObj->getTransform()->localScale = glm::vec3(0.1f);
                 sm->getActiveScene()->addObject(bananaPeelObj);
                 bananaCount++;
-                bananaPeelObj->capsuleCollider = new CapsuleCollider(bananaPeelObj->localTransform->localPosition, 5.0f, 5.0f, 1.0f, true);
+                bananaPeelObj->capsuleCollider = new CapsuleCollider(bananaPeelObj->localTransform->localPosition, 3.0f, 3.0f, 1.0f, true);
                 //cm.addStaticObject(bananaPeelObj);
                 bananaPeelObj->capsuleCollider->isTriggerOnly = true;
 

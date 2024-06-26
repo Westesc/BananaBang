@@ -45,21 +45,22 @@ public:
 		//std::cout << name << glm::to_string(velocity);
 		glm::vec3 avoid = glm::vec3(0.f);
 		for (auto& collision : collisions) {
-			glm::vec3 toCollision = collision->localTransform->localPosition - localTransform->localPosition;
-			float distance = glm::length(toCollision);
-			if (collision->name.starts_with("enemy") && distance > 0.0f) {
-				if (rand() % 2 == 0) {
-					toCollision = glm::vec3(-toCollision.z, toCollision.y, toCollision.x);
+			if (!collision->name.starts_with("bananaPeel")) {
+				glm::vec3 toCollision = collision->localTransform->localPosition - localTransform->localPosition;
+				float distance = glm::length(toCollision);
+				if (collision->name.starts_with("enemy") && distance > 0.0f) {
+					if (rand() % 2 == 0) {
+						toCollision = glm::vec3(-toCollision.z, toCollision.y, toCollision.x);
+					}
+					else {
+						toCollision = glm::vec3(toCollision.z, toCollision.y, -toCollision.x);
+					}
+					avoid -= glm::normalize(toCollision) / distance;
 				}
-				else {
-					toCollision = glm::vec3(toCollision.z, toCollision.y, -toCollision.x);
+				else if (distance > 0.0f) {
+					avoid -= glm::normalize(toCollision) / distance;
 				}
-				avoid -= glm::normalize(toCollision) / distance;
 			}
-			else if (distance > 0.0f) {
-				avoid -= glm::normalize(toCollision) / distance;
-			}
-			
 		}
 		//std::cout << "avoid: " << glm::to_string(avoid) << ", after: ";
 		if (!collisions.empty()) {

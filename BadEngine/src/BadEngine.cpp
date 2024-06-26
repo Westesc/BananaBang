@@ -270,7 +270,7 @@ void generate() {
 						fruits->name = "FruitMango";
 						fruits->addModelComponent(RL.mangoModel);
 						fruits->localTransform->localScale = glm::vec3(2.f);
-						fruits->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), 5.0f, 5.0f, 1.0f, true);
+						fruits->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), 0.25f, 0.25f, 1.0f, true);
 						fruits->capsuleCollider->isTriggerOnly = true;
 						break;
 					}
@@ -1331,8 +1331,8 @@ int main() {
 
 			lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 		}
-		std::cout <<"light: "<< lightPos.x << "   " << lightPos.y << "   " << lightPos.z << std::endl;
-		std::cout <<"player"<< sm->activeScene->findByName("player")->localTransform->localPosition.x << "   " << sm->activeScene->findByName("player")->localTransform->localPosition.y << "   " << sm->activeScene->findByName("player")->localTransform->localPosition.z << std::endl;
+		//std::cout <<"light: "<< lightPos.x << "   " << lightPos.y << "   " << lightPos.z << std::endl;
+		//std::cout <<"player"<< sm->activeScene->findByName("player")->localTransform->localPosition.x << "   " << sm->activeScene->findByName("player")->localTransform->localPosition.y << "   " << sm->activeScene->findByName("player")->localTransform->localPosition.z << std::endl;
 
 		float near_plane = 1.0f, far_plane = 100.f;
 		lightProjection = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, near_plane, far_plane);
@@ -1547,7 +1547,7 @@ int main() {
 		ps->update(deltaTime);
 		sm->getActiveScene()->gameObjects.erase(std::remove_if(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), [](GameObject* obj) {return obj == nullptr; }), sm->getActiveScene()->gameObjects.end());
 		sm->getActiveScene()->gameObjects.erase(std::remove_if(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), [](GameObject* obj) {return obj->markedForDeletion; }), sm->getActiveScene()->gameObjects.end());
-		if (sectorSelector) {
+		if (sectorSelector && sm->getActiveScene()->findByName("player")) {
 			if(sectorpointer){
 				if (sectorSelector->selectedSector != 0) {
 					playerPos = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);

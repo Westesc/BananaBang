@@ -1331,9 +1331,12 @@ int main() {
 
 			lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 		}
+		std::cout <<"light: "<< lightPos.x << "   " << lightPos.y << "   " << lightPos.z << std::endl;
+		std::cout <<"player"<< sm->activeScene->findByName("player")->localTransform->localPosition.x << "   " << sm->activeScene->findByName("player")->localTransform->localPosition.y << "   " << sm->activeScene->findByName("player")->localTransform->localPosition.z << std::endl;
+
 		float near_plane = 1.0f, far_plane = 100.f;
 		lightProjection = glm::ortho(-50.0f, 50.0f, -50.0f, 50.0f, near_plane, far_plane);
-		lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		//lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 		lightSpaceMatrix = lightProjection * lightView;
 		// render scene from light's point of view
 		if (shadowsFrameCounter % 2 == 0) {

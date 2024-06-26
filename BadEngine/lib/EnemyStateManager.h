@@ -75,7 +75,7 @@ public:
                 case EnemyState::Chopping:
                     for (auto audio : enemy->audios) {
                         if (audio->name == "axe_attack") {
-                            audio->playC();
+                            audio->play();
                         }
                         else {
                             audio->stop();

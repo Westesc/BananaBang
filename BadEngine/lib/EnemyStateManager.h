@@ -45,29 +45,30 @@ public:
             pm->setAttackDestination(closestEnemy);
         }
         for (auto& enemy : enemies) {
-            if (playerAtention && glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) < 15.0f) {
-                enemy->state = EnemyState::Attacking;
-            }
-            else if (enemy->state == EnemyState::Attacking && glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) > 20.0f) {
-                enemy->state = EnemyState::Idle;
-            }
-            switch (enemy->state) {
-            case EnemyState::Idle:
-                updateIdleState(enemy, deltaTime);
-                enemy->getAnimateBody()->setActiveAnimation("idle");
-                break;
-            case EnemyState::Walking:
-                updateWalkingState(enemy, deltaTime);
-                enemy->getAnimateBody()->setActiveAnimation("walking");
-                break;
-            case EnemyState::Chopping:
-                updateChoppingState(enemy, deltaTime);
-                break;
-            case EnemyState::Attacking:
-                updateAttackingState(enemy, deltaTime);
-                rotateEnemyTowards(enemy, player->getTransform()->localPosition);
-                enemy->getAnimateBody()->setActiveAnimation("hit");
-                break;
+            if (enemy->hp > 0) {
+                if (playerAtention && glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) < 15.0f) {
+                    enemy->state = EnemyState::Attacking;
+                }
+                else if (enemy->state == EnemyState::Attacking && glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) > 20.0f) {
+                    enemy->state = EnemyState::Idle;
+                }
+                switch (enemy->state) {
+                case EnemyState::Idle:
+                    updateIdleState(enemy, deltaTime);
+                    enemy->getAnimateBody()->setActiveAnimation("idle");
+                    break;
+                case EnemyState::Walking:
+                    updateWalkingState(enemy, deltaTime);
+                    enemy->getAnimateBody()->setActiveAnimation("walking");
+                    break;
+                case EnemyState::Chopping:
+                    updateChoppingState(enemy, deltaTime);
+                    break;
+                case EnemyState::Attacking:
+                    updateAttackingState(enemy, deltaTime);
+                    rotateEnemyTowards(enemy, player->getTransform()->localPosition);
+                    break;
+                }
             }
         }
     }
@@ -158,6 +159,7 @@ private:
     void updateAttackingState(Enemy* enemy, float deltaTime) {
         if (player) {
             if (glm::distance(enemy->getTransform()->localPosition, player->getTransform()->localPosition) > 3.0f) {
+                enemy->getAnimateBody()->setActiveAnimation("walking");
                 enemy->children.at(0)->active = false;
                 enemy->children.at(0)->getTransform()->localRotation = glm::vec3(0.0f);
                 glm::vec3 direction = glm::normalize(player->getTransform()->localPosition - enemy->getTransform()->localPosition);
@@ -179,6 +181,7 @@ private:
                 }
             }
             else {
+                enemy->getAnimateBody()->setActiveAnimation("hit");
                 enemy->velocity = glm::vec3(0.0f);
                 GameObject* weapon = enemy->children.at(0);
                 weapon->active = true;

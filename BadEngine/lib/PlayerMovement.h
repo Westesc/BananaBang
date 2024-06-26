@@ -97,7 +97,7 @@ private:
 
     void useGravity() {
         if (player->getTransform()->getLocalPosition().y >  groundPosition) {
-            rb->upwardsSpeed = -0.1f;
+            rb->upwardsSpeed = -0.3f;
             rb->useGravity();
         }
     }
@@ -548,7 +548,7 @@ public:
                     player->velocity = velocity / deltaTime;
                     player->children.at(0)->active = true;
                     player->children.at(0)->getTransform()->localPosition = player->getTransform()->localPosition;
-                    if (glm::distance(enemyPosition, currentPosition) < 0.05) {
+                    if (glm::distance(enemyPosition, currentPosition) < 0.1) {
                         ability->UseCoolDownAbility("tree attack");
                         state = PlayerState::walking;
                         player->children.at(0)->active = false;

@@ -54,15 +54,18 @@ public:
             switch (enemy->state) {
             case EnemyState::Idle:
                 updateIdleState(enemy, deltaTime);
+                enemy->getAnimateBody()->setActiveAnimation("idle");
                 break;
             case EnemyState::Walking:
                 updateWalkingState(enemy, deltaTime);
+                enemy->getAnimateBody()->setActiveAnimation("walking");
                 break;
             case EnemyState::Chopping:
                 updateChoppingState(enemy, deltaTime);
                 break;
             case EnemyState::Attacking:
                 updateAttackingState(enemy, deltaTime);
+                enemy->getAnimateBody()->setActiveAnimation("hit");
                 break;
             }
         }
@@ -118,10 +121,17 @@ private:
                     enemy->timeSpentWalking = 0.f;
                 }
             }
+            rotatePlayerTowards(enemy, enemy->chosenTreePos);
         }
         else {
             enemy->state = EnemyState::Chopping;
         }
+    }
+    void rotatePlayerTowards(Enemy* enemy, glm::vec3 targetPosition) {
+        glm::vec3 enemyPosition = enemy->getTransform()->getLocalPosition();
+        glm::vec3 direction = glm::normalize(targetPosition - enemyPosition);
+        float angle = atan2(direction.x, direction.z);
+        enemy->getTransform()->localRotation.y = glm::degrees(angle);
     }
     void updateChoppingState(Enemy* enemy, float deltaTime) {
         if (glm::distance(enemy->getTransform()->localPosition, enemy->chosenTreePos) > 5.f) {

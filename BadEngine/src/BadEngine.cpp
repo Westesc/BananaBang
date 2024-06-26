@@ -594,7 +594,7 @@ void showTutorial() {
 	sm->getActiveScene()->addObject(tutorial1);
 	sm->getActiveScene()->addObject(tutorial2);
 	sm->getActiveScene()->addObject(tutorial3);
-	//sm->getActiveScene()->addObject(tutorial4);
+	sm->getActiveScene()->addObject(tutorial4);
 	sm->getActiveScene()->addObject(tutorial5);
 	sm->getActiveScene()->addObject(tutorial6);
 	sm->getActiveScene()->addObject(tutorial7);
@@ -937,7 +937,7 @@ int main() {
 	UI* tutorialui3 = new UI(writing);
 	tutorialui3->addShader(LogoShader);
 	tutorial3->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight - 200.f, 0.0f);
-	tutorialui3->setText("lewy przycisk myszy - atak");
+	tutorialui3->setText("lewy przycisk myszy - atak, prawy przycisk - unik");
 	tutorial3->uiComponent = tutorialui3;
 	sm->getActiveScene()->addObject(tutorial3);
 
@@ -945,15 +945,15 @@ int main() {
 	UI* tutorialui4 = new UI(writing);
 	tutorialui4->addShader(LogoShader);
 	tutorial4->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight - 250.f, 0.0f);
-	tutorialui4->setText("R przy drzewie - wspinaczka");
+	tutorialui4->setText("E - atak z drzewa/podlozenie banana");
 	tutorial4->uiComponent = tutorialui4;
-	//sm->getActiveScene()->addObject(tutorial4);
+	sm->getActiveScene()->addObject(tutorial4);
 
 	tutorial5 = new GameObject("tutorial5");
 	UI* tutorialui5 = new UI(writing);
 	tutorialui5->addShader(LogoShader);
 	tutorial5->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight - 300.f, 0.0f);
-	tutorialui5->setText("T przy drwalach - prowokacja");
+	tutorialui5->setText("R przy drwalach - prowokacja");
 	tutorial5->uiComponent = tutorialui5;
 	sm->getActiveScene()->addObject(tutorial5);
 
@@ -1118,16 +1118,16 @@ int main() {
 
 		if (input->checkAnyKey())
 		{
-			if (input->checkKey(GLFW_KEY_ESCAPE)) {
-				if (gameMode.getMode() == GameMode::Game) {
-					//sm->saveScene("mainLoop");
-					sm->activeScene = menuScene;
-					gameMode.setMode(GameMode::Menu);
-					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-				}
-				else if(gameMode.getMode() == GameMode::Menu){
-					//sm->loadScene("mainLoop");
-				}
+			//if (input->checkKey(GLFW_KEY_ESCAPE)) {
+			//	if (gameMode.getMode() == GameMode::Game) {
+			//		//sm->saveScene("mainLoop");
+			//		sm->activeScene = menuScene;
+			//		gameMode.setMode(GameMode::Menu);
+			//		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			//	}
+			//	else if(gameMode.getMode() == GameMode::Menu){
+			//		//sm->loadScene("mainLoop");
+			//	}
 			}
 			if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_1))
 			{
@@ -1160,28 +1160,7 @@ int main() {
 		}
 
 		if (sm->getActiveScene()->findByName("player")) {
-			if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
-				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, 0.0f, boxSpeed);
-			}
-			if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
-				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, 0.0f, -boxSpeed);
-			}
-			if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS) {
-				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(-boxSpeed, 0.0f, 0.0f);
-			}
-			if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
-				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(boxSpeed, 0.0f, 0.0f);
-			}
-			if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-				if (sm->getActiveScene()->findByName("player")->getTransform()->localPosition.y < 0.1f) {
-					sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, boxSpeed, 0.0f);
-				}
-			}
-			if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS) {
-				sm->getActiveScene()->findByName("player")->velocity += glm::vec3(0.0f, -boxSpeed, 0.0f);
-			}
-
-			if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+			if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS) {
 				staticUpdateTime = 0;
 				playerAtention = true;
 			}

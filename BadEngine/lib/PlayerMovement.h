@@ -39,7 +39,6 @@ private:
     RigidBody* rb;
     GameObject* player;
     PlayerMovement* pm = nullptr;
-    AbilityManager* ability;
 
     //animation
     std::queue < std::string > queueAnim;
@@ -424,7 +423,7 @@ private:
     }
 
 public:
-
+    AbilityManager* ability;
     PlayerMovement(SceneManager* sm, Input* input, Camera* camera, TimeManager* tm, AbilityManager* ab) {
         this->sm = sm;
         this->input = input;
@@ -581,6 +580,9 @@ public:
                 bananaPeelObj->getTransform()->localScale = glm::vec3(0.1f);
                 sm->getActiveScene()->addObject(bananaPeelObj);
                 bananaCount++;
+                bananaPeelObj->capsuleCollider = new CapsuleCollider(bananaPeelObj->localTransform->localPosition, 5.0f, 5.0f, 1.0f, true);
+                //cm.addStaticObject(bananaPeelObj);
+                bananaPeelObj->capsuleCollider->isTriggerOnly = true;
 
                 //sm->getActiveScene()->findByName("bananaPeelObj")->getTransform()->localPosition = glm::vec3(player->getTransform()->getLocalPosition().x, 0.2f, player->getTransform()->getLocalPosition().z);
                 state = PlayerState::walking;

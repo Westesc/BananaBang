@@ -71,8 +71,8 @@ public:
                 }
                 object->velocity.y = 0.0f;
             }
-            if (object->name.starts_with("enemy") && object->getTransform()->localPosition.y <= 2.0f) {
-                object->getTransform()->localPosition.y = 2.0f;
+            if (object->name.starts_with("enemy") && object->getTransform()->localPosition.y <= 0.0f) {
+                object->getTransform()->localPosition.y = 0.0f;
                 object->velocity.y = 0.0f;
             }
         }

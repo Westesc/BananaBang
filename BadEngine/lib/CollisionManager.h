@@ -250,7 +250,7 @@ public:
 
 	void resolveCollisionStatic(GameObject* first, GameObject* second, float deltaTime) {
 		bool resolved = false;
-		if (second->name.starts_with("Fruit")) {
+		if (second->name.starts_with("Fruit") || second->name.starts_with("bananaPeel")) {
 			return;
 		}
 		if (second->name.starts_with("branch")) {
@@ -488,7 +488,13 @@ public:
 							std::cout << "Fruit" << std::endl;
 							resolveFruits(section->objects.at(i), section->staticObjects.at(j));
 						}
-						resolveCollisionStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
+						else if (section->objects.at(i)->name.starts_with("enemy") && section->staticObjects.at(j)->name.starts_with("bananaPeel")) {
+							section->staticObjects.at(j)->markedForDeletion = true;
+							section->objects.at(i)->hp = 0;
+						}
+						else {
+							resolveCollisionStatic(section->objects.at(i), section->staticObjects.at(j), deltaTime);
+						}
 					}
 				}
 				for (int j = i + 1; j < section->objects.size(); j++) {
@@ -515,15 +521,7 @@ public:
 				}
 			}
 			section->staticObjects.erase(
-				std::remove_if(section->staticObjects.begin(), section->staticObjects.end(), [](GameObject* obj) {
-					if (obj->markedForDeletion) {
-						delete obj;
-						return true;
-					}
-					return false;
-					}),
-				section->staticObjects.end()
-			);
+				std::remove_if(section->staticObjects.begin(), section->staticObjects.end(), [](GameObject* obj) { return obj->markedForDeletion; }), section->staticObjects.end());
 		}
 	}
 
@@ -754,10 +752,23 @@ public:
 	}
 
 	void resolveFruits(GameObject* player, GameObject* fruit) {
-		if (player->hp < 5) {
+		if (fruit->name.ends_with("Banana")) {
+			pm->ability->AddBanana();
+			fruit->markedForDeletion = true;
+		}
+		else if (player->hp < 5) {
 			player->hp += 1;
 			fruit->markedForDeletion = true;
 		}
+	}
+
+	bool isInCM(GameObject* obj) {
+		for (auto section : sections) {
+			if (std::find(section->objects.begin(), section->objects.end(), obj) != section->objects.end()) {
+				return true;
+			}
+		}
+		return false;
 	}
 };
 

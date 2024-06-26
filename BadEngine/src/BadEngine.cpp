@@ -260,14 +260,14 @@ void generate() {
 						fruits->name = "FruitBanana";
 						fruits->addModelComponent(RL.bananaModel);
 						fruits->localTransform->localScale = glm::vec3(0.1f);
-						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 2.0f, 2.0f, 1.0f, true);
+						fruits->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), 5.0f, 5.0f, 1.0f, true);
 						fruits->capsuleCollider->isTriggerOnly = true;
 						break;
 					case 1:
 						fruits->name = "FruitMango";
 						fruits->addModelComponent(RL.mangoModel);
 						fruits->localTransform->localScale = glm::vec3(2.f);
-						fruits->capsuleCollider = new CapsuleCollider(fruits->localTransform->localPosition, 2.0f, 2.0f, 1.0f, true);
+						fruits->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), 5.0f, 5.0f, 1.0f, true);
 						fruits->capsuleCollider->isTriggerOnly = true;
 						break;
 					}
@@ -496,14 +496,15 @@ void generate() {
 	//basicEnemy->getTransform()->localPosition = glm::vec3(2.0f, 2.0f, 3.0f);
 
 	sm->getActiveScene()->addObject(basicEnemy);
+	basicEnemy->isVisible = false;
 
 	//Tutaj działa
-	Enemy* basicEnemy2 = new Enemy("basicEnemy2", glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(120.f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
+	/*Enemy* basicEnemy2 = new Enemy("basicEnemy2", glm::vec3(2.0f, 2.0f, 0.0f), glm::vec3(120.f), glm::vec3(0.f), std::make_pair(2.0f, 6.f));
 	basicEnemy2->addModelComponent(RL.animationEnemyModel);
 	basicEnemy2->animPlayer = basicEnemy->animPlayer->clone(RL.animationEnemyModel.get());
 	//basicEnemy2->animPlayer = basicEnemy->animPlayer;
-	basicEnemy2->getAnimateBody()->setActiveAnimation("hit");
-	sm->getActiveScene()->addObject(basicEnemy2);
+	basicEnemy2->getAnimateBody()->setActiveAnimation("walking");
+	sm->getActiveScene()->addObject(basicEnemy2);*/
 
 
 	glm::vec3 capsuleCenter = anim->getTransform()->getLocalPosition();
@@ -1100,6 +1101,11 @@ int main() {
 		tm->setTime(deltaTime);
 		if (gameMode.getMode() == GameMode::Game) {
 			pm->ManagePlayer(deltaTime2, deltaTime);
+			if (sm->getActiveScene()->gameObjects.size() > 0) {
+				if (sm->getActiveScene()->gameObjects.back()->name.starts_with("bananaPeel") && !cm.isInCM(sm->getActiveScene()->gameObjects.back())) {
+					cm.addStaticObject(sm->getActiveScene()->gameObjects.back());
+				}
+			}
 			V = camera->getViewMatrixPlayer();
 			//V = glm::scale(V, glm::vec3(30.f));
 			sm->getActiveScene()->findByName("skydome")->timeSetting(gameTime / 7, glm::vec2(10, 10));
@@ -1118,17 +1124,17 @@ int main() {
 
 		if (input->checkAnyKey())
 		{
-			//if (input->checkKey(GLFW_KEY_ESCAPE)) {
-			//	if (gameMode.getMode() == GameMode::Game) {
-			//		//sm->saveScene("mainLoop");
-			//		sm->activeScene = menuScene;
-			//		gameMode.setMode(GameMode::Menu);
-			//		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			//	}
-			//	else if(gameMode.getMode() == GameMode::Menu){
-			//		//sm->loadScene("mainLoop");
-			//	}
-			//}
+			/*if (input->checkKey(GLFW_KEY_ESCAPE)) {
+				if (gameMode.getMode() == GameMode::Game) {
+					//sm->saveScene("mainLoop");
+					sm->activeScene = menuScene;
+					gameMode.setMode(GameMode::Menu);
+					glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+				}
+				else if(gameMode.getMode() == GameMode::Menu){
+					//sm->loadScene("mainLoop");
+				}
+			}*/
 			if (input->checkKey(GLFW_KEY_TAB) && input->checkKey(GLFW_KEY_1))
 			{
 				gameMode.setMode(GameMode::Debug);
@@ -1441,16 +1447,8 @@ int main() {
 		if (sm->getActiveScene()->findByName("player")) {
 			sm->getActiveScene()->findByName("player")->isVisible = true;
 		}
-		if (frustumTest) {
-			for (int i = 0; i < sm->getActiveScene()->gameObjects.size(); i++) {
-				if (sm->getActiveScene()->gameObjects.at(i)->isVisible) {
-					std::cout << sm->getActiveScene()->gameObjects.at(i)->name << " " << std::endl;
-					for (int j = 0; j < sm->getActiveScene()->gameObjects.at(i)->children.size(); j++) {
-						std::cout << sm->getActiveScene()->gameObjects.at(i)->children.at(j)->name << " " << std::endl;
-					}
-				}
-			}
-		}
+		sm->getActiveScene()->gameObjects.erase(std::remove_if(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), [](GameObject* obj) {return obj == nullptr; }), sm->getActiveScene()->gameObjects.end());
+		sm->getActiveScene()->gameObjects.erase(std::remove_if(sm->getActiveScene()->gameObjects.begin(), sm->getActiveScene()->gameObjects.end(), [](GameObject* obj) {return obj->markedForDeletion; }), sm->getActiveScene()->gameObjects.end());
 		if (sectorSelector) {
 			if(sectorpointer){
 				if (sectorSelector->selectedSector != 0) {
@@ -1460,8 +1458,8 @@ int main() {
 						glm::vec2 direction = glm::normalize(sectorCenters[sectorSelector->selectedSector - 1] - playerPos);
 						glm::vec2 cameraFront = glm::normalize(glm::vec2(camera->getFront().x, camera->getFront().z));
 						float angle = glm::atan(direction.y, direction.x) - glm::atan(cameraFront.y, cameraFront.x);
-						sectorpointer->getTransform()->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.f + radius * cos(angle), windowGlobals.windowHeight * 0.5f - radius * sin(angle), 0.0f);
-						sectorpointer->getTransform()->localRotation = glm::vec3(0.0f, 0.0f, -glm::degrees(angle));
+						sectorpointer->getTransform()->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.f - radius * sin(angle), windowGlobals.windowHeight * 0.5f - radius * cos(angle), 0.0f);
+						//sectorpointer->getTransform()->localRotation = glm::vec3(0.0f, 0.0f, glm::degrees(angle));
 					}
 					else {
 						sectorpointer->isVisible = false;
@@ -1476,9 +1474,8 @@ int main() {
 						glm::vec2 direction = glm::normalize(sectorCenters[sectorSelector->selectedSector2 - 1] - playerPos);
 						glm::vec2 cameraFront = glm::normalize(glm::vec2(camera->getFront().x, camera->getFront().z));
 						float angle = glm::atan(direction.y, direction.x) - glm::atan(cameraFront.y, cameraFront.x);
-						sectorpointer2->getTransform()->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.f + radius * cos(angle), windowGlobals.windowHeight * 0.5f - radius * sin(angle), 0.0f);
-						angle = atan2(direction.y, direction.x) - atan2(camera->getFront().z, camera->getFront().x);
-						sectorpointer2->getTransform()->localRotation = glm::vec3(0.0f, 0.0f, glm::degrees(angle));
+						sectorpointer2->getTransform()->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.f - radius * sin(angle), windowGlobals.windowHeight * 0.5f - radius * cos(angle), 0.0f);
+						//sectorpointer2->getTransform()->localRotation = glm::vec3(0.0f, 0.0f, glm::degrees(angle));
 					}
 					else {
 						sectorpointer2->isVisible = false;
@@ -1746,16 +1743,7 @@ int main() {
 				enemy->addModelComponent(RL.enemyModel2);
 				pbd->objects.push_back(enemy);
 				enemy->addColider(2);
-				enemy->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), enemy->capsuleCollider->radius * 0.8f * 0.35f, enemy->capsuleCollider->height * 0.35f, 1.0f, true);
-				/*glm::vec3 min = glm::vec3(0.0f);
-				min.x += enemy->capsuleCollider->radius;
-				min.z += enemy->capsuleCollider->radius;
-				glm::vec3 max = glm::vec3(0.0f);
-				max.x -= enemy->capsuleCollider->radius;
-				max.z -= enemy->capsuleCollider->radius;
-				max.y += enemy->capsuleCollider->height;
-				enemy->boundingBox = new BoundingBox(min, max, 1.0f, true);
-				enemy->capsuleCollider = nullptr;*/
+				enemy->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), enemy->capsuleCollider->radius * 0.8f * 0.35f, enemy->capsuleCollider->height * 0.15f, 1.0f, true);
 				enemy->capsuleCollider->center.y += enemy->capsuleCollider->height * 0.5f;
 				
 				//enemy->modelComponent = RL.enemyModel;

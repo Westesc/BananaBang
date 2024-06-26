@@ -121,6 +121,10 @@ GameObject* acknowledgments5;
 bool Lost = false;
 bool Won = false;
 Shader* LogoShader;
+std::array<glm::vec2, 16> sectorCenters;
+GameObject* sectorpointer;
+GameObject* sectorpointer2;
+float radius = 300.0f;
 
 void addAnimation(GameObject* anim, char* path, const char* name, float duration) {
 	anim->addAnimation(path, name, duration);
@@ -165,6 +169,7 @@ void generate() {
 	enemyManager->enemies.clear();
 	pathfinder->trees.clear();
 	spawnedEnemies = 0;
+	reqEnemies = 10;
 	int sectorcounter = 1;
 	for (int i = 0; i < sectorsPom; i++) {
 		for (int j = 0; j < sectorsPom; j++) {
@@ -173,7 +178,7 @@ void generate() {
 			planeSector->addModelComponent(RL.planeSectormodel);
 			planeSector->localTransform->localPosition = glm::vec3(i * 20 * planeSector->localTransform->localScale.x, 0.f, j * 20 * planeSector->localTransform->localScale.z);
 			int treeCount = losujLiczbe(a, b);
-
+			sectorCenters.at(sectorcounter - 1) = glm::vec2(planeSector->localTransform->localPosition.x + 20, planeSector->localTransform->localPosition.z + 20);
 			for (int k = 0; k < fruits.size(); k++) {
 				for (int m = 0; m < fruits.at(k); m++) {
 					fruitPool.push_back(k);
@@ -536,6 +541,26 @@ void generate() {
 	sm->getActiveScene()->addObject(dashTime);
 	sm->getActiveScene()->addObject(treeAttackTime);
 	sm->getActiveScene()->addObject(bananaPeelCount);
+
+	sectorpointer = new GameObject("sectorpointer");
+	UI* sectorpointerui = new UI(plane);
+	sectorpointerui->addShader(UIShader);
+	sectorpointerui->setTexture("res/strzalka.png");
+	sectorpointer->uiComponent = sectorpointerui;
+	sectorpointer->localTransform->localScale = glm::vec3(1.2f);
+	sm->getActiveScene()->addObject(sectorpointer);
+
+	sectorpointer2 = new GameObject("sectorpointer2");
+	UI* sectorpointerui2 = new UI(plane);
+	sectorpointerui2->addShader(UIShader);
+	sectorpointerui2->setTexture("res/strzalka.png");
+	sectorpointer2->uiComponent = sectorpointerui2;
+	sectorpointer2->localTransform->localScale = glm::vec3(1.2f);
+	sectorpointer2->localTransform->localPosition = glm::vec3(500.0f, 0.0f, 0.0f);
+	sm->getActiveScene()->addObject(sectorpointer2);
+
+	sectorpointer->isVisible = false;
+	sectorpointer2->isVisible = false;
 
 	loaded = true;
 	spawnerTime = 0;
@@ -1031,6 +1056,7 @@ int main() {
 	menuScene->addObject(returnButton);
 
 	bool fruitsrenderd = false;
+	glm::vec2 playerPos = glm::vec2(0.f);
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
 		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
@@ -1436,7 +1462,37 @@ int main() {
 				}
 			}
 		}
-		
+		if (sectorSelector) {
+			if (sectorSelector->selectedSector != 0) {
+				playerPos = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
+				if (glm::distance(playerPos, sectorCenters[sectorSelector->selectedSector - 1]) > 35.0f) {
+					sectorpointer->isVisible = true;
+					glm::vec2 direction = glm::normalize(sectorCenters[sectorSelector->selectedSector - 1] - playerPos);
+					glm::vec2 cameraFront = glm::normalize(glm::vec2(camera->getFront().x, camera->getFront().z));
+					float angle = glm::atan(direction.y, direction.x) - glm::atan(cameraFront.y, cameraFront.x);
+					sectorpointer->getTransform()->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.f + radius * cos(angle), windowGlobals.windowHeight * 0.5f - radius * sin(angle), 0.0f);
+					sectorpointer->getTransform()->localRotation = glm::vec3(0.0f, 0.0f, -glm::degrees(angle));
+				}
+				else {
+					sectorpointer->isVisible = false;
+				}
+			}
+			if (sectorSelector->selectedSector2 != 0) {
+				playerPos = glm::vec2(sm->getActiveScene()->findByName("player")->getTransform()->localPosition.x, sm->getActiveScene()->findByName("player")->getTransform()->localPosition.z);
+				if (glm::distance(playerPos, sectorCenters[sectorSelector->selectedSector2 - 1]) > 35.0f) {
+					sectorpointer2->isVisible = true;
+					glm::vec2 direction = glm::normalize(sectorCenters[sectorSelector->selectedSector2 - 1] - playerPos);
+					glm::vec2 cameraFront = glm::normalize(glm::vec2(camera->getFront().x, camera->getFront().z));
+					float angle = glm::atan(direction.y, direction.x) - glm::atan(cameraFront.y, cameraFront.x);
+					sectorpointer2->getTransform()->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.f + radius * cos(angle), windowGlobals.windowHeight * 0.5f - radius * sin(angle), 0.0f);
+					angle = atan2(direction.y, direction.x) - atan2(camera->getFront().z, camera->getFront().x);
+					sectorpointer2->getTransform()->localRotation = glm::vec3(0.0f, 0.0f, glm::degrees(angle));
+				}
+				else {
+					sectorpointer2->isVisible = false;
+				}
+			}
+		}
 		if (sm->getActiveScene()->findByName("skydome")) {
 			sm->getActiveScene()->findByName("skydome")->getTransform()->localPosition = camera->transform->localPosition;
 		}

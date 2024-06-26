@@ -1375,7 +1375,7 @@ int main() {
 					transformsEnemyWeapon.push_back(enemy->children.at(0)->getTransform());
 				}
 			}
-			if (transformsEnemy.size() > 0) {
+			/*if (transformsEnemy.size() > 0) {
 				for (auto mesh : enemyManager->enemies.at(0)->getModelComponent().get()->meshes) {
 					mesh->initInstances(transformsEnemy);
 				}
@@ -1386,7 +1386,7 @@ int main() {
 					}
 					enemyManager->enemies.at(0)->children.at(0)->getModelComponent().get()->drawInstances(RL.depthInstancedShader);
 				}
-			}
+			}*/
 
 			sm->getActiveScene()->Draw(RL.depthShader, RL.depthAnimationShader);
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -1414,6 +1414,8 @@ int main() {
 		}
 		for (auto enemy : enemyManager->enemies) {
 			if (enemy->hp <= 0) {
+				enemy->getAnimateBody()->setActiveAnimation("death");
+				if(!enemy->getAnimateBody()->isPlay()) {
 				pbd->objects.erase(std::remove(pbd->objects.begin(), pbd->objects.end(), enemy), pbd->objects.end());
 				for (auto sect : cm.sections) {
 					sect->objects.erase(std::remove(sect->objects.begin(), sect->objects.end(), enemy), sect->objects.end());
@@ -1437,8 +1439,10 @@ int main() {
 				if (reqEnemies < 1) {
 					Won = true;
 				}
+				//enemy->getAnimateBody()->setActiveAnimation("death");
 				sm->getActiveScene()->findByName("Enemycount")->uiComponent->setText("Pozostali drwale : " + std::to_string(reqEnemies));
 				delete enemy;
+				}
 			}
 			else {
 				cm.addObject(enemy);
@@ -1748,7 +1752,7 @@ int main() {
 				enemy->addModelComponent(RL.enemyModel2);
 				pbd->objects.push_back(enemy);
 				enemy->addColider(2);
-				enemy->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), enemy->capsuleCollider->radius * 0.8f * 0.35f, enemy->capsuleCollider->height * 0.15f, 1.0f, true);
+				enemy->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), enemy->capsuleCollider->radius * 0.004f, enemy->capsuleCollider->height * 0.0007f, 1.0f, true);
 				enemy->capsuleCollider->center.y += enemy->capsuleCollider->height * 0.5f;
 				
 				//enemy->modelComponent = RL.enemyModel;
@@ -1756,7 +1760,7 @@ int main() {
 				enemy->animPlayer = sm->getActiveScene()->findByName("basicEnemy")->animPlayer->clone(RL.animationEnemyModel.get());
 
 				enemy->modelComponent.get()->capsuleCollider = enemy->capsuleCollider;
-				enemy->getTransform()->localScale = glm::vec3(3.0f);
+				enemy->getTransform()->localScale = glm::vec3(200.0f);
 				sm->getActiveScene()->addObject(enemy);
 				cm.addObject(enemy);
 				spawnedEnemies++;

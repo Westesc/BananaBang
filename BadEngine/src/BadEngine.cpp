@@ -1842,7 +1842,7 @@ int main() {
 			}
 		}
 		int pom = 0;
-		if (sectorSelectorTime > 30.0f) {
+		if (sectorSelectorTime > 30.0f && gameMode.getMode() == GameMode::Game) {
 			bool selected = false;
 			if (sectorSelector->selectedSector == 0 || sm->getActiveScene()->findByName("sector" + std::to_string(sectorSelector->selectedSector))->children.size() == 0) {
 				sectorSelector->selectSector(1);

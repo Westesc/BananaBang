@@ -73,6 +73,8 @@ public:
     }
 
     void render(glm::mat4 view, glm::mat4 projection) {
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
         particleShader->use();
         particleShader->setMat4("view", view);
         particleShader->setMat4("projection", projection);
@@ -88,7 +90,7 @@ public:
 
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, p.position);
-                model = glm::scale(model, glm::vec3(20.0f));
+                model = glm::scale(model, glm::vec3(6.0f));
                 particleShader->setMat4("model", model);
 
                 glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -96,6 +98,7 @@ public:
         }
 
         glBindVertexArray(0);
+        glEnable(GL_DEPTH_TEST);
     }
 
     void spawnParticle(glm::vec3 position, glm::vec3 velocity, glm::vec4 color) {

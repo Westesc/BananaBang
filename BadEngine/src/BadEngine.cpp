@@ -1879,7 +1879,7 @@ int main() {
 				enemy->addModelComponent(RL.enemyModel2);
 				pbd->objects.push_back(enemy);
 				enemy->addColider(2);
-				enemy->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), enemy->capsuleCollider->radius * 0.004f, enemy->capsuleCollider->height * 0.0007f, 1.0f, true);
+				enemy->capsuleCollider = new CapsuleCollider(glm::vec3(0.0f), enemy->capsuleCollider->radius * 0.005f, enemy->capsuleCollider->height * 0.0011f, 1.0f, true);
 				enemy->capsuleCollider->center.y += enemy->capsuleCollider->height * 0.5f;
 				audio = new AudioSource("axe_attack", audioManager->getSource("axe_attack"));
 				audio->setVolume(2.f);

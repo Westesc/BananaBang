@@ -120,6 +120,8 @@ GameObject* acknowledgments2;
 GameObject* acknowledgments3;
 GameObject* acknowledgments4;
 GameObject* acknowledgments5;
+GameObject* acknowledgments6;
+GameObject* title;
 bool Lost = false;
 bool Won = false;
 Shader* LogoShader;
@@ -615,6 +617,7 @@ void showMain() {
 	sm->getActiveScene()->addObject(playButton);
 	sm->getActiveScene()->addObject(tutorialButton);
 	sm->getActiveScene()->addObject(acknowledgmentsButton);
+	sm->getActiveScene()->addObject(title);
 	playButton->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 200.0f, windowGlobals.windowHeight * 0.5f, 0.0f);
 	delay(100);
 }
@@ -663,6 +666,14 @@ void showAcknowledgments() {
 	acknowledgments5->uiComponent = acknowledgmentsui5;
 	//sm->getActiveScene()->addObject(acknowledgments5);
 	sm->getActiveScene()->addObject(backButton);
+
+	acknowledgments6 = new GameObject("acknowledgments");
+	UI* acknowledgmentsui6 = new UI(writing);
+	acknowledgmentsui6->addShader(LogoShader);
+	acknowledgmentsui6->setText("Muzyka pochodzi z https://pixabay.com");
+	acknowledgments6->localTransform->localPosition = glm::vec3(100.0f, windowGlobals.windowHeight - 300.0f, 0.0f);
+	acknowledgments6->uiComponent = acknowledgmentsui6;
+	sm->getActiveScene()->addObject(acknowledgments6);
 }
 
 void Start() {
@@ -1076,6 +1087,15 @@ int main() {
 	menu->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 100.0f, windowGlobals.windowHeight * 0.5f, 0.0f);
 	menuScene->addObject(menu);
 	menuScene->addObject(returnButton);
+
+	title = new GameObject("title");
+	UI* titletextUI = new UI(writing);
+	titletextUI->addShader(LogoShader);
+	titletextUI->setText("Primal Guardian");
+	title->uiComponent = titletextUI;
+	title->localTransform->localPosition = glm::vec3(windowGlobals.windowWidth * 0.5f - 700.0f, windowGlobals.windowHeight * 0.5f + 300, 0.0f);
+	title->localTransform->localScale = glm::vec3(2.f, 2.f, 1.f);
+	sm->getActiveScene()->addObject(title);
 
 	bool fruitsrenderd = false;
 	glm::vec2 playerPos = glm::vec2(0.f);

@@ -1182,9 +1182,6 @@ int main() {
 	RL.postProcessingShader->setInt("screenTexture", 0);
 	while (!glfwWindowShouldClose(window)) {
 		FrameMark;
-		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
-			glfwSetWindowShouldClose(window, 1);
-		}
 		glClearColor(0.2f, 0.3f, 0.7f, 1.f);
 		//glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);

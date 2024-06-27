@@ -1315,11 +1315,12 @@ int main() {
 						delete treeActual;
 						if (object->name.ends_with(std::to_string(sectorSelector->selectedSector)) && object->children.size() == 0 && sectorSelectorTime > 30.0f) {
 							sectorSelector->selectSector(1);
+							sectorSelectorTime = 0;
 						}
 						else if (object->name.ends_with(std::to_string(sectorSelector->selectedSector2)) && object->children.size() == 0 && sectorSelectorTime > 30.0f) {
 							sectorSelector->selectSector(2);
+							sectorSelectorTime = 0;
 						}
-						sectorSelectorTime = 0;
 					}
 				}
 			}
@@ -1843,11 +1844,11 @@ int main() {
 		int pom = 0;
 		if (sectorSelectorTime > 30.0f) {
 			bool selected = false;
-			if (sectorSelector->selectedSector == 0) {
+			if (sectorSelector->selectedSector == 0 || sm->getActiveScene()->findByName("sector" + std::to_string(sectorSelector->selectedSector))->children.size() == 0) {
 				sectorSelector->selectSector(1);
 				selected = true;
 			}
-			else if (sectorSelector->selectedSector2 == 0) {
+			else if (sectorSelector->selectedSector2 == 0 || sm->getActiveScene()->findByName("sector" + std::to_string(sectorSelector->selectedSector2))->children.size() == 0) {
 				sectorSelector->selectSector(2);
 				selected = true;
 			}

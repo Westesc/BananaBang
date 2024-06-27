@@ -117,45 +117,49 @@ private:
         }
         else {
             enemy->sector = ss->selectedSector;
-            enemy->state = EnemyState::Walking;
         }
     }
     void updateWalkingState(Enemy* enemy, float deltaTime) {
-        if (glm::distance(enemy->getTransform()->localPosition, enemy->chosenTreePos) > 5.f) {
-            enemy->timeSinceDirChange += deltaTime;
-            glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->getTransform()->localPosition, enemy->sector);
-            glm::vec3 direction = glm::normalize(destination - enemy->getTransform()->localPosition);
-            enemy->setVel(direction);
-            glm::vec3 tmpMove = glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z);
-            enemy->Move(tmpMove * deltaTime);
-            cm->addObjectPredict(enemy);
-            std::vector<GameObject*> collisions = cm->checkPrediction();
-            enemy->Move(-tmpMove * deltaTime);
-            enemy->setVel2(collisions);
-            if ((glm::any(glm::isnan(enemy->getTransform()->localPosition)) || glm::any(glm::isinf(enemy->getTransform()->localPosition)))) {
-                enemy->getTransform()->localPosition = glm::vec3(5.0f);
-            }
-            cm->addObject(enemy);
-            if (enemy->velocity != glm::vec3(0.0f)) {
-				float angle = glm::atan(enemy->velocity.z, enemy->velocity.x);
-				enemy->getTransform()->localRotation.y = angle;
-			}
-            enemy->timeSpentWalking += deltaTime;
-            if (enemy->timeSpentWalking > 15.f) {
-                std::pair<glm::vec3, Tree*> tree = pathfinder->decideInitalDestination(enemy->sector);
-                if (tree.second == nullptr) {
-                    enemy->state = EnemyState::Idle;
-                }
-                else {
-                    enemy->chosenTreePos = tree.first;
-                    enemy->chosenTree = tree.second;
-                    enemy->timeSpentWalking = 0.f;
-                }
-            }
-            rotateEnemyTowards(enemy, enemy->chosenTreePos);
-        }
+        if (enemy->chosenTree == nullptr) {
+			enemy->state = EnemyState::Idle;
+		}
         else {
-            enemy->state = EnemyState::Chopping;
+            if (glm::distance(enemy->getTransform()->localPosition, enemy->chosenTreePos) > 5.f) {
+                enemy->timeSinceDirChange += deltaTime;
+                glm::vec3 destination = pathfinder->decideDestination(enemy->chosenTreePos, enemy->getTransform()->localPosition, enemy->sector);
+                glm::vec3 direction = glm::normalize(destination - enemy->getTransform()->localPosition);
+                enemy->setVel(direction);
+                glm::vec3 tmpMove = glm::vec3(enemy->velocity.x, 0.0f, enemy->velocity.z);
+                enemy->Move(tmpMove * deltaTime);
+                cm->addObjectPredict(enemy);
+                std::vector<GameObject*> collisions = cm->checkPrediction();
+                enemy->Move(-tmpMove * deltaTime);
+                enemy->setVel2(collisions);
+                if ((glm::any(glm::isnan(enemy->getTransform()->localPosition)) || glm::any(glm::isinf(enemy->getTransform()->localPosition)))) {
+                    enemy->getTransform()->localPosition = glm::vec3(5.0f);
+                }
+                cm->addObject(enemy);
+                if (enemy->velocity != glm::vec3(0.0f)) {
+                    float angle = glm::atan(enemy->velocity.z, enemy->velocity.x);
+                    enemy->getTransform()->localRotation.y = angle;
+                }
+                enemy->timeSpentWalking += deltaTime;
+                if (enemy->timeSpentWalking > 15.f) {
+                    std::pair<glm::vec3, Tree*> tree = pathfinder->decideInitalDestination(enemy->sector);
+                    if (tree.second == nullptr) {
+                        enemy->state = EnemyState::Idle;
+                    }
+                    else {
+                        enemy->chosenTreePos = tree.first;
+                        enemy->chosenTree = tree.second;
+                        enemy->timeSpentWalking = 0.f;
+                    }
+                }
+                rotateEnemyTowards(enemy, enemy->chosenTreePos);
+            }
+            else {
+                enemy->state = EnemyState::Chopping;
+            }
         }
     }
     void rotateEnemyTowards(Enemy* enemy, glm::vec3 targetPosition) {

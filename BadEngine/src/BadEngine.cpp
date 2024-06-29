@@ -687,8 +687,8 @@ void Start() {
 	windowGlobals.windowHeight = mode->height;
 	windowGlobals.windowWidth = mode->width;
 
-	//window = glfwCreateWindow(windowGlobals.windowWidth, windowGlobals.windowHeight, "Primal Guardian", monitor, nullptr);
-	window = glfwCreateWindow(windowGlobals.windowWidth, windowGlobals.windowHeight, "Primal Guardian", NULL, nullptr);
+	window = glfwCreateWindow(windowGlobals.windowWidth, windowGlobals.windowHeight, "Primal Guardian", monitor, nullptr);
+	//window = glfwCreateWindow(windowGlobals.windowWidth, windowGlobals.windowHeight, "Primal Guardian", NULL, nullptr);
 	if (!window) exit(1);
 
 	glfwMakeContextCurrent(window);

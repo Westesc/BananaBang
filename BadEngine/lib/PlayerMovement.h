@@ -325,14 +325,18 @@ private:
                                 if (tree->name.starts_with("tree")) {
                                     GameObject* log = tree->children.at(0);
                                     if (log->getTransform()->localPosition != treePosition) {
-                                        if (glm::distance(glm::vec2(player->getTransform()->localPosition.x, player->getTransform()->localPosition.z), glm::vec2(log->getTransform()->localPosition.x, log->getTransform()->localPosition.z)) < 15.0f && treeJumpTime >= treeJumpCD) {
-                                            state = PlayerState::treeJump;
-                                            player->getAnimateBody()->setActiveAnimation("jumping up", true);
-                                            moveToTree(log->getTransform()->localPosition);
-                                            treeJumpTime = 0.0f;
-                                            //std::cout << glm::to_string(player->getTransform()->localPosition) << std::endl;
-                                            //std::cout << glm::to_string(treePosition) << std::endl;
-                                            return;
+                                        glm::vec2 playerPos2d = glm::vec2(player->getTransform()->localPosition.x, player->getTransform()->localPosition.z);
+                                        glm::vec2 logPos2d = glm::vec2(log->getTransform()->localPosition.x, log->getTransform()->localPosition.z);
+                                        if (glm::distance(playerPos2d, logPos2d) < 30.0f && treeJumpTime >= treeJumpCD) {
+                                            if (glm::dot(-glm::vec2(camera->getFront().x, camera->getFront().z), glm::normalize(logPos2d - playerPos2d)) >= glm::cos(glm::radians(30.0f))) {
+                                                state = PlayerState::treeJump;
+                                                player->getAnimateBody()->setActiveAnimation("jumping up", true);
+                                                moveToTree(log->getTransform()->localPosition);
+                                                treeJumpTime = 0.0f;
+                                                //std::cout << glm::to_string(player->getTransform()->localPosition) << std::endl;
+                                                //std::cout << glm::to_string(treePosition) << std::endl;
+                                                return;
+                                            }
                                         }
                                     }
                                 }
